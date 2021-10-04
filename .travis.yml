@@ -6,7 +6,7 @@ julia:
   - 1.6
   - nightly
 os:
-  - linux
+  - osx
 arch:
   - x64
 cache:
