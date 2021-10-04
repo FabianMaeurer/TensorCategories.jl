@@ -1,6 +1,8 @@
-using JuCat
+using Main.JuCat
 using Test
 
+
+
 @testset "JuCat.jl" begin
-    # Write your tests here.
+    @test func(2,1) == 4
 end

@@ -1,5 +1,7 @@
 module JuCat
 
-# Write your package code here.
+export func
+
+include("test.jl")
 
 end
