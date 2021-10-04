@@ -1,4 +1,4 @@
-using Main.JuCat
+using JuCat
 using Test
 
 
