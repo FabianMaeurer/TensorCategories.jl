@@ -1,7 +1,9 @@
 module JuCat
 
-export func
+export Category, Morphism, Object, HomSet
 
-include("test.jl")
+include("structures/abstracts.jl")
+include("structures/VectorSpaces.jl")
+
 
 end
