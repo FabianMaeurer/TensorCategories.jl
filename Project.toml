@@ -5,9 +5,11 @@ version = "0.1.0"
 
 [deps]
 Oscar = "f1435218-dba5-11e9-1e4d-f1a5fab5fc13"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 
 [compat]
 julia = "1.6"
+Documenter = "0.27"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
