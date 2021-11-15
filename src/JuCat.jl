@@ -8,7 +8,6 @@ import Oscar: VectorSpace, Field, elem_type, QQ, FieldElem,
                 ⊕, compose, ⊗, tensor_product, Map, MatrixElem, kronecker_product,
                 id, domain, one, zero, MatrixSpace, size
 
-import AbstractAlgebra.Generic: FreeModule, ModuleHomomorphism
 
 export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         GradedVectorSpaces, GradedVectorSpaceObject, GradedVectorSpaceMorphism,
