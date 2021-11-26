@@ -2,12 +2,12 @@
 
 | **Documentation**                                                         | **Build Status**                                      |
 |:-------------------------------------------------------------------------:|:-----------------------------------------------------:|
-| [![][docs-stable-img]][docs-stable-url]| [![][ga-img]][ga-url] |
+| [![][docs-stable-img]][docs-stable-url]|                                  | [![][ga-img]][ga-url] |
 
 
 
 
-[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-stable-url]: https://fabianmaeurer.github.io/JuCat.jl/
 
 [ga-img]: https://github.com/fabianmaeurer/JuCat.jl/workflows/Run%20tests/badge.svg
