@@ -25,7 +25,7 @@ struct VectorSpaceMorphism{T<:FieldElem} <: Morphism
     codomain::VectorSpaceObject{T}
 end
 
-
+features(::VectorSpaces) = [:semisimple,:abelian,:linear,:monoidal, :additive]
 
 #-----------------------------------------------------------------
 #   Constructors
@@ -159,8 +159,6 @@ function dsum(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where {T}
     return V,[ix,iy]
 end
 
-⊕(X::VectorSpaceObject{T},Y::VectorSpaceObject{T}) where {T,S,S2} = dsum(X,Y)
-
 function dsum(f::VectorSpaceMorphism{T},g::VectorSpaceMorphism{T}) where T
     F = base_ring(domain(f))
     mf,nf = size(f.m)
@@ -171,7 +169,8 @@ function dsum(f::VectorSpaceMorphism{T},g::VectorSpaceMorphism{T}) where T
     return VectorSpaceMorphism{T}(m,dsum(domain(f),domain(g))[1],dsum(codomain(f),codomain(g))[1])
 end
 
-⊕(f::VectorSpaceMorphism{T},g::VectorSpaceMorphism{T}) where T = dsum(f,g)
+
+
 #-----------------------------------------------------------------
 #   Functionality: Tensor Product
 #-----------------------------------------------------------------
@@ -229,6 +228,8 @@ function id(X::VectorSpaceObject{T}) where T
     m = matrix(base_ring(X), [i == j ? 1 : 0 for i ∈ 1:n, j ∈ 1:n])
     return VectorSpaceMorphism(X,X,m)
 end
+
+inv(f::VectorSpaceMorphism{T}) where T = VectorSpaceMorphism(domain(f), codomain(f), inv(f.m))
 
 #---------------------------------------------------------------------------
 #   Associators

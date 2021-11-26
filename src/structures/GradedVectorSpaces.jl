@@ -159,7 +159,6 @@ function dsum(f::GradedVectorSpaceMorphism{T,G}, g::GradedVectorSpaceMorphism{T,
     return GradedVectorSpaceMorphism(D,C,m)
 end
 
-⊕(f::GradedVectorSpaceMorphism{T,G}, g::GradedVectorSpaceMorphism{T,G}) where {T,G} = dsum(f,g)
 
 #-----------------------------------------------------------------
 #   Functionality: Tensor Products
