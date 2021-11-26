@@ -1,5 +1,5 @@
 
-@docs """
+"""
     VectorSpaces{T}(K::S) where T <: FieldElem
 
 The category of finite dimensional vector spaces over K.
@@ -8,7 +8,7 @@ struct VectorSpaces{T<:FieldElem} <: TensorCategory{T}
     base_ring::Field
 end
 
-@docs """
+"""
     VectorSpaceObject{T}
 
 An object in the category of finite dimensional vector spaces.
@@ -141,7 +141,7 @@ end
 #   Functionality: Direct Sum
 #-----------------------------------------------------------------
 
-@docs """
+"""
     dsum(X::VectorSpaceObject{T,S}...) where {T,S <: FreeModule}
 
 Direct sum space of X... together with the embedding morphisms.
