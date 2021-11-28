@@ -8,7 +8,9 @@ makedocs(
     ),
     pages = [
         "Home" => "index.md",
-        "types.md",
+        "Categories" => [
+            "VectorSpaces" => "VectorSpaces.md"
+        ],
         "showcase.md"
     ],
 )
