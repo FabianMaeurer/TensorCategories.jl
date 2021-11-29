@@ -54,7 +54,7 @@ function GradedVectorSpaceMorphism(D::GradedVectorSpaceObject{T,G},
 end
 
 function GradedVectorSpaceMorphism(D::GradedVectorSpaceObject{T,G}, C::GradedVectorSpaceObject{T,G},
-        m::Pair{G,VectorSpaceMorphism{T}}) where {T,G}
+        m::Pair{G,VectorSpaceMorphism{T}}...) where {T,G}
     return GradedVectorSpaceMorphism(D,C, Dict(m...))
 end
 #-----------------------------------------------------------------
@@ -214,6 +214,32 @@ end
 #------------------------------------------------------------------------------
 
 
-function associator(X::GradedVectorSpaceObject{T,G}, Y::GradedVectorSpaceObject{T,G}, Z::GradedVectorSpaceObject{T,G}) where T,G
+function associator(X::GradedVectorSpaceObject{T,G}, Y::GradedVectorSpaceObject{T,G}, Z::GradedVectorSpaceObject{T,G}) where {T,G}
     #todo
 end
+
+
+#----------------------------------------------------------------------------
+#   Hom Spaces
+#----------------------------------------------------------------------------
+
+struct GVSHomSpace{T,G} <: HomSpace{T}
+    X::GradedVectorSpaceObject{T,G}
+    Y::GradedVectorSpaceObject{T,G}
+    basis::Vector{GradedVectorSpaceMorphism{T,G}}
+end
+
+function Hom(X::GradedVectorSpaceObject{T,G}, Y::GradedVectorSpaceObject{T,G}) where {T,G}
+    key_elems = keys(X.V)∩keys(Y.V)
+    bases = Dict(g => Hom(X[g],Y[g]).basis for g ∈ key_elems)
+    basis = Vector{GradedVectorSpaceMorphism{T,G}}()
+
+    for g ∈ key_elems
+        for b ∈ bases[g]
+            push!(basis, GradedVectorSpaceMorphism(X,Y,g => b))
+        end
+    end
+    return GVSHomSpace{T,G}(X,Y,basis)
+end
+
+basis(V::GVSHomSpace) = V.basis

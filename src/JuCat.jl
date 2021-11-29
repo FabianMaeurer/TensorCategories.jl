@@ -18,7 +18,8 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         Functor, Sets, SetObject, SetMorphism, inv, product, coproduct,
         features, issemisimple, isabelian, ismonoidal, ×, ∐, RepresentationCategory,
         GroupRepresentationCategory, AlgebraRepresentationCategory,
-        HopfAlgebraRepresentationCategory
+        HopfAlgebraRepresentationCategory, FusionCategory, VSHomSpace,HomSpace,HomSet,
+        Hom, GVSHomSpace
 
 include("structures/abstracts.jl")
 include("structures/VectorSpaces.jl")

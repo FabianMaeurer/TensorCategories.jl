@@ -14,7 +14,7 @@ end
 An object in the category of finite dimensional vector spaces.
 """
 struct VectorSpaceObject{T<:FieldElem} <: Object
-    basis::Vector{S} where S
+    basis::Vector
     basis_strings::Vector{String}
     parent::VectorSpaces{T}
 end
@@ -244,3 +244,25 @@ function associator(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}, Z::VectorS
     m = matrix(F, [i == j ? 1 : 0 for i ∈ 1:n, j ∈ 1:n])
     return VectorSpaceMorphism((X⊗Y)⊗Z, X⊗(Y⊗Z), m)
 end
+
+
+#----------------------------------------------------------------------------
+#   Hom Spaces
+#----------------------------------------------------------------------------
+
+struct VSHomSpace{T} <: HomSpace{T}
+    X::VectorSpaceObject{T}
+    Y::VectorSpaceObject{T}
+    basis::Vector{VectorSpaceMorphism{T}}
+end
+
+function Hom(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where T
+    n1,n2 = (dim(X),dim(Y))
+    mats = [matrix(base_ring(X), [i==k && j == l ? 1 : 0 for i ∈ 1:n1, j ∈ 1:n2]) for k ∈ 1:n1, l ∈ 1:n2]
+    basis = [[VectorSpaceMorphism(X,Y,m) for m ∈ mats]...]
+    return VSHomSpace{T}(X,Y,basis)
+end
+
+basis(V::VSHomSpace) = V.basis
+
+zero(V::VSHomSpace) = VectorSpaceMorphism(V.X,V.Y,matrix(base_ring(V.X), [0 for i ∈ 1:dim(V.X), j ∈ 1:dim(V.Y)]))

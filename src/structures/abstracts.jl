@@ -7,13 +7,15 @@ abstract type Category end
 
 abstract type TensorCategory{T <: FieldElem} <: Category end
 
+abstract type FusionCategory{T <: FieldElem} <: TensorCategory{T} end
+
 abstract type Object end
 
 abstract type Morphism end
 
 abstract type HomSet end
 
-abstract type HomSpace <: HomSet end
+abstract type HomSpace{T<:FieldElem} <: HomSet end
 
 domain(m::Morphism) = m.domain
 codomain(m::Morphism) = m.codomain
@@ -94,3 +96,9 @@ end
 issemisimple(C::Category) = :semisimple ∈ features(C)
 isabelian(C::Category) = :abelian ∈ features(C)
 ismonoidal(C::Category) = :monoidal ∈ features(C)
+
+#-------------------------------------------------------
+# Hom Spaces
+#-------------------------------------------------------
+
+dim(V::HomSpace) = length(basis(V))
