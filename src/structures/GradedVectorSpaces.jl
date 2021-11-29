@@ -207,3 +207,13 @@ function id(X::GradedVectorSpaceObject{T,G}) where {T,G}
     m = Dict(g => id(X[g]) for g ∈ keys(X.V))
     return GradedVectorSpaceMorphism(X,X, m)
 end
+
+
+#------------------------------------------------------------------------------
+# Associators
+#------------------------------------------------------------------------------
+
+
+function associator(X::GradedVectorSpaceObject{T,G}, Y::GradedVectorSpaceObject{T,G}, Z::GradedVectorSpaceObject{T,G}) where T,G
+    #todo
+end

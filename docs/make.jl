@@ -9,7 +9,7 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "Categories" => [
-            "VectorSpaces" => "VectorSpaces.md"
+            "Vector Spaces" => "VectorSpaces.md"
         ],
         "showcase.md"
     ],

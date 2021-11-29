@@ -11,6 +11,8 @@ VectorSpaces
 The following methods are provided:
 
 ```@autodocs
-Moduls = [JuCat]
+Modules = [JuCat]
 Pages = [VectorSpaces.jl]
 ```
+
+#The Category of Graded Vector Spaces
