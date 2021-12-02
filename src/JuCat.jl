@@ -25,8 +25,8 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
 include("structures/abstracts.jl")
 include("structures/VectorSpaces.jl")
 include("structures/GradedVectorSpaces.jl")
-include("structures/Functors.jl")
 include("structures/set.jl")
+include("structures/Functors.jl")
 include("structures/Representations/Representations.jl")
 include("structures/Representations/AlgebraRepresentations.jl")
 
