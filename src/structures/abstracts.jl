@@ -13,9 +13,13 @@ abstract type Object end
 
 abstract type Morphism end
 
+abstract type VectorSpaceObject{T<:FieldElem} <: Object end
+
+abstract type VectorSpaceMorphism{T<:FieldElem} <: Morphism end
+
 abstract type HomSet end
 
-abstract type HomSpace{T<:FieldElem} <: HomSet end
+abstract type HomSpace{T<:FieldElem} <: VectorSpaceObject{T} end
 
 domain(m::Morphism) = m.domain
 codomain(m::Morphism) = m.codomain
@@ -86,6 +90,7 @@ end
 ×(X::Object...) = product(X...)
 ∐(X::Object...) = coproduct(X...)
 ⊕(X::Object...) = dsum(X...)
+⊗(X::Object...) = tensor_product(X...)
 
 ^(X::Object,n::Integer) = dsum([X for i in 1:n]...)
 
@@ -96,6 +101,8 @@ end
 issemisimple(C::Category) = :semisimple ∈ features(C)
 isabelian(C::Category) = :abelian ∈ features(C)
 ismonoidal(C::Category) = :monoidal ∈ features(C)
+
+∘(f::Morphism...) = compose(reverse(f)...)
 
 #-------------------------------------------------------
 # Hom Spaces

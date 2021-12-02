@@ -9,15 +9,15 @@ struct GradedVectorSpaces{T,G} <: TensorCategory{T}
     base_group::GAPGroup
 end
 
-struct GradedVectorSpaceObject{T,G} <: Object
+struct GVSObject{T,G} <: VectorSpaceObject{T}
     V::Dict{G,VectorSpaceObject{T}}
     parent::GradedVectorSpaces{T,G}
 end
 
-struct GradedVectorSpaceMorphism{T,G} <: Morphism
+struct GVSMorphism{T,G} <: VectorSpaceMorphism{T}
     m::Dict{G,VectorSpaceMorphism{T}}
-    domain::GradedVectorSpaceObject{T,G}
-    codomain::GradedVectorSpaceObject{T,G}
+    domain::GVSObject{T,G}
+    codomain::GVSObject{T,G}
 end
 #-----------------------------------------------------------------
 #   Constructors
@@ -33,29 +33,29 @@ end
 #     return GradedVectorSpaceObject(V,Vec)
 # end
 
-function GradedVectorSpaceObject(V::Dict{G,VectorSpaceObject{T}}) where {T,G}
+function VectorSpaceObject(V::Dict{G,S}) where {T, S <: VectorSpaceObject{T},G}
     Vec = GradedVectorSpaces{T,G}(base_ring(V[V.keys[1]]), parent(V.keys[1]))
-    return GradedVectorSpaceObject{T,G}(V,Vec)
+    return GVSObject{T,G}(V,Vec)
 end
 
-function GradedVectorSpaceObject(V::Pair{G,VectorSpaceObject{T}}...) where {G,T}
-    return GradedVectorSpaceObject(Dict([v for v in V]...))
+function VectorSpaceObject(V::Pair{G,T}...) where {G,T <: VectorSpaceObject}
+    return VectorSpaceObject(Dict([v for v in V]...))
 end
 
-function GradedVectorSpaceMorphism(D::GradedVectorSpaceObject{T,G},
-        C::GradedVectorSpaceObject{T,G}, m::Dict{G,VectorSpaceMorphism{T}}) where {T,G}
+function VectorSpaceMorphism(D::GVSObject{T,G},
+        C::GVSObject{T,G}, m::Dict{G,S}) where {T,S<:VectorSpaceMorphism,G}
     if parent(D) != parent(C)
         throw(ErrorException("Missmatching parents."))
     elseif !(*([size(m[g].m) == (dim(D[g]),dim(C[g])) for g in keys(m)]...))
         throw(ErrorException("Mismatching dimensions"))
     else
-        return GradedVectorSpaceMorphism{T,G}(m,D,C)
+        return GVSMorphism{T,G}(m,D,C)
     end
 end
 
-function GradedVectorSpaceMorphism(D::GradedVectorSpaceObject{T,G}, C::GradedVectorSpaceObject{T,G},
-        m::Pair{G,VectorSpaceMorphism{T}}...) where {T,G}
-    return GradedVectorSpaceMorphism(D,C, Dict(m...))
+function VectorSpaceMorphism(D::GVSObject{T,G}, C::GVSObject{T,G},
+        m::Pair{G,S}...) where {T,G, S <: VectorSpaceMorphism{T}}
+    return VectorSpaceMorphism(D,C, Dict(m...))
 end
 #-----------------------------------------------------------------
 #   Pretty Printing
@@ -67,7 +67,7 @@ function Base.show(io::IO, Vec::GradedVectorSpaces)
     with simple objects in $(Vec.base_group).""")
 end
 
-function Base.show(io::IO, V::GradedVectorSpaceObject)
+function Base.show(io::IO, V::GVSObject)
     print(io, """
     Graded Vector Space of dimension $(dim(V)) over $(base_ring(V)). Direct sum of \n""")
     for (k,v) in V.V
@@ -80,27 +80,27 @@ end
 #-----------------------------------------------------------------
 
 base_ring(Vec::GradedVectorSpaces) = Vec.base_ring
-base_ring(V:: GradedVectorSpaceObject) = V.parent.base_ring
+base_ring(V:: GVSObject) = V.parent.base_ring
 
-dim(V::GradedVectorSpaceObject) = sum([dim(v) for (g,v) in V.V])
+dim(V::GVSObject) = sum([dim(v) for (g,v) in V.V])
 
 function simples(Vec::GradedVectorSpaces)
     F = base_ring(Vec)
     S = VectorSpaceObject(F,1)
-    return [GradedVectorSpaceObject(g => S) for g in Vec.base_group]
+    return [VectorSpaceObject(g => S) for g in Vec.base_group]
 end
 
 function one(Vec::GradedVectorSpaces)
     F = base_ring(Vec)
     S = VectorSpaceObject(F,1)
-    return GradedVectorSpaceObject(one(Vec.base_group) => S)
+    return VectorSpaceObject(one(Vec.base_group) => S)
 end
 
-parent(V::GradedVectorSpaceObject) = V.parent
+parent(V::GVSObject) = V.parent
 
-getindex(V::GradedVectorSpaceObject, x) = x ∈ keys(V.V) ? V.V[x] : VectorSpaceObject(base_ring(V),0)
+getindex(V::GVSObject, x) = x ∈ keys(V.V) ? V.V[x] : VectorSpaceObject(base_ring(V),0)
 
-function getindex(f::GradedVectorSpaceMorphism, x)
+function getindex(f::GVSMorphism, x)
     if x ∈ keys(f.m)
         return f.m[x]
     end
@@ -113,7 +113,7 @@ end
 #   Functionality: Direct Sums
 #-----------------------------------------------------------------
 
-function dsum(V::GradedVectorSpaceObject{T,G}, W::GradedVectorSpaceObject{T,G}) where {T,G}
+function dsum(V::GVSObject{T,G}, W::GVSObject{T,G}) where {T,G}
     Wm,Vm = Dict{G,VectorSpaceMorphism{T}}(),Dict{G,VectorSpaceMorphism{T}}()
     Z = Dict{G,VectorSpaceObject{T}}()
 
@@ -132,15 +132,13 @@ function dsum(V::GradedVectorSpaceObject{T,G}, W::GradedVectorSpaceObject{T,G}) 
         Wm[g] = id(W[g])
     end
 
-    VZ = GradedVectorSpaceObject(Z)
-    mV = GradedVectorSpaceMorphism(V,VZ, Vm)
-    mW = GradedVectorSpaceMorphism(W,VZ, Wm)
+    VZ = VectorSpaceObject(Z)
+    mV = VectorSpaceMorphism(V,VZ, Vm)
+    mW = VectorSpaceMorphism(W,VZ, Wm)
     return VZ, [mV,mW]
 end
 
-⊕(V::GradedVectorSpaceObject{T,G}, W::GradedVectorSpaceObject{T,G}) where {T,G} = dsum(V,W)
-
-function dsum(f::GradedVectorSpaceMorphism{T,G}, g::GradedVectorSpaceMorphism{T,G}) where {T,G}
+function dsum(f::GVSMorphism{T,G}, g::GVSMorphism{T,G}) where {T,G}
     D,_ = domain(f) ⊕ domain(g)
     C,_ = codomain(f) ⊕ codomain(g)
 
@@ -156,7 +154,7 @@ function dsum(f::GradedVectorSpaceMorphism{T,G}, g::GradedVectorSpaceMorphism{T,
         m[x] = g[x]
     end
 
-    return GradedVectorSpaceMorphism(D,C,m)
+    return VectorSpaceMorphism(D,C,m)
 end
 
 
@@ -164,7 +162,7 @@ end
 #   Functionality: Tensor Products
 #-----------------------------------------------------------------
 
-function tensor_product(V::GradedVectorSpaceObject{T,G}, W::GradedVectorSpaceObject{T,G}) where {T,G}
+function tensor_product(V::GVSObject{T,G}, W::GVSObject{T,G}) where {T,G}
     if parent(V) != parent(W)
         throw(ErrorException("Mismatching parents."))
     end
@@ -177,32 +175,30 @@ function tensor_product(V::GradedVectorSpaceObject{T,G}, W::GradedVectorSpaceObj
             Z[g*h] = V[g]⊗W[h]
         end
     end
-    return GradedVectorSpaceObject(Z)
+    return VectorSpaceObject(Z)
 end
 
-⊗(X::GradedVectorSpaceObject{T}, Y::GradedVectorSpaceObject{T}) where {T} = tensor_product(X,Y)
 #-----------------------------------------------------------------
 #   Functionality: Morphisms
 #-----------------------------------------------------------------
 
-function compose(f::GradedVectorSpaceMorphism{T,G}...) where {T,G}
+function compose(f::GVSMorphism{T,G}...) where {T,G}
     if [domain(f[i]) == codomain(f[i-1]) for i ∈ 2:length(f)] != trues(length(f)-1)
         throw(ErrorException("Morphisms not compatible"))
     end
     m = Dict(g => compose([f[i][g] for i ∈ 1:length(f)]...) for g ∈ ∪([keys(f[i].m) for i ∈ 1:length(f)]...))
-    return GradedVectorSpaceMorphism(domain(f[1]), codomain(f[end]), m)
+    return VectorSpaceMorphism(domain(f[1]), codomain(f[end]), m)
 end
 
-∘(f::GradedVectorSpaceMorphism...) = compose(reverse(f)...)
 
-function ==(f::GradedVectorSpaceMorphism, g::GradedVectorSpaceMorphism)
+function ==(f::GVSMorphism, g::GVSMorphism)
     a = domain(f) == domain(g)
     b = codomain(f) == codomain(g)
     c = f.m == g.m
     return a && b && c
 end
 
-function id(X::GradedVectorSpaceObject{T,G}) where {T,G}
+function id(X::GVSObject{T,G}) where {T,G}
     n = [dim(X[g]) for g ∈ keys(X.V)]
     m = Dict(g => id(X[g]) for g ∈ keys(X.V))
     return GradedVectorSpaceMorphism(X,X, m)
@@ -214,7 +210,7 @@ end
 #------------------------------------------------------------------------------
 
 
-function associator(X::GradedVectorSpaceObject{T,G}, Y::GradedVectorSpaceObject{T,G}, Z::GradedVectorSpaceObject{T,G}) where {T,G}
+function associator(X::GVSObject{T,G}, Y::GVSObject{T,G}, Z::GVSObject{T,G}) where {T,G}
     #todo
 end
 
@@ -224,22 +220,23 @@ end
 #----------------------------------------------------------------------------
 
 struct GVSHomSpace{T,G} <: HomSpace{T}
-    X::GradedVectorSpaceObject{T,G}
-    Y::GradedVectorSpaceObject{T,G}
-    basis::Vector{GradedVectorSpaceMorphism{T,G}}
+    X::GVSObject{T,G}
+    Y::GVSObject{T,G}
+    basis::Vector{GVSMorphism{T,G}}
+    parent::VectorSpaces{T}
 end
 
-function Hom(X::GradedVectorSpaceObject{T,G}, Y::GradedVectorSpaceObject{T,G}) where {T,G}
+function Hom(X::GVSObject{T,G}, Y::GVSObject{T,G}) where {T,G}
     key_elems = keys(X.V)∩keys(Y.V)
     bases = Dict(g => Hom(X[g],Y[g]).basis for g ∈ key_elems)
-    basis = Vector{GradedVectorSpaceMorphism{T,G}}()
+    basis = Vector{GVSMorphism{T,G}}()
 
     for g ∈ key_elems
         for b ∈ bases[g]
-            push!(basis, GradedVectorSpaceMorphism(X,Y,g => b))
+            push!(basis, VectorSpaceMorphism(X,Y,g => b))
         end
     end
-    return GVSHomSpace{T,G}(X,Y,basis)
+    return GVSHomSpace{T,G}(X,Y,basis,VectorSpaces(base_ring(X)))
 end
 
 basis(V::GVSHomSpace) = V.basis

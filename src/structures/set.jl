@@ -62,7 +62,6 @@ function compose(f::SetMorphism...)
     return SetMorphism(domain(f[1]), codomain(f[end]),m)
 end
 
-∘(f::SetMorphism...) = compose(reverse(f)...)
 
 function inv(f::SetMorphism)
     if length(values(f.m)) == length(keys(f.m))
@@ -98,3 +97,14 @@ function coproduct(X::SetObject, Y::SetObject)
     end
     return Z, [ix,iy]
 end
+
+#--------------------------------------------------
+#   HomSets
+#--------------------------------------------------
+
+struct SetHomSet <: HomSet
+    X::SetObject
+    Y::SetObject
+end
+
+Hom(X::SetObject, Y::SetObject) = SetHomSet(X,Y)

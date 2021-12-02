@@ -8,18 +8,20 @@ struct VectorSpaces{T<:FieldElem} <: TensorCategory{T}
     base_ring::Field
 end
 
+
+
 """
     VectorSpaceObject{T}
 
 An object in the category of finite dimensional vector spaces.
 """
-struct VectorSpaceObject{T<:FieldElem} <: Object
+struct VSObject{T<:FieldElem} <: VectorSpaceObject{T}
     basis::Vector
     basis_strings::Vector{String}
     parent::VectorSpaces{T}
 end
 
-struct VectorSpaceMorphism{T<:FieldElem} <: Morphism
+struct VSMorphism{T<:FieldElem} <: VectorSpaceMorphism{T}
     m::MatElem{T}
     domain::VectorSpaceObject{T}
     codomain::VectorSpaceObject{T}
@@ -48,7 +50,7 @@ function VectorSpaceObject(Vec::VectorSpaces{T}, n::Int, basis::Vector{String} =
     elseif length(basis) != n
         throw(ErrorException("Mismatching dimensions"))
     end
-    return VectorSpaceObject{T}(basis,basis,Vec)
+    return VSObject{T}(basis,basis,Vec)
 end
 
 
@@ -65,7 +67,7 @@ function VectorSpaceObject(Vec::VectorSpaces{T}, basis::Vector{S},
         elseif length(basis) != length(bstring)
             throw(ErrorException("Mismatching dimensions"))
         end
-        return VectorSpaceObject{T}(basis, bstring, Vec)
+        return VSObject{T}(basis, bstring, Vec)
 end
 
 function VectorSpaceObject(K::F, basis::Vector{S},
@@ -81,7 +83,7 @@ function VectorSpaceMorphism(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}, m
     elseif size(m) != (dim(X),dim(Y))
         throw(ErrorException("Mismatching dimensions"))
     else
-        return VectorSpaceMorphism{T}(m,X,Y)
+        return VSMorphism{T}(m,X,Y)
     end
 end
 #
@@ -117,7 +119,7 @@ end
 
 parent(X::VectorSpaceObject) = X.parent
 
-base_ring(V::VectorSpaceObject) = V.parent.base_ring
+base_ring(V::VectorSpaceObject) = parent(V).base_ring
 base_ring(Vec::VectorSpaces) = Vec.base_ring
 
 dim(V::VectorSpaceObject) = length(V.basis)
@@ -214,7 +216,6 @@ function compose(f::VectorSpaceMorphism{T}...) where T
     return VectorSpaceMorphism{T}(*([g.m for g ∈ f]...),domain(f[1]),codomain(f[end]))
 end
 
-∘(f::VectorSpaceMorphism{T}, g::VectorSpaceMorphism) where T = compose(g,f)
 
 function ==(f::VectorSpaceMorphism, g::VectorSpaceMorphism)
     a = domain(f) == domain(g)
@@ -254,13 +255,14 @@ struct VSHomSpace{T} <: HomSpace{T}
     X::VectorSpaceObject{T}
     Y::VectorSpaceObject{T}
     basis::Vector{VectorSpaceMorphism{T}}
+    parent::VectorSpaces{T}
 end
 
 function Hom(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where T
     n1,n2 = (dim(X),dim(Y))
     mats = [matrix(base_ring(X), [i==k && j == l ? 1 : 0 for i ∈ 1:n1, j ∈ 1:n2]) for k ∈ 1:n1, l ∈ 1:n2]
     basis = [[VectorSpaceMorphism(X,Y,m) for m ∈ mats]...]
-    return VSHomSpace{T}(X,Y,basis)
+    return VSHomSpace{T}(X,Y,basis,VectorSpaces(base_ring(X)))
 end
 
 basis(V::VSHomSpace) = V.basis
