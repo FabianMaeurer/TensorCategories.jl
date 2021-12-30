@@ -2,8 +2,8 @@
 
 Vector spaces in JuCat are of the abstract type
 
-```@docs
-VectorSpaceObject
+```
+VectorSpaceObject{T} <: Object
 ```
 
 They always need the following fields:
@@ -16,18 +16,30 @@ parent::Category
 ## The Category of Finite Dimensional VectorSpaces
 
 The simplest example to provide are the finite dimensional vector spaces over a field.
+This category has type
 
-The basic methods to generate this are
-
-```@docs
-VectorSpaces
+```
+VectorSpaces{T} <: TensorCategory{T}
 ```
 
-The following methods are provided:
+and can be constructed like so:
 
-```@autodocs
-Modules = [JuCat]
-Pages = [VectorSpaces.jl]
+```@example
+F = FiniteField(5,2)
+Vec = VectorSpaces(F)
+```
+
+Objects of this category are of the type
+
+```
+VSObject{T} <: VectorSpaceObject{T}
+```
+
+Every vector space object is defined by a basis and a base field provided by the
+parent category.
+
+```@docs
+VectorSpaceObject
 ```
 
 ## The Category of Graded Vector Spaces
