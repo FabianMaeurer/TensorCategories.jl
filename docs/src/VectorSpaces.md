@@ -25,6 +25,7 @@ VectorSpaces{T} <: TensorCategory{T}
 and can be constructed like so:
 
 ```@example
+using Oscar #hide
 F = FiniteField(5,2)
 Vec = VectorSpaces(F)
 ```
@@ -40,7 +41,7 @@ parent category.
 
 ```@docs
 VectorSpaceObject
-VectorSpaceObject(x,y)
+VectorSpaceObject(::VectorSpaces,::Int)
 ```
 
 ## The Category of Graded Vector Spaces
