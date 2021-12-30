@@ -9,15 +9,8 @@ struct VectorSpaces{T<:FieldElem} <: TensorCategory{T}
 end
 
 
-
-"""
-    VectorSpaceObject{T}
-
-An object in the category of finite dimensional vector spaces.
-"""
 struct VSObject{T<:FieldElem} <: VectorSpaceObject{T}
     basis::Vector
-    basis_strings::Vector{String}
     parent::VectorSpaces{T}
 end
 
@@ -43,31 +36,27 @@ end
 # end
 #
 
+"""
+    VectorSpaceObject(Vec::VectorSpaces, n::Int64)
+    VectorSpaceObject(K::Field, n::Int)
+    VectorSpaceObject(Vec::VectorSpaces, basis::Vector)
+    VectorSpaceObject(K::Field, basis::Vector)
 
-function VectorSpaceObject(Vec::VectorSpaces{T}, n::Int, basis::Vector{String} = String[]) where T
-    if basis == String[]
-        basis = ["v$i" for i ∈ 1:n]
-    elseif length(basis) != n
-        throw(ErrorException("Mismatching dimensions"))
-    end
-    return VSObject{T}(basis,basis,Vec)
+The n-dimensional vector space with basis v1,..,vn (or other specified basis)
+"""
+function VectorSpaceObject(Vec::VectorSpaces{T}, n::Int) where T
+    basis = ["v$i" for i ∈ 1:n]
+    return VSObject{T}(basis,Vec)
 end
 
 
-function VectorSpaceObject(K::F,n::Int, basis::Vector{String} = String[]) where {F<:Field}
+function VectorSpaceObject(K::Field,n::Int)
     Vec = VectorSpaces(K)
-    return VectorSpaceObject(Vec,n,basis)
+    return VectorSpaceObject(Vec,n)
 end
 
-function VectorSpaceObject(Vec::VectorSpaces{T}, basis::Vector{S},
-        bstring::Vector{String} = String[]) where {T,S}
-
-        if bstring == String[]
-            bstring = ["v$i" for i ∈ 1:length(basis)]
-        elseif length(basis) != length(bstring)
-            throw(ErrorException("Mismatching dimensions"))
-        end
-        return VSObject{T}(basis, bstring, Vec)
+function VectorSpaceObject(Vec::VectorSpaces{T}, basis::Vector) where T
+    return VSObject{T}(basis, Vec)
 end
 
 function VectorSpaceObject(K::F, basis::Vector{S},
@@ -77,7 +66,12 @@ function VectorSpaceObject(K::F, basis::Vector{S},
     return VectorSpaceObject(Vec,basis,bstring)
 end
 
-function VectorSpaceMorphism(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}, m::MatElem{T}) where {T}
+"""
+    Morphism(X::VectorSpaceObject, Y::VectorSpaceObject, m::MatElem)
+
+Return a morphism in the category of vector spaces defined by m.
+"""
+function Morphism(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}, m::MatElem{T}) where {T}
     if parent(X) != parent(Y)
         throw(ErrorException("Missmatching parents."))
     elseif size(m) != (dim(X),dim(Y))
@@ -117,8 +111,6 @@ end
 #   Functionality
 #-----------------------------------------------------------------
 
-parent(X::VectorSpaceObject) = X.parent
-
 base_ring(V::VectorSpaceObject) = parent(V).base_ring
 base_ring(Vec::VectorSpaces) = Vec.base_ring
 
@@ -156,10 +148,17 @@ function dsum(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where {T}
     b = [(1,x) for x in basis(X)] ∪ [(2,y) for y in basis(Y)]
     bstring = ["($x,0)" for x in X.basis_strings] ∪ ["(0,$y)" for y in Y.basis_strings]
     V = VectorSpaceObject(parent(X),b,bstring)
+
     ix = VectorSpaceMorphism(X,V, matrix(F,[i == j ? 1 : 0 for i ∈ 1:dim(X), j ∈ 1:dim(V)]))
     iy = VectorSpaceMorphism(Y,V, matrix(F,[i == j - dim(X) for i ∈ 1:dim(Y), j ∈ 1:dim(V)]))
-    return V,[ix,iy]
+
+    px = VectorSpaceMorphism(V,X, matrix(F,[i == j ? 1 : 0 for i ∈ 1:dim(V), j ∈ 1:dim(X)]))
+    py = VectorSpaceMorphism(V,Y, matrix(F,[i == j ? 1 : 0 for i ∈ 1:dim(V), j ∈ 1:dim(Y)]))
+    return V,[ix,iy], [px,py]
 end
+
+product(X::VectorSpaceObject, Y::VectorSpaceObject) = dsum(X,Y)[[1,3]]
+coproduct(X::VectorSpaceObject, Y::VectorSpaceObject) = dsum(X,Y)[[1,2]]
 
 function dsum(f::VectorSpaceMorphism{T},g::VectorSpaceMorphism{T}) where T
     F = base_ring(domain(f))
@@ -172,7 +171,6 @@ function dsum(f::VectorSpaceMorphism{T},g::VectorSpaceMorphism{T}) where T
 end
 
 
-
 #-----------------------------------------------------------------
 #   Functionality: Tensor Product
 #-----------------------------------------------------------------
@@ -182,7 +180,7 @@ function tensor_product(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where 
         throw(ErrorException("Mismatching parents."))
     end
     b = [[(x,y) for x ∈ basis(X), y ∈ basis(Y)]...]
-    bstring = [["$x⊗$y" for x ∈ X.basis_strings, y ∈ Y.basis_strings]...]
+    bstring = String[["$x⊗$y" for x ∈ X.basis_strings, y ∈ Y.basis_strings]...]
     return VectorSpaceObject(parent(X),b,bstring)
 end
 #
@@ -195,7 +193,7 @@ function tensor_product(f::VectorSpaceMorphism, g::VectorSpaceMorphism) where {T
     return VectorSpaceMorphism(D,C,m)
 end
 #
-⊗(f::VectorSpaceMorphism, g::VectorSpaceMorphism) where {T} = tensor_product(f,g)
+
 #
 # function compose(m1::VectorSpaceMorphism, m2::VectorSpaceMorphism)
 #     return VectorSpaceMorphism(domain(m1), codomain(m2), compose(m1.m,m2.m))
@@ -213,7 +211,7 @@ function compose(f::VectorSpaceMorphism{T}...) where T
     if [domain(f[i]) == codomain(f[i-1]) for i ∈ 2:length(f)] != trues(length(f)-1)
         throw(ErrorException("Morphisms not compatible"))
     end
-    return VectorSpaceMorphism{T}(*([g.m for g ∈ f]...),domain(f[1]),codomain(f[end]))
+    return VSMorphism{T}(*([g.m for g ∈ f]...),domain(f[1]),codomain(f[end]))
 end
 
 
@@ -230,8 +228,11 @@ function id(X::VectorSpaceObject{T}) where T
     return VectorSpaceMorphism(X,X,m)
 end
 
-inv(f::VectorSpaceMorphism{T}) where T = VectorSpaceMorphism(domain(f), codomain(f), inv(f.m))
+inv(f::VectorSpaceMorphism)= VectorSpaceMorphism(domain(f), codomain(f), inv(f.m))
 
+*(λ,f::VSMorphism)  = VectorSpaceMorphism(domain(f),codomain(f),parent(domain(f)).base_ring(λ)*f.m)
+
+isinvertible(f::VSMorphism) = rank(f.m) == dim(domain(f)) == dimension(codomain(f))
 #---------------------------------------------------------------------------
 #   Associators
 #---------------------------------------------------------------------------

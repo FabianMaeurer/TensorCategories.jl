@@ -1,4 +1,19 @@
-# The Category of Finite Dimensional VectorSpaces
+# Vector Space Categories
+
+Vector spaces in JuCat are of the abstract type
+
+```@docs
+VectorSpaceObject
+```
+
+They always need the following fields:
+
+```
+basis::Vector{Any}
+parent::Category
+```
+
+## The Category of Finite Dimensional VectorSpaces
 
 The simplest example to provide are the finite dimensional vector spaces over a field.
 
@@ -15,4 +30,4 @@ Modules = [JuCat]
 Pages = [VectorSpaces.jl]
 ```
 
-#The Category of Graded Vector Spaces
+## The Category of Graded Vector Spaces

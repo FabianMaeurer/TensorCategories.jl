@@ -7,6 +7,7 @@ The category of finite dimensional vector spaces over K.
 struct GradedVectorSpaces{T,G} <: TensorCategory{T}
     base_ring::Field
     base_group::GAPGroup
+    twist::Cocycle{3}
 end
 
 struct GVSObject{T,G} <: VectorSpaceObject{T}
@@ -23,10 +24,10 @@ end
 #   Constructors
 #-----------------------------------------------------------------
 
-function GradedVectorSpaces(K::T,G::S) where {T <: Field, S <: GAPGroup}
+function GradedVectorSpaces(K::T,G::S,twist::Cocycle{3} = trivial_3_cocycle(G)) where {T <: Field, S <: GAPGroup}
     F = elem_type(K)
     G2 = elem_type(G)
-    return GradedVectorSpaces{F,G2}(K,G)
+    return GradedVectorSpaces{F,G2}(K,G,twist)
 end
 
 # function (Vec::GradedVectorSpaces{T})(V::FreeModule{T}) where T <: FieldElem
@@ -34,7 +35,7 @@ end
 # end
 
 function VectorSpaceObject(V::Dict{G,S}) where {T, S <: VectorSpaceObject{T},G}
-    Vec = GradedVectorSpaces{T,G}(base_ring(V[V.keys[1]]), parent(V.keys[1]))
+    Vec = GradedVectorSpaces(base_ring(V[V.keys[1]]), parent(V.keys[1]))
     return GVSObject{T,G}(V,Vec)
 end
 
@@ -114,28 +115,35 @@ end
 #-----------------------------------------------------------------
 
 function dsum(V::GVSObject{T,G}, W::GVSObject{T,G}) where {T,G}
-    Wm,Vm = Dict{G,VectorSpaceMorphism{T}}(),Dict{G,VectorSpaceMorphism{T}}()
+    incl_W, incl_V = Dict{G,VectorSpaceMorphism{T}}(),Dict{G,VectorSpaceMorphism{T}}()
+    proj_W, proj_V = Dict{G,VectorSpaceMorphism{T}}(),Dict{G,VectorSpaceMorphism{T}}()
     Z = Dict{G,VectorSpaceObject{T}}()
 
     for g ∈ setdiff(keys(V.V), keys(W.V))
         Z[g] = V[g]
-        Vm[g] = id(V[g])
+        incl_V[g] = id(V[g])
+        proj_V[g] = id(V[g])
     end
     for g ∈ keys(V.V) ∩ keys(W.V)
-        S,i = dsum(V[g], W[g])
+        S,i,p = dsum(V[g], W[g])
         Z[g] = S
-        Vm[g] = i[1]
-        Wm[g] = i[2]
+        incl_V[g] = i[1]
+        incl_W[g] = i[2]
+        proj_V[g] = p[1]
+        proj_W[g] = p[2]
     end
     for g ∈ setdiff(keys(W.V),keys(V.V))
         Z[g] = W[g]
-        Wm[g] = id(W[g])
+        incl_W[g] = id(W[g])
+        proj_W[g] = id(W[g])
     end
 
     VZ = VectorSpaceObject(Z)
-    mV = VectorSpaceMorphism(V,VZ, Vm)
-    mW = VectorSpaceMorphism(W,VZ, Wm)
-    return VZ, [mV,mW]
+    mor_incl_V = VectorSpaceMorphism(V,VZ, incl_V)
+    mor_incl_W = VectorSpaceMorphism(W,VZ, incl_W)
+    mor_proj_V = VectorSpaceMorphism(VZ,V, proj_V)
+    mor_proj_W = VectorSpaceMorphism(VZ,W, proj_W)
+    return VZ, [mor_incl_V,mor_incl_W], [mor_proj_V, mor_proj_W]
 end
 
 function dsum(f::GVSMorphism{T,G}, g::GVSMorphism{T,G}) where {T,G}
@@ -211,7 +219,24 @@ end
 
 
 function associator(X::GVSObject{T,G}, Y::GVSObject{T,G}, Z::GVSObject{T,G}) where {T,G}
-    #todo
+    D = (X⊗Y)⊗Z
+    C = X⊗(Y⊗Z)
+    mors = Vector{Pair{G,VSMorphism{T}}}() #Dict{G,VSMorphism{T}}()
+    Vec = parent(X)
+    for g1 ∈ X.V.keys
+        for g2 ∈ Y.V.keys
+            for g3 ∈ Z.V.keys
+                a = g1*g2*g3
+                # if false #(a = g1*g2*g3) ∈ keys(mors)
+                #     mors[a] = mors[a] ⊕ Vec.twist(g1,g2,g3)*associator(X[g1],Y[g2],Z[g3])
+                # else
+                #     @show a
+                #     push!(mors,a => Vec.twist(g1,g2,g3)*associator(X[g1],Y[g2],Z[g3]))
+                # end
+            end
+        end
+    end
+    return VectorSpaceMorphism(D,C,mors)
 end
 
 

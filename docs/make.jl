@@ -8,8 +8,9 @@ makedocs(
     ),
     pages = [
         "Home" => "index.md",
-        "Categories" => [
-            "Vector Spaces" => "VectorSpaces.md"
+        "Implemented Examples" => [
+            "Vector Spaces" => "VectorSpaces.md",
+            "Representations of Finite Groups" => "Representations.md"
         ],
         "showcase.md"
     ],
