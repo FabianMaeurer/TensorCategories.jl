@@ -40,6 +40,7 @@ parent category.
 
 ```@docs
 VectorSpaceObject
+VectorSpaceObject(x,y)
 ```
 
 ## The Category of Graded Vector Spaces
