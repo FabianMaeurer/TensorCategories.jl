@@ -2,9 +2,10 @@
 
 JuCat is a package under development with the intention to provide a framework as well a examples for computations in the realm of categories.
 
-##Installation
+## Installation
 
-You need to have Julia installed. For reliable results Julia version at least 1.6 is required
+You need to have Julia installed. For reliable results Julia version at least 1.6 is required. To use JuCat
+do the following:
 
 ```julia
 julia> import Pkg
@@ -27,5 +28,5 @@ contribution to the SFB-TRR 195 'Symbolic Tools in Mathematics and their
 Application' of the German Research Foundation (DFG).
 
 
-[1] = https://ulthiel.com/math/ 'Ulrich Thiel'
-[2] = https://github.com/oscar-system/Oscar.jl'OSCAR'
+[1]: https://ulthiel.com/math/ 'Ulrich Thiel'
+[2]: https://github.com/oscar-system/Oscar.jl'OSCAR'
