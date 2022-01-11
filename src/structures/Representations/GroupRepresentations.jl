@@ -20,11 +20,11 @@ end
 #   Constructors
 #-------------------------------------------------------------------------
 
-function GroupRepresentationCategory(G::GAPGroup, F::Field)
+function RepresentationCategory(G::GAPGroup, F::Field)
     return GroupRepresentationCategory{elem_type(F),typeof(G)}(G,F)
 end
 
-function GroupRepresentation(G::GAPGroup, pre_img::Vector, img::Vector)
+function Representation(G::GAPGroup, pre_img::Vector, img::Vector)
     F = base_ring(img[1])
     d = size(img[1])[1]
     H = GL(d, F)
@@ -34,7 +34,7 @@ end
 
 
 
-function GroupRepresentation(G::GAPGroup, m::Function)
+function Representation(G::GAPGroup, m::Function)
     F = order(G) == 1 ? base_ring(parent(m(elements(G)[1]))) : base_ring(parent(m(G[1])))
     d = order(G) == 1 ? size(m(elements(G)[1]))[1] : size(m(G[1]))[1]
     H = GL(d,F)

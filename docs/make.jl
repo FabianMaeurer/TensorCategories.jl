@@ -1,4 +1,6 @@
-using Documenter, JuCat, Oscar
+using Documenter, JuCat
+
+DocMeta.setdocmeta!(JuCat, :DocTestSetup, :(using JuCat,Oscar); recursive=true)
 
 makedocs(
     sitename = "JuCat.jl",
