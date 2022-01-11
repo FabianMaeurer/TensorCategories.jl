@@ -1,3 +1,7 @@
+```@setup VS
+using JuCat,Oscar
+```
+
 # Vector Space Categories
 
 Vector spaces in JuCat are of the abstract type
@@ -20,7 +24,7 @@ The simplest example to provide are the finite dimensional vector spaces over a 
 This category has type
 
 ```@doc
-VectorSpaces{T} <: TensorCategory{T}
+struct VectorSpaces{T} <: TensorCategory{T} end
 ```
 
 and can be constructed like so:
@@ -45,6 +49,19 @@ VectorSpaceObject
 VectorSpaceObject(::VectorSpaces,::Int)
 ```
 
+Morphisms in this Category are defined only by matrices of matching dimensions.
+They are typed as
+
+```julia
+struct VSMorphism{T} <: Morphism end
+```
+
+and constructed giving a domain, codomain and matrix element.
+
+```docs
+Morphism(::VSObject, ::VSObject, ::MatElem)
+```
+
 ## The Category of Graded Vector Spaces
 
 Very similar we have the category of (twisted) ``G``-graded vector spaces for a finite group ``G``.
@@ -56,7 +73,6 @@ GradedVectorSpaces{T,G} <: VectorSpaces{T,G}
 and they are constructed in straightforward manner
 
 ```@repl
-using JuCat, Oscar # hide
 G = symmetric_group(6)
 F,a = FiniteField(2,3)
 VecG = GradedVectorSpaces(G,F)
@@ -66,9 +82,23 @@ To add a nontrivial associator (twist) construct a Cocycle{3} object coding a 3-
 of the group ``G``. By now no checking of this condition happens.
 
 ```@repl
-using JuCat, Oscar #hide
 C = #TODO CoCycle(G, )
 VecG = #VectorSpaces(G,QQ,C)
+```
+
+Graded vector spaces decompose into direct sums of vector spaces for each element in
+``G``.
+
+```
+struct GVSObject{T,G} <: VectorSpaceObject{T} end
+```
+
+```@repl
+G = symmetric_group(5)
+g,s = gens(G)
+V1 = VectorSpaceObject(QQ,5)
+V2 = VectorSpaceObject(QQ, [:v, :w])
+W = VectorSpaceObject(QQ, g => V1, s => V2, g*s => V1⊗V2)
 ```
 
 ## Functionality
