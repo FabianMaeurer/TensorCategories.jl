@@ -1,5 +1,5 @@
-```@setup reps
-using JuCat,Oscar
+```@meta
+CurrentModule = JuCat
 ```
 
 # Representations
@@ -25,7 +25,8 @@ Let ``G`` be a finite group. We consider the category of finite dimensinal
 GroupRepresentationCategory{T,G} <: RepresentationCategory{T}
 ```
 
-Build it by 
+Build it with the constructor
+
 
 ```@docs
 RepresentationCategory(::GAPGroup, ::Field)
@@ -41,4 +42,8 @@ GroupRepresentation{T,G} <: Representation
 They are constructed in one of two ways, either by images of generators or by a function
 
 ```@docs
-Representation(::GAPGroup)
+Representation(::GAPGroup,::Vector,::Vector)
+Representation(::GAPGroup,::Function)
+```
+
+where in both cases the images are required to be fitting MatrixElem objects.

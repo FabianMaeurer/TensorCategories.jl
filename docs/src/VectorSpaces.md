@@ -1,5 +1,5 @@
-```@setup VS
-using JuCat,Oscar
+```@meta
+CurrentModule = JuCat
 ```
 
 # Vector Space Categories
@@ -29,8 +29,7 @@ VectorSpaces{T} <: TensorCategory{T}
 
 and can be constructed like so:
 
-```@example VS
-using Oscar,JuCat # hide
+```@example
 F = FiniteField(5,2)
 Vec = VectorSpaces(F)
 ```
@@ -72,7 +71,7 @@ GradedVectorSpaces{T,G} <: VectorSpaces{T,G}
 ```
 and they are constructed in straightforward manner
 
-```@example VS
+```@example
 G = symmetric_group(6)
 F,a = FiniteField(2,3)
 VecG = GradedVectorSpaces(G,F)
@@ -81,7 +80,7 @@ VecG = GradedVectorSpaces(G,F)
 To add a nontrivial associator (twist) construct a Cocycle{3} object coding a 3-cocycle
 of the group ``G``. By now no checking of this condition happens.
 
-```@example VS
+```@example
 C = #TODO CoCycle(G, )
 VecG = #VectorSpaces(G,QQ,C)
 ```
@@ -93,7 +92,7 @@ Graded vector spaces decompose into direct sums of vector spaces for each elemen
 GVSObject{T,G} <: VectorSpaceObject{T}
 ```
 
-```@example VS
+```@example 
 G = symmetric_group(5)
 g,s = gens(G)
 V1 = VectorSpaceObject(QQ,5)
