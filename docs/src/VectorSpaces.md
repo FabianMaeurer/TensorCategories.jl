@@ -107,7 +107,7 @@ Morphisms are implemented analogously by pairs of group elements and vectorspace
 GVSMorphism{T,G} <: Morphism
 ```
 
-The constructors are 
+The constructors are
 
 ```@docs
 Morphism(::GVSObject,::GVSObject,::Dict)
