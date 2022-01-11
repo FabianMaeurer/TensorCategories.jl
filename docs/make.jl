@@ -1,4 +1,4 @@
-using Documenter, JuCat
+using Documenter, JuCat, Oscar
 
 makedocs(
     sitename = "JuCat.jl",
@@ -8,9 +8,9 @@ makedocs(
     ),
     pages = [
         "Home" => "index.md",
-        "Implemented Examples" => [
+        "Examples" => [
             "Vector Spaces" => "VectorSpaces.md",
-            "Representations of Finite Groups" => "Representations.md"
+            "Representations" => "Representations.md"
         ],
         "showcase.md"
     ],

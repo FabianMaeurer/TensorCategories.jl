@@ -18,7 +18,7 @@ basis::Vector{Any}
 parent::Category
 ```
 
-## The Category of Finite Dimensional VectorSpaces
+## Finite Dimensional VectorSpaces
 
 The simplest example to provide are the finite dimensional vector spaces over a field.
 This category has type
@@ -62,9 +62,9 @@ and constructed giving a domain, codomain and matrix element.
 Morphism(::VSObject, ::VSObject, ::MatElem)
 ```
 
-## The Category of Graded Vector Spaces
+## Graded Vector Spaces
 
-Very similar we have the category of (twisted) ``G``-graded vector spaces for a finite group ``G``.
+Very similar we have the category of finite dimensional (twisted) ``G``-graded vector spaces for a finite group ``G``.
 We have the type
 
 ```@docs
