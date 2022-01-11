@@ -7,7 +7,7 @@ using JuCat,Oscar
 Vector spaces in JuCat are of the abstract type
 
 ```
-VectorSpaceObject{T} <: Object
+abstract type VectorSpaceObject{T} <: Object end
 ```
 
 All objects with vector space structure like hom-spaces are and should be implemented as a
@@ -24,12 +24,12 @@ The simplest example to provide are the finite dimensional vector spaces over a 
 This category has type
 
 ```@doc
-struct VectorSpaces{T} <: TensorCategory{T} end
+VectorSpaces{T} <: TensorCategory{T}
 ```
 
 and can be constructed like so:
 
-```@example
+```@example VS
 using Oscar,JuCat # hide
 F = FiniteField(5,2)
 Vec = VectorSpaces(F)
@@ -53,12 +53,12 @@ Morphisms in this Category are defined only by matrices of matching dimensions.
 They are typed as
 
 ```julia
-struct VSMorphism{T} <: Morphism end
+VSMorphism{T} <: Morphism
 ```
 
 and constructed giving a domain, codomain and matrix element.
 
-```docs
+```@docs
 Morphism(::VSObject, ::VSObject, ::MatElem)
 ```
 
@@ -72,7 +72,7 @@ GradedVectorSpaces{T,G} <: VectorSpaces{T,G}
 ```
 and they are constructed in straightforward manner
 
-```@repl
+```@example VS
 G = symmetric_group(6)
 F,a = FiniteField(2,3)
 VecG = GradedVectorSpaces(G,F)
@@ -81,7 +81,7 @@ VecG = GradedVectorSpaces(G,F)
 To add a nontrivial associator (twist) construct a Cocycle{3} object coding a 3-cocycle
 of the group ``G``. By now no checking of this condition happens.
 
-```@repl
+```@example VS
 C = #TODO CoCycle(G, )
 VecG = #VectorSpaces(G,QQ,C)
 ```
@@ -90,16 +90,30 @@ Graded vector spaces decompose into direct sums of vector spaces for each elemen
 ``G``.
 
 ```
-struct GVSObject{T,G} <: VectorSpaceObject{T} end
+GVSObject{T,G} <: VectorSpaceObject{T}
 ```
 
-```@repl
+```@example VS
 G = symmetric_group(5)
 g,s = gens(G)
 V1 = VectorSpaceObject(QQ,5)
 V2 = VectorSpaceObject(QQ, [:v, :w])
 W = VectorSpaceObject(QQ, g => V1, s => V2, g*s => V1⊗V2)
 ```
+
+Morphisms are implemented analogously by pairs of group elements and vectorspace objects.
+
+```
+GVSMorphism{T,G} <: Morphism
+```
+
+The constructors are 
+
+```@docs
+Morphism(::GVSObject,::GVSObject,::Dict)
+Morphism(::GVSObject,::GVSObject,::Pair...)
+```
+
 
 ## Functionality
 
