@@ -12,21 +12,22 @@ julia> import Pkg
 julia> Pkg.add("https://github.com/FabianMaeurer/JuCat.jl")
 ```
 
-Then to use JuCat you can just type
+## Usage
 
-```julia
-julia> using JuCat, Oscar
+To use Jucat the structures from the [OSCAR-System](https://github.com/oscar-system/Oscar.jl) are required. Here a minimal usage Example.
+
+```@repl
+using JuCat, Oscar;
+F = FiniteField(5)
+G = symmetric_group(2)
+X = gset(G,[1,2,3])
+C = ConvolutionCategory(X,F)
+simples(C)
+groethendieck_ring(C)
 ```
-
-to utilize JuCat and the required algebraic datatypes from the [OSCAR-System][2]
-
 
 ## Acknowledgements
 
-This project was started under supervision of [Prof. Ulrich Thiel][1]  (University of Kaiserslautern). This work is a
+This project was started under supervision of [Prof. Ulrich Thiel](https://ulthiel.com/math/)  (University of Kaiserslautern). This work is a
 contribution to the SFB-TRR 195 'Symbolic Tools in Mathematics and their
 Application' of the German Research Foundation (DFG).
-
-
-[1]: https://ulthiel.com/math/ 'Ulrich Thiel'
-[2]: https://github.com/oscar-system/Oscar.jl'OSCAR'
