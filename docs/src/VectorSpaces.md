@@ -2,6 +2,10 @@
 using JuCat, Oscar
 ```
 
+```@meta
+CurrentModule = JuCat
+```
+
 # Vector Space Categories
 
 Vector spaces in JuCat are of the abstract type
