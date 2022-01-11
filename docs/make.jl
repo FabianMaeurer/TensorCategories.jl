@@ -1,6 +1,6 @@
 using Documenter, JuCat
 
-DocMeta.setdocmeta!(JuCat, :DocTestSetup, :(using JuCat,Oscar); recursive=true)
+#DocMeta.setdocmeta!(JuCat, :DocTestSetup, :(using JuCat); recursive=true)
 
 makedocs(
     sitename = "JuCat.jl",
@@ -12,7 +12,8 @@ makedocs(
         "Home" => "index.md",
         "Examples" => [
             "Vector Spaces" => "VectorSpaces.md",
-            "Representations" => "Representations.md"
+            "Representations" => "Representations.md",
+            "Coherent Sheaves" => "CoherentSheaves.md"
         ],
         "showcase.md"
     ],

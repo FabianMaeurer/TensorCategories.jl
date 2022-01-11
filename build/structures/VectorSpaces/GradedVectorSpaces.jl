@@ -43,13 +43,7 @@ function VectorSpaceObject(V::Pair{G,T}...) where {G,T <: VectorSpaceObject}
     return VectorSpaceObject(Dict([v for v in V]...))
 end
 
-"""
-    Morphism(D::GVSObject, C::GVSObject, m::Dict)
-
-Morphism between graded vector spaces defined by pairs of elements and morphisms
-g => (Dg -> Cg).
-"""
-function Morphism(D::GVSObject{T,G},
+function VectorSpaceMorphism(D::GVSObject{T,G},
         C::GVSObject{T,G}, m::Dict{G,S}) where {T,S<:VectorSpaceMorphism,G}
     if parent(D) != parent(C)
         throw(ErrorException("Missmatching parents."))
@@ -60,15 +54,9 @@ function Morphism(D::GVSObject{T,G},
     end
 end
 
-"""
-    Morphism(D::GVSObject, C::GVSObject, m::Pair...)
-
-Morphism between graded vector spaces defined by pairs of elements and morphisms
-g => (Dg -> Cg).
-"""
-function Morphism(D::GVSObject{T,G}, C::GVSObject{T,G},
+function VectorSpaceMorphism(D::GVSObject{T,G}, C::GVSObject{T,G},
         m::Pair{G,S}...) where {T,G, S <: VectorSpaceMorphism{T}}
-    return Morphism(D,C, Dict(m...))
+    return VectorSpaceMorphism(D,C, Dict(m...))
 end
 #-----------------------------------------------------------------
 #   Pretty Printing
@@ -126,7 +114,7 @@ function getindex(f::GVSMorphism, x)
     end
     D = domain(f)[x]
     C = codomain(f)[x]
-    return Morphism(D,C,matrix(base_ring(D),zeros(Int64,dim(D),dim(C))))
+    return VectorSpaceMorphism(D,C,matrix(base_ring(D),zeros(Int64,dim(D),dim(C))))
 end
 
 function ==(V::GVSObject, W::GVSObject)
@@ -179,10 +167,10 @@ function dsum(V::GVSObject{T,G}, W::GVSObject{T,G}, morphisms = false) where {T,
     if !morphisms return VZ end
 
     VZ = VectorSpaceObject(Z)
-    mor_incl_V = Morphism(V,VZ, incl_V)
-    mor_incl_W = Morphism(W,VZ, incl_W)
-    mor_proj_V = Morphism(VZ,V, proj_V)
-    mor_proj_W = Morphism(VZ,W, proj_W)
+    mor_incl_V = VectorSpaceMorphism(V,VZ, incl_V)
+    mor_incl_W = VectorSpaceMorphism(W,VZ, incl_W)
+    mor_proj_V = VectorSpaceMorphism(VZ,V, proj_V)
+    mor_proj_W = VectorSpaceMorphism(VZ,W, proj_W)
     return VZ, [mor_incl_V,mor_incl_W], [mor_proj_V, mor_proj_W]
 end
 
@@ -202,7 +190,7 @@ function dsum(f::GVSMorphism{T,G}, g::GVSMorphism{T,G}) where {T,G}
         m[x] = g[x]
     end
 
-    return Morphism(D,C,m)
+    return VectorSpaceMorphism(D,C,m)
 end
 
 
@@ -235,7 +223,7 @@ function compose(f::GVSMorphism{T,G}...) where {T,G}
         throw(ErrorException("Morphisms not compatible"))
     end
     m = Dict(g => compose([f[i][g] for i ∈ 1:length(f)]...) for g ∈ ∪([keys(f[i].m) for i ∈ 1:length(f)]...))
-    return Morphism(domain(f[1]), codomain(f[end]), m)
+    return VectorSpaceMorphism(domain(f[1]), codomain(f[end]), m)
 end
 
 
@@ -249,7 +237,7 @@ end
 function id(X::GVSObject{T,G}) where {T,G}
     n = [dim(X[g]) for g ∈ keys(X.V)]
     m = Dict(g => id(X[g]) for g ∈ keys(X.V))
-    return Morphism(X,X, m)
+    return GradedVectorSpaceMorphism(X,X, m)
 end
 
 
@@ -276,7 +264,7 @@ function associator(X::GVSObject{T,G}, Y::GVSObject{T,G}, Z::GVSObject{T,G}) whe
             end
         end
     end
-    return Morphism(D,C,mors)
+    return VectorSpaceMorphism(D,C,mors)
 end
 
 
@@ -298,7 +286,7 @@ function Hom(X::GVSObject{T,G}, Y::GVSObject{T,G}) where {T,G}
 
     for g ∈ key_elems
         for b ∈ bases[g]
-            push!(basis, Morphism(X,Y,g => b))
+            push!(basis, VectorSpaceMorphism(X,Y,g => b))
         end
     end
     return GVSHomSpace{T,G}(X,Y,basis,VectorSpaces(base_ring(X)))

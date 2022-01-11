@@ -1,5 +1,5 @@
-```@meta
-CurrentModule = JuCat
+```@setup VS
+using JuCat, Oscar
 ```
 
 # Vector Space Categories
@@ -23,14 +23,14 @@ parent::Category
 The simplest example to provide are the finite dimensional vector spaces over a field.
 This category has type
 
-```@doc
+```
 VectorSpaces{T} <: TensorCategory{T}
 ```
 
 and can be constructed like so:
 
-```@example
-F = FiniteField(5,2)
+```@example VS
+F,a = FiniteField(5,2)
 Vec = VectorSpaces(F)
 ```
 
@@ -58,7 +58,7 @@ VSMorphism{T} <: Morphism
 and constructed giving a domain, codomain and matrix element.
 
 ```@docs
-Morphism(::VSObject, ::VSObject, ::MatElem)
+Morphism(::VectorSpaceObject{T}, ::VectorSpaceObject{T}, ::MatElem{T}) where T
 ```
 
 ## Graded Vector Spaces
@@ -66,15 +66,15 @@ Morphism(::VSObject, ::VSObject, ::MatElem)
 Very similar we have the category of finite dimensional (twisted) ``G``-graded vector spaces for a finite group ``G``.
 We have the type
 
-```@docs
+```
 GradedVectorSpaces{T,G} <: VectorSpaces{T,G}
 ```
 and they are constructed in straightforward manner
 
-```@example
+```@example VS
 G = symmetric_group(6)
 F,a = FiniteField(2,3)
-VecG = GradedVectorSpaces(G,F)
+VecG = GradedVectorSpaces(F,G)
 ```
 
 To add a nontrivial associator (twist) construct a Cocycle{3} object coding a 3-cocycle
@@ -92,12 +92,12 @@ Graded vector spaces decompose into direct sums of vector spaces for each elemen
 GVSObject{T,G} <: VectorSpaceObject{T}
 ```
 
-```@example 
+```@example VS
 G = symmetric_group(5)
 g,s = gens(G)
 V1 = VectorSpaceObject(QQ,5)
 V2 = VectorSpaceObject(QQ, [:v, :w])
-W = VectorSpaceObject(QQ, g => V1, s => V2, g*s => V1⊗V2)
+W = VectorSpaceObject(g => V1, s => V2, g*s => V1⊗V2)
 ```
 
 Morphisms are implemented analogously by pairs of group elements and vectorspace objects.
@@ -109,8 +109,8 @@ GVSMorphism{T,G} <: Morphism
 The constructors are
 
 ```@docs
-Morphism(::GVSObject,::GVSObject,::Dict)
-Morphism(::GVSObject,::GVSObject,::Pair...)
+Morphism(::GVSObject{T,G},::GVSObject{T,G},::Dict{G,S}) where {T,S<:VectorSpaceMorphism,G}
+Morphism(::GVSObject{T,G}, ::GVSObject{T,G},::Pair{G,S}...) where {T,G, S <: VectorSpaceMorphism{T}}
 ```
 
 
@@ -121,6 +121,6 @@ direct sums, standard tensor products, one and zero object are all implemented.
 
 ```@autodocs
 Modules = [JuCat]
-pages = ["VectorSpaces.jl"]
+Pages = ["VectorSpaces.jl"]
 Order = [:function]
 ```

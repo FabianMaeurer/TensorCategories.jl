@@ -42,11 +42,7 @@ function Representation(G::GAPGroup, pre_img::Vector, img::Vector)
 end
 
 
-"""
-    Representation(G::GAPGroup, m::Function)
 
-Group representation defined by m:G -> Mat_n.
-"""
 function Representation(G::GAPGroup, m::Function)
     F = order(G) == 1 ? base_ring(parent(m(elements(G)[1]))) : base_ring(parent(m(G[1])))
     d = order(G) == 1 ? size(m(elements(G)[1]))[1] : size(m(G[1]))[1]
@@ -95,8 +91,8 @@ end
 function one(Rep::GroupRepresentationCategory{T,G}) where {T,G}
     grp = base_group(Rep)
     F = base_ring(Rep)
-    if order(grp) == 1 return Representation(grp,x -> one(MatrixSpace(F,1,1))) end
-    Representation(grp, gens(grp), [one(MatrixSpace(F,1,1)) for _ ∈ gens(grp)])
+    if order(grp) == 1 return GroupRepresentation(grp,x -> one(MatrixSpace(F,1,1))) end
+    GroupRepresentation(grp, gens(grp), [one(MatrixSpace(F,1,1)) for _ ∈ gens(grp)])
 end
 
 function id(ρ::GroupRepresentation{T,G}) where {T,G}
@@ -188,10 +184,10 @@ function tensor_product(ρ::GroupRepresentation{T}, τ::GroupRepresentation{T}) 
 
     if order(G) == 1
         g = elements(G)[1]
-        return Representation(G, x -> kronecker_product(matrix(ρ(g)),matrix(τ(g))))
+        return GroupRepresentation(G, x -> kronecker_product(matrix(ρ(g)),matrix(τ(g))))
     end
     generators = gens(G)
-    return Representation(G, generators, [kronecker_product(matrix(ρ(g)),matrix(τ(g))) for g ∈ generators])
+    return GroupRepresentation(G, generators, [kronecker_product(matrix(ρ(g)),matrix(τ(g))) for g ∈ generators])
 end
 
 function tensor_product(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
@@ -383,7 +379,7 @@ function induction(ρ::GroupRepresentation{T,S}, G::GAPGroup) where {T,S}
         end
         images = [images; m]
     end
-    return Representation(G, g, images)
+    return GroupRepresentation(G, g, images)
 end
 
 function induction(f::GroupRepresentationMorphism, G::GAPGroup)

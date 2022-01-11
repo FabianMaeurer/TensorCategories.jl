@@ -42,6 +42,7 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         ConvHomSpace,stalk, induction, restriction, orbit_index, dsum_morphisms,
         decompose, multiplication_table, print_multiplication_table, groethendieck_ring
 
+export Field, FiniteField
 
 include("Utility/FFE_to_FinField.jl")
 include("structures/abstracts.jl")

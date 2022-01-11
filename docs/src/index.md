@@ -7,7 +7,7 @@ JuCat is a package under development with the intention to provide a framework a
 You need to have Julia installed. For reliable results Julia version at least 1.6 is required. To use JuCat
 do the following:
 
-```julia
+```julia-repl
 julia> import Pkg
 julia> Pkg.add("https://github.com/FabianMaeurer/JuCat.jl")
 ```

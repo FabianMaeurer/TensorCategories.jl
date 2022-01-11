@@ -47,3 +47,11 @@ Representation(::GAPGroup,::Function)
 ```
 
 where in both cases the images are required to be fitting MatrixElem objects.
+
+Since group reprsentation categories are tensor categories, we again have methods
+for the important operations
+
+```@autodocs
+Modules = [JuCat]
+Pages = ["GroupRepresentations.jl"]
+```

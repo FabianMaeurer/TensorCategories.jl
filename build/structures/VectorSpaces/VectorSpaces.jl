@@ -59,10 +59,13 @@ function VectorSpaceObject(Vec::VectorSpaces{T}, basis::Vector) where T
     return VSObject{T}(basis, Vec)
 end
 
-function VectorSpaceObject(K::Field, basis::Vector)
+function VectorSpaceObject(K::F, basis::Vector{S},
+        bstring::Vector{String} = String[]) where {F <: Field,S}
+
     Vec = VectorSpaces(K)
-    return VSObject{elem_type(K)}(basis, Vec)
+    return VectorSpaceObject(Vec,basis,bstring)
 end
+
 """
     Morphism(X::VectorSpaceObject, Y::VectorSpaceObject, m::MatElem)
 
@@ -78,11 +81,6 @@ function Morphism(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}, m::MatElem{T
     end
 end
 
-"""
-    Morphism(m::MatElem)
-
-Vector space morphisms defined by m.
-"""
 function Morphism(m::MatElem)
     l,n = size(m)
     F = base_ring(m)
