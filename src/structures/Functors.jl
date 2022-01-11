@@ -68,3 +68,24 @@ function Hom(v,X::SetObject)
     mor_map = g -> f -> g ∘ f
     return HomFunctor(parent(X),Sets(),obj_map,mor_map)
 end
+
+
+#-------------------------------------------------------------------------------
+#   Tensor Product Functors
+#-------------------------------------------------------------------------------
+
+struct TensorFunctor{T} <: Functor
+    domain::ProductCategory{2}
+    codomain::TensorCategory{T}
+    obj_map
+    mor_map
+end
+
+function TensorFunctor(C::TensorCategory{T}) where T
+    domain = ProductCategory(C,C)
+    obj_map = X -> X[1]⊗X[2]
+    mor_map = f -> f[1]⊗f[2]
+    return TensorFunctor{T}(domain, C, obj_map, mor_map)
+end
+
+⊗(C::TensorCategory) = TensorFunctor(C)

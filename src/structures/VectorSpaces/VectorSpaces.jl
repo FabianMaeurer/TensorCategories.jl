@@ -80,6 +80,14 @@ function Morphism(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}, m::MatElem{T
         return VSMorphism{T}(m,X,Y)
     end
 end
+
+function Morphism(m::MatElem)
+    l,n = size(m)
+    F = base_ring(m)
+    dom = VectorSpaceObject(F,l)
+    codom = VectorSpaceObject(F,n)
+    return Morphism(dom,codom,m)
+end
 #
 # function VectorSpaceMorphism(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}, m::U) where {T,U <: MatrixElem}
 #     if parent(X) == parent(Y)
@@ -120,6 +128,8 @@ basis(V::VectorSpaceObject) = V.basis
 
 simples(Vec::VectorSpaces) = [VectorSpaceObject(base_ring(Vec),1)]
 
+decompose(V::VSObject) = [(one(parent(V)),dim(V))]
+
 one(Vec::VectorSpaces) = VectorSpaceObject(base_ring(Vec),1)
 
 zero(Vec::VectorSpaces) = VectorSpaceObject(base_ring(Vec), 0)
@@ -131,6 +141,13 @@ function ==(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where T
     return a
 end
 
+function isisomorphic(V::VSObject, W::VSObject)
+    if parent(V) != parent(W) return false, nothing end
+    if dim(V) != dim(W) return false, nothing end
+
+    return true, Morphism(V,W,one(MatrixSpace(base_ring(V),dim(V),dim(V))))
+end
+
 #-----------------------------------------------------------------
 #   Functionality: Direct Sum
 #-----------------------------------------------------------------
@@ -140,25 +157,28 @@ end
 
 Direct sum space of X... together with the embedding morphisms.
 """
-function dsum(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where {T}
+function dsum(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}, morphisms = false) where {T}
     if parent(X) != parent(Y)
         throw(ErrorException("Mismatching parents."))
     end
     F = base_ring(X)
     b = [(1,x) for x in basis(X)] ∪ [(2,y) for y in basis(Y)]
-    bstring = ["($x,0)" for x in X.basis_strings] ∪ ["(0,$y)" for y in Y.basis_strings]
-    V = VectorSpaceObject(parent(X),b,bstring)
 
-    ix = VectorSpaceMorphism(X,V, matrix(F,[i == j ? 1 : 0 for i ∈ 1:dim(X), j ∈ 1:dim(V)]))
-    iy = VectorSpaceMorphism(Y,V, matrix(F,[i == j - dim(X) for i ∈ 1:dim(Y), j ∈ 1:dim(V)]))
+    V = VectorSpaceObject(parent(X),b)
 
-    px = VectorSpaceMorphism(V,X, matrix(F,[i == j ? 1 : 0 for i ∈ 1:dim(V), j ∈ 1:dim(X)]))
-    py = VectorSpaceMorphism(V,Y, matrix(F,[i == j ? 1 : 0 for i ∈ 1:dim(V), j ∈ 1:dim(Y)]))
+    if !morphisms return V end
+
+    ix = Morphism(X,V, matrix(F,[i == j ? 1 : 0 for i ∈ 1:dim(X), j ∈ 1:dim(V)]))
+    iy = Morphism(Y,V, matrix(F,[i == j - dim(X) for i ∈ 1:dim(Y), j ∈ 1:dim(V)]))
+
+    px = Morphism(V,X, matrix(F,[i == j ? 1 : 0 for i ∈ 1:dim(V), j ∈ 1:dim(X)]))
+    py = Morphism(V,Y, matrix(F,[i == j ? 1 : 0 for i ∈ 1:dim(V), j ∈ 1:dim(Y)]))
+
     return V,[ix,iy], [px,py]
 end
 
-product(X::VectorSpaceObject, Y::VectorSpaceObject) = dsum(X,Y)[[1,3]]
-coproduct(X::VectorSpaceObject, Y::VectorSpaceObject) = dsum(X,Y)[[1,2]]
+product(X::VectorSpaceObject, Y::VectorSpaceObject, projections = false) = dsum(X,Y, projections)[[1,3]]
+coproduct(X::VectorSpaceObject, Y::VectorSpaceObject, injections = false) = dsum(X,Y, injections)[[1,2]]
 
 function dsum(f::VectorSpaceMorphism{T},g::VectorSpaceMorphism{T}) where T
     F = base_ring(domain(f))
@@ -167,7 +187,7 @@ function dsum(f::VectorSpaceMorphism{T},g::VectorSpaceMorphism{T}) where T
     z1 = zero(MatrixSpace(F,mf,ng))
     z2 = zero(MatrixSpace(F,mg,nf))
     m = vcat(hcat(f.m,z1), hcat(z2,g.m))
-    return VectorSpaceMorphism{T}(m,dsum(domain(f),domain(g))[1],dsum(codomain(f),codomain(g))[1])
+    return VSMorphism{T}(m,dsum(domain(f),domain(g))[1],dsum(codomain(f),codomain(g))[1])
 end
 
 
@@ -180,8 +200,7 @@ function tensor_product(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where 
         throw(ErrorException("Mismatching parents."))
     end
     b = [[(x,y) for x ∈ basis(X), y ∈ basis(Y)]...]
-    bstring = String[["$x⊗$y" for x ∈ X.basis_strings, y ∈ Y.basis_strings]...]
-    return VectorSpaceObject(parent(X),b,bstring)
+    return VectorSpaceObject(parent(X),b)
 end
 #
 ⊗(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where {T} = tensor_product(X,Y)

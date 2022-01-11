@@ -83,6 +83,8 @@ end
 base_ring(Vec::GradedVectorSpaces) = Vec.base_ring
 base_ring(V:: GVSObject) = V.parent.base_ring
 
+issemisimple(::GradedVectorSpaces) = true
+
 dim(V::GVSObject) = sum([dim(v) for (g,v) in V.V])
 
 function simples(Vec::GradedVectorSpaces)
@@ -95,6 +97,11 @@ function one(Vec::GradedVectorSpaces)
     F = base_ring(Vec)
     S = VectorSpaceObject(F,1)
     return VectorSpaceObject(one(Vec.base_group) => S)
+end
+
+function decompose(V::GVSObject)
+    F = base_ring(V)
+    return [(VectorSpaceObject(g => one(VectorSpaces(F))),dim(v)) for (g,v) in V.V]
 end
 
 parent(V::GVSObject) = V.parent
@@ -110,11 +117,30 @@ function getindex(f::GVSMorphism, x)
     return VectorSpaceMorphism(D,C,matrix(base_ring(D),zeros(Int64,dim(D),dim(C))))
 end
 
+function ==(V::GVSObject, W::GVSObject)
+    if keys(V.V) != keys(W.V) return false end
+    for g ∈ keys(V.V)
+        if V[g] != W[g] return false end
+    end
+    return true
+end
+
+function isisomorphic(V::GVSObject{T,G}, W::GVSObject{T,G}) where {T,G}
+    if keys(V.V) != keys(W.V) return false, nothing end
+    m = []
+    for g ∈ keys(V.V)
+        b,n = isisomorphic(V[g],W[g])
+        if !b return false, nothing end
+        m = [m;g => n]
+    end
+    return true, Morphism(V,W, m...)
+end
+
 #-----------------------------------------------------------------
 #   Functionality: Direct Sums
 #-----------------------------------------------------------------
 
-function dsum(V::GVSObject{T,G}, W::GVSObject{T,G}) where {T,G}
+function dsum(V::GVSObject{T,G}, W::GVSObject{T,G}, morphisms = false) where {T,G}
     incl_W, incl_V = Dict{G,VectorSpaceMorphism{T}}(),Dict{G,VectorSpaceMorphism{T}}()
     proj_W, proj_V = Dict{G,VectorSpaceMorphism{T}}(),Dict{G,VectorSpaceMorphism{T}}()
     Z = Dict{G,VectorSpaceObject{T}}()
@@ -137,6 +163,8 @@ function dsum(V::GVSObject{T,G}, W::GVSObject{T,G}) where {T,G}
         incl_W[g] = id(W[g])
         proj_W[g] = id(W[g])
     end
+
+    if !morphisms return VZ end
 
     VZ = VectorSpaceObject(Z)
     mor_incl_V = VectorSpaceMorphism(V,VZ, incl_V)

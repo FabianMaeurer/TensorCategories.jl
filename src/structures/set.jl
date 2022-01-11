@@ -78,14 +78,14 @@ id(X::SetObject) = SetMorphism(X,X, x->x)
 #   Product
 #--------------------------------------------------
 
-function product(X::SetObject, Y::SetObject)
+function product(X::SetObject, Y::SetObject, projections = false)
     Z = SetObject(Set([(x,y) for x ∈ X, y ∈ Y]))
     pX = SetMorphism(Z,X, x -> x[1])
     pY = SetMorphism(Z,Y, x -> x[2])
-    return Z,[pX,pY]
+    return projections ? (Z,[pX,pY]) : Z
 end
 
-function coproduct(X::SetObject, Y::SetObject)
+function coproduct(X::SetObject, Y::SetObject, injections = false)
     if length(X.set ∩ Y.set) != 0
         Z = SetObject(union([(x,0) for x ∈ X],[(y,1) for y ∈ Y]))
         ix = SetMorphism(X,Z, x -> (x,0))
@@ -95,7 +95,7 @@ function coproduct(X::SetObject, Y::SetObject)
         ix = SetMorphism(X,Z, x -> x)
         iy = SetMorphism(Y,Z, y -> y)
     end
-    return Z, [ix,iy]
+    return injections ? (Z, [ix,iy]) : Z
 end
 
 #--------------------------------------------------

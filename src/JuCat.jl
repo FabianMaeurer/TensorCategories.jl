@@ -1,6 +1,9 @@
 module JuCat
 
-import Base: show,^,==, getindex, in, issubset, iterate, length,*,+,-, iterate
+import Base: show,^,==, getindex, in, issubset, iterate, length,*,+,-, iterate,
+                getproperty
+
+import AbstractAlgebra.Integers
 
 import Oscar: VectorSpace, Field, elem_type, QQ, FieldElem,
                 dim, base_ring, MatrixSpace, GAPGroup, GroupElem,
@@ -10,7 +13,10 @@ import Oscar: VectorSpace, Field, elem_type, QQ, FieldElem,
                 Ring, RingElem, base_field, MPolyQuo, iscommutative, isinvertible,
                 MatrixGroup, hom, GAPGroupHomomorphism, GL, MatrixSpace, matrix,
                 codomain, GAP, characteristic, degree, julia_to_gap, GSet, gset,
-                FqNmodFiniteField,gen
+                FinField,gen, GSet, gset, orbits, stabilizer, orbit,
+                isisomorphic, issubgroup, left_transversal, ComplexField, order,
+                elements, index, symmetric_group, gap_to_julia, multiplication_table,
+                issemisimple, AlgAss, AlgAssElem
 
 
 
@@ -27,11 +33,19 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         Hom, GVSHomSpace, HomFunctor, VSObject, GVSObject, GVSMorphism, SetHomSet,
         HomSet, Cocycle, trivial_3_cocylce,*, Algebra, FreeAlgebra, GroupAlgebra,
         AlgebraElem,+,-, GroupRepresentation, GroupRepresentationMorphism,
-        isinvertible, Representation, isequivariant, matrix, GRHomSpace
+        isinvertible, Representation, isequivariant, matrix, GRHomSpace,
+        OppositeCategory, OppositeMorphism, OppositeObject, ProductCategory,
+        ProductObject, ProductMorphism, CohSheaves, CohSheaf, CohSheafMorphism,
+        stalks, PullbackFunctor, Pullback, PushforwardFunctor, Pushforward,
+        CohSfHomSpace, ConvolutionCategory, ConvolutionObject, ConvolutionMorphism,
+        ConvHomSpace,stalk, induction, restriction, orbit_index, dsum_morphisms,
+        decompose, multiplication_table, print_multiplication_table, groethendieck_ring
 
 
 include("Utility/FFE_to_FinField.jl")
 include("structures/abstracts.jl")
+include("structures/MISC/ProductCategory.jl")
+include("structures/MISC/OppositeCategory.jl")
 include("structures/VectorSpaces/VectorSpaces.jl")
 include("structures/VectorSpaces/Cocycles.jl")
 include("structures/VectorSpaces/GradedVectorSpaces.jl")
@@ -43,6 +57,10 @@ include("structures/Representations/GroupRepresentations.jl")
 include("structures/AlgebraicStructures/Algebras.jl")
 include("structures/AlgebraicStructures/AlgebraMorphisms.jl")
 include("structures/ConvolutionCategory/CoherentSheaves.jl")
+include("structures/ConvolutionCategory/ConvolutionCategory.jl")
+include("structures/MISC/multiplication_table.jl")
+include("structures/GroethendieckRing.jl")
+
 
 
 

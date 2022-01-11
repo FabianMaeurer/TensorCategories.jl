@@ -53,6 +53,7 @@ Return the base ring ```k``` of the ```k```-linear parent category of ```X```.
 """
 base_ring(X::Object) = parent(X).base_ring
 
+base_ring(X::Morphism) = parent(domain(X)).base_ring
 """
     base_ring(C::Category)
 
@@ -88,16 +89,33 @@ end
 ⊕(X::S1,T::Tuple{S,Vector{R}, Vector{R2}}) where {S <: Object,S1 <: Object, R <: Morphism, R2 <: Morphism} = ⊕(T,X)
 
 function dsum(X::Object...)
+    if length(X) == 0 return nothing end
+    Z = X[1]
+    for Y ∈ X[2:end]
+        Z = Z⊕Y
+    end
+    return Z
+end
+
+function dsum_morphisms(X::Object...)
     if length(X) == 1
         return X[1], [id(X[1]),id(X[1])]
     end
-    Z,ix,px = ⊕(X[1],X[2])
+    Z,ix,px = dsum(X[1],X[2],true)
     for Y in X[3:end]
         Z,ix,px = ⊕((Z,ix,px),Y)
     end
     return Z,ix,px
 end
 
+function dsum(f::Morphism...)
+    g = f[1]
+
+    for h ∈ f[2:end]
+        g = g ⊕ h
+    end
+    return g
+end
 
 function ×(T::Tuple{S,Vector{R}},X::S1) where {S <: Object,S1 <: Object, R <: Morphism}
     Z,px = product(T[1],X)
@@ -108,10 +126,19 @@ end
 ×(X::S1,T::Tuple{S,Vector{R}}) where {S <: Object,S1 <: Object, R <: Morphism} = ×(T,X)
 
 function product(X::Object...)
+    if length(X) == 0 return nothing end
+    Z = X[1]
+    for Y ∈ X[2:end]
+        Z = product(Z,Y)
+    end
+    return Z
+end
+
+function product_morphisms(X::Object...)
     if length(X) == 1
         return X[1], [id(X[1])]
     end
-    Z,px = product(X[1],X[2])
+    Z,px = product(X[1],X[2], true)
     for Y in X[3:end]
         Z,px = ×((Z,px),Y)
     end
@@ -127,6 +154,15 @@ end
 ∐(X::S1,T::Tuple{S,Vector{R}}) where {S <: Object,S1 <: Object, R <: Morphism} = ∐(T,X)
 
 function coproduct(X::Object...)
+    if length(X) == 0 return nothing end
+    Z = X[1]
+    for Y in X[2:end]
+        Z = coproduct(Z,Y)
+    end
+    return Z
+end
+
+function coproduct_morphisms(X::Object...)
     if length(X) == 1
         return X[1], [id(X[1])]
     end
@@ -160,6 +196,8 @@ morphisms.
 
 ⊕(X::Object...) = dsum(X...)
 
+⊕(X::Morphism...) = dsum(X...)
+
 """
     ⊗(X::Object...)
 
@@ -180,6 +218,27 @@ Return the n-fold product object ```X^n```.
 Return the tensor product morphism of ```f```and ```g```.
 """
 ⊗(f::Morphism, g::Morphism) where {T} = tensor_product(f,g)
+
+
+dsum(X::T) where T <: Union{Vector,Tuple} = dsum(X...)
+product(X::T) where T <: Union{Vector,Tuple} = product(X...)
+coproduct(X::T) where T <: Union{Vector,Tuple} = coproduct(X...)
+
+#---------------------------------------------------------
+#   tensor_product
+#---------------------------------------------------------
+
+function tensor_product(X::Object...)
+    if length(X) == 1 return X end
+
+    Z = X[1]
+    for Y ∈ X[2:end]
+        Z = Z⊗Y
+    end
+    return Z
+end
+
+tensor_product(X::T) where T <: Union{Vector,Tuple} = tensor_product(X...)
 #------------------------------------------------------
 #   Abstract Methods
 #------------------------------------------------------
@@ -196,3 +255,5 @@ ismonoidal(C::Category) = :monoidal ∈ features(C)
 #-------------------------------------------------------
 
 dim(V::HomSpace) = length(basis(V))
+
+End(X::Object) = Hom(X,X)
