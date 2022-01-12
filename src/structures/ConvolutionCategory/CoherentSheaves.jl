@@ -20,7 +20,11 @@ end
 #-----------------------------------------------------------------
 #   Constructors
 #-----------------------------------------------------------------
+"""
+    CohSheaves(X::GSet,F::Field)
 
+The category of ``G``-equivariant coherent sheafes on ``X``.
+"""
 function CohSheaves(X::GSet, F::Field)
     G = X.group
     orbit_reps = [O.seeds[1] for O ∈ orbits(X)]
@@ -28,6 +32,11 @@ function CohSheaves(X::GSet, F::Field)
     return CohSheaves{elem_type(F), typeof(G)}(G, F, X, orbit_reps, orbit_stabilizers)
 end
 
+"""
+    CohSheaves(X, F::Field)
+
+The category of coherent sheafes on ``X``.
+"""
 function CohSheaves(X,F::Field)
     G = symmetric_group(1)
     return CohSheaves(gset(G,X), F)

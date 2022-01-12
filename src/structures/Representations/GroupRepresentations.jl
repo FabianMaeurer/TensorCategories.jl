@@ -56,6 +56,12 @@ function Representation(G::GAPGroup, m::Function)
 end
 
 
+"""
+    Morphism(ρ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}, m::MatElem{T}; check = true) where {T,G}
+
+Morphism between representations defined by ``m``. If check == false equivariancy
+will not be checked.
+"""
 function Morphism(ρ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}, m::MatElem{T}; check = true) where {T,G}
     if size(m) != (dim(ρ), dim(τ)) throw(ErrorException("Mismatching dimensions")) end
     if check
@@ -67,6 +73,11 @@ end
 #-------------------------------------------------------------------------
 #   Functionality
 #-------------------------------------------------------------------------
+"""
+    issemisimple(C::GroupRepresentationCategory)
+
+Return true if C is semisimple else false.
+"""
 issemisimple(C::GroupRepresentationCategory) = gcd(characteristic(base_ring(C)), order(base_group(C))) == 1
 
 function (ρ::GroupRepresentation)(x)
@@ -84,14 +95,29 @@ matrix(f::GroupRepresentationMorphism) = f.map
 base_group(Rep::GroupRepresentationCategory) = Rep.group
 base_group(ρ::GroupRepresentation) = ρ.group
 
+"""
+    parent(ρ::GroupRepresentation{T,G}) where {T,G}
+
+Return the parent representation category of ρ.
+"""
 parent(ρ::GroupRepresentation{T,G}) where {T,G} = GroupRepresentationCategory{T,G}(base_group(ρ), base_ring(ρ))
 
+"""
+    zero(Rep::GroupRepresentationCategory{T,G}) where {T,G}
+
+Return the zero reprensentation.
+"""
 function zero(Rep::GroupRepresentationCategory{T,G}) where {T,G}
     grp = base_group(Rep)
     F = base_ring(Rep)
     GroupRepresentation{T,G}(grp,0,F,0)
 end
 
+"""
+    one(Rep::GroupRepresentationCategory{T,G}) where {T,G}
+
+Return the trivial representation.
+"""
 function one(Rep::GroupRepresentationCategory{T,G}) where {T,G}
     grp = base_group(Rep)
     F = base_ring(Rep)
@@ -99,6 +125,11 @@ function one(Rep::GroupRepresentationCategory{T,G}) where {T,G}
     Representation(grp, gens(grp), [one(MatrixSpace(F,1,1)) for _ ∈ gens(grp)])
 end
 
+"""
+    id(ρ::GroupRepresentation{T,G}) where {T,G}
+
+Return the identity on ρ.
+"""
 function id(ρ::GroupRepresentation{T,G}) where {T,G}
     return GroupRepresentationMorphism{T,G}(ρ,ρ,one(MatrixSpace(base_ring(ρ),dim(ρ),dim(ρ))))
 end
@@ -123,6 +154,11 @@ function ==(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
     return domain(f) == domain(g) && codomain(f) == codomain(g) && f.map == g.map
 end
 
+"""
+    isisomorphic(σ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}) where {T,G}
+
+Check whether σ and τ are isomorphic. If true return the isomorphism.
+"""
 function isisomorphic(σ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}) where {T,G}
     @assert parent(σ) == parent(τ) "Mismatching parents"
 
@@ -179,6 +215,11 @@ end
 #   Tensor Products
 #-------------------------------------------------------------------------
 
+"""
+    tensor_product(ρ::GroupRepresentation{T}, τ::GroupRepresentation{T}) where T
+
+Return the tensor product of representations.
+"""
 function tensor_product(ρ::GroupRepresentation{T}, τ::GroupRepresentation{T}) where T
     @assert ρ.group == τ.group "Mismatching groups"
 
@@ -194,6 +235,11 @@ function tensor_product(ρ::GroupRepresentation{T}, τ::GroupRepresentation{T}) 
     return Representation(G, generators, [kronecker_product(matrix(ρ(g)),matrix(τ(g))) for g ∈ generators])
 end
 
+"""
+    tensor_product(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
+
+Return the tensor product of morphisms of representations.
+"""
 function tensor_product(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
     dom = domain(f) ⊗ domain(g)
     codom = codomain(f) ⊗ codomain(g)
@@ -206,6 +252,12 @@ end
 #   Direct Sum
 #-------------------------------------------------------------------------
 
+"""
+    dsum(ρ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}, morphisms::Bool = false) where {T,G}
+
+Return the direct sum of representations. If morphisms is set true inclusion and
+projection morphisms are also returned.
+"""
 function dsum(ρ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}, morphisms::Bool = false) where {T,G}
     @assert ρ.group == τ.group "Mismatching groups"
 
@@ -239,6 +291,11 @@ function dsum(ρ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}, morphi
     return S, [incl_ρ, incl_τ], [proj_ρ, proj_τ]
 end
 
+"""
+    dsum(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
+
+Direct sum of morphisms of representations.
+"""
 function dsum(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
     dom,_,_ = domain(f)⊕domain(g)
     codom,_,_ = codomain(f)⊕codomain(g)
@@ -260,6 +317,11 @@ coproduct(X::GroupRepresentation,Y::GroupRepresentation, morphisms = false) = mo
 #   Simple Objects
 #-------------------------------------------------------------------------
 
+"""
+    simples(Rep::GroupRepresentationCategory{T,G}) where {T,G}
+
+Return a list of the simple objects in Rep.
+"""
 function simples(Rep::GroupRepresentationCategory{T,G}) where {T,G}
     grp = base_group(Rep)
     F = base_ring(Rep)
@@ -277,6 +339,12 @@ function simples(Rep::GroupRepresentationCategory{T,G}) where {T,G}
     return reps
 end
 
+"""
+    decompose(σ::GroupRepresentation)
+
+Decompose the representation into a direct sum of simple objects. Return a
+list of tuples with simple objects and multiplicities.
+"""
 function decompose(σ::GroupRepresentation)
     F = base_ring(σ)
     if dim(σ) == 0 return [] end
@@ -306,6 +374,11 @@ struct GRHomSpace{T,G} <: HomSpace{T}
     parent::VectorSpaces{T}
 end
 
+"""
+    Hom(σ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}) where {T,G}
+
+Return the hom-space of the representations as a vector space.
+"""
 function Hom(σ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}) where {T,G}
     grp = base_group(σ)
     F = base_ring(σ)
