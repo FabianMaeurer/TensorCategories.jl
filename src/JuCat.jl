@@ -3,7 +3,7 @@ module JuCat
 import Base: show,^,==, getindex, in, issubset, iterate, length,*,+,-, iterate,
                 getproperty
 
-import AbstractAlgebra.Integers
+import Oscar.AbstractAlgebra.Integers
 
 
 import Oscar: VectorSpace, Field, elem_type, QQ, FieldElem,

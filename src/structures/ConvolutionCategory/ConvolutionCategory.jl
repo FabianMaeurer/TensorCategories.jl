@@ -63,7 +63,7 @@ end
 #   Functionality: Direct Sum
 #-----------------------------------------------------------------
 
-function dsum(X::ConvolutionObject{T,G}, Y::ConvolutionObject{T,G}, morphisms = false) where {T,G}
+function dsum(X::ConvolutionObject{T,G}, Y::ConvolutionObject{T,G}, morphisms::Bool = false) where {T,G}
     @assert parent(X) == parent(Y) "Mismatching parents"
     Z,ix,px = dsum(X.sheaf,Y.sheaf,true)
     Z = ConvolutionObject{T,G}(Z,parent(X))

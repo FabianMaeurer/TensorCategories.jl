@@ -92,7 +92,7 @@ function dsum(X::Object...)
     if length(X) == 0 return nothing end
     Z = X[1]
     for Y ∈ X[2:end]
-        Z = Z⊕Y
+        Z = dsum(Z,Y)
     end
     return Z
 end

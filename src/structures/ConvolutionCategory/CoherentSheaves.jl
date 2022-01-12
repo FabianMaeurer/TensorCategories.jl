@@ -79,7 +79,7 @@ end
 #   Functionality: Direct Sum
 #-----------------------------------------------------------------
 
-function dsum(X::CohSheaf{T,G}, Y::CohSheaf{T,G}, morphisms = false) where {T,G}
+function dsum(X::CohSheaf{T,G}, Y::CohSheaf{T,G}, morphisms::Bool = false) where {T,G}
     sums = [dsum(x,y,true) for (x,y) ∈ zip(stalks(X), stalks(Y))]
     Z = CohSheaf{T,G}(parent(X), [s[1] for s ∈ sums])
 
@@ -263,7 +263,7 @@ function pushf_obj_map(CX,CY,X,f)
         orbit_reps = [O.seeds[1] for O ∈ orbits(fiber)]
 
         for j ∈ 1:length(orbit_reps)
-            stlks[i] = (stlks[i] ⊕ induction(stalk(X,orbit_reps[j]), CY.orbit_stabilizers[i]))[1]
+            stlks[i] = dsum(stlks[i], induction(stalk(X,orbit_reps[j]), CY.orbit_stabilizers[i]))
         end
     end
     return CohSheaf(CY, stlks)

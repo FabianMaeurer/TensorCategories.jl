@@ -206,21 +206,28 @@ end
 #   Direct Sum
 #-------------------------------------------------------------------------
 
-function dsum(ρ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}, morphisms = false) where {T,G}
+function dsum(ρ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}, morphisms::Bool = false) where {T,G}
     @assert ρ.group == τ.group "Mismatching groups"
 
     grp = ρ.group
     F = base_ring(ρ)
 
-    if ρ.m == 0 return τ,[GroupRepresentationMorphism(ρ,τ,zero(MatrixSpace(F,0,dim(τ)))), id(τ)], [GroupRepresentationMorphism(τ,ρ,zero(MatrixSpace(F,dim(τ),0))), id(τ)] end
-    if τ.m == 0 return ρ,[id(ρ), GroupRepresentationMorphism(τ,ρ,zero(MatrixSpace(F,0,dim(ρ)))), id(τ)], [id(ρ), GroupRepresentationMorphism(ρ,τ,zero(MatrixSpace(F,dim(ρ),0)))] end
+    if ρ.m == 0
+        if !morphisms return τ end
+        return τ,[GroupRepresentationMorphism(ρ,τ,zero(MatrixSpace(F,0,dim(τ)))), id(τ)], [GroupRepresentationMorphism(τ,ρ,zero(MatrixSpace(F,dim(τ),0))), id(τ)]
+    elseif τ.m == 0
+        if !morphisms return ρ end
+        return ρ,[id(ρ), GroupRepresentationMorphism(τ,ρ,zero(MatrixSpace(F,0,dim(ρ)))), id(τ)], [id(ρ), GroupRepresentationMorphism(ρ,τ,zero(MatrixSpace(F,dim(ρ),0)))]
+    end
 
     M1 = MatrixSpace(F,dim(ρ),dim(ρ))
     M2 = MatrixSpace(F,dim(ρ),dim(τ))
     M3 = MatrixSpace(F,dim(τ),dim(ρ))
     M4 = MatrixSpace(F,dim(τ),dim(τ))
 
-    S = Representation(grp, gens(grp), [[matrix(ρ(g)) zero(M2); zero(M3) matrix(τ(g))] for g ∈ gens(grp)])
+    generators = order(grp) == 1 ? elements(grp) : gens(grp)
+
+    S = Representation(grp, generators, [[matrix(ρ(g)) zero(M2); zero(M3) matrix(τ(g))] for g ∈ generators])
 
     if !morphisms return S end
 
