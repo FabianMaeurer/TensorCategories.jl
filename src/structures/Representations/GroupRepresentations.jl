@@ -28,6 +28,10 @@ function RepresentationCategory(G::GAPGroup, F::Field)
     return GroupRepresentationCategory{elem_type(F),typeof(G)}(G,F)
 end
 
+function RepresentationCategory(G::GAPGroup)
+    return RepresentationCategory(G, abelian_closure(QQ)[1])
+end
+
 """
     Representation(G::GAPGroup, pre_img::Vector, img::Vector)
 
@@ -328,15 +332,22 @@ function simples(Rep::GroupRepresentationCategory{T,G}) where {T,G}
 
     if order(grp) == 1 return [one(Rep)] end
 
-    gap_field = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
-    gap_reps = GAP.Globals.IrreducibleRepresentations(grp.X,gap_field)
+    if characteristic(F) == 0
+        mods = irreducible_modules(grp)
+        reps = [Representation(grp,gens(grp),[matrix(x) for x ∈ action(m)]) for m ∈ mods]
+        return reps
+    else
 
-    dims = [GAP.Globals.DimensionOfMatrixGroup(GAP.Globals.Range(m)) for m ∈ gap_reps]
+        gap_field = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
+        gap_reps = GAP.Globals.IrreducibleRepresentations(grp.X,gap_field)
 
-    oscar_reps = [GAPGroupHomomorphism(grp, GL(dims[i],F), gap_reps[i]) for i ∈ 1:length(gap_reps)]
-    reps = [GroupRepresentation{T,G}(grp,m,F,d) for (m,d) ∈ zip(oscar_reps,dims)]
+        dims = [GAP.Globals.DimensionOfMatrixGroup(GAP.Globals.Range(m)) for m ∈ gap_reps]
 
-    return reps
+        oscar_reps = [GAPGroupHomomorphism(grp, GL(dims[i],F), gap_reps[i]) for i ∈ 1:length(gap_reps)]
+        reps = [GroupRepresentation{T,G}(grp,m,F,d) for (m,d) ∈ zip(oscar_reps,dims)]
+
+        return reps
+    end
 end
 
 """

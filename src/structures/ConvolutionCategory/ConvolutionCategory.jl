@@ -20,6 +20,11 @@ struct ConvolutionMorphism{T,G} <: Morphism
     m::CohSheafMorphism{T,G}
 end
 
+"""
+    ConvolutionCategory(X::GSet, K::Field)
+
+Return the category of equivariant coherent sheaves on ``X`` with convolution product.
+"""
 function ConvolutionCategory(X::GSet, K::Field)
     G = X.group
     sqX = gset(G,(x,g) -> Tuple(X.action_function(xi,g) for xi ∈ x), [(x,y) for x ∈ X.seeds, y ∈ X.seeds][:])
@@ -37,6 +42,11 @@ function ConvolutionCategory(X::GSet, K::Field)
     return ConvolutionCategory{elem_type(K),typeof(G)}(G,K,X,sqX,cuX,sqCoh,cuCoh, [P12, P13, P23])
 end
 
+"""
+    ConvolutionCategory(X, K::Field)
+
+Return the category of coherent sheaves on ``X`` with convolution product.
+"""
 function ConvolutionCategory(X, K::Field)
     G = symmetric_group(1)
     return ConvolutionCategory(gset(G,X), K)
@@ -44,15 +54,38 @@ end
 #-----------------------------------------------------------------
 #   Functionality
 #-----------------------------------------------------------------
+
+"""
+    issemisimple(C::ConvolutionCategory)
+
+Check whether ``C`` semisimple.
+"""
 issemisimple(C::ConvolutionCategory) = gcd(order(C.group), characteristic(base_ring(C))) == 1
 
+"""
+    orbit_stabilizers(C::ConvolutionCategory)
+
+Return the stabilizers of representatives of the orbits.
+"""
 orbit_stabilizers(C::ConvolutionCategory) = C.squaredCoh.orbit_stabilizers
 orbit_index(X::ConvolutionObject, y) = orbit_index(X.sheaf, y)
 orbit_index(X::ConvolutionCategory, y) = orbit_index(X.squaredCoh, y)
+
+"""
+    stalks(X::ConvolutionObject)
+
+Return the stalks of the sheaf ``X``.
+"""
 stalks(X::ConvolutionObject) = stalks(X.sheaf)
 
 ==(X::ConvolutionObject,Y::ConvolutionObject) = X.sheaf == Y.sheaf
 
+
+"""
+    isisomorphic(X::ConvolutionObject{T,G}, Y::ConvolutionObject{T,G})
+
+Check whether ``X``and ``Y``are isomorphic. Return the isomorphism if true.
+"""
 function isisomorphic(X::ConvolutionObject{T,G}, Y::ConvolutionObject{T,G}) where {T,G}
     b, iso = isisomorphic(X.sheaf, Y.sheaf)
     if !b return false, nothing end
@@ -63,6 +96,11 @@ end
 #   Functionality: Direct Sum
 #-----------------------------------------------------------------
 
+"""
+    dsum(X::ConvolutionObject{T,G}, Y::ConvolutionObject{T,G}, morphisms::Bool = false) where {T,G}
+
+documentation
+"""
 function dsum(X::ConvolutionObject{T,G}, Y::ConvolutionObject{T,G}, morphisms::Bool = false) where {T,G}
     @assert parent(X) == parent(Y) "Mismatching parents"
     Z,ix,px = dsum(X.sheaf,Y.sheaf,true)
@@ -75,6 +113,11 @@ function dsum(X::ConvolutionObject{T,G}, Y::ConvolutionObject{T,G}, morphisms::B
     return Z, ix, px
 end
 
+"""
+    dsum(f::ConvolutionMorphism{T,G}, g::ConvolutionMorphism{T,G}) where {T,G}
+
+Return the direct sum of morphisms of coherent sheaves (with convolution product).
+"""
 function dsum(f::ConvolutionMorphism{T,G}, g::ConvolutionMorphism{T,G}) where {T,G}
     dom = dsum(domain(f), domain(g))[1]
     codom = dsum(codomain(f), codomain(g))[1]
@@ -85,13 +128,22 @@ end
 product(X::ConvolutionObject,Y::ConvolutionObject,projections = false) = projections ? dsum(X,Y,projections)[[1,3]] : dsum(X,Y)
 coproduct(X::ConvolutionObject,Y::ConvolutionObject,projections = false) = projections ? dsum(X,Y,projections)[[1,2]] : dsum(X,Y)
 
+"""
+    zero(C::ConvolutionCategory{T,G}) where {T,G}
 
+Return the zero object in Conv(``X``).
+"""
 zero(C::ConvolutionCategory{T,G}) where {T,G} = ConvolutionObject(zero(C.squaredCoh),C)
 
 #-----------------------------------------------------------------
 #   Functionality: Tensor Product
 #-----------------------------------------------------------------
 
+"""
+    tensor_product(X::ConvolutionObject{T,G}, Y::ConvolutionObject{T,G}) where {T,G}
+
+Return the convolution product of coherent sheaves.
+"""
 function tensor_product(X::ConvolutionObject{T,G}, Y::ConvolutionObject{T,G}) where {T,G}
     @assert parent(X) == parent(Y) "Mismatching parents"
     p12,p13,p23 = parent(X).projectors
@@ -99,6 +151,11 @@ function tensor_product(X::ConvolutionObject{T,G}, Y::ConvolutionObject{T,G}) wh
     return ConvolutionObject{T,G}(p13(p12(X.sheaf)⊗p23(Y.sheaf)),parent(X))
 end
 
+"""
+    tensor_product(f::ConvolutionMorphism{T,G}, g::ConvolutionMorphism{T,G}) where {T,G}
+
+Return the convolution product of morphisms of coherent sheaves.
+"""
 function tensor_product(f::ConvolutionMorphism{T,G}, g::ConvolutionMorphism{T,G}) where {T,G}
     dom = domain(f)⊗domain(g)
     codom = codomain(f)⊗codomain(g)
@@ -107,6 +164,11 @@ function tensor_product(f::ConvolutionMorphism{T,G}, g::ConvolutionMorphism{T,G}
     return ConvolutionMorphism{T,G}(dom,codom, p13(p12(f.m)⊗p23(g.m)))
 end
 
+"""
+    one(C::ConvolutionCategory{T,G}) where {T,G}
+
+Return the one object in Conv(``X``).
+"""
 function one(C::ConvolutionCategory{T,G}) where {T,G}
     F = base_ring(C)
 
@@ -135,10 +197,20 @@ end
 #   Simple Objects
 #-----------------------------------------------------------------
 
+"""
+    simples(C::ConvolutionCategory{T,G}) where {T,G}
+
+Return a list of simple objects in Conv(``X``).
+"""
 function simples(C::ConvolutionCategory{T,G}) where {T,G}
     return [ConvolutionObject{T,G}(sh,C) for sh ∈ simples(C.squaredCoh)]
 end
 
+"""
+    decompose(X::ConvolutionObject)
+
+Decompose ``X`` into a direct sum of simple objects with multiplicities.
+"""
 function decompose(X::ConvolutionObject)
     facs = decompose(X.sheaf)
     return [(ConvolutionObject(sh,parent(X)),d) for (sh,d) ∈ facs]
@@ -155,6 +227,11 @@ struct ConvHomSpace{T,G} <: HomSpace{T}
     parent::VectorSpaces{T}
 end
 
+"""
+    Hom(X::ConvolutionObject{T,G}, Y::ConvolutionObject{T,G}) where {T,G}
+
+Return Hom(``X,Y``) as a vector space.
+"""
 function Hom(X::ConvolutionObject{T,G}, Y::ConvolutionObject{T,G}) where {T,G}
     @assert parent(X) == parent(Y) "Missmatching parents"
     b = basis(Hom(X.sheaf,Y.sheaf))

@@ -124,6 +124,11 @@ end
 base_ring(V::VectorSpaceObject) = parent(V).base_ring
 base_ring(Vec::VectorSpaces) = Vec.base_ring
 
+"""
+    dim(V::VectorSpaceObject) = length(V.basis)
+
+Return the vector space dimension of ``V``.
+"""
 dim(V::VectorSpaceObject) = length(V.basis)
 
 basis(V::VectorSpaceObject) = V.basis
@@ -132,8 +137,18 @@ simples(Vec::VectorSpaces) = [VectorSpaceObject(base_ring(Vec),1)]
 
 decompose(V::VSObject) = [(one(parent(V)),dim(V))]
 
+"""
+    one(Vec::VectorSpaces) = VectorSpaceObject(base_ring(Vec),1)
+
+Return the one-dimensional vector space.
+"""
 one(Vec::VectorSpaces) = VectorSpaceObject(base_ring(Vec),1)
 
+"""
+    zero(Vec::VectorSpaces) = VectorSpaceObject(base_ring(Vec), 0)
+
+Return the zero-dimensional vector space.
+"""
 zero(Vec::VectorSpaces) = VectorSpaceObject(base_ring(Vec), 0)
 
 ==(V::VectorSpaces{T},W::VectorSpaces{T}) where T = V.base_ring == W.base_ring
@@ -143,6 +158,11 @@ function ==(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where T
     return a
 end
 
+"""
+    isisomorphic(V::VSObject, W::VSObject)
+
+Check whether ``V`` and ``W``are isomorphic. Return the isomorphisms if existent.
+"""
 function isisomorphic(V::VSObject, W::VSObject)
     if parent(V) != parent(W) return false, nothing end
     if dim(V) != dim(W) return false, nothing end
@@ -155,9 +175,9 @@ end
 #-----------------------------------------------------------------
 
 """
-    dsum(X::VectorSpaceObject{T,S}...) where {T,S <: FreeModule}
+    dsum(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}, morphisms = false) where {T}
 
-Direct sum space of X... together with the embedding morphisms.
+Direct sum of vector spaces together with the embedding morphisms if morphisms = true.
 """
 function dsum(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}, morphisms = false) where {T}
     if parent(X) != parent(Y)
@@ -182,6 +202,11 @@ end
 product(X::VectorSpaceObject, Y::VectorSpaceObject, projections = false) = dsum(X,Y, projections)[[1,3]]
 coproduct(X::VectorSpaceObject, Y::VectorSpaceObject, injections = false) = dsum(X,Y, injections)[[1,2]]
 
+"""
+    dsum(f::VectorSpaceMorphism{T},g::VectorSpaceMorphism{T}) where T
+
+Return the direct sum of morphisms of vector spaces.
+"""
 function dsum(f::VectorSpaceMorphism{T},g::VectorSpaceMorphism{T}) where T
     F = base_ring(domain(f))
     mf,nf = size(f.m)
@@ -197,6 +222,11 @@ end
 #   Functionality: Tensor Product
 #-----------------------------------------------------------------
 
+"""
+    tensor_product(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where {T,S1,S2}
+
+Return the tensor product of vector spaces.
+"""
 function tensor_product(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where {T,S1,S2}
     if parent(X) != parent(Y)
         throw(ErrorException("Mismatching parents."))
@@ -204,23 +234,18 @@ function tensor_product(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where 
     b = [[(x,y) for x ∈ basis(X), y ∈ basis(Y)]...]
     return VectorSpaceObject(parent(X),b)
 end
-#
-⊗(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where {T} = tensor_product(X,Y)
-#
+
+"""
+    tensor_product(f::VectorSpaceMorphism, g::VectorSpaceMorphism) where {T}
+
+Return the tensor product of vector space morphisms.
+"""
 function tensor_product(f::VectorSpaceMorphism, g::VectorSpaceMorphism) where {T}
     D = tensor_product(domain(f),domain(g))
     C = tensor_product(codomain(f),codomain(g))
     m = kronecker_product(g.m, f.m)
     return VectorSpaceMorphism(D,C,m)
 end
-#
-
-#
-# function compose(m1::VectorSpaceMorphism, m2::VectorSpaceMorphism)
-#     return VectorSpaceMorphism(domain(m1), codomain(m2), compose(m1.m,m2.m))
-# end
-#
-# ∘(m1::VectorSpaceMorphism,m2::VectorSpaceMorphism) = compose(m2,m1)
 #
 
 
@@ -243,6 +268,11 @@ function ==(f::VectorSpaceMorphism, g::VectorSpaceMorphism)
     return a && b && c
 end
 
+"""
+    id(X::VectorSpaceObject{T}) where T
+
+Return the identity on the vector space ``X``.
+"""
 function id(X::VectorSpaceObject{T}) where T
     n = dim(X)
     m = matrix(base_ring(X), [i == j ? 1 : 0 for i ∈ 1:n, j ∈ 1:n])
@@ -258,6 +288,12 @@ isinvertible(f::VSMorphism) = rank(f.m) == dim(domain(f)) == dimension(codomain(
 #   Associators
 #---------------------------------------------------------------------------
 #
+
+"""
+    associator(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}, Z::VectorSpaceObject{T}) where T
+
+Return the associator isomorphism a::(X⊗Y)⊗Z -> X⊗(Y⊗Z).
+"""
 function associator(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}, Z::VectorSpaceObject{T}) where T
     if !(parent(X) == parent(Y) == parent(Z))
         throw(ErrorException("Mismatching parents"))
@@ -280,6 +316,11 @@ struct VSHomSpace{T} <: HomSpace{T}
     parent::VectorSpaces{T}
 end
 
+"""
+    Hom(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where T
+
+Return the Hom(``X,Y```) as a vector space.
+"""
 function Hom(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}) where T
     n1,n2 = (dim(X),dim(Y))
     mats = [matrix(base_ring(X), [i==k && j == l ? 1 : 0 for i ∈ 1:n1, j ∈ 1:n2]) for k ∈ 1:n1, l ∈ 1:n2]

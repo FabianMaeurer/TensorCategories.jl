@@ -17,7 +17,8 @@ import Oscar: VectorSpace, Field, elem_type, QQ, FieldElem,
                 FinField,gen, GSet, gset, orbits, stabilizer, orbit,
                 isisomorphic, issubgroup, left_transversal, ComplexField, order,
                 elements, index, symmetric_group, gap_to_julia, multiplication_table,
-                issemisimple, AlgAss, AlgAssElem, FiniteField
+                issemisimple, AlgAss, AlgAssElem, FiniteField, abelian_closure,
+                irreducible_modules, action
 
 
 

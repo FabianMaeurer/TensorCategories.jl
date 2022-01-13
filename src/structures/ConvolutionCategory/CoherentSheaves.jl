@@ -45,9 +45,18 @@ end
 #-----------------------------------------------------------------
 #   Functionality
 #-----------------------------------------------------------------
+"""
+    issemisimple(C::CohSheaves)
 
+Return whether ``C``is semisimple.
+"""
 issemisimple(C::CohSheaves) = gcd(order(C.group), characteristic(base_ring(C))) == 1
 
+"""
+    stalks(X::CohSheaf)
+
+Return the stalks of ``X``.
+"""
 stalks(X::CohSheaf) = X.stalks
 
 function orbit_index(X::CohSheaf, y)
@@ -62,6 +71,11 @@ function stalk(X::CohSheaf,y)
     return stalks(X)[orbit_index(X,y)]
 end
 
+"""
+    zero(C::CohSheaves)
+
+Return the zero sheaf on the ``G``-set.
+"""
 zero(C::CohSheaves) = CohSheaf(C,[zero(RepresentationCategory(H,base_ring(C))) for H ∈ C.orbit_stabilizers])
 
 zero_morphism(X::CohSheaf, Y::CohSheaf) = CohSheafMorphism(X,Y,[zero(Hom(x,y)) for (x,y) ∈ zip(stalks(X),stalks(Y))])
@@ -74,6 +88,11 @@ function ==(X::CohSheaf, Y::CohSheaf)
     return true
 end
 
+"""
+    isisomorphic(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
+
+Check whether ``X``and ``Y`` are isomorphic and the isomorphism if possible.
+"""
 function isisomorphic(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
     m = GroupRepresentationMorphism{T,G}[]
     for (s,r) ∈ zip(stalks(X),stalks(Y))
@@ -88,6 +107,12 @@ end
 #   Functionality: Direct Sum
 #-----------------------------------------------------------------
 
+"""
+    dsum(X::CohSheaf{T,G}, Y::CohSheaf{T,G}, morphisms::Bool = false) where {T,G}
+
+Return the direct sum of sheaves. Return also the inclusion and projection if
+morphisms = true.
+"""
 function dsum(X::CohSheaf{T,G}, Y::CohSheaf{T,G}, morphisms::Bool = false) where {T,G}
     sums = [dsum(x,y,true) for (x,y) ∈ zip(stalks(X), stalks(Y))]
     Z = CohSheaf{T,G}(parent(X), [s[1] for s ∈ sums])
@@ -99,6 +124,11 @@ function dsum(X::CohSheaf{T,G}, Y::CohSheaf{T,G}, morphisms::Bool = false) where
     return Z,ix,px
 end
 
+"""
+    dsum(f::CohSheafMorphism{T,G}, g::CohSheafMorphism{T,G}) where {T,G}
+
+Return the direct sum of morphisms of sheaves.
+"""
 function dsum(f::CohSheafMorphism{T,G}, g::CohSheafMorphism{T,G}) where {T,G}
     dom = dsum(domain(f), domain(g))[1]
     codom = dsum(codomain(f), codomain(g))[1]
@@ -113,11 +143,21 @@ coproduct(X::CohSheaf,Y::CohSheaf,projections = false) = projections ? dsum(X,Y,
 #   Functionality: Tensor Product
 #-----------------------------------------------------------------
 
+"""
+    tensor_product(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
+
+Return the tensor product of equivariant coherent sheaves.
+"""
 function tensor_product(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
     @assert parent(X) == parent(Y) "Mismatching parents"
     return CohSheaf{T,G}(parent(X), [x⊗y for (x,y) ∈ zip(stalks(X), stalks(Y))])
 end
 
+"""
+    tensor_product(f::CohSheafMorphism{T,G}, g::CohSheafMorphism{T,G}) where {T,G}
+
+Return the tensor product of morphisms of equivariant coherent sheaves.
+"""
 function tensor_product(f::CohSheafMorphism{T,G}, g::CohSheafMorphism{T,G}) where {T,G}
     dom = tensor_product(domain(f), domain(g))
     codom = tensor_product(codomain(f), codomain(g))
@@ -125,6 +165,11 @@ function tensor_product(f::CohSheafMorphism{T,G}, g::CohSheafMorphism{T,G}) wher
     return CohSheafMorphism{T,G}(dom,codom,mors)
 end
 
+"""
+    one(C::CohSheaves{T,G}) where {T,G}
+
+Return the one object in ``C``.
+"""
 function one(C::CohSheaves{T,G}) where {T,G}
     return CohSheaf{T,G}(C,[one(RepresentationCategory(H,base_ring(C))) for H ∈ C.orbit_stabilizers])
 end
@@ -143,7 +188,11 @@ end
 #-----------------------------------------------------------------
 #   Simple Objects
 #-----------------------------------------------------------------
+"""
+    simples(C::CohSheaves{T,G}) where {T,G}
 
+Return the simple objects of ``C``.
+"""
 function simples(C::CohSheaves{T,G}) where {T,G}
 
     simple_objects = CohSheaf[]
@@ -165,6 +214,11 @@ function simples(C::CohSheaves{T,G}) where {T,G}
     return simple_objects
 end
 
+"""
+    decompose(X::CohSheaf)
+
+Decompose ``X`` into a direct sum of simple objects with multiplicity.
+"""
 function decompose(X::CohSheaf)
     ret = []
     C = parent(X)
@@ -188,6 +242,11 @@ struct CohSfHomSpace{T,G} <: HomSpace{T}
     parent::VectorSpaces{T}
 end
 
+"""
+    Hom(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
+
+Return Hom(``X,Y``) as a vector space.
+"""
 function Hom(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
     @assert parent(X) == parent(Y) "Missmatching parents"
 
