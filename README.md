@@ -2,7 +2,7 @@
 
 | **Documentation**                                                         | **Build Status**                                      |
 |:-------------------------------------------------------------------------:|:-----------------------------------------------------:|
-| [![][docs-stable-img]][docs-stable-url]|                                  | [![][ga-img]][ga-url] |
+| [![][docs-stable-img]][docs-stable-url]|                                  | [![Build status](https://ci.appveyor.com/api/projects/status/egtv4niuustg4kpc?svg=true)](https://ci.appveyor.com/project/FabianMaeurer/jucat-jl)|
 
 # JuCat.jl
 

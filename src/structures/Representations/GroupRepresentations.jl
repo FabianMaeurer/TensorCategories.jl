@@ -482,6 +482,7 @@ function induction(f::GroupRepresentationMorphism, G::GAPGroup)
     codom = induction(codomain(f), G)
     return Morphism(dom,codom, dsum([Morphism(matrix(f)) for i ∈ 1:Int64(index(G,domain(f).group))]).m)
 end
+
 #-------------------------------------------------------------------------
 #   Pretty Printing
 #-------------------------------------------------------------------------

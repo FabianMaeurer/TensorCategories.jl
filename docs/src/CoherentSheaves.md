@@ -49,7 +49,9 @@ finite ``G``-set ``X\times X``. But we endow them with a different monoidal prod
 
 Let ``p_{ij}: X\times X\times X \to X \times X`` be the canonical projections.
 Then we define the monoidal product of two coherent sheaves ``x``and ``y``
-``\begin{align*} x\otimes y = p_{13}_\ast(p_{12}^\ast(x)\otimes' p_{23}^\ast(y))\end{align*}``
+```math
+\begin{align*} x\otimes y = p_{13}_\ast(p_{12}^\ast(x)\otimes' p_{23}^\ast(y))\end{align*}
+```
 
 where ``\otimes'``is the monoidal product of ``Coh(X\times X\times X)``. Similar for
 morphisms.
