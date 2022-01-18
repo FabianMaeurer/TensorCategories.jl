@@ -1,10 +1,7 @@
 # JuCat.jl
 
-| **Documentation**                                                         | **Build Status**                                      |
-|:-------------------------------------------------------------------------:|:-----------------------------------------------------:|
-| [![][docs-stable-img]][docs-stable-url]|                                  | [![][docs-stable-img]][build-status-url] [![][codecov_img]][codecov_url]|
 
-[![][docs-stable-img]][build-status-url] [![][codecov_img]][codecov_url]|
+[![][docs-stable-img]][docs-stable-url] [![][build-status-img]][build-status-url] [![][ga-img]][ga-url] [![][codecov_img]][codecov_url]|
 
 # JuCat.jl
 
