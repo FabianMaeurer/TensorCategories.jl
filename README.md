@@ -2,7 +2,7 @@
 
 | **Documentation**                                                         | **Build Status**                                      |
 |:-------------------------------------------------------------------------:|:-----------------------------------------------------:|
-| [![][docs-stable-img]][docs-stable-url]|                                  | [![][docs-stable-img]][build_status_url] [![][codecov_img]][codecov_url]|
+| [![][docs-stable-img]][docs-stable-url]|                                  | [![][docs-stable-img]][build-status-url] [![][codecov_img]][codecov_url]|
 
 # JuCat.jl
 
@@ -42,8 +42,8 @@ Application' of the German Research Foundation (DFG).
 [docs-stable-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-stable-url]: https://fabianmaeurer.github.io/JuCat.jl/
 
-[build_status_img]: https://ci.appveyor.com/api/projects/status/egtv4niuustg4kpc?svg=true
-[build_status_url]: https://ci.appveyor.com/project/FabianMaeurer/jucat-jl
+[build-status-img]: https://ci.appveyor.com/api/projects/status/egtv4niuustg4kpc?svg=true
+[build-status-url]: https://ci.appveyor.com/project/FabianMaeurer/jucat-jl
 
 [codecov_img]: https://codecov.io/gh/FabianMaeurer/JuCat.jl/branch/master/graph/badge.svg?token=axGHAcozx5
 [codecov_url]: https://codecov.io/gh/FabianMaeurer/JuCat.jl
