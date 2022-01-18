@@ -2,7 +2,7 @@
 
 | **Documentation**                                                         | **Build Status**                                      |
 |:-------------------------------------------------------------------------:|:-----------------------------------------------------:|
-| [![][docs-stable-img]][docs-stable-url]|                                  | [![Build status](https://ci.appveyor.com/api/projects/status/egtv4niuustg4kpc?svg=true)](https://ci.appveyor.com/project/FabianMaeurer/jucat-jl)|
+| [![][docs-stable-img]][docs-stable-url]|                                  | [![Build status](https://ci.appveyor.com/api/projects/status/egtv4niuustg4kpc?svg=true)](https://ci.appveyor.com/project/FabianMaeurer/jucat-jl) [![codecov](https://codecov.io/gh/FabianMaeurer/JuCat.jl/branch/master/graph/badge.svg?token=axGHAcozx5)](https://codecov.io/gh/FabianMaeurer/JuCat.jl)|
 
 # JuCat.jl
 

@@ -14,7 +14,7 @@ julia> Pkg.add("https://github.com/FabianMaeurer/JuCat.jl")
 
 ## Usage
 
-To use Jucat the structures from the [OSCAR-System](https://github.com/oscar-system/Oscar.jl) are required. Here a minimal usage Example.
+To use JuCat the structures from the [OSCAR-System](https://github.com/oscar-system/Oscar.jl) are required. Here a minimal usage Example.
 
 ```@repl
 using JuCat, Oscar;

@@ -10,3 +10,4 @@ struct MFCategory{T} <: MultiFusionCategory{T}
 end
 
 function MultiFusionCategory(F::Field, multiplication::Array{Int,3})
+end
