@@ -2,7 +2,7 @@
 
 | **Documentation**                                                         | **Build Status**                                      |
 |:-------------------------------------------------------------------------:|:-----------------------------------------------------:|
-| [![][docs-stable-img]][docs-stable-url]|                                  | [![Build status](https://ci.appveyor.com/api/projects/status/egtv4niuustg4kpc?svg=true)](https://ci.appveyor.com/project/FabianMaeurer/jucat-jl) [![codecov](https://codecov.io/gh/FabianMaeurer/JuCat.jl/branch/master/graph/badge.svg?token=axGHAcozx5)](https://codecov.io/gh/FabianMaeurer/JuCat.jl)|
+| [![][docs-stable-img]][docs-stable-url]|                                  | [![][build_status_img]][build_status_url] [![][codecov_img]][codecov_url]|
 
 # JuCat.jl
 
@@ -41,6 +41,12 @@ Application' of the German Research Foundation (DFG).
 
 [docs-stable-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-stable-url]: https://fabianmaeurer.github.io/JuCat.jl/
+
+[build_status_img]: https://ci.appveyor.com/api/projects/status/egtv4niuustg4kpc?svg=true
+[build_status_url]: https://ci.appveyor.com/project/FabianMaeurer/jucat-jl
+
+[codecov_img]: https://codecov.io/gh/FabianMaeurer/JuCat.jl/branch/master/graph/badge.svg?token=axGHAcozx5
+[codecov_url]: https://codecov.io/gh/FabianMaeurer/JuCat.jl
 
 [ga-img]: https://github.com/fabianmaeurer/JuCat.jl/workflows/Run%20tests/badge.svg
 [ga-url]: https://github.com/fabianmaeurer/JuCat.jl/actions?query=workflow%3A%22Run+tests%22
