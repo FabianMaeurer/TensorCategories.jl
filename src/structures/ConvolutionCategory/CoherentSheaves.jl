@@ -103,6 +103,12 @@ function isisomorphic(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
     return true, CohSheafMorphism{T,G}(X,Y,m)
 end
 
+==(f::CohSheafMorphism, g::CohSheafMorphism) = f.m == f.m
+
+id(X::CohSheaf{T,G}) where {T,G} = CohSheafMorphism{T,G}(X,X,[id(s) for s ∈ stalks(X)])
+
+associator(X::CohSheaf, Y::CohSheaf, Z::CohSheaf) = id(X⊗Y⊗Z)
+
 #-----------------------------------------------------------------
 #   Functionality: Direct Sum
 #-----------------------------------------------------------------
@@ -338,7 +344,7 @@ function pushf_obj_map(CX,CY,X,f)
 end
 
 function pushf_mor_map(CX,CY,m,f)
-    mor = [zero(Hom(s,r)) for (s,r) ∈ zip(stalks(domain(m)),stalks(codomain(m)))]
+    mor = [zero_morphism(s,r) for (s,r) ∈ zip(stalks(domain(m)),stalks(codomain(m)))]
     for i ∈ 1:length(CY.orbit_reps)
         y = CY.orbit_reps[i]
         Gy = CY.orbit_stabilizers[i]
@@ -348,7 +354,7 @@ function pushf_mor_map(CX,CY,m,f)
 
         orbit_reps = [O.seeds[1] for O ∈ orbits(fiber)]
 
-        mor[i] = dsum([mor[i]; [induction(m.m[orbit_index(CX,y)], Gy) for y ∈ orbit_reps]]...)
+        mor[i] = dsum([induction(mor[i],Gy); [induction(m.m[orbit_index(CX,y)], Gy) for y ∈ orbit_reps]]...)
     end
     return CohSheafMorphism(pushf_obj_map(CX,CY,domain(m),f), pushf_obj_map(CX,CY,codomain(m),f), mor)
 end

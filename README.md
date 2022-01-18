@@ -1,7 +1,7 @@
 # JuCat.jl
 
 
-[![][docs-stable-img]][docs-stable-url] [![][build-status-img]][build-status-url] [![][ga-img]][ga-url] [![][codecov_img]][codecov_url]|
+[![][docs-stable-img]][docs-stable-url] [![][build-status-img]][build-status-url] [![][ga-img]][ga-url] [![][codecov_img]][codecov_url]
 
 # JuCat.jl
 
@@ -47,5 +47,5 @@ Application' of the German Research Foundation (DFG).
 [codecov_img]: https://codecov.io/gh/FabianMaeurer/JuCat.jl/branch/master/graph/badge.svg?token=axGHAcozx5
 [codecov_url]: https://codecov.io/gh/FabianMaeurer/JuCat.jl
 
-[ga-img]: https://github.com/fabianmaeurer/JuCat.jl/workflows/Run%20tests/badge.svg
-[ga-url]: https://github.com/fabianmaeurer/JuCat.jl/actions?query=workflow%3A%22Run+tests%22
+[ga-img]: https://github.com/FabianMaeurer/JuCat.jl/actions/workflows/runtests.yml/badge.svg
+[ga-url]: https://github.com/FabianMaeurer/JuCat.jl/actions/workflows/runtests.yml

@@ -80,6 +80,7 @@ stalks(X::ConvolutionObject) = stalks(X.sheaf)
 
 ==(X::ConvolutionObject,Y::ConvolutionObject) = X.sheaf == Y.sheaf
 
+==(f::ConvolutionMorphism, g::ConvolutionMorphism) = f.m == f.m
 
 """
     isisomorphic(X::ConvolutionObject{T,G}, Y::ConvolutionObject{T,G})
@@ -92,6 +93,14 @@ function isisomorphic(X::ConvolutionObject{T,G}, Y::ConvolutionObject{T,G}) wher
     return true, ConvolutionMorphism{T,G}(X,Y,iso)
 end
 
+id(X::ConvolutionObject) = ConvolutionMorphism(X,X,id(X.sheaf))
+
+function associator(X::ConvolutionObject, Y::ConvolutionObject, Z::ConvolutionObject)
+    dom = (X⊗Y)⊗Z
+    cod = X⊗(Y⊗Z)
+    _,f = isisomorphic(dom,cod)
+    return f
+end
 #-----------------------------------------------------------------
 #   Functionality: Direct Sum
 #-----------------------------------------------------------------

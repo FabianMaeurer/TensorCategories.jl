@@ -214,7 +214,7 @@ function dsum(f::VectorSpaceMorphism{T},g::VectorSpaceMorphism{T}) where T
     z1 = zero(MatrixSpace(F,mf,ng))
     z2 = zero(MatrixSpace(F,mg,nf))
     m = vcat(hcat(f.m,z1), hcat(z2,g.m))
-    return VSMorphism{T}(m,dsum(domain(f),domain(g))[1],dsum(codomain(f),codomain(g))[1])
+    return VSMorphism{T}(m,dsum(domain(f),domain(g)),dsum(codomain(f),codomain(g)))
 end
 
 

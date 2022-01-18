@@ -200,6 +200,8 @@ function compose(f::GroupRepresentationMorphism{T,G}, g::GroupRepresentationMorp
     return GroupRepresentationMorphism{T,G}(domain(f),codomain(g), matrix(f)*matrix(g))
 end
 
+associator(σ::GroupRepresentation, τ::GroupRepresentation, ρ::GroupRepresentation) = id(σ⊗τ⊗ρ)
+
 #-------------------------------------------------------------------------
 #   Necessities
 #-------------------------------------------------------------------------
@@ -301,8 +303,9 @@ end
 Direct sum of morphisms of representations.
 """
 function dsum(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
-    dom,_,_ = domain(f)⊕domain(g)
-    codom,_,_ = codomain(f)⊕codomain(g)
+
+    dom = domain(f)⊕domain(g)
+    codom = codomain(f)⊕codomain(g)
     F = base_ring(domain(f))
 
     z1 = zero(MatrixSpace(F, dim(domain(f)), dim(codomain(g))))
@@ -397,10 +400,11 @@ function Hom(σ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}) where {
     if dim(σ)*dim(τ) == 0 return GRHomSpace{T,G}(σ,τ,GroupRepresentationMorphism{T,G}[],VectorSpaces(F)) end
 
     gap_F = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
+    generators = order(grp) == 1 ? elements(grp) : gens(grp)
 
     #Build the modules from σ and τ
-    mats_σ = GAP.GapObj([julia_to_gap(σ(g)) for g ∈ gens(grp)])
-    mats_τ = GAP.GapObj([julia_to_gap(τ(g)) for g ∈ gens(grp)])
+    mats_σ = GAP.GapObj([julia_to_gap(σ(g)) for g ∈ generators])
+    mats_τ = GAP.GapObj([julia_to_gap(τ(g)) for g ∈ generators])
     Mσ = GAP.Globals.GModuleByMats(mats_σ, gap_F)
     Mτ = GAP.Globals.GModuleByMats(mats_τ, gap_F)
 
@@ -441,7 +445,7 @@ function restriction(ρ::GroupRepresentation{T,G}, H::GAPGroup) where {T,G}
 end
 
 function restriction(f::GroupRepresentationMorphism, H::GAPGroup)
-    @show domain(f).group, H
+    if domain(f).group == H return f end
     return Morphism(restriction(domain(f),H), restriction(codomain(f),H), matrix(f))
 end
 
