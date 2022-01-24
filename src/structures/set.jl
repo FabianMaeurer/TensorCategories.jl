@@ -108,3 +108,15 @@ struct SetHomSet <: HomSet
 end
 
 Hom(X::SetObject, Y::SetObject) = SetHomSet(X,Y)
+
+#--------------------------------------------------
+#   Pretty printing
+#--------------------------------------------------
+
+function show(io::IO, X::Sets)
+    print(io,"Category of finte sets")
+end
+
+function show(io::IO, X::SetObject)
+    print(X.set)
+end

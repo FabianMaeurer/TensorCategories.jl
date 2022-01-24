@@ -8,7 +8,7 @@ end
 function multiplication_table(simples::Vector{<:Object})
     @assert issemisimple(parent(simples[1])) "Category needs to be semi-simple"
 
-    return [s⊗t for s ∈ simples, t ∈ simples]
+    return multiplication_table(parent(simples[1]), simples)
 end
 
 function print_multiplication_table(simples::Vector{<:Object}, names::Vector{String})

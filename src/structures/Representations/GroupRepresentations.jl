@@ -192,6 +192,30 @@ function isisomorphic(σ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}
     m = matrix(F,[F(iso[i,j]) for i ∈ 1:dim(σ), j ∈ 1:dim(τ)])
     return true, Morphism(σ,τ,m)
 end
+
+function dual(ρ::GroupRepresentation)
+    G = base_group(ρ)
+    F = base_ring(ρ)
+    if dim(ρ) == 0 return ρ end
+    generators = order(G) == 1 ? elements(G) : gens(G)
+    return Representation(G, generators, [transpose(matrix(ρ(inv(g)))) for g ∈ generators])
+end
+
+function ev(ρ::GroupRepresentation)
+    dom = dual(ρ) ⊗ ρ
+    cod = one(parent(ρ))
+    F = base_ring(ρ)
+    m = matrix(ev(VectorSpaceObject(F,dim(ρ))))
+    return Morphism(dom,cod,m)
+end
+
+function coev(ρ::GroupRepresentation)
+    dom = one(parent(ρ))
+    cod = ρ ⊗ dual(ρ)
+    F = base_ring(ρ)
+    m = matrix(coev(VectorSpaceObject(F,dim(ρ))))
+    return Morphism(dom,cod, m)
+end
 #-------------------------------------------------------------------------
 #   Functionality: Morphisms
 #-------------------------------------------------------------------------
@@ -202,6 +226,20 @@ end
 
 associator(σ::GroupRepresentation, τ::GroupRepresentation, ρ::GroupRepresentation) = id(σ⊗τ⊗ρ)
 
+function +(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
+    @assert domain(f) == domain(g) && codomain(f) == codomain(g) "Not compatible"
+    return Morphism(domain(f), codomain(f), f.map + g.map)
+end
+
+function (F::Field)(f::GroupRepresentationMorphism)
+    D = domain(f)
+    C = codomain(f)
+    if dim(D) == dim(C) == 1
+        return F(f.map[1,1])
+    else
+        throw(ErrorException("Cannot coerce"))
+    end
+end
 #-------------------------------------------------------------------------
 #   Necessities
 #-------------------------------------------------------------------------
@@ -254,6 +292,19 @@ function tensor_product(f::GroupRepresentationMorphism, g::GroupRepresentationMo
     return Morphism(dom,codom, m)
 end
 
+function braiding(X::GroupRepresentation, Y::GroupRepresentation)
+    F = base_ring(X)
+    n,m = dim(X),dim(Y)
+    map = zero(MatrixSpace(F,n*m,n*m))
+    for i ∈ 1:n, j ∈ 1:m
+        v1 = matrix(F,transpose([k == i ? 1 : 0 for k ∈ 1:n]))
+        v2 = matrix(F,transpose([k == j ? 1 : 0 for k ∈ 1:m]))
+        map[(j-1)*n + i, :] = kronecker_product(v1,v2)
+    end
+    return Morphism(X⊗Y, Y⊗X, transpose(map))
+end
+
+spherical(X::GroupRepresentation) = id(X)
 #-------------------------------------------------------------------------
 #   Direct Sum
 #-------------------------------------------------------------------------

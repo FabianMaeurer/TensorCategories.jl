@@ -18,7 +18,7 @@ import Oscar: VectorSpace, Field, elem_type, QQ, FieldElem,
                 isisomorphic, issubgroup, left_transversal, ComplexField, order,
                 elements, index, symmetric_group, gap_to_julia, multiplication_table,
                 issemisimple, AlgAss, AlgAssElem, FiniteField, abelian_closure,
-                irreducible_modules, action
+                irreducible_modules, action, decompose,+, dual, tr
 
 
 
@@ -41,7 +41,9 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         stalks, PullbackFunctor, Pullback, PushforwardFunctor, Pushforward,
         CohSfHomSpace, ConvolutionCategory, ConvolutionObject, ConvolutionMorphism,
         ConvHomSpace,stalk, induction, restriction, orbit_index, dsum_morphisms,
-        decompose, multiplication_table, print_multiplication_table, groethendieck_ring
+        decompose, multiplication_table, print_multiplication_table, groethendieck_ring,
+        dual, left_dual, right_dual, ev, coev, left_trace, right_trace, tr, braiding,
+        drinfeld_morphism, smatrix, End
 
 
 include("Utility/FFE_to_FinField.jl")

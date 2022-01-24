@@ -15,6 +15,7 @@ makedocs(
             "Representations" => "Representations.md",
             "Coherent Sheaves" => "CoherentSheaves.md"
         ],
+        "Multitensor Categories" => "Multitensor.md"
         "showcase.md"
     ],
 )

@@ -22,7 +22,7 @@ struct Forgetful <: Functor
 end
 
 function Forgetful(C::GradedVectorSpaces{T,G}, D::VectorSpaces{T}) where {T,G}
-    obj_map = x -> dsum([V for (g,V) in x.V]...)[1]
+    obj_map = x -> dsum([V for (g,V) in x.V]...)
     mor_map = m -> dsum([f for (g,f) in m.m]...)
     return Forgetful(C,D,obj_map, mor_map)
 end

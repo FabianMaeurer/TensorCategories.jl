@@ -42,6 +42,9 @@ function CohSheaves(X,F::Field)
     return CohSheaves(gset(G,X), F)
 end
 
+Morphism(X::CohSheaf{T,G}, Y::CohSheaf{T,G}, m::Vector) where {T,G} = CohSheafMorphism{T,G}(X,Y,m)
+
+
 #-----------------------------------------------------------------
 #   Functionality
 #-----------------------------------------------------------------
@@ -109,6 +112,24 @@ id(X::CohSheaf{T,G}) where {T,G} = CohSheafMorphism{T,G}(X,X,[id(s) for s ∈ st
 
 associator(X::CohSheaf, Y::CohSheaf, Z::CohSheaf) = id(X⊗Y⊗Z)
 
+dual(X::CohSheaf) = CohSheaf(parent(X),[dual(s) for s ∈ stalks(X)])
+
+function ev(X::CohSheaf)
+    dom = dual(X)⊗X
+    cod = one(parent(X))
+    return CohSheafMorphism(dom,cod, [ev(s) for s ∈ stalks(X)])
+end
+
+function coev(X::CohSheaf)
+    dom = one(parent(X))
+    cod = X ⊗ dual(X)
+    return CohSheafMorphism(dom,cod, [coev(s) for s ∈ stalks(X)])
+end
+
+spherical(X::CohSheaf) = Morphism(X,X,[spherical(s) for s ∈ stalks(X)])
+
+braiding(X::CohSheaf, Y::CohSheaf) = Morphism(X⊗Y, Y⊗X, [braiding(x,y) for (x,y) ∈ zip(stalks(X),stalks(Y))])
+
 #-----------------------------------------------------------------
 #   Functionality: Direct Sum
 #-----------------------------------------------------------------
@@ -167,6 +188,7 @@ Return the tensor product of morphisms of equivariant coherent sheaves.
 function tensor_product(f::CohSheafMorphism{T,G}, g::CohSheafMorphism{T,G}) where {T,G}
     dom = tensor_product(domain(f), domain(g))
     codom = tensor_product(codomain(f), codomain(g))
+
     mors = [tensor_product(m,n) for (m,n) ∈ zip(f.m,g.m)]
     return CohSheafMorphism{T,G}(dom,codom,mors)
 end
@@ -189,6 +211,11 @@ function compose(f::CohSheafMorphism{T,G}, g::CohSheafMorphism{T,G}) where {T,G}
     codom = codomain(f)
     mors = [compose(m,n) for (m,n) ∈ zip(f.m,g.m)]
     return CohSheafMorphism{T,G}(dom,codom,mors)
+end
+
+function +(f::CohSheafMorphism, g::CohSheafMorphism)
+    @assert domain(f) == domain(g) && codomain(f) == codomain(g) "Not compatible"
+    return Morphism(domain(f), codomain(f), [fm + gm for (fm,gm) ∈ zip(f.m,g.m)])
 end
 
 #-----------------------------------------------------------------
@@ -257,11 +284,10 @@ function Hom(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
     @assert parent(X) == parent(Y) "Missmatching parents"
 
     b = CohSheafMorphism{T,G}[]
+    H = [Hom(stalks(X)[i],stalks(Y)[i]) for i ∈ 1:length(stalks(X))]
     for i ∈ 1:length(stalks(X))
-        Hxy = Hom(stalks(X)[i],stalks(Y)[i])
-
-        for ρ ∈ basis(Hxy)
-            reps = [zero(Hxy) for j ∈ 1:length(stalks(X))]
+        for ρ ∈ basis(H[i])
+            reps = [zero(H[j]) for j ∈ 1:length(stalks(X))]
             reps[i] = ρ
             b = [b; CohSheafMorphism(X,Y,reps)]
         end

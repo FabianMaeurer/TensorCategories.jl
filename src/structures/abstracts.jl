@@ -257,3 +257,55 @@ ismonoidal(C::Category) = :monoidal ∈ features(C)
 dim(V::HomSpace) = length(basis(V))
 
 End(X::Object) = Hom(X,X)
+
+
+#-------------------------------------------------------
+# Duals
+#-------------------------------------------------------
+
+left_dual(X::Object) = dual(X)
+right_dual(X::Object) = dual(X)
+
+tr(f::Morphism) = left_trace(f)
+
+function left_trace(f::Morphism)
+    V = domain(f)
+    W = codomain(f)
+    if V == W
+        return ev(left_dual(V)) ∘ ((spherical(V)∘f) ⊗ id(left_dual(V))) ∘ coev(V)
+    end
+    return ev(left_dual(V)) ∘ (f ⊗ id(left_dual(V))) ∘ coev(V)
+end
+
+function right_trace(f::Morphism)
+    V = domain(f)
+    W = codomain(f)
+    dV = right_dual(V)
+    _,i = isisomorphic(left_dual(dV),V)
+    _,j = isisomorphic(right_dual(V), left_dual(right_dual(dV)))
+    return (ev(right_dual(dV))) ∘ (j⊗(f∘i)) ∘ coev(right_dual(V))
+end
+
+#-------------------------------------------------------
+# Spherical structure
+#-------------------------------------------------------
+
+function drinfeld_morphism(X::Object)
+     (ev(X)⊗id(dual(dual(X)))) ∘ (braiding(X,dual(X))⊗id(dual(dual(X)))) ∘ (id(X)⊗coev(dual(X)))
+ end
+
+
+ #-------------------------------------------------------
+ # S-Matrix
+ #-------------------------------------------------------
+
+function smatrix(C::MultiTensorCategory, simples = simples(C))
+    @assert issemisimple(C) "Category has to be semisimple"
+    m = [tr(braiding(s,t)∘braiding(t,s)) for s ∈ simples, t ∈ simples]
+    try
+        F = base_ring(C)
+        return [F(n) for n ∈ m]
+    catch
+        return m
+    end
+end
