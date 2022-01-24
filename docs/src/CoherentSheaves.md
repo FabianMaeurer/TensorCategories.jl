@@ -48,9 +48,9 @@ The objects of this category are again ``G``-equivariant coherent sheaves on a
 finite ``G``-set ``X\times X``. But we endow them with a different monoidal product.
 
 Let ``p_{ij}: X\times X\times X \to X \times X`` be the canonical projections.
-Then we define the monoidal product of two coherent sheaves ``x``and ``y``
+Then we define the monoidal product of two coherent sheaves ``x`` and ``y``
 ```math
-\begin{align*} x\otimes y = p_{13}_\ast(p_{12}^\ast(x)\otimes' p_{23}^\ast(y))\end{align*}
+\begin{aligned} x\otimes y = p_{13}_\ast(p_{12}^\ast(x)\otimes' p_{23}^\ast(y))\end{aligned}
 ```
 
 where ``\otimes'``is the monoidal product of ``Coh(X\times X\times X)``. Similar for

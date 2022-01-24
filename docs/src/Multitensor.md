@@ -91,3 +91,53 @@ Conv = ConvolutionCategory(X,F)
 
 R,f = groethendieck_ring(Conv)
 ```
+
+# The S-Matrix
+
+For a braided fusion category with spherical structure and simple objects ``X_i``
+the ``S``-matrix is defined as
+
+```math
+\begin{aligned}
+(S)_{ij} = Tr(c_{X_iX_j} \circ c_{X_jX_i})
+\end{aligned}
+```
+
+Hence you see you need to provide a trace function and a braiding. The braiding
+
+```
+braiding(X::YourObject, Y::YourObject) ::YourMorphism
+```
+
+There are two ways to archieve the trace: either you provide the trace by yourself
+
+```
+tr(f::YourMorphism) ::YourMorphism
+```
+
+or you provide a spherical structure, duals, evaluation and coevaluation
+
+```
+spherical(X::YourObject) ::YourMorphism
+dual(X::YourObject) ::YourObject
+ev(X::YourObject) ::YourMorphism
+coev(X::YourObject) ::YourMorphism
+```
+
+with which the generic left categorical trace will be computed.
+
+```@docs
+tr
+```
+
+## Example
+
+We can compute now the ``S``-matrix of for the representations.
+
+```@example Ex
+G = symmetric_group(3)
+F = FiniteField(5)
+Rep = RepresentationCategory(G,F)
+
+smatrix(Rep)
+```
