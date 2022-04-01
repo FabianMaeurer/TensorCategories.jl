@@ -4,37 +4,35 @@
 
 The category of finite dimensional vector spaces over K.
 """
-struct GradedVectorSpaces{T,G} <: TensorCategory{T}
+struct GradedVectorSpaces<: Category
     base_ring::Field
     base_group::GAPGroup
     twist::Cocycle{3}
 end
 
-struct GVSObject{T,G} <: VectorSpaceObject{T}
-    V::Dict{G,VectorSpaceObject{T}}
-    parent::GradedVectorSpaces{T,G}
+struct GVSObject <: VectorSpaceObject
+    V::Dict{G,VectorSpaceObject} where G <: GroupElem
+    parent::GradedVectorSpaces
 end
 
-struct GVSMorphism{T,G} <: VectorSpaceMorphism{T}
-    m::Dict{G,VectorSpaceMorphism{T}}
-    domain::GVSObject{T,G}
-    codomain::GVSObject{T,G}
+struct GVSMorphism <: VectorSpaceMorphism
+    m::Dict{G,VectorSpaceMorphism} where G <: GroupElem
+    domain::GVSObject
+    codomain::GVSObject
 end
 #-----------------------------------------------------------------
 #   Constructors
 #-----------------------------------------------------------------
 
-function GradedVectorSpaces(K::T,G::S,twist::Cocycle{3} = trivial_3_cocycle(G)) where {T <: Field, S <: GAPGroup}
-    F = elem_type(K)
-    G2 = elem_type(G)
-    return GradedVectorSpaces{F,G2}(K,G,twist)
+function GradedVectorSpaces(K::Field,G::GAPGroup)
+    return GradedVectorSpaces(K,G,trivial_3_cocycle(G))
 end
 
 # function (Vec::GradedVectorSpaces{T})(V::FreeModule{T}) where T <: FieldElem
 #     return GradedVectorSpaceObject(V,Vec)
 # end
 
-function VectorSpaceObject(V::Dict{G,S}) where {T, S <: VectorSpaceObject{T},G}
+function VectorSpaceObject(V::Dict{G,S}) where {G <: GroupElem, S <: VectorSpaceObject}
     Vec = GradedVectorSpaces(base_ring(V[V.keys[1]]), parent(V.keys[1]))
     return GVSObject{T,G}(V,Vec)
 end
@@ -51,14 +49,14 @@ VectorSpaceObject(x::Base.Generator{<:Dict{<:GroupElem, <:VectorSpaceObject}, <:
 Morphism between graded vector spaces defined by pairs of elements and morphisms
 g => (Dg -> Cg).
 """
-function Morphism(D::GVSObject{T,G},
-        C::GVSObject{T,G}, m::Dict{G,S}) where {T,S<:VectorSpaceMorphism,G}
+function Morphism(D::GVSObject,
+        C::GVSObject, m::Dict{G,S}) where {S<:VectorSpaceMorphism,G}
     if parent(D) != parent(C)
         throw(ErrorException("Missmatching parents."))
     # elseif length(m) != 0 && !(*([size(m[g].m) == (dim(D[g]),dim(C[g])) for g in keys(m)]...))
     #     throw(ErrorException("Mismatching dimensions"))
     else
-        return GVSMorphism{T,G}(m,D,C)
+        return GVSMorphism(m,D,C)
     end
 end
 
@@ -68,16 +66,22 @@ end
 Morphism between graded vector spaces defined by pairs of elements and morphisms
 g => (Dg -> Cg).
 """
-function Morphism(D::GVSObject{T,G}, C::GVSObject{T,G},
-        m::Pair{G,S}...) where {T,G, S <: VectorSpaceMorphism{T}}
+function Morphism(D::GVSObject, C::GVSObject,
+        m::Pair{G,S}...) where {T,G, S <: VectorSpaceMorphism}
     return Morphism(D,C, Dict(m...))
+end
+
+function Morphism(m::Pair{G,S}...) where {G,S}
+    dom = VectorSpaceObject([g => domain(f) for (g,f) in m]...)
+    cod = VectorSpaceObject([g => codomain(f) for (g,f) in m]...)
+    Morphism(dom,cod,m...)
 end
 #-----------------------------------------------------------------
 #   Pretty Printing
 #-----------------------------------------------------------------
 
 function Base.show(io::IO, Vec::GradedVectorSpaces)
-    println(io, """
+    print(io, """
     Category of finite dimensional graded vector spaces over $(base_ring(Vec))
     with simple objects in $(Vec.base_group).""")
 end
@@ -102,9 +106,13 @@ base_group(V::GVSObject) = V.parent.base_group
 
 issemisimple(::GradedVectorSpaces) = true
 
-dim(V::GVSObject) = sum([dim(v) for (g,v) in V.V])
+dim(V::GVSObject) = length(V.V) > 0 ? sum([dim(v) for (g,v) in V.V]) : 0
 
 basis(V::GVSObject) = hcat([[(g,v) for v ∈ basis(dual(Vg))] for (g,Vg) ∈ V.V]...)[:]
+
+function matrices(f::GVSMorphism)
+    return Dict(g => matrix(m) for (g,m) ∈ f.m)
+end
 
 function simples(Vec::GradedVectorSpaces)
     F = base_ring(Vec)
@@ -144,7 +152,7 @@ function ==(V::GVSObject, W::GVSObject)
     return true
 end
 
-function isisomorphic(V::GVSObject{T,G}, W::GVSObject{T,G}) where {T,G}
+function isisomorphic(V::GVSObject, W::GVSObject)
     if keys(V.V) != keys(W.V) return false, nothing end
     m = []
     for g ∈ keys(V.V)
@@ -155,35 +163,35 @@ function isisomorphic(V::GVSObject{T,G}, W::GVSObject{T,G}) where {T,G}
     return true, Morphism(V,W, m...)
 end
 
-dual(V::GVSObject) = VectorSpaceObject(g => Hom(V[inv(g)],one(parent(Vg))) for (g,Vg) ∈ V.V)
+dual(V::GVSObject) = VectorSpaceObject([g => dual(V[inv(g)]) for g ∈ base_group(V) if inv(g) ∈ keys(V.V)]...)
 
-function ev(V::GVSObject{T,G}) where {T,G}
+function ev(V::GVSObject)
     dom = dual(V)⊗V
     cod = one(parent(V))
-
-    gs = [g for g ∈ keys(V.V) if inv(g) ∈ keys(V.V)]
     o = one(base_group(V))
     ω = parent(V).twist
-    return Morphism(dom,cod, o => Morphism(dom[o], cod[o], vcat([ω(inv(g),g,inv(g))*matrix(ev(V[g])) for g ∈ gs]...)))
+    m = Morphism(dom[o], cod[o], vcat([ev(V[g]).m for g ∈ keys(V.V)]))
+    return Morphism(dom,cod, o => m)
 end
 
 function coev(V::GVSObject)
     dom = one(parent(V))
     cod = V ⊗ dual(V)
-
-    gs = [g for g ∈ keys(V.V) if inv(g) ∈ keys(V.V)]
     o = one(base_group(V))
-    return Morphism(dom,cod, o => Morphism(dom[o], cod[o], hcat([matrix(coev(V[g])) for g ∈ gs]...)))
+    m = Morphism(dom[o], cod[o], hcat([coev(V[g]).m for g ∈  keys(V.V)]))
+    return Morphism(dom,cod, o => m)
 end
+
+spherical(X::GVSObject) = Morphism(X,dual(dual(X)), [g => spherical(V) for (g,V) ∈ X.V]...)
 
 #-----------------------------------------------------------------
 #   Functionality: Direct Sums
 #-----------------------------------------------------------------
 
-function dsum(V::GVSObject{T,G}, W::GVSObject{T,G}, morphisms::Bool = false) where {T,G}
-    incl_W, incl_V = Dict{G,VectorSpaceMorphism{T}}(),Dict{G,VectorSpaceMorphism{T}}()
-    proj_W, proj_V = Dict{G,VectorSpaceMorphism{T}}(),Dict{G,VectorSpaceMorphism{T}}()
-    Z = Dict{G,VectorSpaceObject{T}}()
+function dsum(V::GVSObject, W::GVSObject, morphisms::Bool = false)
+    incl_W, incl_V = Dict{G,VectorSpaceMorphism}(),Dict{G,VectorSpaceMorphism}()
+    proj_W, proj_V = Dict{G,VectorSpaceMorphism}(),Dict{G,VectorSpaceMorphism}()
+    Z = Dict{G,VectorSpaceObject}()
 
     for g ∈ setdiff(keys(V.V), keys(W.V))
         Z[g] = V[g]
@@ -205,7 +213,7 @@ function dsum(V::GVSObject{T,G}, W::GVSObject{T,G}, morphisms::Bool = false) whe
     end
 
 
-    VZ = VectorSpaceObject(Z)
+    VZ = GVSObject{T,G}(Z,parent(V))
 
     if !morphisms return VZ end
 
@@ -216,11 +224,11 @@ function dsum(V::GVSObject{T,G}, W::GVSObject{T,G}, morphisms::Bool = false) whe
     return VZ, [mor_incl_V,mor_incl_W], [mor_proj_V, mor_proj_W]
 end
 
-function dsum(f::GVSMorphism{T,G}, g::GVSMorphism{T,G}) where {T,G}
-    D,_ = domain(f) ⊕ domain(g)
-    C,_ = codomain(f) ⊕ codomain(g)
+function dsum(f::GVSMorphism, g::GVSMorphism) where {T,G}
+    D = domain(f) ⊕ domain(g)
+    C = codomain(f) ⊕ codomain(g)
 
-    m = Dict{G,VectorSpaceMorphism{T}}()
+    m = Dict{G,VectorSpaceMorphism}()
 
     for x ∈ keys(f.m) ∩ keys(g.m)
         m[x] = f[x] ⊕ g[x]
@@ -235,55 +243,65 @@ function dsum(f::GVSMorphism{T,G}, g::GVSMorphism{T,G}) where {T,G}
     return Morphism(D,C,m)
 end
 
-
+zero(C::GradedVectorSpaces) where {T,G} = GVSObject(Dict{G,VectorSpaceObject}(),C)
 #-----------------------------------------------------------------
 #   Functionality: Tensor Products
 #-----------------------------------------------------------------
 
-function tensor_product(V::GVSObject{T,G}, W::GVSObject{T,G}) where {T,G}
+function tensor_product(V::GVSObject, W::GVSObject)
     if parent(V) != parent(W)
         throw(ErrorException("Mismatching parents."))
     end
-    Z = Dict{G,VectorSpaceObject{T}}()
+    Z = Dict{G,VectorSpaceObject}()
     grp = base_group(V)
 
     for g ∈ grp, h ∈ grp
-        if !(g ∈ keys(V.V)) || !(h ∈ keys(W.V)) continue end
         if g*h ∈ keys(Z)
             Z[g*h] = dsum(Z[g*h],V[g]⊗W[h])
         else
             Z[g*h] = V[g]⊗W[h]
         end
     end
-    return VectorSpaceObject(Z)
+    return GVSObject(Z,parent(V))
 end
 
-function tensor_product(f::GVSMorphism{T,G}, g::GVSMorphism{T,G}) where {T,G}
+function tensor_product(f::GVSMorphism, g::GVSMorphism)
     dom = domain(f) ⊗ domain(g)
     cod = codomain(f) ⊗ codomain(g)
-    mors = Dict{G,VSMorphism{T}}()
+    mors = Dict{G,VSMorphism}()
 
     grp = base_group(domain(f))
     for x ∈ grp, y ∈ grp
-        if !(x*y ∈ keys(dom.V)) || !(x*y ∈ keys(cod.V)) continue end
+        @show matrix.([f[x],g[x]])
         if (a = x*y) ∈ keys(mors)
             mors[a] = mors[a] ⊕ (f[x] ⊗ g[y])
         else
             mors[a] = (f[x] ⊗ g[y])
         end
     end
-    return Morphism(dom,cod, Dict(x => Morphism(dom[x],cod[x], mors[x].m) for x ∈ keys(mors)))
+    # for g ∈ keys(mors)
+    #     dom_left = dim(dom[g]) - dim(domain(mors[g]))
+    #     cod_left = dim(cod[g]) - dim(codomain(mors[g]))
+    #     Vd = VectorSpaceObject(base_ring(dom), dom_left)
+    #     Vc = VectorSpaceObject(base_ring(cod), cod_left)
+    #     mors[g] = mors[g] ⊕ zero_morphism(Vd,Vc)
+    # end
+
+    return Morphism(dom,cod, [x => mors[x] for x ∈ keys(mors)]...)
 end
 
 #-----------------------------------------------------------------
 #   Functionality: Morphisms
 #-----------------------------------------------------------------
 
-function compose(f::GVSMorphism{T,G},g::GVSMorphism{T,G}) where {T,G}
-    if domain(g) != codomain(f)
+function compose(f::GVSMorphism,g::GVSMorphism)
+    if !isisomorphic(domain(g), codomain(f))[1]
         throw(ErrorException("Morphisms not compatible"))
     end
+    if length(keys(f.m)∩keys(g.m)) == 0 return zero_morphism(domain(f),codomain(g)) end
+
     m = Dict(x => compose(f[x],g[x]) for x ∈ keys(f.m)∩keys(g.m))
+
     return Morphism(domain(f), codomain(g), m)
 end
 
@@ -295,32 +313,67 @@ function ==(f::GVSMorphism, g::GVSMorphism)
     return a && b && c
 end
 
-function id(X::GVSObject{T,G}) where {T,G}
+function id(X::GVSObject)
     n = [dim(X[g]) for g ∈ keys(X.V)]
     m = Dict(g => id(X[g]) for g ∈ keys(X.V))
     return Morphism(X,X, m)
 end
 
-zero_morphism(X::GVSObject{T,G}, Y::GVSObject{T,G}) where {T,G} = Morphism(X,Y,Dict{G,VSMorphism{T}}())
+zero_morphism(X::GVSObject, Y::GVSObject) = Morphism(X,Y,Dict{G,VSMorphism}())
+
 
 function +(f::GVSMorphism, g::GVSMorphism)
-    @assert domain(f) == domain(g) && codomain(f) == codomain(g)
+    @assert isisomorphic(domain(f),domain(g))[1] && isisomorphic(codomain(f), codomain(g))[1]
 
-    return Morphism(domain(f),codomain(f), [f[x] + g[x] for x ∈ keys(f.m)∪keys(g.m)])
+    return Morphism(domain(f),codomain(f), Dict(x => f[x] + g[x] for x ∈ keys(f.m)∪keys(g.m)))
 end
 
+function *(x, f::GVSMorphism)
+    return Morphism(domain(f),codomain(f), Dict(g => x*m for (g,m) ∈ f.m))
+end
+
+function inv(f::GVSMorphism)
+    m = Dict(g => inv(m) for (g,m) ∈ f.m)
+    return Morphism(codomain(f), domain(f), m)
+end
+
+function express_in_basis(f::GVSMorphism, basis::Vector{GVSMorphism})
+    F = base_ring(domain(f))
+    A = Array{T,2}(undef,length(basis),0)
+    grp = base_group(domain(f))
+    for g ∈ basis
+        B = []
+        for x ∈ grp
+            if x ∈ keys(g.m)
+                B = [B ; [n for n ∈ g[x].m][:]]
+            else
+                B = [B ; zeros(F,dim(domain(f)[x]), dim(codomain(f)[x]))[:]]
+            end
+        end
+        A = [A B]
+    end
+    b = []
+    for x ∈ grp
+        if x ∈ keys(f.m)
+            b = [b; [n for n ∈ f[x].m][:]]
+        else
+            b = [b; zeros(F,dim(domain(f)[x]), dim(codomain(f)[x]))[:]]
+        end
+    end
+    return [i for  i ∈ solve_left(transpose(matrix(F,A)), MatrixSpace(F,1,length(b))(F.(b)))][:]
+end
 #------------------------------------------------------------------------------
 # Associators
 #------------------------------------------------------------------------------
 
 
-function associator(X::GVSObject{T,G}, Y::GVSObject{T,G}, Z::GVSObject{T,G}) where {T,G}
+function associator(X::GVSObject, Y::GVSObject, Z::GVSObject)
     D = (X⊗Y)⊗Z
     C = X⊗(Y⊗Z)
     Vec = parent(X)
     ω = Vec.twist
 
-    mors = Dict{G,VSMorphism{T}}()
+    mors = Dict{G,VSMorphism}()
 
     for (g,Vg) ∈ X.V, (h,Vh) ∈ Y.V, (k,Vk) ∈ Z.V
         if (a = g*h*k) ∈ keys(mors)
@@ -338,17 +391,17 @@ end
 #   Hom Spaces
 #----------------------------------------------------------------------------
 
-struct GVSHomSpace{T,G} <: HomSpace{T}
-    X::GVSObject{T,G}
-    Y::GVSObject{T,G}
-    basis::Vector{GVSMorphism{T,G}}
-    parent::VectorSpaces{T}
+struct GVSHomSpace <: HomSpace
+    X::GVSObject
+    Y::GVSObject
+    basis::Vector{GVSMorphism}
+    parent::VectorSpaces
 end
 
-function Hom(X::GVSObject{T,G}, Y::GVSObject{T,G}) where {T,G}
+function Hom(X::GVSObject, Y::GVSObject)
     key_elems = keys(X.V)∩keys(Y.V)
     bases = Dict(g => Hom(X[g],Y[g]).basis for g ∈ key_elems)
-    basis = Vector{GVSMorphism{T,G}}()
+    basis = Vector{GVSMorphism}()
 
     for g ∈ key_elems
         for b ∈ bases[g]

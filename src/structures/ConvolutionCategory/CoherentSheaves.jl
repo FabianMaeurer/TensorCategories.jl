@@ -1,20 +1,20 @@
-struct CohSheaves{T,G} <: MultiTensorCategory{T}
-    group::G
+struct CohSheaves <: Category
+    group::GAPGroup
     base_ring::Field
     GSet::GSet
     orbit_reps
     orbit_stabilizers
 end
 
-struct CohSheaf{T,G} <: Object
-    parent::CohSheaves{T}
-    stalks::Vector{GroupRepresentation{T,G}}
+struct CohSheaf <: Object
+    parent::CohSheaves
+    stalks::Vector{GroupRepresentation}
 end
 
-struct CohSheafMorphism{T,G} <: Morphism
-    domain::CohSheaf{T,G}
-    codomain::CohSheaf{T,G}
-    m::Vector{GroupRepresentationMorphism{T,G}}
+struct CohSheafMorphism <: Morphism
+    domain::CohSheaf
+    codomain::CohSheaf
+    m::Vector{GroupRepresentationMorphism}
 end
 
 #-----------------------------------------------------------------
@@ -29,7 +29,7 @@ function CohSheaves(X::GSet, F::Field)
     G = X.group
     orbit_reps = [O.seeds[1] for O ∈ orbits(X)]
     orbit_stabilizers = [stabilizer(G,x,X.action_function)[1] for x ∈ orbit_reps]
-    return CohSheaves{elem_type(F), typeof(G)}(G, F, X, orbit_reps, orbit_stabilizers)
+    return CohSheaves(G, F, X, orbit_reps, orbit_stabilizers)
 end
 
 """
@@ -42,7 +42,7 @@ function CohSheaves(X,F::Field)
     return CohSheaves(gset(G,X), F)
 end
 
-Morphism(X::CohSheaf{T,G}, Y::CohSheaf{T,G}, m::Vector) where {T,G} = CohSheafMorphism{T,G}(X,Y,m)
+Morphism(X::CohSheaf, Y::CohSheaf, m::Vector) = CohSheafMorphism(X,Y,m)
 
 
 #-----------------------------------------------------------------
@@ -61,6 +61,8 @@ issemisimple(C::CohSheaves) = gcd(order(C.group), characteristic(base_ring(C))) 
 Return the stalks of ``X``.
 """
 stalks(X::CohSheaf) = X.stalks
+
+orbit_stabilizers(Coh::CohSheaves) = Coh.orbit_stabilizers
 
 function orbit_index(X::CohSheaf, y)
     i = findfirst(x -> y ∈ x, orbits(parent(X).GSet))
@@ -92,23 +94,23 @@ function ==(X::CohSheaf, Y::CohSheaf)
 end
 
 """
-    isisomorphic(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
+    isisomorphic(X::CohSheaf, Y::CohSheaf)
 
 Check whether ``X``and ``Y`` are isomorphic and the isomorphism if possible.
 """
-function isisomorphic(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
+function isisomorphic(X::CohSheaf, Y::CohSheaf)
     m = GroupRepresentationMorphism{T,G}[]
     for (s,r) ∈ zip(stalks(X),stalks(Y))
         b, iso = isisomorphic(s,r)
         if !b return false, nothing end
         m = [m; iso]
     end
-    return true, CohSheafMorphism{T,G}(X,Y,m)
+    return true, CohSheafMorphism(X,Y,m)
 end
 
 ==(f::CohSheafMorphism, g::CohSheafMorphism) = f.m == f.m
 
-id(X::CohSheaf{T,G}) where {T,G} = CohSheafMorphism{T,G}(X,X,[id(s) for s ∈ stalks(X)])
+id(X::CohSheaf) = CohSheafMorphism(X,X,[id(s) for s ∈ stalks(X)])
 
 associator(X::CohSheaf, Y::CohSheaf, Z::CohSheaf) = id(X⊗Y⊗Z)
 
@@ -135,32 +137,32 @@ braiding(X::CohSheaf, Y::CohSheaf) = Morphism(X⊗Y, Y⊗X, [braiding(x,y) for (
 #-----------------------------------------------------------------
 
 """
-    dsum(X::CohSheaf{T,G}, Y::CohSheaf{T,G}, morphisms::Bool = false) where {T,G}
+    dsum(X::CohSheaf, Y::CohSheaf, morphisms::Bool = false)
 
 Return the direct sum of sheaves. Return also the inclusion and projection if
 morphisms = true.
 """
-function dsum(X::CohSheaf{T,G}, Y::CohSheaf{T,G}, morphisms::Bool = false) where {T,G}
+function dsum(X::CohSheaf, Y::CohSheaf, morphisms::Bool = false)
     sums = [dsum(x,y,true) for (x,y) ∈ zip(stalks(X), stalks(Y))]
     Z = CohSheaf{T,G}(parent(X), [s[1] for s ∈ sums])
 
     if !morphisms return Z end
 
-    ix = [CohSheafMorphism{T,G}(x,Z,[s[2][i] for s ∈ sums]) for (x,i) ∈ zip([X,Y],1:2)]
-    px = [CohSheafMorphism{T,G}(Z,x,[s[3][i] for s ∈ sums]) for (x,i) ∈ zip([X,Y],1:2)]
+    ix = [CohSheafMorphism(x,Z,[s[2][i] for s ∈ sums]) for (x,i) ∈ zip([X,Y],1:2)]
+    px = [CohSheafMorphism(Z,x,[s[3][i] for s ∈ sums]) for (x,i) ∈ zip([X,Y],1:2)]
     return Z,ix,px
 end
 
 """
-    dsum(f::CohSheafMorphism{T,G}, g::CohSheafMorphism{T,G}) where {T,G}
+    dsum(f::CohSheafMorphism, g::CohSheafMorphism)
 
 Return the direct sum of morphisms of sheaves.
 """
-function dsum(f::CohSheafMorphism{T,G}, g::CohSheafMorphism{T,G}) where {T,G}
-    dom = dsum(domain(f), domain(g))[1]
-    codom = dsum(codomain(f), codomain(g))[1]
+function dsum(f::CohSheafMorphism, g::CohSheafMorphism)
+    dom = dsum(domain(f), domain(g))
+    codom = dsum(codomain(f), codomain(g))
     mors = [dsum(m,n) for (m,n) ∈ zip(f.m,g.m)]
-    return CohSheafMorphism{T,G}(dom,codom, mors)
+    return CohSheafMorphism(dom,codom, mors)
 end
 
 product(X::CohSheaf,Y::CohSheaf,projections = false) = projections ? dsum(X,Y,projections)[[1,3]] : dsum(X,Y)
@@ -171,46 +173,46 @@ coproduct(X::CohSheaf,Y::CohSheaf,projections = false) = projections ? dsum(X,Y,
 #-----------------------------------------------------------------
 
 """
-    tensor_product(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
+    tensor_product(X::CohSheaf, Y::CohSheaf)
 
 Return the tensor product of equivariant coherent sheaves.
 """
-function tensor_product(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
+function tensor_product(X::CohSheaf, Y::CohSheaf)
     @assert parent(X) == parent(Y) "Mismatching parents"
-    return CohSheaf{T,G}(parent(X), [x⊗y for (x,y) ∈ zip(stalks(X), stalks(Y))])
+    return CohSheaf(parent(X), [x⊗y for (x,y) ∈ zip(stalks(X), stalks(Y))])
 end
 
 """
-    tensor_product(f::CohSheafMorphism{T,G}, g::CohSheafMorphism{T,G}) where {T,G}
+    tensor_product(f::CohSheafMorphism, g::CohSheafMorphism)
 
 Return the tensor product of morphisms of equivariant coherent sheaves.
 """
-function tensor_product(f::CohSheafMorphism{T,G}, g::CohSheafMorphism{T,G}) where {T,G}
+function tensor_product(f::CohSheafMorphism, g::CohSheafMorphism)
     dom = tensor_product(domain(f), domain(g))
     codom = tensor_product(codomain(f), codomain(g))
 
     mors = [tensor_product(m,n) for (m,n) ∈ zip(f.m,g.m)]
-    return CohSheafMorphism{T,G}(dom,codom,mors)
+    return CohSheafMorphism(dom,codom,mors)
 end
 
 """
-    one(C::CohSheaves{T,G}) where {T,G}
+    one(C::CohSheaves)
 
 Return the one object in ``C``.
 """
-function one(C::CohSheaves{T,G}) where {T,G}
-    return CohSheaf{T,G}(C,[one(RepresentationCategory(H,base_ring(C))) for H ∈ C.orbit_stabilizers])
+function one(C::CohSheaves)
+    return CohSheaf(C,[one(RepresentationCategory(H,base_ring(C))) for H ∈ C.orbit_stabilizers])
 end
 
 #-----------------------------------------------------------------
 #   Functionality: Morphisms
 #-----------------------------------------------------------------
 
-function compose(f::CohSheafMorphism{T,G}, g::CohSheafMorphism{T,G}) where {T,G}
+function compose(f::CohSheafMorphism, g::CohSheafMorphism)
     dom = domain(f)
     codom = codomain(f)
     mors = [compose(m,n) for (m,n) ∈ zip(f.m,g.m)]
-    return CohSheafMorphism{T,G}(dom,codom,mors)
+    return CohSheafMorphism(dom,codom,mors)
 end
 
 function +(f::CohSheafMorphism, g::CohSheafMorphism)
@@ -218,15 +220,21 @@ function +(f::CohSheafMorphism, g::CohSheafMorphism)
     return Morphism(domain(f), codomain(f), [fm + gm for (fm,gm) ∈ zip(f.m,g.m)])
 end
 
+function *(x,f::CohSheafMorphism)
+    Morphism(domain(f),codomain(f),x .* f.m)
+end
+
+matrices(f::CohSheafMorphism) = matrix.(f.m)
+
 #-----------------------------------------------------------------
 #   Simple Objects
 #-----------------------------------------------------------------
 """
-    simples(C::CohSheaves{T,G}) where {T,G}
+    simples(C::CohSheaves)
 
 Return the simple objects of ``C``.
 """
-function simples(C::CohSheaves{T,G}) where {T,G}
+function simples(C::CohSheaves)
 
     simple_objects = CohSheaf[]
 
@@ -268,22 +276,22 @@ end
 #   Hom Spaces
 #-----------------------------------------------------------------
 
-struct CohSfHomSpace{T,G} <: HomSpace{T}
-    X::CohSheaf{T,G}
-    Y::CohSheaf{T,G}
-    basis::Vector{CohSheafMorphism{T,G}}
-    parent::VectorSpaces{T}
+struct CohSfHomSpace <: HomSpace
+    X::CohSheaf
+    Y::CohSheaf
+    basis::Vector{CohSheafMorphism}
+    parent::VectorSpaces
 end
 
 """
-    Hom(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
+    Hom(X::CohSheaf, Y::CohSheaf)
 
 Return Hom(``X,Y``) as a vector space.
 """
-function Hom(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
+function Hom(X::CohSheaf, Y::CohSheaf)
     @assert parent(X) == parent(Y) "Missmatching parents"
 
-    b = CohSheafMorphism{T,G}[]
+    b = CohSheafMorphism[]
     H = [Hom(stalks(X)[i],stalks(Y)[i]) for i ∈ 1:length(stalks(X))]
     for i ∈ 1:length(stalks(X))
         for ρ ∈ basis(H[i])
@@ -292,7 +300,7 @@ function Hom(X::CohSheaf{T,G}, Y::CohSheaf{T,G}) where {T,G}
             b = [b; CohSheafMorphism(X,Y,reps)]
         end
     end
-    return CohSfHomSpace{T,G}(X,Y,b,VectorSpaces(base_ring(X)))
+    return CohSfHomSpace(X,Y,b,VectorSpaces(base_ring(X)))
 end
 
 zero(H::CohSfHomSpace) = zero_morphism(H.X,H.Y)
@@ -303,15 +311,15 @@ zero(H::CohSfHomSpace) = zero_morphism(H.X,H.Y)
 #-----------------------------------------------------------------
 
 function show(io::IO, C::CohSheaves)
-    print(io, "Category of equivariant coherent sheaves on $(C.GSet.seeds) over $(C.base_ring).")
+    print(io, "Category of equivariant coherent sheaves on $(C.GSet.seeds) over $(C.base_ring)")
 end
 
 function show(io::IO, X::CohSheaf)
-    print(io, "Equivariant choherent sheaf on $(X.parent.GSet.seeds) over $(base_ring(X)).")
+    print(io, "Equivariant choherent sheaf on $(X.parent.GSet.seeds) over $(base_ring(X))")
 end
 
 function show(io::IO, X::CohSheafMorphism)
-    print(io, "Morphism of equivariant choherent sheaves on $(domain(X).parent.GSet.seeds) over $(base_ring(X)).")
+    print(io, "Morphism of equivariant choherent sheaves on $(domain(X).parent.GSet.seeds) over $(base_ring(X))")
 end
 
 
@@ -319,9 +327,9 @@ end
 #   Functors
 #-----------------------------------------------------------------
 
-struct PullbackFunctor{T} <: Functor
-    domain::T
-    codomain::T
+struct PullbackFunctor <: Functor
+    domain::Category
+    codomain::Category
     obj_map
     mor_map
 end
@@ -335,18 +343,18 @@ function pullb_mor_map(CY,CX,m,f)
     CohSheafMorphism(dom, codom, maps)
 end
 
-function Pullback(CY::CohSheaves{T,G}, CX::CohSheaves{T,G}, f::Function) where {T,G}
+function Pullback(CY::CohSheaves, CX::CohSheaves, f::Function)
     @assert isequivariant(CX.GSet, CY.GSet, f) "Map not equivariant"
 
     obj_map = X -> pullb_obj_map(CY,CX,X,f)
     mor_map = m -> pullb_mor_map(CY,CX,m,f)
 
-    return PullbackFunctor{CohSheaves{T,G}}(CY, CX, obj_map, mor_map)
+    return PullbackFunctor(CY, CX, obj_map, mor_map)
 end
 
-struct PushforwardFunctor{T} <: Functor
-    domain::T
-    codomain::T
+struct PushforwardFunctor <: Functor
+    domain::Category
+    codomain::Category
     obj_map
     mor_map
 end
@@ -370,7 +378,8 @@ function pushf_obj_map(CX,CY,X,f)
 end
 
 function pushf_mor_map(CX,CY,m,f)
-    mor = [zero_morphism(s,r) for (s,r) ∈ zip(stalks(domain(m)),stalks(codomain(m)))]
+    mor = GroupRepresentationMorphism{typeof(CX).parameters...}[]
+
     for i ∈ 1:length(CY.orbit_reps)
         y = CY.orbit_reps[i]
         Gy = CY.orbit_stabilizers[i]
@@ -380,12 +389,12 @@ function pushf_mor_map(CX,CY,m,f)
 
         orbit_reps = [O.seeds[1] for O ∈ orbits(fiber)]
 
-        mor[i] = dsum([induction(mor[i],Gy); [induction(m.m[orbit_index(CX,y)], Gy) for y ∈ orbit_reps]]...)
+        mor = [mor; dsum([induction(m.m[orbit_index(CX,y)], Gy) for y ∈ orbit_reps]...)]
     end
     return CohSheafMorphism(pushf_obj_map(CX,CY,domain(m),f), pushf_obj_map(CX,CY,codomain(m),f), mor)
 end
 
-function Pushforward(CX::CohSheaves{T,G}, CY::CohSheaves{T,G}, f::Function) where {T,G}
+function Pushforward(CX::CohSheaves, CY::CohSheaves, f::Function)
     @assert isequivariant(CX.GSet, CY.GSet, f) "Map not equivariant"
 
     return PushforwardFunctor(CX,CY,X -> pushf_obj_map(CX,CY,X,f),m -> pushf_mor_map(CX,CY,m,f))
@@ -394,4 +403,12 @@ end
 #dummy
 function isequivariant(X::GSet, Y::GSet, f::Function)
     true
+end
+
+function show(io::IO,F::PushforwardFunctor)
+    print(io, "Pushforward functor from $(domain(F)) to $(codomain(F))")
+end
+
+function show(io::IO,F::PullbackFunctor)
+    print(io, "Pullback functor from $(domain(F)) to $(codomain(F))")
 end

@@ -1,4 +1,5 @@
-function groethendieck_ring(C::MultiTensorCategory, simples = simples(C))
+function grothendieck_ring(C::Category, simples = simples(C))
+    @assert is_tensor(C) "C is required to be tensor"
     @assert issemisimple(C) "C is required to be semi-simple"
 
     m = multiplication_table(C,simples)

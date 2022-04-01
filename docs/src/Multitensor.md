@@ -68,11 +68,11 @@ Provided these methods exist you can call the function `groethendieck_ring` on y
 category.
 
 ```@docs
-groethendieck_ring
+grothendieck_ring
 ```
 
 Since this is a generic methods it is by nature not the fastest. Thus if you know more
-about your category you should specify `groethendieck_ring` on your type manually.
+about your category you should specify `grothendieck_ring` on your type manually.
 
 ## Example
 
@@ -89,7 +89,7 @@ X = gset(G, [1,2,3])
 F = FiniteField(5)
 Conv = ConvolutionCategory(X,F)
 
-R,f = groethendieck_ring(Conv)
+R,f = grothendieck_ring(Conv)
 ```
 
 # The S-Matrix

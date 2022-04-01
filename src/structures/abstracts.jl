@@ -5,14 +5,6 @@
 
 abstract type Category end
 
-abstract type MultiTensorCategory{T} <: Category end
-
-abstract type TensorCategory{T} <: MultiTensorCategory{T} end
-
-abstract type MultiFusionCategory{T} <: MultiTensorCategory{T} end
-
-abstract type FusionCategory{T} <: MultiFusionCategory{T} end
-
 abstract type Object end
 
 abstract type Morphism end
@@ -23,18 +15,18 @@ abstract type Morphism end
 
 An object in the category of finite dimensional vector spaces.
 """
-abstract type VectorSpaceObject{T} <: Object end
+abstract type VectorSpaceObject <: Object end
 
 """
     VectorSpaceMorphism{T}()
 
 A morphism in the category of finite dimensional vector spaces.
 """
-abstract type VectorSpaceMorphism{T} <: Morphism end
+abstract type VectorSpaceMorphism <: Morphism end
 
 abstract type HomSet end
 
-abstract type HomSpace{T} <: VectorSpaceObject{T} end
+abstract type HomSpace <: VectorSpaceObject end
 
 domain(m::Morphism) = m.domain
 codomain(m::Morphism) = m.codomain
@@ -60,20 +52,6 @@ base_ring(X::Morphism) = parent(domain(X)).base_ring
 Return the base ring ```k```of the ```k```-linear category ```C```.
 """
 base_ring(C::Category) = C.base_ring
-#----------------------------------------------------------------------
-#   Algebras
-#----------------------------------------------------------------------
-
-abstract type Algebra <: Ring end
-abstract type FreeAlgebra{T} <: Algebra end
-abstract type AlgebraQuo <: Algebra end
-
-
-abstract type HopfAlgebra <: Ring end
-
-abstract type AlgebraElem{T} <: RingElem end
-abstract type HopfAlgebraElem{T} <: AlgebraElem{T} end
-
 
 #---------------------------------------------------------
 #   Direct Sums, Products, Coproducts
@@ -210,8 +188,9 @@ Return the tensor product object.
 
 Return the n-fold product object ```X^n```.
 """
-^(X::Object,n::Integer) = product([X for i in 1:n]...)
+^(X::Object,n::Integer) = n == 0 ? zero(parent(X)) : product([X for i in 1:n]...)
 
+^(X::Morphism,n::Integer) = n == 0 ? zero_morphism(zero(parent(domain(X))), zero(parent(domain(X)))) : dsum([X for i in 1:n]...)
 """
     ⊗(f::Morphism, g::Morphism)
 
@@ -224,6 +203,8 @@ dsum(X::T) where T <: Union{Vector,Tuple} = dsum(X...)
 product(X::T) where T <: Union{Vector,Tuple} = product(X...)
 coproduct(X::T) where T <: Union{Vector,Tuple} = coproduct(X...)
 
+product(X::Object,Y::Object) = dsum(X,Y)
+coproduct(X::Object, Y::Object) = dsum(X,Y)
 #---------------------------------------------------------
 #   tensor_product
 #---------------------------------------------------------
@@ -242,13 +223,25 @@ tensor_product(X::T) where T <: Union{Vector,Tuple} = tensor_product(X...)
 #------------------------------------------------------
 #   Abstract Methods
 #------------------------------------------------------
+isfusion(C::Category) = false
+ismultifusion(C::Category) = isfusion(C)
 
-issemisimple(C::Category) = :semisimple ∈ features(C)
-isabelian(C::Category) = :abelian ∈ features(C)
-ismonoidal(C::Category) = :monoidal ∈ features(C)
+istensor(C::Category) = isfusion(C)
+ismultitensor(C::Category) = ismultifusion(C) || istensor(C)
+
+ismonoidal(C::Category) = ismultitensor(C)
+
+isabelian(C::Category) = ismultitensor(C)
+
+isadditive(C::Category) = isabelian(C)
+
+islinear(C::Category) = isabelian(C)
 
 
 ∘(f::Morphism...) = compose(reverse(f)...)
+
+-(f::Morphism, g::Morphism) = f + (-1)*g
+-(f::Morphism) = (-1)*f
 
 #-------------------------------------------------------
 # Hom Spaces
@@ -266,11 +259,26 @@ End(X::Object) = Hom(X,X)
 left_dual(X::Object) = dual(X)
 right_dual(X::Object) = dual(X)
 
+dual(f::Morphism) = left_dual(f)
+
+function left_dual(f::Morphism)
+    X = domain(f)
+    Y = codomain(f)
+    a = ev(Y)⊗id(dual(X))
+    b = id(dual(Y)⊗f)⊗id(dual(X))
+    c = inv(associator(dual(Y),X,dual(X)))
+    d = id(dual(Y)⊗coev(X))
+    (a)∘(b)∘(c)∘(d)
+end
+
 tr(f::Morphism) = left_trace(f)
 
 function left_trace(f::Morphism)
     V = domain(f)
     W = codomain(f)
+    C = parent(V)
+    if V == zero(C) || W == zero(C) return zero_morphism(one(C),one(C)) end
+
     if V == W
         return ev(left_dual(V)) ∘ ((spherical(V)∘f) ⊗ id(left_dual(V))) ∘ coev(V)
     end
@@ -294,13 +302,16 @@ function drinfeld_morphism(X::Object)
      (ev(X)⊗id(dual(dual(X)))) ∘ (braiding(X,dual(X))⊗id(dual(dual(X)))) ∘ (id(X)⊗coev(dual(X)))
  end
 
+dim(X::Object) = base_ring(X)(tr(spherical(X)))
 
- #-------------------------------------------------------
- # S-Matrix
- #-------------------------------------------------------
+dim(C::Category) = sum(dim(s)^2 for s ∈ simples(C))
+#-------------------------------------------------------
+# S-Matrix
+#-------------------------------------------------------
 
-function smatrix(C::MultiTensorCategory, simples = simples(C))
+function smatrix(C::Category, simples = simples(C))
     @assert issemisimple(C) "Category has to be semisimple"
+
     m = [tr(braiding(s,t)∘braiding(t,s)) for s ∈ simples, t ∈ simples]
     try
         F = base_ring(C)
@@ -308,4 +319,5 @@ function smatrix(C::MultiTensorCategory, simples = simples(C))
     catch
         return m
     end
+
 end

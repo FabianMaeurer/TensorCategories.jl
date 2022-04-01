@@ -2,22 +2,24 @@ struct OppositeCategory <: Category
     C::Category
 end
 
-struct OppositeMorphism <: Morphism
-    m::Morphism
-end
-
 struct OppositeObject <: Object
+    parent::OppositeCategory
     X::Object
 end
 
-domain(f::OppositeMorphism) = codomain(f.m)
-codomain(f::OppositeMorphism) = domain(f.m)
+
+struct OppositeMorphism <: Morphism
+    domain::OppositeObject
+    codomain::OppositeObject
+    m::Morphism
+end
+
 
 base_ring(C::OppositeCategory) = base_ring(C.C)
 base_ring(X::OppositeObject) = base_ring(X.X)
 parent(X::OppositeObject) = OppositeCategory(parent(X.X))
 
-compose(f::OppositeMorphism, g::OppositeMorphism) = OppositeMorphism(compose(f.m,g.m))
+compose(f::OppositeMorphism, g::OppositeMorphism) = OppositeMorphism(compose(g.m,f.m))
 
 function product(X::OppositeObject, Y::OppositeObject)
     Z,px = product(X.X,Y.X)

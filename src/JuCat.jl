@@ -18,14 +18,18 @@ import Oscar: VectorSpace, Field, elem_type, QQ, FieldElem,
                 isisomorphic, issubgroup, left_transversal, ComplexField, order,
                 elements, index, symmetric_group, gap_to_julia, multiplication_table,
                 issemisimple, AlgAss, AlgAssElem, FiniteField, abelian_closure,
-                irreducible_modules, action, decompose,+, dual, tr
+                irreducible_modules, action, decompose,+, dual, tr, iscentral, rank,
+                ZZ, solve_left, PolynomialRing, groebner_basis, ideal, roots,
+                splitting_field, change_base_ring, isconstant, coeff, isindependent,
+                coefficients, isabelian, leading_monomial, gcd, msolve, fmpz, fmpq,
+                rref, NumberField
 
 
 
 
 export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         GradedVectorSpaces, GradedVectorSpaceObject, GradedVectorSpaceMorphism,
-        VectorSpaceObject, simples,
+        VectorSpaceObject, simples, FusionCategory,
         VectorSpaceMorphism, parent, dsum,⊕, domain, codomain, compose, ∘, ^, ⊗,
         tensor_product,==, associator, basis, id, getindex, one, zero, Forgetful,
         Functor, Sets, SetObject, SetMorphism, inv, product, coproduct,
@@ -33,20 +37,26 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         GroupRepresentationCategory,
          FusionCategory, VSHomSpace,HomSpace,
         Hom, GVSHomSpace, HomFunctor, VSObject, GVSObject, GVSMorphism, SetHomSet,
-        HomSet, Cocycle, trivial_3_cocylce,*, Algebra, FreeAlgebra, GroupAlgebra,
-        AlgebraElem,+,-, GroupRepresentation, GroupRepresentationMorphism,
+        HomSet, Cocycle, trivial_3_cocylce,*,
+        +,-, GroupRepresentation, GroupRepresentationMorphism,
+        GroupRepresentationCategory,
         isinvertible, Representation, isequivariant, matrix, GRHomSpace,
         OppositeCategory, OppositeMorphism, OppositeObject, ProductCategory,
         ProductObject, ProductMorphism, CohSheaves, CohSheaf, CohSheafMorphism,
         stalks, PullbackFunctor, Pullback, PushforwardFunctor, Pushforward,
         CohSfHomSpace, ConvolutionCategory, ConvolutionObject, ConvolutionMorphism,
         ConvHomSpace,stalk, induction, restriction, orbit_index, dsum_morphisms,
-        decompose, multiplication_table, print_multiplication_table, groethendieck_ring,
+        decompose, multiplication_table, print_multiplication_table, grothendieck_ring,
         dual, left_dual, right_dual, ev, coev, left_trace, right_trace, tr, braiding,
-        drinfeld_morphism, smatrix, End
-
+        drinfeld_morphism, smatrix, End, CenterCategory, CenterObject, CenterMorphism,
+        spherical, iscentral, center_simples, RingCategory, set_tensor_product!,
+        set_braiding!, Ising, zero_morphism, express_in_basis, solve_groebner,
+        Center, CenterCategory, CenterObject, CenterMorphism, ev_coev, matrices,
+        orbit_stabilizers, GRepRestriction, GRepInduction, Restriction, Induction,
+        print_multiplication_table, RingObject, RingMorphism
 
 include("Utility/FFE_to_FinField.jl")
+include("Utility/SolveGroebner.jl")
 include("structures/abstracts.jl")
 include("structures/MISC/ProductCategory.jl")
 include("structures/MISC/OppositeCategory.jl")
@@ -54,16 +64,17 @@ include("structures/VectorSpaces/VectorSpaces.jl")
 include("structures/VectorSpaces/Cocycles.jl")
 include("structures/VectorSpaces/GradedVectorSpaces.jl")
 include("structures/set.jl")
-include("structures/Functors.jl")
 include("structures/Representations/Representations.jl")
-include("structures/Representations/AlgebraRepresentations.jl")
 include("structures/Representations/GroupRepresentations.jl")
-include("structures/AlgebraicStructures/Algebras.jl")
-include("structures/AlgebraicStructures/AlgebraMorphisms.jl")
+include("structures/Functors.jl")
 include("structures/ConvolutionCategory/CoherentSheaves.jl")
 include("structures/ConvolutionCategory/ConvolutionCategory.jl")
+include("structures/MultiFusionCategories/FusionCategory.jl")
+include("structures/MultiFusionCategories/Duals.jl")
 include("structures/MISC/multiplication_table.jl")
-include("structures/GroethendieckRing.jl")
+include("structures/GrothendieckRing.jl")
+include("structures/Center/Center.jl")
+
 
 
 

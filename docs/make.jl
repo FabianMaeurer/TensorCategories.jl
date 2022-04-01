@@ -1,4 +1,4 @@
-using Documenter, JuCat
+using Documenter, DocumenterLaTeX, JuCat
 
 #DocMeta.setdocmeta!(JuCat, :DocTestSetup, :(using JuCat); recursive=true)
 
@@ -10,7 +10,7 @@ makedocs(
     ),
     pages = [
         "Home" => "index.md",
-        "Examples" => [
+        "Exampes" => [
             "Vector Spaces" => "VectorSpaces.md",
             "Representations" => "Representations.md",
             "Coherent Sheaves" => "CoherentSheaves.md"
@@ -18,6 +18,22 @@ makedocs(
         "Multitensor Categories" => "Multitensor.md",
         "showcase.md"
     ],
+)
+
+makedocs(
+    sitename = "JuCat.jl",
+    modules = [JuCat],
+    format = LaTeX(platform = "none"),
+    pages = [
+            "Home" => "index.md",
+            "Exampes" => [
+                "Vector Spaces" => "VectorSpaces.md",
+                "Representations" => "Representations.md",
+                "Coherent Sheaves" => "CoherentSheaves.md"
+            ],
+            "Multitensor Categories" => "Multitensor.md",
+            "showcase.md"
+        ],
 )
 
 deploydocs(

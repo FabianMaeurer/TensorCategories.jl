@@ -1,19 +1,20 @@
-struct GroupRepresentationCategory{T,G} <: RepresentationCategory{T}
+struct GroupRepresentationCategory <: RepresentationCategory
     group::GAPGroup
     base_ring::Field
 end
 
-struct GroupRepresentation{T,G} <: Representation{T}
-    group::G
+struct GroupRepresentation <: Representation
+    parent::GroupRepresentationCategory
+    group::GAPGroup
     m
     base_ring::Ring
     dim::Int64
 end
 
-struct GroupRepresentationMorphism{T,G} <: RepresentationMorphism{T}
-    domain::GroupRepresentation{T,G}
-    codomain::GroupRepresentation{T,G}
-    map::MatElem{T}
+struct GroupRepresentationMorphism <: RepresentationMorphism
+    domain::GroupRepresentation
+    codomain::GroupRepresentation
+    map::MatElem
 end
 
 #-------------------------------------------------------------------------
@@ -25,7 +26,7 @@ end
 Category of finite dimensonal group representations of \\G\\.
 """
 function RepresentationCategory(G::GAPGroup, F::Field)
-    return GroupRepresentationCategory{elem_type(F),typeof(G)}(G,F)
+    return GroupRepresentationCategory(G,F)
 end
 
 function RepresentationCategory(G::GAPGroup)
@@ -42,7 +43,7 @@ function Representation(G::GAPGroup, pre_img::Vector, img::Vector)
     d = size(img[1])[1]
     H = GL(d, F)
     m = hom(G,H, pre_img,H.(img))
-    return GroupRepresentation{elem_type(F),typeof(G)}(G,m,F,d)
+    return GroupRepresentation(RepresentationCategory(G,F),G,m,F,d)
 end
 
 
@@ -56,22 +57,22 @@ function Representation(G::GAPGroup, m::Function)
     d = order(G) == 1 ? size(m(elements(G)[1]))[1] : size(m(G[1]))[1]
     H = GL(d,F)
     m = hom(G,H,g -> H(m(g)))
-    return GroupRepresentation{elem_type(F),typeof(G)}(G,m,F,d)
+    return GroupRepresentation(RepresentationCategory(G,F),G,m,F,d)
 end
 
 
 """
-    Morphism(ρ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}, m::MatElem{T}; check = true) where {T,G}
+    Morphism(ρ::GroupRepresentation, τ::GroupRepresentation, m::MatElem; check = true)
 
 Morphism between representations defined by ``m``. If check == false equivariancy
 will not be checked.
 """
-function Morphism(ρ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}, m::MatElem{T}; check = true) where {T,G}
+function Morphism(ρ::GroupRepresentation, τ::GroupRepresentation, m::MatElem; check = true)
     if size(m) != (dim(ρ), dim(τ)) throw(ErrorException("Mismatching dimensions")) end
     if check
         if !isequivariant(m,ρ,τ) throw(ErrorException("Map has to be equivariant")) end
     end
-    return GroupRepresentationMorphism{T,G}(ρ,τ,m)
+    return GroupRepresentationMorphism(ρ,τ,m)
 end
 
 #-------------------------------------------------------------------------
@@ -100,29 +101,29 @@ base_group(Rep::GroupRepresentationCategory) = Rep.group
 base_group(ρ::GroupRepresentation) = ρ.group
 
 """
-    parent(ρ::GroupRepresentation{T,G}) where {T,G}
+    parent(ρ::GroupRepresentation)
 
 Return the parent representation category of ρ.
 """
-parent(ρ::GroupRepresentation{T,G}) where {T,G} = GroupRepresentationCategory{T,G}(base_group(ρ), base_ring(ρ))
+parent(ρ::GroupRepresentation) = ρ.parent
 
 """
-    zero(Rep::GroupRepresentationCategory{T,G}) where {T,G}
+    zero(Rep::GroupRepresentationCategory)
 
 Return the zero reprensentation.
 """
-function zero(Rep::GroupRepresentationCategory{T,G}) where {T,G}
+function zero(Rep::GroupRepresentationCategory)
     grp = base_group(Rep)
     F = base_ring(Rep)
-    GroupRepresentation{T,G}(grp,0,F,0)
+    GroupRepresentation(Rep,grp,0,F,0)
 end
 
 """
-    one(Rep::GroupRepresentationCategory{T,G}) where {T,G}
+    one(Rep::GroupRepresentationCategory)
 
 Return the trivial representation.
 """
-function one(Rep::GroupRepresentationCategory{T,G}) where {T,G}
+function one(Rep::GroupRepresentationCategory)
     grp = base_group(Rep)
     F = base_ring(Rep)
     if order(grp) == 1 return Representation(grp,x -> one(MatrixSpace(F,1,1))) end
@@ -130,12 +131,12 @@ function one(Rep::GroupRepresentationCategory{T,G}) where {T,G}
 end
 
 """
-    id(ρ::GroupRepresentation{T,G}) where {T,G}
+    id(ρ::GroupRepresentation)
 
 Return the identity on ρ.
 """
-function id(ρ::GroupRepresentation{T,G}) where {T,G}
-    return GroupRepresentationMorphism{T,G}(ρ,ρ,one(MatrixSpace(base_ring(ρ),dim(ρ),dim(ρ))))
+function id(ρ::GroupRepresentation)
+    return GroupRepresentationMorphism(ρ,ρ,one(MatrixSpace(base_ring(ρ),dim(ρ),dim(ρ))))
 end
 
 function ==(ρ::GroupRepresentation, τ::GroupRepresentation)
@@ -159,11 +160,11 @@ function ==(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
 end
 
 """
-    isisomorphic(σ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}) where {T,G}
+    isisomorphic(σ::GroupRepresentation, τ::GroupRepresentation)
 
 Check whether σ and τ are isomorphic. If true return the isomorphism.
 """
-function isisomorphic(σ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}) where {T,G}
+function isisomorphic(σ::GroupRepresentation, τ::GroupRepresentation)
     @assert parent(σ) == parent(τ) "Mismatching parents"
 
     if dim(σ) != dim(τ) return false, nothing end
@@ -201,7 +202,7 @@ function dual(ρ::GroupRepresentation)
     return Representation(G, generators, [transpose(matrix(ρ(inv(g)))) for g ∈ generators])
 end
 
-function ev(ρ::GroupRepresentation)
+function ev(ρ::GroupRepresentation)y
     dom = dual(ρ) ⊗ ρ
     cod = one(parent(ρ))
     F = base_ring(ρ)
@@ -220,11 +221,13 @@ end
 #   Functionality: Morphisms
 #-------------------------------------------------------------------------
 
-function compose(f::GroupRepresentationMorphism{T,G}, g::GroupRepresentationMorphism{T,G}) where {T,G}
-    return GroupRepresentationMorphism{T,G}(domain(f),codomain(g), matrix(f)*matrix(g))
+function compose(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
+    return GroupRepresentationMorphism(domain(f),codomain(g), matrix(f)*matrix(g))
 end
 
 associator(σ::GroupRepresentation, τ::GroupRepresentation, ρ::GroupRepresentation) = id(σ⊗τ⊗ρ)
+
+*(x, f::GroupRepresentationMorphism) = Morphism(domain(f),codomain(f),x*f.map)
 
 function +(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
     @assert domain(f) == domain(g) && codomain(f) == codomain(g) "Not compatible"
@@ -244,7 +247,7 @@ end
 #   Necessities
 #-------------------------------------------------------------------------
 
-function isequivariant(m::MatElem{T}, ρ::GroupRepresentation{T}, τ::GroupRepresentation{T}) where T
+function isequivariant(m::MatElem, ρ::GroupRepresentation, τ::GroupRepresentation)
     if dim(ρ)*dim(τ) == 0 return true end
     for g ∈ gens(ρ.group)
         if matrix(ρ(g))*m != m*matrix(τ(g))
@@ -260,11 +263,11 @@ end
 #-------------------------------------------------------------------------
 
 """
-    tensor_product(ρ::GroupRepresentation{T}, τ::GroupRepresentation{T}) where T
+    tensor_product(ρ::GroupRepresentation, τ::GroupRepresentation)
 
 Return the tensor product of representations.
 """
-function tensor_product(ρ::GroupRepresentation{T}, τ::GroupRepresentation{T}) where T
+function tensor_product(ρ::GroupRepresentation, τ::GroupRepresentation)
     @assert ρ.group == τ.group "Mismatching groups"
 
     if ρ.m == 0 || τ.m == 0 return zero(parent(ρ)) end
@@ -310,12 +313,12 @@ spherical(X::GroupRepresentation) = id(X)
 #-------------------------------------------------------------------------
 
 """
-    dsum(ρ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}, morphisms::Bool = false) where {T,G}
+    dsum(ρ::GroupRepresentation, τ::GroupRepresentation, morphisms::Bool = false)
 
 Return the direct sum of representations. If morphisms is set true inclusion and
 projection morphisms are also returned.
 """
-function dsum(ρ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}, morphisms::Bool = false) where {T,G}
+function dsum(ρ::GroupRepresentation, τ::GroupRepresentation, morphisms::Bool = false)
     @assert ρ.group == τ.group "Mismatching groups"
 
     grp = ρ.group
@@ -367,8 +370,8 @@ function dsum(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
     return Morphism(dom,codom, m)
 end
 
-product(X::GroupRepresentation,Y::GroupRepresentation, morphisms = false) = morphisms ? dsum(X,Y, true)[[1,3]] : dsum(X,Y)
-coproduct(X::GroupRepresentation,Y::GroupRepresentation, morphisms = false) = morphisms ? dsum(X,Y, true)[[1,2]] : dsum(X,Y)
+# product(X::GroupRepresentation,Y::GroupRepresentation, morphisms = false) = morphisms ? dsum(X,Y, true)[[1,3]] : dsum(X,Y)
+# coproduct(X::GroupRepresentation,Y::GroupRepresentation, morphisms = false) = morphisms ? dsum(X,Y, true)[[1,2]] : dsum(X,Y)
 
 
 #-------------------------------------------------------------------------
@@ -376,11 +379,11 @@ coproduct(X::GroupRepresentation,Y::GroupRepresentation, morphisms = false) = mo
 #-------------------------------------------------------------------------
 
 """
-    simples(Rep::GroupRepresentationCategory{T,G}) where {T,G}
+    simples(Rep::GroupRepresentationCategory)
 
 Return a list of the simple objects in Rep.
 """
-function simples(Rep::GroupRepresentationCategory{T,G}) where {T,G}
+function simples(Rep::GroupRepresentationCategory)
     grp = base_group(Rep)
     F = base_ring(Rep)
 
@@ -398,7 +401,7 @@ function simples(Rep::GroupRepresentationCategory{T,G}) where {T,G}
         dims = [GAP.Globals.DimensionOfMatrixGroup(GAP.Globals.Range(m)) for m ∈ gap_reps]
 
         oscar_reps = [GAPGroupHomomorphism(grp, GL(dims[i],F), gap_reps[i]) for i ∈ 1:length(gap_reps)]
-        reps = [GroupRepresentation{T,G}(grp,m,F,d) for (m,d) ∈ zip(oscar_reps,dims)]
+        reps = [GroupRepresentation(Rep,grp,m,F,d) for (m,d) ∈ zip(oscar_reps,dims)]
 
         return reps
     end
@@ -432,23 +435,23 @@ end
 #   Hom Spaces
 #-------------------------------------------------------------------------
 
-struct GRHomSpace{T,G} <: HomSpace{T}
-    X::GroupRepresentation{T,G}
-    Y::GroupRepresentation{T,G}
-    basis::Vector{GroupRepresentationMorphism{T,G}}
-    parent::VectorSpaces{T}
+struct GRHomSpace<: HomSpace
+    X::GroupRepresentation
+    Y::GroupRepresentation
+    basis::Vector{GroupRepresentationMorphism}
+    parent::VectorSpaces
 end
 
 """
-    Hom(σ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}) where {T,G}
+    Hom(σ::GroupRepresentation, τ::GroupRepresentation)
 
 Return the hom-space of the representations as a vector space.
 """
-function Hom(σ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}) where {T,G}
+function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
     grp = base_group(σ)
     F = base_ring(σ)
 
-    if dim(σ)*dim(τ) == 0 return GRHomSpace{T,G}(σ,τ,GroupRepresentationMorphism{T,G}[],VectorSpaces(F)) end
+    if dim(σ)*dim(τ) == 0 return GRHomSpace(σ,τ,GroupRepresentationMorphism{T,G}[],VectorSpaces(F)) end
 
     gap_F = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
     generators = order(grp) == 1 ? elements(grp) : gens(grp)
@@ -467,10 +470,10 @@ function Hom(σ::GroupRepresentation{T,G}, τ::GroupRepresentation{T,G}) where {
 
     rep_homs = [Morphism(σ,τ,m,check = false) for m ∈ mat_homs]
 
-    return GRHomSpace{T,G}(σ,τ, rep_homs, VectorSpaces(F))
+    return GRHomSpace(σ,τ, rep_homs, VectorSpaces(F))
 end
 
-function zero(H::GRHomSpace{T,G}) where {T,G}
+function zero(H::GRHomSpace)
     dom = H.X
     codom = H.Y
     m = zero(MatrixSpace(base_ring(dom),dim(dom),dim(codom)))
@@ -486,13 +489,13 @@ end
 #   Restriction and Induction Functor
 #-------------------------------------------------------------------------
 
-function restriction(ρ::GroupRepresentation{T,G}, H::GAPGroup) where {T,G}
+function restriction(ρ::GroupRepresentation, H::GAPGroup)
     b,f = issubgroup(ρ.group, H)
-
+    RepH = RepresentationCategory(H,base_ring(ρ))
     if b == false throw(ErrorException("Not a subgroup")) end
-    if ρ.m == 0 return zero(RepresentationCategory(H,base_ring(ρ))) end
+    if ρ.m == 0 return zero(RepH) end
     h = hom(H,codomain(ρ.m), gens(H), [ρ(f(g)) for g ∈ gens(H)])
-    return GroupRepresentation{T,G}(H, h, base_ring(ρ), dim(ρ))
+    return GroupRepresentation(RepH, H, h, base_ring(ρ), dim(ρ))
 end
 
 function restriction(f::GroupRepresentationMorphism, H::GAPGroup)
@@ -500,7 +503,7 @@ function restriction(f::GroupRepresentationMorphism, H::GAPGroup)
     return Morphism(restriction(domain(f),H), restriction(codomain(f),H), matrix(f))
 end
 
-function induction(ρ::GroupRepresentation{T,S}, G::GAPGroup) where {T,S}
+function induction(ρ::GroupRepresentation, G::GAPGroup)
     H = ρ.group
 
     if H == G return ρ end
@@ -551,10 +554,24 @@ function show(io::IO, ρ::GroupRepresentation)
     print(io,"$(dim(ρ))-dimensional group representation over $(base_ring(ρ)) of $(ρ.group))")
 end
 
+function show(io::IO, f::GroupRepresentationMorphism)
+    println(io, "Group representation Morphism with defining matrix")
+    print(io,f.map)
+end
+
+#-------------------------------------------------------------------------
+#   Utility
+#-------------------------------------------------------------------------
+
 
 function to_gap_module(σ::GroupRepresentation,F::Field)
     grp = σ.group
     gap_F = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
     mats_σ = GAP.GapObj([julia_to_gap(σ(g)) for g ∈ gens(grp)])
     Mσ = GAP.Globals.GModuleByMats(mats_σ, gap_F)
+end
+
+function express_in_basis(f::GroupRepresentationMorphism, basis::Vector{GroupRepresentationMorphism})
+    o = one(base_group(domain(f)))
+    express_in_basis(Morphism(o => Morphism(f.map)), [Morphism(o => Morphism(g.map)) for g in basis])
 end
