@@ -22,7 +22,7 @@ import Oscar: VectorSpace, Field, elem_type, QQ, FieldElem,
                 ZZ, solve_left, PolynomialRing, groebner_basis, ideal, roots,
                 splitting_field, change_base_ring, isconstant, coeff, isindependent,
                 coefficients, isabelian, leading_monomial, gcd, msolve, fmpz, fmpq,
-                rref, NumberField
+                rref, NumberField, nf_elem, kernel, cokernel
 
 
 
@@ -53,7 +53,7 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         set_braiding!, Ising, zero_morphism, express_in_basis, solve_groebner,
         Center, CenterCategory, CenterObject, CenterMorphism, ev_coev, matrices,
         orbit_stabilizers, GRepRestriction, GRepInduction, Restriction, Induction,
-        print_multiplication_table, RingObject, RingMorphism
+        print_multiplication_table, RingObject, RingMorphism, kernel, cokernel
 
 include("Utility/FFE_to_FinField.jl")
 include("Utility/SolveGroebner.jl")

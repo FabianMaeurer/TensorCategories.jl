@@ -14,3 +14,9 @@ end
     f = id(a)⊕ (-id(b))
     @test compose((id(b)⊗f)⊗id(c), associator(b,a⊕b,c)) == compose(associator(b,a⊕b,c), id(b)⊗(f⊗id(c)))
 end
+
+# @testset "Ising: Duals, Ev, Coev" begin
+#     X = a^2 ⊕ b^2 ⊕ c
+#     @test dual(X) == X
+#     @test (id(X)⊗ev(X))∘associator(X,X,X)∘(coev(X)⊗id(X)) == id(X)
+# end

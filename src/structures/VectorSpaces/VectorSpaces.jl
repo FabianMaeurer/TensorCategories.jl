@@ -235,7 +235,23 @@ function dsum(f::VectorSpaceMorphism,g::VectorSpaceMorphism)
     return VSMorphism(m,dsum(domain(f),domain(g)),dsum(codomain(f),codomain(g)))
 end
 
+#-----------------------------------------------------------------
+#   Functionality: (Co)Kernel
+#-----------------------------------------------------------------
 
+function kernel(f::VSMorphism)
+    F = base_ring(domain(f))
+    d,k = kernel(f.m, F, side = :left)
+    K = VectorSpaceObject(parent(domain(f)), d)
+    return K, Morphism(K,domain(f),k)
+end
+
+function cokernel(f::VSMorphism)
+    F = base_ring(domain(f))
+    d,k = kernel(f.m, F)
+    K = VectorSpaceObject(parent(domain(f)), d)
+    return K, Morphism(codomain(f), K, k)
+end
 #-----------------------------------------------------------------
 #   Functionality: Tensor Product
 #-----------------------------------------------------------------

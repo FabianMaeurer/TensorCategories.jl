@@ -103,7 +103,7 @@ end
 #     F.coev = coev
 # end
 
-dim(X::RingObject) = Int(tr(id(X)))
+dim(X::RingObject) = base_ring(X)(tr(id(X)))
 
 (::Type{Int})(x::fmpq) = Int(numerator(x))
 
@@ -137,6 +137,7 @@ function associator(X::RingObject, Y::RingObject, Z::RingObject)
     filter!(e -> e[2] != 0, cod_order)
     sort!(cod_order)
 
+    # Associator
     for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n
         for i2 ∈ 1:X[i], j2 ∈ 1:Y[j], k2 ∈ 1:Z[k]
             T = C[i]⊗C[j]⊗C[k]
@@ -158,7 +159,7 @@ function associator(X::RingObject, Y::RingObject, Z::RingObject)
         cod_i = filter(e -> e[1] == i, cod_order)
         ass_i = filter(e -> e[1] == i, ass_order)
 
-        c_ass = sortperm(ass_i, by = t -> findfirst(e -> e == t, dom_i))
+        c_ass = vector_permutation(dom_i,ass_i)
 
         dom_dims = [k for (_,k,_) ∈ dom_i]
         ass_dims = [k for (_,k,_) ∈ ass_i]
@@ -167,8 +168,11 @@ function associator(X::RingObject, Y::RingObject, Z::RingObject)
         # Permutation dom -> associator
         ass_perm = zero(MatrixSpace(F,sum(dom_dims),sum(dom_dims)))
         j = 0
+
         for (k,d) ∈ zip(c_ass,dom_dims)
+
             nk = sum(ass_dims[1:k-1])
+
             for i ∈ 1:d
                 ass_perm[j+i,nk+i] = F(1)
             end
@@ -177,24 +181,43 @@ function associator(X::RingObject, Y::RingObject, Z::RingObject)
 
         # Permutation associator -> cod
         cod_perm = zero(MatrixSpace(F,sum(dom_dims),sum(dom_dims)))
-        c_cod = sortperm(cod_i, by = t -> findfirst(e -> e == t, ass_i))
+
+        c_cod = vector_permutation(ass_i,cod_i)
         j = 0
         for (k,d) ∈ zip(c_cod,ass_dims)
             nk = sum(cod_dims[1:k-1])
+
             for i ∈ 1:d
                 cod_perm[j+i,nk+i] = F(1)
             end
             j = j+d
         end
         comp_maps[i] = ass_perm*comp_maps[i]*cod_perm
+
     end
+
     return Morphism(dom,dom, comp_maps)
 end
+
+function vector_permutation(A::Vector,B::Vector)
+    temp = deepcopy(B)
+    perm = Int[]
+    for a ∈ A
+        i = findall(e -> e == a, temp)
+        j = filter(e -> !(e ∈ perm), i)[1]
+        perm = [perm; j]
+    end
+    return perm
+end
+
+
 
 #-------------------------------------------------------------------------------
 #   Functionality
 #-------------------------------------------------------------------------------
 issemisimple(::RingCategory) = true
+
+issimple(X::RingObject) = sum(X.components) == 1
 
 ==(X::RingObject, Y::RingObject) = parent(X) == parent(Y) && X.components == Y.components
 ==(f::RingMorphism, g::RingMorphism) = domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
@@ -215,46 +238,85 @@ function +(f::RingMorphism, g::RingMorphism)
     RingMorphism(domain(f), codomain(f), [m + n for (m,n) ∈ zip(f.m,g.m)])
 end
 
+"""
+    dual(X::RingObject)
+
+Return the dual object of ``X``. An error is thrown if ``X`` is not rigid.
+"""
 function dual(X::RingObject)
-    dualcoeffs = parent(X).duals
-    duals = [RingObject(parent(X),c) for c ∈ dualcoeffs]
-    return dsum([duals[i]^(X.components[i]) for i ∈ 1:length(duals)])
+    C = parent(X)
+
+    # Dual of simple Object
+    if issimple(X)
+        # Check for rigidity
+        i = findfirst(e -> e == 1, X.components)
+        j = findall(e -> C.tensor_product[i,e,1] >= 1, 1:C.simples)
+        if length(j) != 1
+            throw(ErrorException("Object not rigid."))
+        end
+        return RingObject(C,[i == j[1] ? 1 : 0 for i ∈ 1:C.simples])
+    end
+
+    # Build dual from simple objects
+    return dsum([dual(Y)^(X.components[i]) for (Y,i) ∈ zip(simples(C), 1:C.simples)])
 end
 
 function coev(X::RingObject) where T
-    @assert (l = length(X.components[X.components .> 0])) <= 1 "Not a simple power"
+    DX = dual(X)
+    C = parent(X)
+    F = base_ring(C)
 
-    if l == 0 return zero_morphism(X,X) end
+    if sum(X.components) == 0 return zero_morphism(one(C), X) end
 
-    cod = X⊗dual(X)
-    n = cod.components[1]
-    k = sum(X.components)
-    m = zero_morphism(one(parent(X)),cod).m
+    m = []
 
-    nc = div(n,k)
-    for i ∈ 1:k
-        m[1][1,(nc+1)*(i-1)+i] = 1
+    for (x,k) ∈ zip(simples(C),X.components), y ∈ simples(C)
+
+        if x == dual(y)
+            c = [F(a==b) for a ∈ 1:k, b ∈ 1:k][:]
+            m = [m; c]
+        else
+            c = [0 for _ ∈ 1:(x⊗y).components[1]]
+            m = [m; c]
+        end
     end
 
-    return RingMorphism(one(parent(X)), cod,m)
+    mats = matrices(zero_morphism(one(C), X⊗DX))
+    M = parent(mats[1])
+    mats[1] = M(F.(m))
+    return Morphism(one(C), X⊗DX, mats)
 end
 
 function ev(X::RingObject)
-    @assert (l = length(X.components[X.components .> 0])) <= 1 "Not a simple power"
-    if l == 0 return zero_morphism(X,X) end
+    DX = dual(X)
+    C = parent(X)
+    F = base_ring(C)
 
-    dom = dual(X)⊗X
-    n = dom.components[1]
-    k = sum(X.components)
-    m = zero_morphism(dom,one(parent(X))).m
-
-    for i ∈ 1:k
-        m[1][(i-1)*(k+1) + 1,1] = 1
+    # Simple Objects
+    if issimple(X)
+        # If X is simple
+        e = basis(Hom(DX⊗X, one(C)))[1]
+        # Scale ev
+        f = (id(X)⊗e)∘associator(X,DX,X)∘(coev(X)⊗id(X))
+        return inv(F(f))*e
     end
 
+    m = elem_type(F)[]
+    #Arbitrary Objects
+    for (x,k) ∈ zip(simples(C),DX.components), y ∈ simples(C)
+        if x == dual(y)
+            c = F(ev(y)[1]).*([F(a==b) for a ∈ 1:k, b ∈ 1:k][:])
+            m = [m; c]
+        else
+            c = [0 for _ ∈ 1:(x⊗y).components[1]]
+            m = [m; c]
+        end
+    end
 
-    return RingMorphism(dom,one(parent(X)),m)
-
+    mats = matrices(zero_morphism(X⊗DX, one(C)))
+    M = parent(mats[1])
+    mats[1] = M(F.(m))
+    return Morphism(X⊗DX,one(C),mats)
 end
 
 function spherical(X::RingObject)
@@ -290,15 +352,13 @@ function matrices(f::RingMorphism)
     f.m
 end
 
-function tr(f::RingMorphism)
-    return sum([tr(n) for n in f.m])
-end
 
 function (F::Field)(f::RingMorphism)
-    if !(domain(f) == codomain(f) == one(parent(domain(f))))
+    if !(domain(f) == codomain(f) && issimple(domain(f)))
         throw(ErrorException("Cannot convert Morphism to $F"))
     end
-    return F(f.m[1][1,1])
+    i = findfirst(e -> e == 1, domain(f).components)
+    return F(f.m[i][1,1])
 end
 #-------------------------------------------------------------------------------
 #   Tensor Product
@@ -426,7 +486,7 @@ function Ising()
     set_associator!(C,3,1,3, matrices(id(C[1])⊕(-id(C[2]))))
     set_associator!(C,3,2,3, matrices((-id(C[1]))⊕id(C[2])))
     z = zero(MatrixSpace(F,0,0))
-    set_associator!(C,3,3,3, [z, z, inv(a)*matrix(F,[1 -1; -1 1])])
+    set_associator!(C,3,3,3, [z, z, inv(a)*matrix(F,[1 1; 1 -1])])
 
     set_braiding!(C, (X,Y) -> id(X⊗Y))
     #set_duals!(C,[[1,0,0], [0,1,0], [0,0,1]])

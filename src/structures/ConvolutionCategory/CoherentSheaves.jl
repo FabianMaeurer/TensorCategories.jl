@@ -144,7 +144,7 @@ morphisms = true.
 """
 function dsum(X::CohSheaf, Y::CohSheaf, morphisms::Bool = false)
     sums = [dsum(x,y,true) for (x,y) ∈ zip(stalks(X), stalks(Y))]
-    Z = CohSheaf{T,G}(parent(X), [s[1] for s ∈ sums])
+    Z = CohSheaf(parent(X), [s[1] for s ∈ sums])
 
     if !morphisms return Z end
 
@@ -167,6 +167,22 @@ end
 
 product(X::CohSheaf,Y::CohSheaf,projections = false) = projections ? dsum(X,Y,projections)[[1,3]] : dsum(X,Y)
 coproduct(X::CohSheaf,Y::CohSheaf,projections = false) = projections ? dsum(X,Y,projections)[[1,2]] : dsum(X,Y)
+
+#-----------------------------------------------------------------
+#   Functionality: (Co)Kernel
+#-----------------------------------------------------------------
+
+function kernel(f::CohSheafMorphism)
+    kernels = [kernel(g) for g ∈ f.m]
+    K = CohSheaf(parent(domain(f)), [k for (k,_) ∈ kernels])
+    return K, Morphism(K, domain(f), [m for (_,m) ∈ kernels])
+end
+
+function cokernel(f::CohSheafMorphism)
+    cokernels = [cokernel(g) for g ∈ f.m]
+    C = CohSheaf(parent(domain(f)), [c for (c,_) ∈ cokernels])
+    return C, Morphism(codomain(f), C, [m for (_,m) ∈ cokernels])
+end
 
 #-----------------------------------------------------------------
 #   Functionality: Tensor Product

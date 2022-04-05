@@ -243,6 +243,52 @@ function (F::Field)(f::GroupRepresentationMorphism)
         throw(ErrorException("Cannot coerce"))
     end
 end
+
+#-------------------------------------------------------------------------
+#   Functionality: (Co)Kernel
+#-------------------------------------------------------------------------
+
+function kernel(f::GroupRepresentationMorphism)
+    ρ = domain(f)
+    G = base_group(ρ)
+    F = base_ring(ρ)
+    d,k = kernel(f.map, side = :left)
+    k = k[1:d,:]
+
+    if d == 0
+        return zero(parent(ρ)), zero_morphism(zero(parent(ρ)), ρ)
+    end
+
+    k_inv = transpose(solve_left(transpose(k), one(MatrixSpace(F,d,d))))
+
+    generators = order(G) == 1 ? elements(G) : gens(G)
+
+    images = [k*matrix(ρ(g))*k_inv for g ∈ generators]
+
+    K = Representation(G, generators, images)
+
+    return K, Morphism(K,ρ,k)
+end
+
+function cokernel(f::GroupRepresentationMorphism)
+    ρ = codomain(f)
+    G = base_group(ρ)
+    F = base_ring(ρ)
+    d,c = kernel(f.map, side = :right)
+    c = c[:,1:d]
+
+    if d == 0
+        return zero(parent(ρ)), zero_morphism(ρ,zero(parent(ρ)))
+    end
+
+    c_inv = solve_left(c, one(MatrixSpace(F,d,d)))
+
+    generators = order(G) == 1 ? elements(G) : gens(G)
+
+    images = [c_inv*matrix(ρ(g))*c for g ∈ generators]
+    C = Representation(G, generators, images)
+    return C, Morphism(ρ,C,c)
+end
 #-------------------------------------------------------------------------
 #   Necessities
 #-------------------------------------------------------------------------

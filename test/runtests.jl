@@ -1,5 +1,6 @@
 using JuCat
-using Test
+using Oscar,Test
 
 
 include("RingCategoryTests/IsingTests.jl")
+include("VectorSpacesTest/VSTest.jl")
