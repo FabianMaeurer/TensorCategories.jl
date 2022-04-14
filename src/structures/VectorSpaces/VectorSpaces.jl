@@ -250,9 +250,9 @@ end
 function cokernel(f::VSMorphism)
     F = base_ring(domain(f))
     d,k = kernel(f.m, F)
-    k = k[1:d,:]
+    k = k[:,1:d]
     K = VectorSpaceObject(parent(domain(f)), d)
-    return K, Morphism(codomain(f), K, transpose(k))
+    return K, Morphism(codomain(f), K, k)
 end
 #-----------------------------------------------------------------
 #   Functionality: Tensor Product
