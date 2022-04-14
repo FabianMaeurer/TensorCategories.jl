@@ -99,7 +99,7 @@ end
 Check whether ``X``and ``Y`` are isomorphic and the isomorphism if possible.
 """
 function isisomorphic(X::CohSheaf, Y::CohSheaf)
-    m = GroupRepresentationMorphism{T,G}[]
+    m = GroupRepresentationMorphism[]
     for (s,r) ∈ zip(stalks(X),stalks(Y))
         b, iso = isisomorphic(s,r)
         if !b return false, nothing end
@@ -232,7 +232,7 @@ function compose(f::CohSheafMorphism, g::CohSheafMorphism)
 end
 
 function +(f::CohSheafMorphism, g::CohSheafMorphism)
-    @assert domain(f) == domain(g) && codomain(f) == codomain(g) "Not compatible"
+    #@assert domain(f) == domain(g) && codomain(f) == codomain(g) "Not compatible"
     return Morphism(domain(f), codomain(f), [fm + gm for (fm,gm) ∈ zip(f.m,g.m)])
 end
 
@@ -241,6 +241,10 @@ function *(x,f::CohSheafMorphism)
 end
 
 matrices(f::CohSheafMorphism) = matrix.(f.m)
+
+function inv(f::CohSheafMorphism)
+    return Morphism(codomain(f), domain(f), [inv(g) for g in f.m])
+end
 
 #-----------------------------------------------------------------
 #   Simple Objects
@@ -394,7 +398,7 @@ function pushf_obj_map(CX,CY,X,f)
 end
 
 function pushf_mor_map(CX,CY,m,f)
-    mor = GroupRepresentationMorphism{typeof(CX).parameters...}[]
+    mor = GroupRepresentationMorphism[]
 
     for i ∈ 1:length(CY.orbit_reps)
         y = CY.orbit_reps[i]

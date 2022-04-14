@@ -151,23 +151,18 @@ function iscentral(Z::Object, simples::Vector = simples(parent(Z)))
         push!(ideal_eqs, p...)
     end
 
-    #normalize isomorphisms
     I = ideal([f for f ∈ unique(ideal_eqs) if f != 0])
 
-    # for i ∈ 1:dim(I)+1
-    #     push!(ideal_eqs, sum(vars[i] .^2) - dim(Homs[i]))
-    # end
     #Require e_Z(1) = id(Z)
     one_c = QQ.(express_in_basis(id(Z), basis(End(Z))))
     push!(ideal_eqs, (vars[1] .- one_c)...)
 
     I = ideal([f for f ∈ unique(ideal_eqs) if f != 0])
-
     if dim(I) < 0 return false,nothing end
-
+    @show dim(I)
     coeffs = recover_solutions(msolve(I),base_ring(Z))
 
-    centrals = CenterObject{elem_type(base_ring(Z))}[]
+    centrals = CenterObject[]
 
     C = Center(parent(Z))
 

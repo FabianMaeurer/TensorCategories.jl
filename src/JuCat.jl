@@ -28,8 +28,7 @@ import Oscar: VectorSpace, Field, elem_type, QQ, FieldElem,
 
 
 export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
-        GradedVectorSpaces, GradedVectorSpaceObject, GradedVectorSpaceMorphism,
-        VectorSpaceObject, simples, FusionCategory,
+        GradedVectorSpaces, VectorSpaceObject, simples,
         VectorSpaceMorphism, parent, dsum,⊕, domain, codomain, compose, ∘, ^, ⊗,
         tensor_product,==, associator, basis, id, getindex, one, zero, Forgetful,
         Functor, Sets, SetObject, SetMorphism, inv, product, coproduct,
@@ -53,7 +52,8 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         set_braiding!, Ising, zero_morphism, express_in_basis, solve_groebner,
         Center, CenterCategory, CenterObject, CenterMorphism, ev_coev, matrices,
         orbit_stabilizers, GRepRestriction, GRepInduction, Restriction, Induction,
-        print_multiplication_table, RingObject, RingMorphism, kernel, cokernel
+        print_multiplication_table, RingObject, RingMorphism, kernel, cokernel,
+        image, isgraded, cyclic_group_3cocycle, decompose_morphism
 
 include("Utility/FFE_to_FinField.jl")
 include("Utility/SolveGroebner.jl")

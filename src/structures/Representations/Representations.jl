@@ -8,7 +8,7 @@ abstract type Representation <: Object end
 # abstract type AlgebraRepresentation <: Representation end
 # abstract type HopfAlgebraRepresentation <: Representation end
 
-abstract type RepresentationMorphism <: Morphism end
+abstract type RepresentationMorphism <: VectorSpaceMorphism end
 
 
 dim(ρ::Representation) = ρ.dim

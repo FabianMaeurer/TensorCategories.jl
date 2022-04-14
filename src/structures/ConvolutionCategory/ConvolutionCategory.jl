@@ -79,6 +79,7 @@ orbit_index(X::ConvolutionCategory, y) = orbit_index(X.squaredCoh, y)
 Return the stalks of the sheaf ``X``.
 """
 stalks(X::ConvolutionObject) = stalks(X.sheaf)
+stalk(X::ConvolutionObject, x) = stalk(X.sheaf,x)
 
 ==(X::ConvolutionObject,Y::ConvolutionObject) = X.sheaf == Y.sheaf
 
@@ -100,8 +101,7 @@ id(X::ConvolutionObject) = ConvolutionMorphism(X,X,id(X.sheaf))
 function associator(X::ConvolutionObject, Y::ConvolutionObject, Z::ConvolutionObject)
     dom = (X⊗Y)⊗Z
     cod = X⊗(Y⊗Z)
-    _,f = isisomorphic(dom,cod)
-    return f
+    return inv(decompose_morphism(cod))∘decompose_morphism(dom)
 end
 #-----------------------------------------------------------------
 #   Functionality: Direct Sum
@@ -136,8 +136,8 @@ function dsum(f::ConvolutionMorphism, g::ConvolutionMorphism)
     return ConvolutionMorphism(dom,codom,m)
 end
 
-product(X::ConvolutionObject,Y::ConvolutionObject,projections = false) = projections ? dsum(X,Y,projections)[[1,3]] : dsum(X,Y)
-coproduct(X::ConvolutionObject,Y::ConvolutionObject,projections = false) = projections ? dsum(X,Y,projections)[[1,2]] : dsum(X,Y)
+product(X::ConvolutionObject,Y::ConvolutionObject,projections::Bool = false) = projections ? dsum(X,Y,projections)[[1,3]] : dsum(X,Y)
+coproduct(X::ConvolutionObject,Y::ConvolutionObject,projections::Bool = false) = projections ? dsum(X,Y,projections)[[1,2]] : dsum(X,Y)
 
 """
     zero(C::ConvolutionCategory)
@@ -145,6 +145,21 @@ coproduct(X::ConvolutionObject,Y::ConvolutionObject,projections = false) = proje
 Return the zero object in Conv(``X``).
 """
 zero(C::ConvolutionCategory) = ConvolutionObject(zero(C.squaredCoh),C)
+
+
+#-----------------------------------------------------------------
+#   Functionality: (Co)Kernel
+#-----------------------------------------------------------------
+
+function kernel(f::ConvolutionMorphism)
+    K,k = kernel(f.m)
+    return ConvolutionObject(K,parent(domain(f))), Morphism(K, domain(f), k)
+end
+
+function cokernel(f::ConvolutionMorphism)
+    C,c = cokernel(f.m)
+    return ConvolutionObject(C, parent(domain(f))), Morphism(codomain(f), C, c)
+end
 
 #-----------------------------------------------------------------
 #   Functionality: Tensor Product
@@ -192,6 +207,13 @@ function one(C::ConvolutionCategory)
     return ConvolutionObject(CohSheaf(C.squaredCoh, stlks), C)
 end
 
+function dual(X::ConvolutionObject)
+    orbit_reps = parent(X).squaredCoh.orbit_reps
+    GSet = parent(X).squaredCoh.GSet
+    perm = [findfirst(e -> e ∈ orbit(GSet, (y,x)), orbit_reps) for (x,y) ∈ orbit_reps]
+    reps = [dual(ρ) for ρ ∈ stalks(X)][perm]
+    return ConvolutionObject(CohSheaf(parent(X.sheaf), reps), parent(X))
+end
 #-----------------------------------------------------------------
 #   Functionality: Morphisms
 #-----------------------------------------------------------------
@@ -214,6 +236,10 @@ end
 
 function matrices(f::ConvolutionMorphism)
     matrices(f.m)
+end
+
+function inv(f::ConvolutionMorphism)
+    return Morphism(codomain(f), domain(f), inv(f.m))
 end
 #-----------------------------------------------------------------
 #   Simple Objects

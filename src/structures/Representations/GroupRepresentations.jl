@@ -178,8 +178,8 @@ function isisomorphic(σ::GroupRepresentation, τ::GroupRepresentation)
     gap_F = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
 
     #Build the modules from σ and τ
-    mats_σ = GAP.GapObj([julia_to_gap(σ(g)) for g ∈ gens(grp)])
-    mats_τ = GAP.GapObj([julia_to_gap(τ(g)) for g ∈ gens(grp)])
+    mats_σ = GAP.GapObj([GAP.julia_to_gap(σ(g)) for g ∈ gens(grp)])
+    mats_τ = GAP.GapObj([GAP.julia_to_gap(τ(g)) for g ∈ gens(grp)])
 
 
     Mσ = GAP.Globals.GModuleByMats(mats_σ, gap_F)
@@ -202,7 +202,7 @@ function dual(ρ::GroupRepresentation)
     return Representation(G, generators, [transpose(matrix(ρ(inv(g)))) for g ∈ generators])
 end
 
-function ev(ρ::GroupRepresentation)y
+function ev(ρ::GroupRepresentation)
     dom = dual(ρ) ⊗ ρ
     cod = one(parent(ρ))
     F = base_ring(ρ)
@@ -252,6 +252,7 @@ function kernel(f::GroupRepresentationMorphism)
     ρ = domain(f)
     G = base_group(ρ)
     F = base_ring(ρ)
+
     d,k = kernel(f.map, side = :left)
     k = k[1:d,:]
 
@@ -497,14 +498,14 @@ function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
     grp = base_group(σ)
     F = base_ring(σ)
 
-    if dim(σ)*dim(τ) == 0 return GRHomSpace(σ,τ,GroupRepresentationMorphism{T,G}[],VectorSpaces(F)) end
+    if dim(σ)*dim(τ) == 0 return GRHomSpace(σ,τ,GroupRepresentationMorphism[],VectorSpaces(F)) end
 
     gap_F = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
     generators = order(grp) == 1 ? elements(grp) : gens(grp)
 
     #Build the modules from σ and τ
-    mats_σ = GAP.GapObj([julia_to_gap(σ(g)) for g ∈ generators])
-    mats_τ = GAP.GapObj([julia_to_gap(τ(g)) for g ∈ generators])
+    mats_σ = GAP.GapObj([GAP.julia_to_gap(σ(g)) for g ∈ generators])
+    mats_τ = GAP.GapObj([GAP.julia_to_gap(τ(g)) for g ∈ generators])
     Mσ = GAP.Globals.GModuleByMats(mats_σ, gap_F)
     Mτ = GAP.Globals.GModuleByMats(mats_τ, gap_F)
 

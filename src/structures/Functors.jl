@@ -22,8 +22,8 @@ struct Forgetful <: Functor
 end
 
 function Forgetful(C::GradedVectorSpaces, D::VectorSpaces)
-    obj_map = x -> dsum([V for (g,V) in x.V]...)
-    mor_map = m -> dsum([f for (g,f) in m.m]...)
+    obj_map = x -> X.V
+    mor_map = f -> Morphism(domain(f).V, codomain(f).V, f.m)
     return Forgetful(C,D,obj_map, mor_map)
 end
 

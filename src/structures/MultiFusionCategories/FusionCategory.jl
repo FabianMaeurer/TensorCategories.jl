@@ -147,7 +147,7 @@ function associator(X::RingObject, Y::RingObject, Z::RingObject)
 
     # Order of summands in associator
     ass_order_temp = [(k, m1*m2*table[i,j,k],[i,j]) for k ∈ 1:n, (i,m1) ∈ zip(1:n,X.components), (j,m2) ∈ zip(1:n,Y.components)][:]
-    filter!(e -> e[2] != 0, dom_order_temp)
+    filter!(e -> e[2] != 0, ass_order_temp)
     ass_order = [(k,m1*m2*table[i,j,k], [id; j]) for k ∈ 1:n, (i,m1,id) ∈ ass_order_temp, (j,m2) ∈ zip(1:n,Z.components)][:]
     filter!(e -> e[2] != 0, ass_order)
 
@@ -515,7 +515,7 @@ function Hom(X::RingObject, Y::RingObject)
 
     d = sum([x*y for (x,y) ∈ zip(Xi,Yi)])
 
-    if d == 0 return FCatHomSpace{T}(X,Y,RingMorphism{T}[], VectorSpaces(F)) end
+    if d == 0 return RingCatHomSpace(X,Y,RingMorphism[], VectorSpaces(F)) end
 
     basis = [zero_morphism(X,Y).m for i ∈ 1:d]
     next = 1

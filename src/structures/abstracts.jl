@@ -53,6 +53,9 @@ Return the base ring ```k```of the ```k```-linear category ```C```.
 """
 base_ring(C::Category) = C.base_ring
 
+base_group(C::Category) = C.base_group
+base_group(X::Object) = parent(X).base_group
+
 #---------------------------------------------------------
 #   Direct Sums, Products, Coproducts
 #---------------------------------------------------------
@@ -237,6 +240,12 @@ isadditive(C::Category) = isabelian(C)
 
 islinear(C::Category) = isabelian(C)
 
+issemisimple(C::Category) = ismultitensor(C)
+
+function image(f::Morphism)
+    C,c = cokernel(f)
+    return kernel(c)
+end
 
 ∘(f::Morphism...) = compose(reverse(f)...)
 
@@ -320,4 +329,31 @@ function smatrix(C::Category, simples = simples(C))
         return m
     end
 
+end
+
+#-------------------------------------------------------
+# decomposition morphism
+#-------------------------------------------------------
+
+function decompose_morphism(X::Object)
+    C = parent(X)
+    @assert issemisimple(C) "Semisimplicity required"
+
+    S = simples(C)
+
+    proj = [basis(Hom(X,s)) for s ∈ S]
+    dims = [length(p) for p ∈ proj]
+
+    Z = dsum([s^d for (s,d) ∈ zip(S,dims)])
+    incl = [basis(Hom(s,Z)) for s ∈ S]
+
+    f = zero_morphism(X,Z)
+
+    for (pk,ik) ∈ zip(proj, incl)
+        for (p,i) ∈ zip(pk,ik)
+            g = i∘p
+            f = f + g
+        end
+    end
+    return f
 end
