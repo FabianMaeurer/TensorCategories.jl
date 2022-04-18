@@ -1,6 +1,7 @@
 
 struct Cocycle{N}
     group::GAPGroup
+    F::Field
     m::Union{Nothing,Dict{NTuple{N,G},T}} where {G<:GroupElem,T<:FieldElem}
 end
 
@@ -10,16 +11,16 @@ end
 Return a ```N```-cocylce of ```G```. By now the condition is not checked.
 """
 function Cocycle(G::GAPGroup, m::Dict{NTuple{N,S},T}) where {S<:GroupElem,T<:FieldElem,N}
-    return Cocycle{N}(G,m)
+    return Cocycle{N}(G,parent(values(m)[1]),m)
 end
 
 function Cocycle(G::GAPGroup, N::Int, f::Function)
     Cocycle(G,Dict(x => f(x...) for x ∈ Base.product([G for i ∈ 1:N]...)))
 end
 
-trivial_3_cocycle(G) = Cocycle{3}(G,nothing)
+trivial_3_cocycle(G,F) = Cocycle{3}(G,F,nothing)
 
-(c::Cocycle{N})(x...) where N = c.m == nothing ? 1 : c.m[x]
+(c::Cocycle{N})(x...) where N = c.m == nothing ? c.F(1) : c.m[x]
 
 function cyclic_group_3cocycle(G::GAPGroup, F::Field, ξ::FieldElem)
     g = G[1]

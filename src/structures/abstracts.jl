@@ -2,7 +2,6 @@
 #   Structs for categories
 #------------------------------------------------------------------------
 
-
 abstract type Category end
 
 abstract type Object end
@@ -320,20 +319,26 @@ dim(C::Category) = sum(dim(s)^2 for s ∈ simples(C))
 
 function smatrix(C::Category, simples = simples(C))
     @assert issemisimple(C) "Category has to be semisimple"
-
+    F = base_ring(C)
     m = [tr(braiding(s,t)∘braiding(t,s)) for s ∈ simples, t ∈ simples]
     try
-        F = base_ring(C)
-        return [F(n) for n ∈ m]
+        return matrix(F,[F(n) for n ∈ m])
     catch
-        return m
     end
-
+    return matrix(F,m)
 end
 
 #-------------------------------------------------------
 # decomposition morphism
 #-------------------------------------------------------
+
+function decompose(X::Object)
+    C = parent(X)
+    @assert issemisimple(C) "Category not semisimple"
+    S = simples(C)
+    dimensions = [dim(Hom(X,s)) for s ∈ S]
+    return [(s,d) for (s,d) ∈ zip(S,dimensions) if d > 0]
+end
 
 function decompose_morphism(X::Object)
     C = parent(X)
@@ -356,4 +361,21 @@ function decompose_morphism(X::Object)
         end
     end
     return f
+end
+
+
+
+
+#-------------------------------------------------------
+# Semisimple: Subobjects
+#-------------------------------------------------------
+
+function unique_simples(simples::Vector{<:Object})
+    unique_simples = simples[1:1]
+    for s ∈ simples[2:end]
+        if sum([dim(Hom(s,u)) for u ∈ unique_simples]) == 0
+            unique_simples = [unique_simples; s]
+        end
+    end
+    return unique_simples
 end

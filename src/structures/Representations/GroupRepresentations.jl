@@ -17,6 +17,8 @@ struct GroupRepresentationMorphism <: RepresentationMorphism
     map::MatElem
 end
 
+istensor(::GroupRepresentationCategory) = true
+isfusion(C::GroupRepresentationCategory) = mod(order(C.group),characteristic(base_ring(C))) != 0
 #-------------------------------------------------------------------------
 #   Constructors
 #-------------------------------------------------------------------------

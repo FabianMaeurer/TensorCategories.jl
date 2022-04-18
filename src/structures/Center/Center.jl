@@ -38,13 +38,27 @@ function Morphism(dom::CenterObject, cod::CenterObject, m::Morphism)
     return CenterMorphism(dom,cod,m)
 end
 
+half_braiding(Z::CenterObject) = Z.γ
+
+isfusion(C::CenterCategory) = true
+
+function add_simple!(C::CenterCategory, S::CenterObject)
+    @assert dim(End(S)) == 1 "Not simple"
+    C.simples = unique_simples([simples(C); S])
+end
+
+spherical(X::CenterObject) = Morphism(X,dual(dual(X)), spherical(X.object))
+
+(F::Field)(f::CenterMorphism) = F(f.m)
 #-------------------------------------------------------------------------------
 #   Direct Sum & Tensor Product
 #-------------------------------------------------------------------------------
 
 function dsum(X::CenterObject, Y::CenterObject)
-    Z = X.object ⊕ Y.object
-    γZ = [y ⊕ q for (y,q) ∈ zip(X.γ, Y.γ)]
+    S = simples(parent(X.object))
+    Z,(ix,iy),(px,py) = dsum(X.object, Y.object,true)
+
+    γZ = [(id(S[i])⊗ix)∘(X.γ[i])∘(px⊗id(S[i])) + (id(S[i])⊗iy)∘(Y.γ[i])∘(py⊗id(S[i])) for i ∈ 1:length(S)]
     return CenterObject(parent(X), Z, γZ)
 end
 
@@ -65,6 +79,22 @@ function tensor_product(X::CenterObject, Y::CenterObject)
         push!(γ, a(S,x,y)∘(yX⊗id(y))∘inv(a(x,S,y))∘(id(x)⊗yY)∘a(x,y,S))
     end
     return CenterObject(parent(X), Z, γ)
+end
+
+function tensor_product(f::CenterMorphism,g::CenterMorphism)
+    dom = domain(f)⊗domain(g)
+    cod = codomain(f)⊗codomain(g)
+    return Morphism(dom,cod,f.m⊗g.m)
+end
+
+function zero(C::CenterCategory)
+    Z = zero(C.category)
+    CenterObject(C,Z,[zero_morphism(Z,Z) for _ ∈ simples(C.category)])
+end
+
+function one(C::CenterCategory)
+    Z = one(C.category)
+    CenterObject(C,Z,[id(s) for s ∈ simples(C.category)])
 end
 #-------------------------------------------------------------------------------
 #   Induction
@@ -93,17 +123,21 @@ end
 #   Is central?
 #-------------------------------------------------------------------------------
 
+function iscentral(Z::Object, simples::Vector{<:Object} = simples(parent(Z)))
+    if prod([isisomorphic(Z⊗s,s⊗Z)[1] for s ∈ simples]) == 0
+        return false
+    end
+    return dim(build_center_ideal(Z,simples)) >= 0
+end
 
-function iscentral(Z::Object, simples::Vector = simples(parent(Z)))
+
+
+function build_center_ideal(Z::Object, simples::Vector = simples(parent(Z)))
     @assert issemisimple(parent(Z)) "Not semisimple"
-
-    if dim(Z) == 0 return true end
 
     Homs = [Hom(Z⊗Xi, Xi⊗Z) for Xi ∈ simples]
     n = length(simples)
-    ks = [length(basis(Homs[i])) for i ∈ 1:n]
-
-    if prod(ks) == 0 return false, nothing end
+    ks = [dim(Homs[i]) for i ∈ 1:n]
 
     var_count = sum([dim(H) for H ∈ Homs])
 
@@ -121,27 +155,21 @@ function iscentral(Z::Object, simples::Vector = simples(parent(Z)))
     eqs = []
 
     for k ∈ 1:n, i ∈ 1:n, j ∈ 1:n
-        base = basis(Hom(Z⊗simples[k], simples[i]⊗simples[j]⊗Z))
+        base = basis(Hom(Z⊗simples[k], simples[i]⊗(simples[j]⊗Z)))
 
         for t ∈ basis(Hom(simples[k], simples[i]⊗simples[j]))
             e = [zero(R) for i ∈ base]
 
-            # for ai ∈ 1:dim(Homs[k]), bi ∈ 1:dim(Homs[j]), ci ∈ 1:dim(Homs[i])
-            #     a,b,c = basis(Homs[k])[ai], basis(Homs[j])[bi], basis(Homs[i])[ci]
-            #     l1 = express_in_basis((t⊗id(Z))∘a, base)
-            #     l2 = express_in_basis((id(simples[i])⊗b)∘associator(simples[i],Z,simples[j]) ∘ (c⊗id(simples[j])) ∘ inv(associator(Z,simples[i],simples[j])) ∘ (id(Z) ⊗ t), base)
-            #     e = e .+ (vars[k][ai] .* l1) .- (vars[j][bi]*vars[i][ci] .* l2)
-            # end
             l1 = [zero(R) for i ∈ base]
             l2 = [zero(R) for i ∈ base]
 
             for ai ∈ 1:dim(Homs[k])
                 a = basis(Homs[k])[ai]
-                l1 = l1 .+ vars[k][ai] .* QQ.(express_in_basis(associator(simples[i],simples[j],Z)∘(t⊗id(Z))∘a, base))
+                l1 = l1 .+ (vars[k][ai] .* QQ.(express_in_basis(associator(simples[i],simples[j],Z)∘(t⊗id(Z))∘a, base)))
             end
             for bi ∈ 1:dim(Homs[j]), ci ∈ 1:dim(Homs[i])
                 b,c = basis(Homs[j])[bi], basis(Homs[i])[ci]
-                l2 = l2 .+ (vars[j][bi]*vars[i][ci]) .* QQ.(express_in_basis((id(simples[i])⊗b)∘associator(simples[i],Z,simples[j]) ∘ (c⊗id(simples[j])) ∘ inv(associator(Z,simples[i],simples[j])) ∘ (id(Z) ⊗ t), base))
+                l2 = l2 .+ ((vars[j][bi]*vars[i][ci]) .* QQ.(express_in_basis((id(simples[i])⊗b)∘associator(simples[i],Z,simples[j]) ∘ (c⊗id(simples[j])) ∘ inv(associator(Z,simples[i],simples[j])) ∘ (id(Z) ⊗ t), base)))
             end
             push!(eqs, l1 .-l2)
         end
@@ -158,10 +186,12 @@ function iscentral(Z::Object, simples::Vector = simples(parent(Z)))
     push!(ideal_eqs, (vars[1] .- one_c)...)
 
     I = ideal([f for f ∈ unique(ideal_eqs) if f != 0])
-    if dim(I) < 0 return false,nothing end
-    @show dim(I)
-    coeffs = recover_solutions(msolve(I),base_ring(Z))
+end
 
+function braidings_from_ideal(Z::Object, I::Ideal, simples::Vector{<:Object})
+    Homs = [Hom(Z⊗Xi, Xi⊗Z) for Xi ∈ simples]
+    coeffs = recover_solutions(msolve(I),base_ring(Z))
+    ks = [dim(H) for H ∈ Homs]
     centrals = CenterObject[]
 
     C = Center(parent(Z))
@@ -178,38 +208,98 @@ function iscentral(Z::Object, simples::Vector = simples(parent(Z)))
         end
         centrals = [centrals; CenterObject(C, Z, ex)]
     end
-    return true, centrals
+    return centrals
 end
 
+function half_braidings(Z::Object; simples = simples(parent(Z)))
+
+    I = build_center_ideal(Z,simples)
+
+    d = dim(I)
+
+    if d < 0 return CenterObject[] end
+
+    if d == 0 return braidings_from_ideal(Z,I,simples) end
+
+    solutions = guess_solutions(Z,I,simples,CenterObject[],gens(base_ring(I)),d)
+
+    if length(solutions) == 0
+        return CenterObject[]
+    end
+    unique_sols = solutions[1:1]
+
+    for s ∈ solutions[2:end]
+        if sum([dim(Hom(s,u)) for u ∈ unique_sols]) == 0
+            unique_sols = [unique_sols; s]
+        end
+    end
+    return unique_sols
+end
+
+function guess_solutions(Z::Object, I::Ideal, simples::Vector{<:Object}, solutions::Vector{CenterObject}, vars, d = dim(I))
+    for y in vars
+        J = I + ideal([y*(y^2-1)])
+        d2 = dim(J)
+        if d2 == 0
+            return [solutions; braidings_from_ideal(Z,J,simples)]
+        elseif d2 < 0
+            return solutions
+        else
+            vars_new = filter(e -> e != y, vars)
+            return [solutions; guess_solutions(Z,J,simples,solutions,vars_new,d2)]
+        end
+    end
+end
 
 function center_simples(C::Category, simples = simples(C))
     d = dim(C)^2
 
     simples_indices = []
-    c_simples = typeof(simples[1])[]
-    d_max = d
+    c_simples = CenterObject[]
+    d_max = dim(C)
     d_rem = d
     k = length(simples)
 
-    coeffs = [i for i ∈ Base.product([0:d_max for i ∈ 1:k]...) if (sum(i) != 0 && sum((i .* dim.(simples)).^2) <= d_rem)][:]
+    coeffs = [i for i ∈ Base.product([0:d_max for i ∈ 1:k]...)][:][2:end]
 
     for c ∈ sort(coeffs, by = t -> (sum(t),length(t) - length([i for i ∈ t if i != 0])))
         if sum((c .* dim.(simples)).^2) > d_rem continue end
+
         if simples_covered(c,simples_indices) continue end
+
         X = dsum([simples[j]^c[j] for j ∈ 1:k])
 
-        ic, so = iscentral(X)
+        ic = iscentral(X)
 
         if ic
+            so = half_braidings(X, simples = simples)
             c_simples = [c_simples; so]
             d_rem = d_rem - sum([dim(x)^2 for x in so])
             if d_rem == 0 return c_simples end
             push!(simples_indices, c)
         end
     end
-
+    if d_rem > 0
+        @warn "Not all halfbraidings found"
+    end
     return c_simples
 end
+
+# function monoidal_completion(simples::Vector{CenterObject})
+#     complete_simples = simples
+#     for i ∈ 1:length(simples)
+#         for j ∈ i:length(simples)
+#             X,Y = simples[[i,j]]
+#             complete_simples = [complete_simples; [x for (x,m) ∈ simple_subobjects(X⊗Y)]]
+#             @show complete_simples
+#             complete_simples = unique_simples(complete_simples)
+#         end
+#     end
+#     if length(complete_simples) > length(simples)
+#         return monoidal_completion(complete_simples)
+#     end
+#     return complete_simples
+# end
 
 function simples_covered(c::Tuple, v::Vector)
     for w ∈ v
@@ -258,8 +348,17 @@ function partitions(d::Int64,k::Int64)
 end
 
 
-function build_half_braiding(Z::Object, Y::Object, ex::Vector, simples::Vector = simples(parent(Z)))
-
+function braiding(X::CenterObject, Y::CenterObject)
+    dom = X.object⊗Y.object
+    cod = Y.object⊗X.object
+    braid = zero_morphism(dom, cod)
+    for (s,ys) ∈ zip(simples(parent(X).category), X.γ)
+        proj = basis(Hom(Y.object,s))
+        if length(proj) == 0 continue end
+        incl = basis(Hom(s,Y.object))
+        braid = braid + sum([(i⊗id(X.object))∘ys∘(id(X.object)⊗p) for i ∈ incl, p ∈ proj][:])
+    end
+    return Morphism(X⊗Y,Y⊗X,braid)
 end
 
 #-------------------------------------------------------------------------------
@@ -282,6 +381,63 @@ end
 
 matrices(f::CenterMorphism) = matrices(f.m)
 matrix(f::CenterMorphism) = matrix(f.m)
+
+compose(f::CenterMorphism, g::CenterMorphism) = Morphism(domain(f), codomain(g), g.m∘f.m)
+
+function dual(X::CenterObject)
+    a = associator
+    e = ev(X.object)
+    c = coev(X.object)
+    γ = Morphism[]
+    dX = dual(X.object)
+    for (Xi,yXi) ∈ zip(simples(parent(X).category), X.γ)
+        f = (e⊗id(Xi⊗dX))∘inv(a(dX,X.object,Xi⊗dX))∘(id(dX)⊗a(X.object,Xi,dX))∘(id(dX)⊗(inv(yXi)⊗id(dX)))∘(id(dX)⊗inv(a(Xi,X.object,dX)))∘a(dX,Xi,X.object⊗dX)∘(id(dX⊗Xi)⊗c)
+        γ = [γ; f]
+    end
+    return CenterObject(parent(X),dX,γ)
+end
+
+function ev(X::CenterObject)
+    Morphism(dual(X)⊗X,one(parent(X)),ev(X.object))
+end
+
+function coev(X::CenterObject)
+    Morphism(one(parent(X)),X⊗dual(X),coev(X.object))
+end
+
+id(X::CenterObject) = Morphism(X,X,id(X.object))
+
+function tr(f::CenterMorphism)
+    C = parent(domain(f))
+    return CenterMorphism(one(C),one(C),tr(f.m))
+end
+#-------------------------------------------------------------------------------
+#   Functionality: Image
+#-------------------------------------------------------------------------------
+
+function kernel(f::CenterMorphism)
+    ker, incl = kernel(f.m)
+    f_inv = left_inverse(incl)
+
+    braiding = [(id(s)⊗f_inv)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), domain(f).γ)]
+
+    Z = CenterObject(parent(domain(f)), ker, braiding)
+    return Z, Morphism(Z,domain(f), incl)
+end
+
+
+function cokernel(f::CenterMorphism)
+    coker, proj = cokernel(f.m)
+    f_inv = right_inverse(proj)
+
+    braiding = [(proj⊗id(s))∘γ∘(id(s)⊗f_inv) for (s,γ) ∈ zip(simples(parent(domain(f.m))), codomain(f).γ)]
+
+    Z = CenterObject(parent(domain(f)), coker, braiding)
+    return Z, Morphism(codomain(f),Z, proj)
+end
+
+
+
 #-------------------------------------------------------------------------------
 #   Hom Spaces
 #-------------------------------------------------------------------------------
@@ -318,6 +474,7 @@ function central_projection(dom::CenterObject, cod::CenterObject, f::Morphism, s
     D = dim(C)
     proj = zero_morphism(X, Y)
     a = associator
+
     for (Xi, yX) ∈ zip(simples, dom.γ)
         #index of dual
         dualXi = findfirst(x -> isisomorphic(dual(Xi),x)[1], simples)
@@ -330,6 +487,7 @@ function central_projection(dom::CenterObject, cod::CenterObject, f::Morphism, s
     return inv(D*base_ring(dom)(1))*proj
 end
 
+zero_morphism(X::CenterObject, Y::CenterObject) = Morphism(X,Y,zero_morphism(X.object,Y.object))
 
 #-------------------------------------------------------------------------------
 #   Pretty Printing

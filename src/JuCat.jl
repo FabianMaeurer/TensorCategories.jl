@@ -2,9 +2,8 @@ module JuCat
 
 import Base: show,^,==, getindex, in, issubset, iterate, length,*,+,-, iterate,
                 getproperty
-
+                
 import Oscar.AbstractAlgebra.Integers
-
 
 import Oscar: VectorSpace, Field, elem_type, QQ, FieldElem,
                 dim, base_ring, MatrixSpace, GAPGroup, GroupElem,
@@ -22,10 +21,8 @@ import Oscar: VectorSpace, Field, elem_type, QQ, FieldElem,
                 ZZ, solve_left, PolynomialRing, groebner_basis, ideal, roots,
                 splitting_field, change_base_ring, isconstant, coeff, isindependent,
                 coefficients, isabelian, leading_monomial, gcd, msolve, fmpz, fmpq,
-                rref, NumberField, nf_elem, kernel, cokernel
-
-
-
+                rref, NumberField, nf_elem, kernel, cokernel, primary_decomposition,
+                Ideal, minpoly, image
 
 export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         GradedVectorSpaces, VectorSpaceObject, simples,
@@ -53,7 +50,9 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         Center, CenterCategory, CenterObject, CenterMorphism, ev_coev, matrices,
         orbit_stabilizers, GRepRestriction, GRepInduction, Restriction, Induction,
         print_multiplication_table, RingObject, RingMorphism, kernel, cokernel,
-        image, isgraded, cyclic_group_3cocycle, decompose_morphism
+        image, isgraded, cyclic_group_3cocycle, decompose_morphism,
+        central_objects, half_braiding, half_braidings, left_inverse, right_inverse,
+        simple_subobjects, add_simple!
 
 include("Utility/FFE_to_FinField.jl")
 include("Utility/SolveGroebner.jl")
@@ -74,11 +73,5 @@ include("structures/MultiFusionCategories/Duals.jl")
 include("structures/MISC/multiplication_table.jl")
 include("structures/GrothendieckRing.jl")
 include("structures/Center/Center.jl")
-
-
-
-
-
-
 
 end

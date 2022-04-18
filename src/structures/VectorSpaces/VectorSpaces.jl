@@ -20,7 +20,7 @@ struct VSMorphism <: VectorSpaceMorphism
     codomain::VectorSpaceObject
 end
 
-features(::VectorSpaces) = [:semisimple,:abelian,:linear,:monoidal, :additive]
+isfusion(::VectorSpaces) = true
 
 #-----------------------------------------------------------------
 #   Constructors
@@ -182,7 +182,7 @@ function coev(V::VectorSpaceObject)
     Morphism(dom,cod, transpose(matrix(base_ring(V), reshape(m,dim(cod),1))))
 end
 
-spherical(V::VSObject) = Morphism(V,dual(dual(V)), id(V).m)
+spherical(V::VectorSpaceObject) = Morphism(V,dual(dual(V)), id(V).m)
 
 #-----------------------------------------------------------------
 #   Functionality: Direct Sum
@@ -211,8 +211,8 @@ function dsum(X::VectorSpaceObject, Y::VectorSpaceObject, morphisms::Bool = fals
     ix = Morphism(X,V, matrix(F,[i == j ? 1 : 0 for i ∈ 1:dim(X), j ∈ 1:dim(V)]))
     iy = Morphism(Y,V, matrix(F,[i == j - dim(X) for i ∈ 1:dim(Y), j ∈ 1:dim(V)]))
 
-    px = Morphism(V,X, matrix(F,[i == j ? 1 : 0 for i ∈ 1:dim(V), j ∈ 1:dim(X)]))
-    py = Morphism(V,Y, matrix(F,[i == j ? 1 : 0 for i ∈ 1:dim(V), j ∈ 1:dim(Y)]))
+    px = Morphism(V,X, transpose(matrix(ix)))
+    py = Morphism(V,Y, transpose(matrix(iy)))
 
     return V,[ix,iy], [px,py]
 end
@@ -279,7 +279,7 @@ Return the tensor product of vector space morphisms.
 function tensor_product(f::VectorSpaceMorphism, g::VectorSpaceMorphism)
     D = tensor_product(domain(f),domain(g))
     C = tensor_product(codomain(f),codomain(g))
-    m = kronecker_product(g.m, f.m)
+    m = kronecker_product(f.m, g.m)
     return Morphism(D,C,m)
 end
 #
@@ -325,6 +325,22 @@ inv(f::VectorSpaceMorphism)= Morphism(codomain(f), domain(f), inv(matrix(f)))
 *(λ,f::VectorSpaceMorphism)  = Morphism(domain(f),codomain(f),parent(domain(f)).base_ring(λ)*f.m)
 
 isinvertible(f::VectorSpaceMorphism) = rank(f.m) == dim(domain(f)) == dimension(codomain(f))
+
+function left_inverse(f::VectorSpaceMorphism)
+    k = matrix(f)
+    d = rank(k)
+    F = base_ring(f)
+    k_inv = transpose(solve_left(transpose(k), one(MatrixSpace(F,d,d))))
+    return Morphism(codomain(f), domain(f), k_inv)
+end
+
+function right_inverse(f::VectorSpaceMorphism)
+    k = matrix(f)
+    d = rank(k)
+    F = base_ring(f)
+    c_inv = solve_left(k, one(MatrixSpace(F,d,d)))
+    return Morphism(codomain(f),domain(f), c_inv)
+end
 #---------------------------------------------------------------------------
 #   Associators
 #---------------------------------------------------------------------------
@@ -379,5 +395,8 @@ function express_in_basis(f::VectorSpaceMorphism, B::Vector{<:VectorSpaceMorphis
     F = base_ring(f)
     B_mat = matrix(F,hcat([[x for x ∈ b.m][:] for b ∈ B]...))
     f_mat = matrix(F, 1, *(size(f.m)...), [x for x ∈ f.m][:])
+
     return [x for x ∈ solve_left(transpose(B_mat),f_mat)][:]
 end
+
+(F::Field)(f::VectorSpaceMorphism) = F(matrix(f)[1,1])

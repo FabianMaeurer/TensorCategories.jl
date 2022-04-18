@@ -332,10 +332,10 @@ end
 #     sum(tr.(f.m))
 # end
 
-function smatrix(C::RingCategory)
-    θ = C.twist
-    #[inv(θ(i))*inv(θ(j))*sum() i ∈ simples(C), j ∈ simples(C)]
-end
+# function smatrix(C::RingCategory)
+#     θ = C.twist
+#     #[inv(θ(i))*inv(θ(j))*sum() i ∈ simples(C), j ∈ simples(C)]
+# end
 
 function getindex(f::RingMorphism, i)
     m = zero_morphism(domain(f),codomain(f)).m

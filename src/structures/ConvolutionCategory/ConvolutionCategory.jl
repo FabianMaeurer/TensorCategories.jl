@@ -19,7 +19,8 @@ struct ConvolutionMorphism <: Morphism
     codomain::ConvolutionObject
     m::CohSheafMorphism
 end
-
+istensor(::ConvolutionCategory) = true
+isfusion(C::ConvolutionCategory) = mod(order(C.group),characteristic(base_ring(C))) != 0
 """
     ConvolutionCategory(X::GSet, K::Field)
 

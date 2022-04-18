@@ -3,13 +3,12 @@ struct GradedVectorSpaces <: Category
     base_ring::Field
     base_group::GAPGroup
     twist::Cocycle{3}
-    tensor_product::Array{Int,2}
 end
 
 struct GVSObject <: VectorSpaceObject
     parent::GradedVectorSpaces
     V::VectorSpaceObject
-    grading::Vector{Int}
+    grading::Vector{<:GroupElem}
 end
 
 struct GVSMorphism <: VectorSpaceMorphism
@@ -18,17 +17,16 @@ struct GVSMorphism <: VectorSpaceMorphism
     m::MatElem
 end
 
-function GradedVectorSpaces(F::Field, G::GAPGroup, twist::Cocycle{3} = trivial_3_cocycle(G))
+function GradedVectorSpaces(F::Field, G::GAPGroup)
     elems = elements(G)
-    tensor = [indexin([g*h], elems)[1] for g ∈ elems, h ∈ elems]
-    GradedVectorSpaces(F,G,twist, tensor)
+    GradedVectorSpaces(F,G,trivial_3_cocycle(G,F))
 end
 
 function VectorSpaceObject(V::Pair{<:GroupElem, <:VectorSpaceObject}...)
     W = dsum([v for (_,v) ∈ V])
     G = parent(V[1][1])
     elems = elements(G)
-    grading = vcat([[findfirst(e -> e == g, elems) for _ ∈ 1:dim(v)] for (g,v) ∈ V]...)
+    grading = vcat([[g for _ ∈ 1:dim(v)] for (g,v) ∈ V]...)
     C = GradedVectorSpaces(base_ring(W), G)
     return GVSObject(C, W, grading)
 end
@@ -45,19 +43,38 @@ function Morphism(X::GVSObject, Y::GVSObject, m::MatElem)
     return GVSMorphism(X,Y,m)
 end
 
-one(C::GradedVectorSpaces) = GVSObject(C,VectorSpaceObject(base_ring(C),1), [1])
-zero(C::GradedVectorSpaces) = GVSObject(C,VectorSpaceObject(base_ring(C),0), [])
+one(C::GradedVectorSpaces) = GVSObject(C,VectorSpaceObject(base_ring(C),1), [one(base_group(C))])
+zero(C::GradedVectorSpaces) = GVSObject(C,VectorSpaceObject(base_ring(C),0), elem_type(base_group(C))[])
+
+function isisomorphic(X::GVSObject, Y::GVSObject)
+    b,f = isisomorphic(X.V,Y.V)
+
+    return b && Set(X.grading) == Set(Y.grading) ? (true,Morphism(X,Y,matrix(f))) : (false,nothing)
+end
 #-----------------------------------------------------------------
 #   Functionality: Direct Sums
 #-----------------------------------------------------------------
 
-function dsum(X::GVSObject, Y::GVSObject)
-    W = X.V ⊕ Y.V
+function dsum(X::GVSObject, Y::GVSObject, morphisms::Bool = false)
+    W,(ix,iy),(px,py) = dsum(X.V, Y.V, true)
     m,n = dim(X), dim(Y)
     F = base_ring(X)
     grading = [X.grading; Y.grading]
     j = 1
-    return GVSObject(parent(X), W, grading)
+
+    Z = GVSObject(parent(X), W, grading)
+
+    if morphisms
+        ix = Morphism(X,Z,matrix(ix))
+        iy = Morphism(Y,Z,matrix(iy))
+
+        px = Morphism(Z,X,matrix(px))
+        py = Morphism(Z,Y,matrix(py))
+
+        return Z, [ix,iy], [px,py]
+    end
+
+    return Z
 end
 
 # function dsum(f::GVSMorphism, g::GVSMorphism)
@@ -75,17 +92,11 @@ end
 
 function tensor_product(X::GVSObject, Y::GVSObject)
     W = X.V ⊗ Y.V
-    table = parent(X).tensor_product
-    grading = [table[i,j] for i ∈ X.grading, j ∈ Y.grading][:]
-    return GVSObject(parent(X), W, grading)
+    G = base_group(X)
+    elems = elements(G)
+    grading = vcat([[i*j for i ∈ X.grading] for j ∈ Y.grading]...)
+    return GVSObject(parent(X), W, length(grading) == 0 ? elem_type(G)[] : grading)
 end
-
-# function tensor_product(f::GVSMorphism, g::GVSMorphism)
-#     dom = domain(f)⊗domain(g)
-#     cod = codomain(f)⊗codomain(g)
-#     m = kronecker_product(f.m,g.m)
-#     return GVSMorphism(dom,cod,m)
-# end
 
 #-----------------------------------------------------------------
 #   Functionality: Simple Objects
@@ -93,8 +104,9 @@ end
 
 function simples(C::GradedVectorSpaces)
     K = VectorSpaceObject(base_ring(C),1)
-    n = Int(order(base_group(C)))
-    return [GVSObject(C,K,[j]) for j ∈ 1:n]
+    G = base_group(C)
+    n = Int(order(G))
+    return [GVSObject(C,K,[g]) for g ∈ G]
 end
 
 function decompose(V::GVSObject)
@@ -112,12 +124,21 @@ function kernel(f::GVSMorphism)
     n = dim(X) - rank(f.m)
     m = zero(MatrixSpace(F, n, dim(X)))
     l = 1
-    grading = Int[]
-    for x ∈ 1:order(G)
+    grading = elem_type(G)[]
+
+    for x ∈ unique(domain(f).grading)
         i = findall(e -> e == x, X.grading)
         j = findall(e -> e == x, Y.grading)
 
-        if length(i)*length(j) == 0 continue end
+        if length(i) == 0 continue end
+        if length(j) == 0
+            grading = [grading; [x for _ ∈ i]]
+            for k in i
+                m[l,k] = F(1)
+                l = l +1
+            end
+            continue
+        end
 
         mx = f.m[i,j]
 
@@ -153,8 +174,8 @@ function associator(X::GVSObject, Y::GVSObject, Z::GVSObject)
     m = one(MatrixSpace(base_ring(X),dim(dom),dim(cod)))
 
     j = 1
-    for x ∈ 1:dim(X), y ∈ 1:dim(Y), z ∈ 1:dim(Z)
-        m[j,j] = twist(elems[[X.grading[x], Y.grading[y], Z.grading[z]]]...)
+    for x ∈ X.grading, y ∈ Y.grading, z ∈ Z.grading
+        m[j,j] = twist(x,y,z)
         j = j+1
     end
     return Morphism(dom,cod,m)
@@ -167,9 +188,7 @@ end
 function dual(V::GVSObject)
     W = dual(V.V)
     G = base_group(V)
-    table = parent(V).tensor_product
-
-    grading = [findfirst(e -> table[j,e] == 1, 1:Int(order(G))) for j ∈ V.grading]
+    grading = [inv(j) for j ∈ V.grading]
     return GVSObject(parent(V), W, grading)
 end
 
@@ -178,7 +197,7 @@ function ev(V::GVSObject)
     cod = one(parent(V))
     elems = elements(base_group(V))
     twist = parent(V).twist
-    m = [i == j ? inv(twist(g,inv(g),g)) : 0 for (i,g) ∈ zip(1:dim(V), elems[V.grading]), j ∈ 1:dim(V)][:]
+    m = [i == j ? inv(twist(g,inv(g),g)) : 0 for (i,g) ∈ zip(1:dim(V), V.grading), j ∈ 1:dim(V)][:]
     Morphism(dom,cod, matrix(base_ring(V), reshape(m,dim(dom),1)))
 end
 
@@ -199,7 +218,7 @@ function Hom(V::GVSObject, W::GVSObject)
 
     zero_M = MatrixSpace(base_ring(V), dim(V), dim(W))
 
-    for x ∈ 1:order(G)
+    for x ∈ unique(V.grading)
         V_grading = findall(e -> e == x, V.grading)
         W_grading = findall(e -> e == x, W.grading)
 
@@ -226,6 +245,8 @@ function isgraded(X::GVSObject, Y::GVSObject, m::MatElem)
     end
     true
 end
+
+id(X::GVSObject) = Morphism(X,X,one(MatrixSpace(base_ring(X),dim(X),dim(X))))
 #-----------------------------------------------------------------
 #   Pretty Printing
 #-----------------------------------------------------------------
@@ -235,5 +256,5 @@ function show(io::IO, C::GradedVectorSpaces)
 end
 function show(io::IO, V::GVSObject)
     elems = elements(base_group(V))
-    print(io, "Graded vector space of dimension $(dim(V)) with grading\n$(elems[V.grading])")
+    print(io, "Graded vector space of dimension $(dim(V)) with grading\n$(V.grading)")
 end

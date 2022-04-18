@@ -17,6 +17,9 @@ struct CohSheafMorphism <: Morphism
     m::Vector{GroupRepresentationMorphism}
 end
 
+ismultitensor(::CohSheaves) = true
+ismultifusion(C::CohSheaves) = mod(order(C.group),characteristic(base_ring(C))) != 0
+
 #-----------------------------------------------------------------
 #   Constructors
 #-----------------------------------------------------------------

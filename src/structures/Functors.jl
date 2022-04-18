@@ -73,7 +73,7 @@ function Hom(::Colon,X::SetObject)
 end
 
 function show(io::IO, H::HomFunctor)
-    print(io,"Hom-functor in $(H.domain)")
+    print(io,"$(typeof(H.domain) == OppositeCategory ? "Contravariant" : "Covariant") Hom-functor in $(H.domain)")
 end
 #-------------------------------------------------------------------------------
 #   Tensor Product Functors
