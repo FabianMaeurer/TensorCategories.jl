@@ -1,23 +1,23 @@
-# JuCat.jl
+# TensorCategories.jl
 
-JuCat is a package under development with the intention to provide a framework as well a examples for computations in the realm of categories.
+TensorCategories is a package under development with the intention to provide a framework as well a examples for computations in the realm of categories.
 
 ## Installation
 
-You need to have Julia installed. For reliable results Julia version at least 1.6 is required. To use JuCat
+You need to have Julia installed. For reliable results Julia version at least 1.6 is required. To use TensorCategories
 do the following:
 
 ```julia-repl
 julia> import Pkg
-julia> Pkg.add(url = "https://github.com/FabianMaeurer/JuCat.jl")
+julia> Pkg.add(url = "https://github.com/FabianMaeurer/TensorCategories.jl")
 ```
 
 ## Usage
 
-To use JuCat the structures from the [OSCAR-System](https://github.com/oscar-system/Oscar.jl) are required. Here a minimal usage Example.
+To use TensorCategories the structures from the [OSCAR-System](https://github.com/oscar-system/Oscar.jl) are required. Here a minimal usage Example.
 
 ```@repl
-using JuCat, Oscar;
+using TensorCategories, Oscar;
 F = FiniteField(5)
 G = symmetric_group(2)
 X = gset(G,[1,2,3])

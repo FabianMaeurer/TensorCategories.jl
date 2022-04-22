@@ -1,6 +1,6 @@
 # Multitensor Categories
 
-The main idea of JuCat is to provide abstract methods for categorical computations.
+The main idea of TensorCategories is to provide abstract methods for categorical computations.
 The abstract types `MultiTensorCategory` and `TensorCategory` are intended for
 this purpose. To use these abstract methods you need to provide some functionality
 for your categories.
@@ -50,7 +50,7 @@ zero(C::YourCategory) ::YourObject
 
 # Groethendieck Ring
 
-JuCat can compute the Groethendieck ring of a semisimple `MultiTensorCategory`,
+TensorCategories can compute the Groethendieck ring of a semisimple `MultiTensorCategory`,
 if provided with methods
 
 ```
@@ -79,7 +79,7 @@ about your category you should specify `grothendieck_ring` on your type manually
 Take a look at the convolution category:
 
 ```@setup Ex
-using JuCat, Oscar
+using TensorCategories, Oscar
 ```
 
 

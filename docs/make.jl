@@ -1,10 +1,10 @@
-using Documenter, JuCat
+using Documenter, TensorCategories
 
 #DocMeta.setdocmeta!(JuCat, :DocTestSetup, :(using JuCat); recursive=true)
 
 makedocs(
-    sitename = "JuCat.jl",
-    modules = [JuCat],
+    sitename = "TensorCategories.jl",
+    modules = [TensorCategories],
     format = Documenter.HTML(
         canonical = "https://juliadocs.github.io/Documenter.jl/stable/",
     ),

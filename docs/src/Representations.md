@@ -1,5 +1,5 @@
 ```@meta
-CurrentModule = JuCat
+CurrentModule = TensorCategories
 ```
 
 # Representations
@@ -7,7 +7,7 @@ CurrentModule = JuCat
 We provide a simple abstract type hirarchy for representation categories:
 
 ```
-abstract type RepresentationCategory{T} <: TensorCategory{T}
+abstract type RepresentationCategory <:Category
 ```
 
 A representation category always requires the field
@@ -22,7 +22,7 @@ Let ``G`` be a finite group. We consider the category of finite dimensinal
 ``k``-representations of ``G``.
 
 ```
-GroupRepresentationCategory{T,G} <: RepresentationCategory{T}
+GroupRepresentationCategory <: RepresentationCategory
 ```
 
 Build it with the constructor
@@ -36,7 +36,7 @@ A group representation is defined by a group homomorphism from ``G`` into a
 finite dimensional vector space ``k^n``. These objects are of type
 
 ```
-GroupRepresentation{T,G} <: Representation
+GroupRepresentation <: Representation
 ```
 
 They are constructed in one of two ways, either by images of generators or by a function
@@ -52,6 +52,6 @@ Since group reprsentation categories are tensor categories, we again have method
 for the important operations
 
 ```@autodocs
-Modules = [JuCat]
+Modules = [TensorCategories]
 Pages = ["GroupRepresentations.jl"]
 ```

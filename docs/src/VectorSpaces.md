@@ -1,14 +1,14 @@
 ```@setup VS
-using JuCat, Oscar
+using TensorCategories, Oscar
 ```
 
 ```@meta
-CurrentModule = JuCat
+CurrentModule = TensorCategories
 ```
 
 # Vector Space Categories
 
-Vector spaces in JuCat are of the abstract type
+Vector spaces in TensorCategories are of the abstract type
 
 ```
 abstract type VectorSpaceObject{T} <: Object end
@@ -28,7 +28,7 @@ The simplest example to provide are the finite dimensional vector spaces over a 
 This category has type
 
 ```
-VectorSpaces{T} <: TensorCategory{T}
+VectorSpaces <: TensorCategory
 ```
 
 and can be constructed like so:
@@ -41,7 +41,7 @@ Vec = VectorSpaces(F)
 Objects of this category are of the type
 
 ```
-VSObject{T} <: VectorSpaceObject{T}
+VSObject <: VectorSpaceObject
 ```
 
 Every vector space object is defined by a basis and a base field provided by the
@@ -56,13 +56,13 @@ Morphisms in this Category are defined only by matrices of matching dimensions.
 They are typed as
 
 ```julia
-VSMorphism{T} <: Morphism
+VSMorphism <: Morphism
 ```
 
 and constructed giving a domain, codomain and matrix element.
 
 ```@docs
-Morphism(::VectorSpaceObject{T}, ::VectorSpaceObject{T}, ::MatElem{T}) where T
+Morphism(::VectorSpaceObject, ::VectorSpaceObject, ::MatElem)
 ```
 
 ## Graded Vector Spaces
@@ -71,7 +71,7 @@ Very similar we have the category of finite dimensional (twisted) ``G``-graded v
 We have the type
 
 ```
-GradedVectorSpaces{T,G} <: VectorSpaces{T,G}
+GradedVectorSpaces <: VectorSpaces
 ```
 and they are constructed in straightforward manner
 
@@ -93,7 +93,7 @@ Graded vector spaces decompose into direct sums of vector spaces for each elemen
 ``G``.
 
 ```
-GVSObject{T,G} <: VectorSpaceObject{T}
+GVSObject <: VectorSpaceObject
 ```
 
 ```@example VS
@@ -107,14 +107,14 @@ W = VectorSpaceObject(g => V1, s => V2, g*s => V1⊗V2)
 Morphisms are implemented analogously by pairs of group elements and vectorspace objects.
 
 ```
-GVSMorphism{T,G} <: Morphism
+GVSMorphism <: Morphism
 ```
 
 The constructors are
 
 ```@docs
-Morphism(::GVSObject{T,G},::GVSObject{T,G},::Dict{G,S}) where {T,S<:VectorSpaceMorphism,G}
-Morphism(::GVSObject{T,G}, ::GVSObject{T,G},::Pair{G,S}...) where {T,G, S <: VectorSpaceMorphism{T}}
+Morphism(::GVSObject,::GVSObject,::Dict{G,S}) where {S<:VectorSpaceMorphism,G}
+Morphism(::GVSObject, ::GVSObject,::Pair{G,S}...) where {G, S <: VectorSpaceMorphism
 ```
 
 
@@ -124,7 +124,7 @@ Morphism(::GVSObject{T,G}, ::GVSObject{T,G},::Pair{G,S}...) where {T,G, S <: Vec
 direct sums, standard tensor products, one and zero object are all implemented.
 
 ```@autodocs
-Modules = [JuCat]
+Modules = [TensorCategories]
 Pages = ["VectorSpaces.jl"]
 Order = [:function]
 ```

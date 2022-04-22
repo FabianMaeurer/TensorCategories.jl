@@ -1,5 +1,5 @@
 ```@meta
-CurrentModule = JuCat
+CurrentModule = TensorCategories
 ```
 
 # Coherent sheaves on Finite Sets
@@ -16,13 +16,13 @@ for the orbits.
 We provide the datatype
 
 ```
-CoherentSheaf{T,G} <: Object
+CoherentSheaf <: Object
 ```
 
 The category of equivariant coherent sheafes has type
 
 ```
-CohSheaves{T,G} <: MultiTensorCategory{T}
+CohSheaves <: MultiTensorCategory
 ```
 
 and can be constructed via
@@ -38,7 +38,7 @@ CohSheafMorphism{T,G} <: Morphism
 ```
 
 ```@autodocs
-Modules = [JuCat]
+Modules = [TensorCategories]
 Pages = ["CoherentSheaves.jl"]
 ```
 
@@ -61,13 +61,13 @@ morphisms.
 Objects in this category are of type
 
 ```
-ConvolutionObject{T,G} <: Object
+ConvolutionObject <: Object
 ```
 
 while the convolution category is of type
 
 ```
-ConvolutionCategory{T,G} <: MultiTensorCategory{T}
+ConvolutionCategory <: MultiTensorCategory
 ```
 
 and can be constructed by
@@ -79,10 +79,10 @@ ConvolutionCategory
 Morphisms are just morphisms of coherent sheaves with the new tensor product.
 
 ```
-ConvolutionMorphism{T,G} <: Morphism
+ConvolutionMorphism <: Morphism
 ```
 
 ```@autodocs
-Modules = [JuCat]
+Modules = [TensorCategories]
 Pages = ["ConvolutionCategory.jl"]
 ```
