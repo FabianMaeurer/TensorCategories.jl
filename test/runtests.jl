@@ -1,4 +1,4 @@
-using JuCat
+using TensorCategories
 using Oscar,Test
 
 

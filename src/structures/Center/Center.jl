@@ -182,8 +182,9 @@ function build_center_ideal(Z::Object, simples::Vector = simples(parent(Z)))
     I = ideal([f for f ∈ unique(ideal_eqs) if f != 0])
 
     #Require e_Z(1) = id(Z)
+    one_index = findfirst(e -> isisomorphic(one(parent(Z)), e)[1], simples)
     one_c = QQ.(express_in_basis(id(Z), basis(End(Z))))
-    push!(ideal_eqs, (vars[1] .- one_c)...)
+    push!(ideal_eqs, (vars[one_index] .- one_c)...)
 
     I = ideal([f for f ∈ unique(ideal_eqs) if f != 0])
 end
@@ -410,6 +411,29 @@ id(X::CenterObject) = Morphism(X,X,id(X.object))
 function tr(f::CenterMorphism)
     C = parent(domain(f))
     return CenterMorphism(one(C),one(C),tr(f.m))
+end
+
+function inv(f::CenterMorphism)
+    return Morphism(codomain(f),domain(f), inv(f.m))
+end
+
+function isisomorphic(X::CenterObject, Y::CenterObject)
+    if dim(Hom(X,Y)) == 0
+        return false, nothing
+    end
+    if isisomorphic(X.object, Y.object)[1]
+        return true, inv(decompose_morphism(Y))∘decompose_morphism(X)
+    else
+        return false, nothing
+    end
+end
+
+function +(f::CenterMorphism, g::CenterMorphism)
+    return Morphism(domain(f), codomain(f), g.m +f.m)
+end
+
+function *(x, f::CenterMorphism)
+    return Morphism(domain(f),codomain(f),x*f.m)
 end
 #-------------------------------------------------------------------------------
 #   Functionality: Image

@@ -332,10 +332,9 @@ end
 # decomposition morphism
 #-------------------------------------------------------
 
-function decompose(X::Object)
+function decompose(X::Object, S = simples(parent(X)))
     C = parent(X)
     @assert issemisimple(C) "Category not semisimple"
-    S = simples(C)
     dimensions = [dim(Hom(X,s)) for s ∈ S]
     return [(s,d) for (s,d) ∈ zip(S,dimensions) if d > 0]
 end

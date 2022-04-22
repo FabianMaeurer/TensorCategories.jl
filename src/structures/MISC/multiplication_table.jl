@@ -19,7 +19,7 @@ function print_multiplication_table(simples::Vector{<:Object}, names::Vector{Str
 end
 
 function pretty_print_semisimple(m::Object,simples::Vector{<:Object},names::Vector{String})
-    facs = decompose(m)
+    facs = decompose(m, simples)
 
     if length(facs) == 0 return "0" end
 

@@ -1,28 +1,28 @@
-# JuCat.jl
+# TensorCategories.jl
 
 
 [![][docs-stable-img]][docs-stable-url] [![][build-status-img]][build-status-url] [![][ga-img]][ga-url] [![][codecov_img]][codecov_url]
 
-# JuCat.jl
+# TensorCategories.jl
 
-JuCat is a package under development with the intention to provide a framework as well a examples for computations in the realm of categories.
+TensorCategories is a package under development with the intention to provide a framework as well a examples for computations in the realm of categories.
 
 ## Installation
 
-You need to have Julia installed. For reliable results Julia version at least 1.6 is required. To use JuCat
+You need to have Julia installed. For reliable results Julia version at least 1.6 is required. To use TensorCategories
 do the following:
 
 ```julia-repl
 julia> import Pkg
-julia> Pkg.add("https://github.com/FabianMaeurer/JuCat.jl")
+julia> Pkg.add(url = "https://github.com/FabianMaeurer/TensorCategories.jl")
 ```
 
 ## Usage
 
-To use Jucat the structures from the [OSCAR-System](https://github.com/oscar-system/Oscar.jl) are required. Here a minimal usage Example.
+To use TensorCategories the structures from the [OSCAR-System](https://github.com/oscar-system/Oscar.jl) are required. Here a minimal usage Example.
 
 ```@repl
-using JuCat, Oscar;
+using TensorCategories, Oscar;
 F = FiniteField(5)
 G = symmetric_group(2)
 X = gset(G,[1,2,3])
@@ -39,13 +39,13 @@ Application' of the German Research Foundation (DFG).
 
 
 [docs-stable-img]: https://img.shields.io/badge/docs-dev-blue.svg
-[docs-stable-url]: https://fabianmaeurer.github.io/JuCat.jl/
+[docs-stable-url]: https://fabianmaeurer.github.io/TensorCategories.jl/
 
 [build-status-img]: https://ci.appveyor.com/api/projects/status/egtv4niuustg4kpc?svg=true
-[build-status-url]: https://ci.appveyor.com/project/FabianMaeurer/jucat-jl
+[build-status-url]: https://ci.appveyor.com/project/FabianMaeurer/TensorCategories-jl
 
-[codecov_img]: https://codecov.io/gh/FabianMaeurer/JuCat.jl/branch/master/graph/badge.svg?token=axGHAcozx5
-[codecov_url]: https://codecov.io/gh/FabianMaeurer/JuCat.jl
+[codecov_img]: https://codecov.io/gh/FabianMaeurer/TensorCategories.jl/branch/master/graph/badge.svg?token=axGHAcozx5
+[codecov_url]: https://codecov.io/gh/FabianMaeurer/TensorCategories.jl
 
-[ga-img]: https://github.com/FabianMaeurer/JuCat.jl/actions/workflows/runtests.yml/badge.svg
-[ga-url]: https://github.com/FabianMaeurer/JuCat.jl/actions/workflows/runtests.yml
+[ga-img]: https://github.com/FabianMaeurer/TensorCategories.jl/actions/workflows/runtests.yml/badge.svg
+[ga-url]: https://github.com/FabianMaeurer/TensorCategories.jl/actions/workflows/runtests.yml

@@ -1,4 +1,4 @@
-name = "JuCat"
+name = "TensorCategories"
 uuid = "258c694e-7338-4d4d-b524-4851272a75cf"
 authors = ["Fabian Mäurer"]
 version = "0.1.0"

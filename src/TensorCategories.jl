@@ -1,8 +1,8 @@
-module JuCat
+module TensorCategories
 
 import Base: show,^,==, getindex, in, issubset, iterate, length,*,+,-, iterate,
                 getproperty
-                
+
 import Oscar.AbstractAlgebra.Integers
 
 import Oscar: VectorSpace, Field, elem_type, QQ, FieldElem,

@@ -9,7 +9,7 @@ do the following:
 
 ```julia-repl
 julia> import Pkg
-julia> Pkg.add("https://github.com/FabianMaeurer/JuCat.jl")
+julia> Pkg.add(url = "https://github.com/FabianMaeurer/JuCat.jl")
 ```
 
 ## Usage
