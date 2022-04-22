@@ -58,7 +58,7 @@ VSMorphism <: Morphism
 
 and constructed giving a domain, codomain and matrix element.
 
-```@docs
+```@docs VS
 Morphism(::VectorSpaceObject, ::VectorSpaceObject, ::MatElem)
 ```
 
