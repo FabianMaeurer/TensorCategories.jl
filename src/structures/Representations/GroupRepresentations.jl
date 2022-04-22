@@ -475,7 +475,7 @@ function decompose(σ::GroupRepresentation)
     d = dim(σ)
     for m ∈ facs
         imgs = [matrix(F,[F(n[i,j]) for i ∈ 1:length(n), j ∈ 1:length(n)]) for n ∈ m[1].generators]
-        ret = [ret;(Representation(G,gens(G),imgs),gap_to_julia(m[2]))]
+        ret = [ret;(Representation(G,gens(G),imgs),GAP.gap_to_julia(m[2]))]
     end
     ret
 end
@@ -616,7 +616,7 @@ end
 function to_gap_module(σ::GroupRepresentation,F::Field)
     grp = σ.group
     gap_F = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
-    mats_σ = GAP.GapObj([julia_to_gap(σ(g)) for g ∈ gens(grp)])
+    mats_σ = GAP.GapObj([GAP.julia_to_gap(σ(g)) for g ∈ gens(grp)])
     Mσ = GAP.Globals.GModuleByMats(mats_σ, gap_F)
 end
 
