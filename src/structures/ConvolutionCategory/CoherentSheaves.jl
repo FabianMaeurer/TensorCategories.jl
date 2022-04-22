@@ -86,6 +86,11 @@ Return the zero sheaf on the ``G``-set.
 """
 zero(C::CohSheaves) = CohSheaf(C,[zero(RepresentationCategory(H,base_ring(C))) for H ∈ C.orbit_stabilizers])
 
+"""
+    zero_morphism(X::CohSheaf, Y::CohSheaf)
+
+Return the zero morphism ```0:X → Y```.
+"""
 zero_morphism(X::CohSheaf, Y::CohSheaf) = CohSheafMorphism(X,Y,[zero(Hom(x,y)) for (x,y) ∈ zip(stalks(X),stalks(Y))])
 
 function ==(X::CohSheaf, Y::CohSheaf)
@@ -113,26 +118,61 @@ end
 
 ==(f::CohSheafMorphism, g::CohSheafMorphism) = f.m == f.m
 
+"""
+    id(X::CohSheaf)
+
+Return the identity on ```X```.
+"""
 id(X::CohSheaf) = CohSheafMorphism(X,X,[id(s) for s ∈ stalks(X)])
 
+"""
+    associator(X::CohSheaf, Y::CohSheaf, Z::CohSheaf)
+
+Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
+"""
 associator(X::CohSheaf, Y::CohSheaf, Z::CohSheaf) = id(X⊗Y⊗Z)
 
+"""
+    dual(X::CohSheaf)
+
+Return the dual object of ```X```.
+"""
 dual(X::CohSheaf) = CohSheaf(parent(X),[dual(s) for s ∈ stalks(X)])
 
+"""
+    ev(X::CohSheaf)
+
+Return the evaluation morphism ```X∗⊗X → 1```.
+"""
 function ev(X::CohSheaf)
     dom = dual(X)⊗X
     cod = one(parent(X))
     return CohSheafMorphism(dom,cod, [ev(s) for s ∈ stalks(X)])
 end
 
+"""
+    coev(X::CohSheaf)
+
+Return the coevaluation morphism ```1 → X⊗X∗```.
+"""
 function coev(X::CohSheaf)
     dom = one(parent(X))
     cod = X ⊗ dual(X)
     return CohSheafMorphism(dom,cod, [coev(s) for s ∈ stalks(X)])
 end
 
+"""
+    spherical(X::CohSheaf)
+
+Return the spherical structure isomorphism ```X → X∗∗```.
+"""
 spherical(X::CohSheaf) = Morphism(X,X,[spherical(s) for s ∈ stalks(X)])
 
+"""
+    braiding(X::cohSheaf, Y::CohSheaf)
+
+Return the braiding isomoephism ```X⊗Y → Y⊗X```.
+"""
 braiding(X::CohSheaf, Y::CohSheaf) = Morphism(X⊗Y, Y⊗X, [braiding(x,y) for (x,y) ∈ zip(stalks(X),stalks(Y))])
 
 #-----------------------------------------------------------------
@@ -175,12 +215,22 @@ coproduct(X::CohSheaf,Y::CohSheaf,projections = false) = projections ? dsum(X,Y,
 #   Functionality: (Co)Kernel
 #-----------------------------------------------------------------
 
+"""
+    kernel(f::CohSheafMorphism)
+
+Return a tuple ```(K,k)``` where ```K``` is the kernel object and ```k``` is the inclusion.
+"""
 function kernel(f::CohSheafMorphism)
     kernels = [kernel(g) for g ∈ f.m]
     K = CohSheaf(parent(domain(f)), [k for (k,_) ∈ kernels])
     return K, Morphism(K, domain(f), [m for (_,m) ∈ kernels])
 end
 
+"""
+    cokernel(f::CohSheafMorphism)
+
+Return a tuple ```(C,c)``` where ```C``` is the kernel object and ```c``` is the projection.
+"""
 function cokernel(f::CohSheafMorphism)
     cokernels = [cokernel(g) for g ∈ f.m]
     C = CohSheaf(parent(domain(f)), [c for (c,_) ∈ cokernels])
@@ -227,6 +277,11 @@ end
 #   Functionality: Morphisms
 #-----------------------------------------------------------------
 
+"""
+    compose(f::CohSheafMorphism, g::CohSheafMorphism)
+
+Return the composition ```g∘f```.
+"""
 function compose(f::CohSheafMorphism, g::CohSheafMorphism)
     dom = domain(f)
     codom = codomain(f)
@@ -245,6 +300,11 @@ end
 
 matrices(f::CohSheafMorphism) = matrix.(f.m)
 
+"""
+    inv(f::CohSheafMorphism)
+
+Retrn the inverse morphism of ```f```.
+"""
 function inv(f::CohSheafMorphism)
     return Morphism(codomain(f), domain(f), [inv(g) for g in f.m])
 end
@@ -366,6 +426,11 @@ function pullb_mor_map(CY,CX,m,f)
     CohSheafMorphism(dom, codom, maps)
 end
 
+"""
+    Pullback(C::CohSheaves, D::CohSheaves, f::Function)
+
+Return the pullback functor ```C → D``` defined by the ```G```-set map ```f::X → Y```.
+"""
 function Pullback(CY::CohSheaves, CX::CohSheaves, f::Function)
     @assert isequivariant(CX.GSet, CY.GSet, f) "Map not equivariant"
 
@@ -417,6 +482,11 @@ function pushf_mor_map(CX,CY,m,f)
     return CohSheafMorphism(pushf_obj_map(CX,CY,domain(m),f), pushf_obj_map(CX,CY,codomain(m),f), mor)
 end
 
+"""
+    Pushforward(C::CohSheaves, D::CohSheaves, f::Function)
+
+Return the push forward functor ```C → D``` defined by the ```G```-set map ```f::X → Y```.
+"""
 function Pushforward(CX::CohSheaves, CY::CohSheaves, f::Function)
     @assert isequivariant(CX.GSet, CY.GSet, f) "Map not equivariant"
 

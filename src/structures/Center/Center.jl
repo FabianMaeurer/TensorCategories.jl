@@ -28,7 +28,11 @@ end
 #-------------------------------------------------------------------------------
 #   Center Constructor
 #-------------------------------------------------------------------------------
+"""
+    Center(C::Category)
 
+Return the Drinfeld center of ```C```. 
+"""
 function Center(C::Category)
     @assert issemisimple(C) "Semisimplicity required"
     return CenterCategory(base_ring(C), C)
@@ -38,15 +42,31 @@ function Morphism(dom::CenterObject, cod::CenterObject, m::Morphism)
     return CenterMorphism(dom,cod,m)
 end
 
+"""
+    half_braiding(Z::CenterObject)
+
+Return  a vector with half braiding morphisms ```Z⊗S → S⊗Z``` for all simple
+objects ```S```.
+"""
 half_braiding(Z::CenterObject) = Z.γ
 
 isfusion(C::CenterCategory) = true
 
+"""
+    add_simple!(C::CenterCategory, S::CenterObject)
+
+Add the simple object ```S``` to the vector of simple objects.
+"""
 function add_simple!(C::CenterCategory, S::CenterObject)
     @assert dim(End(S)) == 1 "Not simple"
     C.simples = unique_simples([simples(C); S])
 end
 
+"""
+    spherical(X::CenterObject)
+
+Return the spherical structure ```X → X∗∗``` of ```X```.
+"""
 spherical(X::CenterObject) = Morphism(X,dual(dual(X)), spherical(X.object))
 
 (F::Field)(f::CenterMorphism) = F(f.m)
@@ -54,6 +74,11 @@ spherical(X::CenterObject) = Morphism(X,dual(dual(X)), spherical(X.object))
 #   Direct Sum & Tensor Product
 #-------------------------------------------------------------------------------
 
+"""
+    dsum(X::CenterObject, Y::CenterObject)
+
+Return the direct sum object of ```X``` and ```Y```.
+"""
 function dsum(X::CenterObject, Y::CenterObject)
     S = simples(parent(X.object))
     Z,(ix,iy),(px,py) = dsum(X.object, Y.object,true)
@@ -62,6 +87,11 @@ function dsum(X::CenterObject, Y::CenterObject)
     return CenterObject(parent(X), Z, γZ)
 end
 
+"""
+    dsum(f::CenterMorphism, g::CenterMorphism)
+
+Return the direct sum of ```f``` and ```g```.
+"""
 function dsum(f::CenterMorphism, g::CenterMorphism)
     dom = domain(f) ⊕ domain(g)
     cod = codomain(f) ⊕ codomain(g)
@@ -69,6 +99,11 @@ function dsum(f::CenterMorphism, g::CenterMorphism)
     return Morphism(dom,cod, m)
 end
 
+"""
+    tensor_product(X::CenterObject, Y::CenterObject)
+
+Return the tensor product of ```X``` and ```Y```.
+"""
 function tensor_product(X::CenterObject, Y::CenterObject)
     Z = X.object ⊗ Y.object
     γ = Morphism[]
@@ -81,17 +116,32 @@ function tensor_product(X::CenterObject, Y::CenterObject)
     return CenterObject(parent(X), Z, γ)
 end
 
+"""
+    tensor_product(f::CenterMorphism,g::CenterMorphism)
+
+Return the tensor product of ```f``` and ```g```.
+"""
 function tensor_product(f::CenterMorphism,g::CenterMorphism)
     dom = domain(f)⊗domain(g)
     cod = codomain(f)⊗codomain(g)
     return Morphism(dom,cod,f.m⊗g.m)
 end
 
+"""
+    zero(C::CenterCategory)
+
+Return the zero object of ```C```.
+"""
 function zero(C::CenterCategory)
     Z = zero(C.category)
     CenterObject(C,Z,[zero_morphism(Z,Z) for _ ∈ simples(C.category)])
 end
 
+"""
+    one(C::CenterCategory)
+
+Return the one object of ```C```.
+"""
 function one(C::CenterCategory)
     Z = one(C.category)
     CenterObject(C,Z,[id(s) for s ∈ simples(C.category)])
@@ -123,6 +173,11 @@ end
 #   Is central?
 #-------------------------------------------------------------------------------
 
+"""
+    iscentral(Z::Object)
+
+Return true if ```Z``` is in the categorical center, i.e. there exists a half-braiding on ```Z```.
+"""
 function iscentral(Z::Object, simples::Vector{<:Object} = simples(parent(Z)))
     if prod([isisomorphic(Z⊗s,s⊗Z)[1] for s ∈ simples]) == 0
         return false
@@ -212,6 +267,11 @@ function braidings_from_ideal(Z::Object, I::Ideal, simples::Vector{<:Object})
     return centrals
 end
 
+"""
+    half_braidings(Z::Object)
+
+Return all objects in the center lying over ```Z```.
+"""
 function half_braidings(Z::Object; simples = simples(parent(Z)))
 
     I = build_center_ideal(Z,simples)
@@ -348,7 +408,11 @@ function partitions(d::Int64,k::Int64)
     return parts
 end
 
+"""
+    braiding(X::CenterObject, Y::CenterObject)
 
+Return the braiding isomorphism ```X⊗Y → Y⊗X```.
+"""
 function braiding(X::CenterObject, Y::CenterObject)
     dom = X.object⊗Y.object
     cod = Y.object⊗X.object
@@ -366,14 +430,30 @@ end
 #   Functionality
 #-------------------------------------------------------------------------------
 
+"""
+    dim(X::CenterObject)
+
+Return the categorical dimension of ```X```.
+"""
 dim(X::CenterObject) = dim(X.object)
 
+"""
+    simples(C::CenterCategory)
+
+Return a vector containing the simple objects of ```C```. The list might be incomplete.
+"""
 function simples(C::CenterCategory)
     if isdefined(C, :simples) return C.simples end
     C.simples = center_simples(C.category)
     return C.simples
 end
 
+
+"""
+    associator(X::CenterObject, Y::CenterObject, Z::CenterObject)
+
+Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
+"""
 function associator(X::CenterObject, Y::CenterObject, Z::CenterObject)
     dom = (X⊗Y)⊗Z
     cod = X⊗(Y⊗Z)
@@ -383,8 +463,18 @@ end
 matrices(f::CenterMorphism) = matrices(f.m)
 matrix(f::CenterMorphism) = matrix(f.m)
 
+"""
+    compose(f::CenterMorphism, g::CenterMorphism)
+
+Return the composition ```g∘f```.
+"""
 compose(f::CenterMorphism, g::CenterMorphism) = Morphism(domain(f), codomain(g), g.m∘f.m)
 
+"""
+    dual(X::CenterObject)
+
+Return the (left) dual object of ```X```.
+"""
 function dual(X::CenterObject)
     a = associator
     e = ev(X.object)
@@ -398,25 +488,56 @@ function dual(X::CenterObject)
     return CenterObject(parent(X),dX,γ)
 end
 
+"""
+    ev(X::CenterObject)
+
+Return the evaluation morphism ``` X⊗X → 1```.
+"""
 function ev(X::CenterObject)
     Morphism(dual(X)⊗X,one(parent(X)),ev(X.object))
 end
 
+"""
+    coev(X::CenterObject)
+
+Return the coevaluation morphism ```1 → X⊗X∗```.
+"""
 function coev(X::CenterObject)
     Morphism(one(parent(X)),X⊗dual(X),coev(X.object))
 end
 
+"""
+    id(X::CenterObject)
+
+Return the identity on ```X```.
+"""
 id(X::CenterObject) = Morphism(X,X,id(X.object))
 
+"""
+    tr(f:::CenterMorphism)
+
+Return the categorical trace of ```f```.
+"""
 function tr(f::CenterMorphism)
     C = parent(domain(f))
     return CenterMorphism(one(C),one(C),tr(f.m))
 end
 
+"""
+    inv(f::CenterMorphism)
+
+Return the inverse of ```f```if possible.
+"""
 function inv(f::CenterMorphism)
     return Morphism(codomain(f),domain(f), inv(f.m))
 end
 
+"""
+    isisomorphic(X::CenterObject, Y::CenterObject)
+
+Check if ```X≃Y```. Return ```(true, m)``` where ```m```is an isomorphism if true,
+else return ```(false,nothing)```.
+"""
 function isisomorphic(X::CenterObject, Y::CenterObject)
     if dim(Hom(X,Y)) == 0
         return false, nothing
@@ -439,6 +560,11 @@ end
 #   Functionality: Image
 #-------------------------------------------------------------------------------
 
+"""
+    kernel(f::CenterMoprhism)
+
+Return a tuple ```(K,k)``` where ```K```is the kernel object and ```k```is the inclusion.
+"""
 function kernel(f::CenterMorphism)
     ker, incl = kernel(f.m)
     f_inv = left_inverse(incl)
@@ -449,7 +575,11 @@ function kernel(f::CenterMorphism)
     return Z, Morphism(Z,domain(f), incl)
 end
 
+"""
+    cokernel(f::CenterMoprhism)
 
+Return a tuple ```(C,c)``` where ```C```is the cokernel object and ```c```is the projection.
+"""
 function cokernel(f::CenterMorphism)
     coker, proj = cokernel(f.m)
     f_inv = right_inverse(proj)
@@ -511,6 +641,11 @@ function central_projection(dom::CenterObject, cod::CenterObject, f::Morphism, s
     return inv(D*base_ring(dom)(1))*proj
 end
 
+"""
+    zero_morphism(X::CenterObject, Y::CenterObject)
+
+Return the zero morphism ```0:X → Y```.
+"""
 zero_morphism(X::CenterObject, Y::CenterObject) = Morphism(X,Y,zero_morphism(X.object,Y.object))
 
 #-------------------------------------------------------------------------------

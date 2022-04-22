@@ -2,9 +2,6 @@
 using TensorCategories, Oscar
 ```
 
-```@meta
-CurrentModule = TensorCategories
-```
 
 # Vector Space Categories
 
@@ -84,9 +81,17 @@ VecG = GradedVectorSpaces(F,G)
 To add a nontrivial associator (twist) construct a Cocycle{3} object coding a 3-cocycle
 of the group ``G``. By now no checking of this condition happens.
 
-```@example
-C = #TODO CoCycle(G, )
-VecG = #VectorSpaces(G,QQ,C)
+```@example VS
+function cyclic_group_3cocycle(G, F, ξ)
+	g = G[1]
+	n = order(G)
+	D = Dict((g^i,g^j,g^k) => ξ^(div(i*(j+k - rem(j+k,n)),n)) for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n)
+	return Cocycle(G,D)
+end
+
+F,ξ = CyclotomicField(5, "ξ")
+c = cyclic_group_3cocycle(G,F,ξ)
+VecG = VectorSpaces(G,F,c)
 ```
 
 Graded vector spaces decompose into direct sums of vector spaces for each element in
@@ -104,7 +109,7 @@ V2 = VectorSpaceObject(QQ, [:v, :w])
 W = VectorSpaceObject(g => V1, s => V2, g*s => V1⊗V2)
 ```
 
-Morphisms are implemented analogously by pairs of group elements and vectorspace objects.
+Morphisms are implemented analogously by pairs of group elements and vector space objects.
 
 ```
 GVSMorphism <: Morphism
@@ -114,7 +119,7 @@ The constructors are
 
 ```@docs
 Morphism(::GVSObject,::GVSObject,::Dict{G,S}) where {S<:VectorSpaceMorphism,G}
-Morphism(::GVSObject, ::GVSObject,::Pair{G,S}...) where {G, S <: VectorSpaceMorphism
+Morphism(::GVSObject, ::GVSObject,::Pair{G,S}...) where {G, S <: VectorSpaceMorphism}
 ```
 
 

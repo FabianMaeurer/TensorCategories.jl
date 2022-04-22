@@ -86,7 +86,7 @@ using TensorCategories, Oscar
 ```@example Ex
 G = symmetric_group(2)
 X = gset(G, [1,2,3])
-F = FiniteField(5)
+F,_ = FiniteField(5)
 Conv = ConvolutionCategory(X,F)
 
 R,f = grothendieck_ring(Conv)
@@ -136,7 +136,7 @@ We can compute now the ``S``-matrix of for the representations.
 
 ```@example Ex
 G = symmetric_group(3)
-F = FiniteField(5)
+F,_ = FiniteField(5)
 Rep = RepresentationCategory(G,F)
 
 smatrix(Rep)

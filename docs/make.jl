@@ -13,10 +13,11 @@ makedocs(
         "Exampes" => [
             "Vector Spaces" => "VectorSpaces.md",
             "Representations" => "Representations.md",
-            "Coherent Sheaves" => "CoherentSheaves.md"
+            "Coherent Sheaves" => "CoherentSheaves.md",
+            "Ring Categories" => "RingCategories.md"
         ],
         "Multitensor Categories" => "Multitensor.md",
-        "showcase.md"
+        "The Center Construction" => "Center.md",
     ],
 )
 
@@ -37,5 +38,5 @@ makedocs(
 # )
 
 deploydocs(
-    repo   = "github.com/FabianMaeurer/JuCat.jl.git",
+    repo   = "github.com/FabianMaeurer/TensorCategories.jl.git",
 )

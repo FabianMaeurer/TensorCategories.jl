@@ -1,5 +1,11 @@
+
+"""
+    grothendieck_ring(C::Category)
+
+Return the grothendieck ring of the multiring category ```C```.
+"""
 function grothendieck_ring(C::Category, simples = simples(C))
-    @assert isfusion(C) "C is required to be tensor"
+    @assert ismultiring(C) "C is required to be tensor"
 
     m = multiplication_table(C,simples)
 

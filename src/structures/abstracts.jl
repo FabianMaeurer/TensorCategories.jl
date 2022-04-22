@@ -231,6 +231,9 @@ ismultifusion(C::Category) = isfusion(C)
 istensor(C::Category) = isfusion(C)
 ismultitensor(C::Category) = ismultifusion(C) || istensor(C)
 
+isring(C::Category) = istensor(C)
+ismultiring(C::Category) = ismultitensor(C)
+
 ismonoidal(C::Category) = ismultitensor(C)
 
 isabelian(C::Category) = ismultitensor(C)
