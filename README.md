@@ -28,7 +28,7 @@ G = symmetric_group(2)
 X = gset(G,[1,2,3])
 C = ConvolutionCategory(X,F)
 simples(C)
-groethendieck_ring(C)
+grothendieck_ring(C)
 ```
 
 ## Acknowledgements
