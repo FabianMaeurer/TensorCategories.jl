@@ -13,7 +13,7 @@ end
 
 function print_multiplication_table(simples::Vector{<:Object}, names::Vector{String} = ["v$i" for i ∈ 1:length(simples)])
     @assert length(simples) == length(names) "Invalid input"
-    mult_table = multiplication_table(simples)
+    mult_table = multiplication_table(parent(simples[1]), simples)
 
     return [pretty_print_semisimple(s⊗t,simples,names) for s ∈ simples, t ∈ simples]
 end

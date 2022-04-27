@@ -94,7 +94,7 @@ function tensor_product(X::GVSObject, Y::GVSObject)
     W = X.V ⊗ Y.V
     G = base_group(X)
     elems = elements(G)
-    grading = vcat([[i*j for i ∈ X.grading] for j ∈ Y.grading]...)
+    grading = vcat([[i*j for i ∈ Y.grading] for j ∈ X.grading]...)
     return GVSObject(parent(X), W, length(grading) == 0 ? elem_type(G)[] : grading)
 end
 

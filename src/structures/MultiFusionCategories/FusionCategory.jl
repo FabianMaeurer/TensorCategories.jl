@@ -488,8 +488,6 @@ function Ising()
     z = zero(MatrixSpace(F,0,0))
     set_associator!(C,3,3,3, [z, z, inv(a)*matrix(F,[1 1; 1 -1])])
 
-    set_braiding!(C, (X,Y) -> id(X⊗Y))
-    #set_duals!(C,[[1,0,0], [0,1,0], [0,0,1]])
     set_spherical!(C, [id(s) for s ∈ simples(C)])
 
     a,b,c = simples(C)
