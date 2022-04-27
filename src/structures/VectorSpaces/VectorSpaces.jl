@@ -267,7 +267,7 @@ function tensor_product(X::VectorSpaceObject, Y::VectorSpaceObject)
     if parent(X) != parent(Y)
         throw(ErrorException("Mismatching parents."))
     end
-    b = [[(x,y) for x ∈ basis(X), y ∈ basis(Y)]...]
+    b = [[(x,y) for y ∈ basis(Y), x ∈ basis(X)]...]
     return VectorSpaceObject(parent(X),b)
 end
 

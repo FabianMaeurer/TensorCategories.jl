@@ -11,7 +11,7 @@ end
 Return a ```N```-cocylce of ```G```. By now the condition is not checked.
 """
 function Cocycle(G::GAPGroup, m::Dict{NTuple{N,S},T}) where {S<:GroupElem,T<:FieldElem,N}
-    return Cocycle{N}(G,parent(values(m)[1]),m)
+    return Cocycle(G,parent(collect(values(m))[1]),m)
 end
 
 function Cocycle(G::GAPGroup, N::Int, f::Function)
@@ -26,7 +26,7 @@ function cyclic_group_3cocycle(G::GAPGroup, F::Field, ξ::FieldElem)
     g = G[1]
     n = order(G)
     D = Dict((g^i,g^j,g^k) => ξ^(div(i*(j+k - rem(j+k,n)),n)) for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n)
-    return Cocycle{3}(G,D)
+    return Cocycle(G,D)
 end
 
 function show(io::IO, c::Cocycle{N}) where N

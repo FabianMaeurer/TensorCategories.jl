@@ -10,14 +10,14 @@ abstract type Morphism end
 
 
 """
-    VectorSpaceObject{T}
+    VectorSpaceObject
 
 An object in the category of finite dimensional vector spaces.
 """
 abstract type VectorSpaceObject <: Object end
 
 """
-    VectorSpaceMorphism{T}()
+    VectorSpaceMorphism
 
 A morphism in the category of finite dimensional vector spaces.
 """
