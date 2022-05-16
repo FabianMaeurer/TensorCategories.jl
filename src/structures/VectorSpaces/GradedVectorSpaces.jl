@@ -47,9 +47,19 @@ one(C::GradedVectorSpaces) = GVSObject(C,VectorSpaceObject(base_ring(C),1), [one
 zero(C::GradedVectorSpaces) = GVSObject(C,VectorSpaceObject(base_ring(C),0), elem_type(base_group(C))[])
 
 function isisomorphic(X::GVSObject, Y::GVSObject)
-    b,f = isisomorphic(X.V,Y.V)
-
-    return b && Set(X.grading) == Set(Y.grading) ? (true,Morphism(X,Y,matrix(f))) : (false,nothing)
+    if Set(X.grading) != Set(Y.grading) || !isisomorphic(X.V,Y.V)[1]
+        return false, nothing
+    else
+        m = zero(MatrixSpace(base_ring(X),dim(X),dim(Y)))
+        for g ∈ X.grading
+            i = findall(h -> h == g, X.grading)
+            j = findall(h -> h == g, Y.grading)
+            for (l,k) ∈ zip(i,j)
+                m[l,k] = 1
+            end
+        end
+        return true, Morphism(X,Y,m)
+    end
 end
 #-----------------------------------------------------------------
 #   Functionality: Direct Sums
