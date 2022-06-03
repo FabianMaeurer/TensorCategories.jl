@@ -116,7 +116,7 @@ function isisomorphic(X::CohSheaf, Y::CohSheaf)
     return true, CohSheafMorphism(X,Y,m)
 end
 
-==(f::CohSheafMorphism, g::CohSheafMorphism) = f.m == f.m
+==(f::CohSheafMorphism, g::CohSheafMorphism) = f.m == g.m
 
 """
     id(X::CohSheaf)
