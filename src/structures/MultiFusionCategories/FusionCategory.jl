@@ -26,14 +26,14 @@ mutable struct RingCategory <: Category
 end
 
 
-struct RingObject <: Object
+struct RingCatObject <: Object
     parent::RingCategory
     components::Vector{Int}
 end
 
-struct RingMorphism <: Morphism
-    domain::RingObject
-    codomain::RingObject
+struct RingCatMorphism <: Morphism
+    domain::RingCatObject
+    codomain::RingCatObject
     m::Vector{<:MatElem}
 end
 
@@ -44,7 +44,7 @@ end
 
 RingCategory(x...) = RingCategory(x...)
 
-Morphism(X::RingObject, Y::RingObject, m::Vector) = RingMorphism(X,Y,m)
+Morphism(X::RingCatObject, Y::RingCatObject, m::Vector) = RingCatMorphism(X,Y,m)
 
 #-------------------------------------------------------------------------------
 #   Setters/Getters
@@ -87,10 +87,6 @@ function set_ribbon!(F::RingCategory, r::Vector)
     F.ribbon = r
 end
 
-function set_dims!(F::RingCategory, d::Vector)
-    F.dims = d
-end
-
 function set_twist!(F::RingCategory, t::Vector)
     F.twist = t
 end
@@ -103,107 +99,227 @@ end
 #     F.coev = coev
 # end
 
-dim(X::RingObject) = base_ring(X)(tr(id(X)))
+dim(X::RingCatObject) = base_ring(X)(tr(id(X)))
 
 (::Type{Int})(x::fmpq) = Int(numerator(x))
 
 
-braiding(X::RingObject, Y::RingObject) = parent(X).braiding(X,Y)
+braiding(X::RingCatObject, Y::RingCatObject) = parent(X).braiding(X,Y)
 
-function associator(X::RingObject, Y::RingObject, Z::RingObject)
+function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
+
     C = parent(X)
     F = base_ring(C)
     n = C.simples
     dom = X⊗Y⊗Z
-    m = zero_morphism(zero(C),zero(C))
+
 
     table = C.tensor_product
-    associator = C.ass
+    C_associator = C.ass
 
+    #---------------------------------
+    # associators on simple objects
+    #---------------------------------
+    if issimple(X) && issimple(Y) && issimple(Z)
+        i = findfirst(e -> e ≠ 0, X.components)
+        j = findfirst(e -> e ≠ 0, Y.components)
+        k = findfirst(e -> e ≠ 0, Z.components)
+        return Morphism(X⊗Y⊗Z, X⊗Y⊗Z, C_associator[i,j,k,:])
+    end
+
+    #---------------------------------
+    # associators for arbitrary objects
+    #---------------------------------
+    simple_objects = simples(parent(X))
+
+    X_summands = vcat([[(s,[k,l]) for l ∈ 1:X.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
+    Y_summands = vcat([[(s,[k,l]) for l ∈ 1:Y.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
+    Z_summands = vcat([[(s,[k,l]) for l ∈ 1:Z.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
+
+    #-------------------------------------
     # Order of summands in domain
-    dom_order_temp = [(k, m1*m2*table[i,j,k],[i,j]) for k ∈ 1:n, (i,m1) ∈ zip(1:n,X.components), (j,m2) ∈ zip(1:n,Y.components)][:]
-    filter!(e -> e[2] != 0, dom_order_temp)
-    sort!(dom_order_temp, by = e -> e[1])
-    dom_order = [(k,m1*m2*table[i,j,k], [id; j]) for k ∈ 1:n, (i,m1,id) ∈ dom_order_temp, (j,m2) ∈ zip(1:n,Z.components)][:]
-    filter!(e -> e[2] != 0, dom_order)
-    sort!(dom_order, by = e -> e[1])
-
-    # Order of summands in codomain
-    cod_order_temp = [(k, m1*m2*table[i,j,k], [i,j]) for k ∈ 1:n, (i,m1) ∈ zip(1:n,Y.components), (j,m2) ∈ zip(1:n,Z.components)][:]
-    filter!(e -> e[2] != 0, cod_order_temp)
-    sort!(cod_order_temp, by = e -> e[1])
-    cod_order = [(k,m1*m2*table[i,j,k], [i; id]) for k ∈ 1:n, (i,m2) ∈ zip(1:n,X.components), (j,m1, id) ∈ cod_order_temp][:]
-    filter!(e -> e[2] != 0, cod_order)
-    sort!(cod_order)
-
-    # Associator
-    for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n
-        for i2 ∈ 1:X[i], j2 ∈ 1:Y[j], k2 ∈ 1:Z[k]
-            T = C[i]⊗C[j]⊗C[k]
-            m = m ⊕ Morphism(T,T,associator[i,j,k,:])
+    #-------------------------------------
+    domain_order_temp = []
+    for (x, x_id) ∈ X_summands, (y, y_id) ∈ Y_summands
+         for (s,k) ∈ zip(simple_objects, (x⊗y).components)
+             append!(domain_order_temp, [(s, [x_id; y_id]) for l ∈ 1:k])
+         end
+    end
+    sort!(domain_order_temp, by = e -> findfirst(k -> k != 0, e[1].components))
+    domain_order = []
+    for (x, x_id) ∈ domain_order_temp, (z, z_id) ∈ Z_summands
+        for (s,k) ∈ zip(simple_objects, (x⊗z).components)
+            append!(domain_order, [(s, [x_id; z_id]) for l ∈ 1:k])
         end
     end
 
-    # Order of summands in associator
-    ass_order_temp = [(k, m1*m2*table[i,j,k],[i,j]) for k ∈ 1:n, (i,m1) ∈ zip(1:n,X.components), (j,m2) ∈ zip(1:n,Y.components)][:]
-    filter!(e -> e[2] != 0, ass_order_temp)
-    ass_order = [(k,m1*m2*table[i,j,k], [id; j]) for k ∈ 1:n, (i,m1,id) ∈ ass_order_temp, (j,m2) ∈ zip(1:n,Z.components)][:]
-    filter!(e -> e[2] != 0, ass_order)
+    #-----------------------------------
+    # Order of summands in codomain
+    #-----------------------------------
+    codomain_order_temp = []
+    for (y, y_id) ∈ Y_summands, (z, z_id) ∈ Z_summands
+        for (s,k) ∈ zip(simple_objects, (y⊗z).components)
+            append!(codomain_order_temp, [(s, [y_id; z_id]) for l ∈ 1:k])
+        end
+    end
+    sort!(codomain_order_temp, by = e -> findfirst(k -> k != 0, e[1].components))
+    codomain_order = []
+    for (x, x_id) ∈ X_summands, (z, z_id) ∈ codomain_order_temp
+        for (s,k) ∈ zip(simple_objects, (x⊗z).components)
+            append!(codomain_order, [(s, [x_id; z_id]) for l ∈ 1:k])
+        end
+    end
 
+    #-----------------------------------
+    # Order of summands in associator
+    #-----------------------------------
+    associator_order = []
+    for (x, x_id) ∈ X_summands, (y, y_id) ∈ Y_summands, (z, z_id) ∈ Z_summands
+        for (s,k) ∈ zip(simple_objects, ((x⊗y)⊗z).components)
+            append!(associator_order, [(s, [x_id; y_id; z_id]) for i ∈ 1:k])
+        end
+    end
+
+    #-----------------------------------
+    # Associator morphism
+    #-----------------------------------
+    m = zero_morphism(zero(C),zero(C))
+    for (x,_) ∈ X_summands, (y,_) ∈ Y_summands, (z,_) ∈ Z_summands
+        m = m ⊕ associator(x,y,z)
+    end
+
+
+    #-----------------------------------
+    # permutations
+    #-----------------------------------
     comp_maps = matrices(m)
 
-    # Permutation matrices
     for i ∈ 1:n
-        dom_i = filter(e -> e[1] == i, dom_order)
-        cod_i = filter(e -> e[1] == i, cod_order)
-        ass_i = filter(e -> e[1] == i, ass_order)
+        dom_i = filter(e -> e[1] == C[i], domain_order)
+        cod_i = filter(e -> e[1] == C[i], codomain_order)
+        ass_i = filter(e -> e[1] == C[i], associator_order)
+
+        if length(dom_i) == 0 continue end
 
         c_ass = vector_permutation(dom_i,ass_i)
 
-        dom_dims = [k for (_,k,_) ∈ dom_i]
-        ass_dims = [k for (_,k,_) ∈ ass_i]
-        cod_dims = [k for (_,k,_) ∈ cod_i]
-
         # Permutation dom -> associator
-        ass_perm = zero(MatrixSpace(F,sum(dom_dims),sum(dom_dims)))
-        j = 0
+        ass_perm = zero(MatrixSpace(F,length(dom_i),length(dom_i)))
 
-        for (k,d) ∈ zip(c_ass,dom_dims)
-
-            nk = sum(ass_dims[1:k-1])
-
-            for i ∈ 1:d
-                ass_perm[j+i,nk+i] = F(1)
-            end
-            j = j+d
+        for (i,k) ∈ zip(1:length(c_ass), c_ass)
+            ass_perm[i,k] = F(1)
         end
 
         # Permutation associator -> cod
-        cod_perm = zero(MatrixSpace(F,sum(dom_dims),sum(dom_dims)))
+        cod_perm = zero(MatrixSpace(F,length(cod_i),length(cod_i)))
 
         c_cod = vector_permutation(ass_i,cod_i)
-        j = 0
-        for (k,d) ∈ zip(c_cod,ass_dims)
-            nk = sum(cod_dims[1:k-1])
 
-            for i ∈ 1:d
-                cod_perm[j+i,nk+i] = F(1)
-            end
-            j = j+d
+        for (i,k) ∈ zip(1:length(c_cod), c_cod)
+            cod_perm[i,k] = F(1)
         end
         comp_maps[i] = ass_perm*comp_maps[i]*cod_perm
 
     end
-
     return Morphism(dom,dom, comp_maps)
+
 end
 
+
+# function associator2(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
+#     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
+#     C = parent(X)
+#     F = base_ring(C)
+#     n = C.simples
+#     dom = X⊗Y⊗Z
+#     m = zero_morphism(zero(C),zero(C))
+#
+#     table = C.tensor_product
+#     associator = C.ass
+#
+#     # Order of summands in domain
+#     dom_order_temp = [(k, m1*m2*table[i,j,k],[i,j]) for k ∈ 1:n, (i,m1) ∈ zip(1:n,X.components), (j,m2) ∈ zip(1:n,Y.components)][:]
+#     filter!(e -> e[2] != 0, dom_order_temp)
+#     sort!(dom_order_temp, by = e -> e[1])
+#     dom_order = [(k,m1*m2*table[i,j,k], [id; j]) for k ∈ 1:n, (i,m1,id) ∈ dom_order_temp, (j,m2) ∈ zip(1:n,Z.components)][:]
+#     filter!(e -> e[2] != 0, dom_order)
+#     #sort!(dom_order, by = e -> e[1])
+#
+#     # Order of summands in codomain
+#     cod_order_temp = [(k, m1*m2*table[i,j,k], [i,j]) for k ∈ 1:n, (i,m1) ∈ zip(1:n,Y.components), (j,m2) ∈ zip(1:n,Z.components)][:]
+#     filter!(e -> e[2] != 0, cod_order_temp)
+#     sort!(cod_order_temp, by = e -> e[1])
+#     cod_order = [(k,m1*m2*table[i,j,k], [i; id]) for k ∈ 1:n, (i,m2) ∈ zip(1:n,X.components), (j,m1, id) ∈ cod_order_temp][:]
+#     filter!(e -> e[2] != 0, cod_order)
+#     #sort!(cod_order, by = e -> e[1])
+#
+#     # Associator
+#     for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n
+#         for i2 ∈ 1:X[i], j2 ∈ 1:Y[j], k2 ∈ 1:Z[k]
+#             T = C[i]⊗C[j]⊗C[k]
+#             m = m ⊕ Morphism(T,T,associator[i,j,k,:])
+#         end
+#     end
+#
+#     # Order of summands in associator
+#     ass_order_temp = [(k, m1*m2*table[i,j,k],[i,j]) for k ∈ 1:n, (i,m1) ∈ zip(1:n,X.components), (j,m2) ∈ zip(1:n,Y.components)][:]
+#     filter!(e -> e[2] != 0, ass_order_temp)
+#     ass_order = [(k,m1*m2*table[i,j,k], [id; j]) for k ∈ 1:n, (i,m1,id) ∈ ass_order_temp, (j,m2) ∈ zip(1:n,Z.components)][:]
+#     filter!(e -> e[2] != 0, ass_order)
+#     #sort!(ass_order, by = e -> e[1])
+#
+#     comp_maps = matrices(m)
+#
+#     # Permutation matrices
+#     for i ∈ 1:n
+#         dom_i = filter(e -> e[1] == i, dom_order)
+#         cod_i = filter(e -> e[1] == i, cod_order)
+#         ass_i = filter(e -> e[1] == i, ass_order)
+#
+#         c_ass = vector_permutation(dom_i,ass_i)
+#
+#         dom_dims = [k for (_,k,_) ∈ dom_i]
+#         ass_dims = [k for (_,k,_) ∈ ass_i]
+#         cod_dims = [k for (_,k,_) ∈ cod_i]
+#
+#         # Permutation dom -> associator
+#         ass_perm = zero(MatrixSpace(F,sum(dom_dims),sum(dom_dims)))
+#         j = 0
+#
+#         for (k,d) ∈ zip(c_ass,dom_dims)
+#
+#             nk = sum(ass_dims[1:k-1])
+#
+#             for i ∈ 1:d
+#                 ass_perm[j+i,nk+i] = F(1)
+#             end
+#             j = j+d
+#         end
+#
+#         # Permutation associator -> cod
+#         cod_perm = zero(MatrixSpace(F,sum(dom_dims),sum(dom_dims)))
+#
+#         c_cod = vector_permutation(ass_i,cod_i)
+#         j = 0
+#         for (k,d) ∈ zip(c_cod,ass_dims)
+#             nk = sum(cod_dims[1:k-1])
+#
+#             for i ∈ 1:d
+#                 cod_perm[j+i,nk+i] = F(1)
+#             end
+#             j = j+d
+#         end
+#         comp_maps[i] = ass_perm*comp_maps[i]*cod_perm
+#
+#     end
+#     return Morphism(dom,dom, comp_maps)
+# end
+
 function vector_permutation(A::Vector,B::Vector)
-    temp = deepcopy(B)
     perm = Int[]
     for a ∈ A
-        i = findall(e -> e == a, temp)
+        i = findall(e -> e == a, B)
         j = filter(e -> !(e ∈ perm), i)[1]
         perm = [perm; j]
     end
@@ -217,33 +333,33 @@ end
 #-------------------------------------------------------------------------------
 issemisimple(::RingCategory) = true
 
-issimple(X::RingObject) = sum(X.components) == 1
+issimple(X::RingCatObject) = sum(X.components) == 1
 
-==(X::RingObject, Y::RingObject) = parent(X) == parent(Y) && X.components == Y.components
-==(f::RingMorphism, g::RingMorphism) = domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
+==(X::RingCatObject, Y::RingCatObject) = parent(X) == parent(Y) && X.components == Y.components
+==(f::RingCatMorphism, g::RingCatMorphism) = domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
 
-decompose(X::RingObject) = [(x,k) for (x,k) ∈ zip(simples(parent(X)), X.components) if k != 0]
+decompose(X::RingCatObject) = [(x,k) for (x,k) ∈ zip(simples(parent(X)), X.components) if k != 0]
 
-inv(f::RingMorphism) = RingMorphism(codomain(f),domain(f), inv.(f.m))
+inv(f::RingCatMorphism) = RingCatMorphism(codomain(f),domain(f), inv.(f.m))
 
-id(X::RingObject) = RingMorphism(X,X, [one(MatrixSpace(base_ring(X),d,d)) for d ∈ X.components])
+id(X::RingCatObject) = RingCatMorphism(X,X, [one(MatrixSpace(base_ring(X),d,d)) for d ∈ X.components])
 
-function compose(f::RingMorphism, g::RingMorphism)
+function compose(f::RingCatMorphism, g::RingCatMorphism)
     @assert codomain(f) == domain(g) "Morphisms not compatible"
-    return RingMorphism(domain(f), codomain(g), [m*n for (m,n) ∈ zip(f.m,g.m)])
+    return RingCatMorphism(domain(f), codomain(g), [m*n for (m,n) ∈ zip(f.m,g.m)])
 end
 
-function +(f::RingMorphism, g::RingMorphism)
+function +(f::RingCatMorphism, g::RingCatMorphism)
     @assert domain(f) == domain(g) && codomain(f) == codomain(g) "Not compatible"
-    RingMorphism(domain(f), codomain(f), [m + n for (m,n) ∈ zip(f.m,g.m)])
+    RingCatMorphism(domain(f), codomain(f), [m + n for (m,n) ∈ zip(f.m,g.m)])
 end
 
 """
-    dual(X::RingObject)
+    dual(X::RingCatObject)
 
 Return the dual object of ``X``. An error is thrown if ``X`` is not rigid.
 """
-function dual(X::RingObject)
+function dual(X::RingCatObject)
     C = parent(X)
 
     # Dual of simple Object
@@ -254,14 +370,14 @@ function dual(X::RingObject)
         if length(j) != 1
             throw(ErrorException("Object not rigid."))
         end
-        return RingObject(C,[i == j[1] ? 1 : 0 for i ∈ 1:C.simples])
+        return RingCatObject(C,[i == j[1] ? 1 : 0 for i ∈ 1:C.simples])
     end
 
     # Build dual from simple objects
     return dsum([dual(Y)^(X.components[i]) for (Y,i) ∈ zip(simples(C), 1:C.simples)])
 end
 
-function coev(X::RingObject) where T
+function coev(X::RingCatObject) where T
     DX = dual(X)
     C = parent(X)
     F = base_ring(C)
@@ -287,7 +403,7 @@ function coev(X::RingObject) where T
     return Morphism(one(C), X⊗DX, mats)
 end
 
-function ev(X::RingObject)
+function ev(X::RingCatObject)
     DX = dual(X)
     C = parent(X)
     F = base_ring(C)
@@ -319,16 +435,16 @@ function ev(X::RingObject)
     return Morphism(X⊗DX,one(C),mats)
 end
 
-function spherical(X::RingObject)
+function spherical(X::RingCatObject)
     C = parent(X)
     sp = C.spherical
     return dsum([x^k for (x,k) ∈ zip(sp, X.components)])
 end
 
 
-*(λ,f::RingMorphism) = RingMorphism(domain(f), codomain(f), λ .*f.m)
+*(λ,f::RingCatMorphism) = RingCatMorphism(domain(f), codomain(f), λ .*f.m)
 
-# function tr(f::RingMorphism)
+# function tr(f::RingCatMorphism)
 #     sum(tr.(f.m))
 # end
 
@@ -337,23 +453,23 @@ end
 #     #[inv(θ(i))*inv(θ(j))*sum() i ∈ simples(C), j ∈ simples(C)]
 # end
 
-function getindex(f::RingMorphism, i)
+function getindex(f::RingCatMorphism, i)
     m = zero_morphism(domain(f),codomain(f)).m
     m[i] = f.m[i]
     simple = simples(parent(domain(f)))
     dom = simple[i]^domain(f).components[i]
     cod = simple[i]^codomain(f).components[i]
-    return RingMorphism(dom,cod,m)
+    return RingCatMorphism(dom,cod,m)
 end
 
-getindex(X::RingObject, i) = X.components[i]
+getindex(X::RingCatObject, i) = X.components[i]
 
-function matrices(f::RingMorphism)
+function matrices(f::RingCatMorphism)
     f.m
 end
 
 
-function (F::Field)(f::RingMorphism)
+function (F::Field)(f::RingCatMorphism)
     if !(domain(f) == codomain(f) && issimple(domain(f)))
         throw(ErrorException("Cannot convert Morphism to $F"))
     end
@@ -364,7 +480,7 @@ end
 #   Tensor Product
 #-------------------------------------------------------------------------------
 
-function tensor_product(X::RingObject, Y::RingObject)
+function tensor_product(X::RingCatObject, Y::RingCatObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
     C = parent(X)
     n = C.simples
@@ -380,10 +496,10 @@ function tensor_product(X::RingObject, Y::RingObject)
         end
     end
 
-    return RingObject(C,T)
+    return RingCatObject(C,T)
 end
 
-function tensor_product(f::RingMorphism, g::RingMorphism)
+function tensor_product(f::RingCatMorphism, g::RingCatMorphism)
     dom = domain(f) ⊗ domain(g)
     cod = codomain(f) ⊗ codomain(g)
     C = parent(dom)
@@ -403,7 +519,7 @@ function tensor_product(f::RingMorphism, g::RingMorphism)
                 m[k] = A
 
                 for _ ∈ 1:table[i,j,k]
-                    h = h ⊕ RingMorphism(simpl[k]^d1,simpl[k]^d2, m)
+                    h = h ⊕ RingCatMorphism(simpl[k]^d1,simpl[k]^d2, m)
                 end
 
             end
@@ -411,7 +527,7 @@ function tensor_product(f::RingMorphism, g::RingMorphism)
     end
     #dom_left = dom.components - domain(h).components
     #cod_left = cod.components - codomain(h).components
-    return h #⊕ zero_morphism(RingObject(C,dom_left), RingObject(C,cod_left))
+    return h #⊕ zero_morphism(RingCatObject(C,dom_left), RingCatObject(C,cod_left))
 end
 
 
@@ -421,12 +537,12 @@ one(C::RingCategory) = simples(C)[1]
 #   Direct sum
 #-------------------------------------------------------------------------------
 
-function dsum(X::RingObject, Y::RingObject)
+function dsum(X::RingCatObject, Y::RingCatObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
-    return RingObject(parent(X), X.components .+ Y.components)
+    return RingCatObject(parent(X), X.components .+ Y.components)
 end
 
-function dsum(f::RingMorphism, g::RingMorphism)
+function dsum(f::RingCatMorphism, g::RingCatMorphism)
     dom = domain(f) ⊕ domain(g)
     cod = codomain(f) ⊕ codomain(g)
     F = base_ring(dom)
@@ -438,14 +554,14 @@ function dsum(f::RingMorphism, g::RingMorphism)
         z2 = zero(MatrixSpace(F,mg,nf))
         m[i] = [f.m[i] z1; z2 g.m[i]]
     end
-    return RingMorphism(dom,cod, m)
+    return RingCatMorphism(dom,cod, m)
 end
 
 
-zero(C::RingCategory) = RingObject(C,[0 for i ∈ 1:C.simples])
+zero(C::RingCategory) = RingCatObject(C,[0 for i ∈ 1:C.simples])
 
-function zero_morphism(X::RingObject, Y::RingObject)
-    return RingMorphism(X,Y,[zero(MatrixSpace(base_ring(X), cX, cY)) for (cX,cY) ∈ zip(X.components, Y.components)])
+function zero_morphism(X::RingCatObject, Y::RingCatObject)
+    return RingCatMorphism(X,Y,[zero(MatrixSpace(base_ring(X), cX, cY)) for (cX,cY) ∈ zip(X.components, Y.components)])
 end
 #-------------------------------------------------------------------------------
 #   Simple Objects
@@ -453,11 +569,11 @@ end
 
 function simples(C::RingCategory)
     n = C.simples
-    [RingObject(C, [i == j ? 1 : 0 for j ∈ 1:n]) for i ∈ 1:n]
+    [RingCatObject(C, [i == j ? 1 : 0 for j ∈ 1:n]) for i ∈ 1:n]
 end
 
 function getindex(C::RingCategory, i)
-    RingObject(C,[i == j ? 1 : 0 for j ∈ 1:C.simples])
+    RingCatObject(C,[i == j ? 1 : 0 for j ∈ 1:C.simples])
 end
 
 #-------------------------------------------------------------------------------
@@ -467,7 +583,7 @@ end
 function Ising()
     Qx,x = QQ["x"]
     F,a = NumberField(x^2-2, "√2")
-    C = RingCategory(F,["1", "χ", "X"])
+    C = RingCategory(F,["𝟙", "χ", "X"])
     M = zeros(Int,3,3,3)
 
     M[1,1,:] = [1,0,0]
@@ -483,8 +599,8 @@ function Ising()
     set_tensor_product!(C,M)
 
     set_associator!(C,2,3,2, matrices(-id(C[3])))
-    set_associator!(C,3,1,3, matrices(id(C[1])⊕(-id(C[2]))))
-    set_associator!(C,3,2,3, matrices((-id(C[1]))⊕id(C[2])))
+    set_associator!(C,3,1,3, matrices(id(C[1])⊕(id(C[2]))))
+    set_associator!(C,3,2,3, matrices((id(C[1]))⊕(-id(C[2]))))
     z = zero(MatrixSpace(F,0,0))
     set_associator!(C,3,3,3, [z, z, inv(a)*matrix(F,[1 1; 1 -1])])
 
@@ -500,20 +616,20 @@ end
 #-------------------------------------------------------------------------------
 
 struct RingCatHomSpace<: HomSpace
-    X::RingObject
-    Y::RingObject
-    basis::Vector{RingMorphism}
+    X::RingCatObject
+    Y::RingCatObject
+    basis::Vector{RingCatMorphism}
     parent::VectorSpaces
 end
 
-function Hom(X::RingObject, Y::RingObject)
+function Hom(X::RingCatObject, Y::RingCatObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
     Xi, Yi = X.components, Y.components
     F = base_ring(X)
 
     d = sum([x*y for (x,y) ∈ zip(Xi,Yi)])
 
-    if d == 0 return RingCatHomSpace(X,Y,RingMorphism[], VectorSpaces(F)) end
+    if d == 0 return RingCatHomSpace(X,Y,RingCatMorphism[], VectorSpaces(F)) end
 
     basis = [zero_morphism(X,Y).m for i ∈ 1:d]
     next = 1
@@ -524,11 +640,11 @@ function Hom(X::RingObject, Y::RingObject)
             next = next + 1
         end
     end
-    basis_mors = [RingMorphism(X,Y,m) for m ∈ basis]
+    basis_mors = [RingCatMorphism(X,Y,m) for m ∈ basis]
     return RingCatHomSpace(X,Y,basis_mors, VectorSpaces(F))
 end
 
-function express_in_basis(f::RingMorphism, base::Vector)
+function express_in_basis(f::RingCatMorphism, base::Vector)
     F = base_ring(domain(f))
     A = Array{elem_type(F),2}(undef,length(base),0)
     b = []
@@ -555,7 +671,7 @@ function show(io::IO, C::RingCategory)
     print(io, "Fusion Category with $(C.simples) simple objects")
 end
 
-function show(io::IO, X::RingObject)
+function show(io::IO, X::RingCatObject)
     coeffs = X.components
 
     if sum(coeffs) == 0
@@ -575,7 +691,7 @@ function show(io::IO, X::RingObject)
     print(io,disp)
 end
 
-function show(io::IO, f::RingMorphism)
+function show(io::IO, f::RingCatMorphism)
     print(io, """Morphism with
 Domain: $(domain(f))
 Codomain: $(codomain(f))

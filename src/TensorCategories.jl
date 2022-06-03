@@ -5,11 +5,12 @@ import Base: show,^,==, getindex, in, issubset, iterate, length,*,+,-, iterate,
 
 import Oscar.AbstractAlgebra.Integers
 
-import Oscar: VectorSpace, Field, elem_type, QQ, FieldElem,
+import Oscar:  Field, elem_type, QQ, FieldElem,
                 dim, base_ring, MatrixSpace, GAPGroup, GroupElem,
                 ModuleIsomorphism, parent, matrix, basis, MatElem, ∘, gens,
                 ⊕, compose, ⊗, tensor_product, Map, MatrixElem, kronecker_product,
-                id, domain, one, zero, MatrixSpace, size, AbstractSet, inv, product,
+                id, domain, one, zero, MatrixSpace, size, AbstractSet,
+                 inv, product,
                 Ring, RingElem, base_field, MPolyQuo, iscommutative, isinvertible,
                 MatrixGroup, hom, GAPGroupHomomorphism, GL, MatrixSpace, matrix,
                 codomain, GAP, characteristic, degree, julia_to_gap, GSet, gset,
@@ -50,10 +51,10 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         set_braiding!, Ising, zero_morphism, express_in_basis, solve_groebner,
         Center, CenterCategory, CenterObject, CenterMorphism, ev_coev, matrices,
         orbit_stabilizers, GRepRestriction, GRepInduction, Restriction, Induction,
-        print_multiplication_table, RingObject, RingMorphism, kernel, cokernel,
+        print_multiplication_table, RingCatObject, RingCatMorphism, kernel, cokernel,
         image, isgraded, cyclic_group_3cocycle, decompose_morphism,
         central_objects, half_braiding, half_braidings, left_inverse, right_inverse,
-        simple_subobjects, add_simple!
+        simple_subobjects, add_simple!, pentagon_axiom
 
 include("Utility/FFE_to_FinField.jl")
 include("Utility/SolveGroebner.jl")
@@ -72,6 +73,7 @@ include("structures/ConvolutionCategory/ConvolutionCategory.jl")
 include("structures/MultiFusionCategories/FusionCategory.jl")
 include("structures/MultiFusionCategories/Duals.jl")
 include("structures/MISC/multiplication_table.jl")
+include("structures/MISC/PentagonAxiom.jl")
 include("structures/GrothendieckRing.jl")
 include("structures/Center/Center.jl")
 
