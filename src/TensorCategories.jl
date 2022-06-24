@@ -23,7 +23,7 @@ import Oscar:  Field, elem_type, QQ, FieldElem,
                 splitting_field, change_base_ring, isconstant, coeff, isindependent,
                 coefficients, isabelian, leading_monomial, gcd, msolve, fmpz, fmpq,
                 rref, NumberField, nf_elem, kernel, cokernel, primary_decomposition,
-                Ideal, minpoly, image
+                Ideal, minpoly, image, solve
 
 export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         GradedVectorSpaces, VectorSpaceObject, simples,
@@ -54,7 +54,7 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         print_multiplication_table, RingCatObject, RingCatMorphism, kernel, cokernel,
         image, isgraded, cyclic_group_3cocycle, decompose_morphism,
         central_objects, half_braiding, half_braidings, left_inverse, right_inverse,
-        simple_subobjects, add_simple!, pentagon_axiom
+        simple_subobjects, add_simple!, pentagon_axiom, set_associator!, dual_basis, pairing
 
 include("Utility/FFE_to_FinField.jl")
 include("Utility/SolveGroebner.jl")
@@ -71,10 +71,11 @@ include("structures/Functors.jl")
 include("structures/ConvolutionCategory/CoherentSheaves.jl")
 include("structures/ConvolutionCategory/ConvolutionCategory.jl")
 include("structures/MultiFusionCategories/FusionCategory.jl")
-include("structures/MultiFusionCategories/Duals.jl")
 include("structures/MISC/multiplication_table.jl")
 include("structures/MISC/PentagonAxiom.jl")
 include("structures/GrothendieckRing.jl")
+include("structures/Center/Induction.jl")
 include("structures/Center/Center.jl")
+
 
 end

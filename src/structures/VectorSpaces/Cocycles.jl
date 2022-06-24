@@ -20,7 +20,7 @@ end
 
 trivial_3_cocycle(G,F) = Cocycle{3}(G,F,nothing)
 
-(c::Cocycle{N})(x...) where N = c.m == nothing ? c.F(1) : c.m[x]
+(c::Cocycle{N})(x...) where N = c.m === nothing ? c.F(1) : c.m[x]
 
 function cyclic_group_3cocycle(G::GAPGroup, F::Field, ξ::FieldElem)
     g = G[1]

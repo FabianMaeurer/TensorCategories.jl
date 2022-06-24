@@ -106,6 +106,8 @@ dim(X::RingCatObject) = base_ring(X)(tr(id(X)))
 
 braiding(X::RingCatObject, Y::RingCatObject) = parent(X).braiding(X,Y)
 
+
+
 function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
@@ -180,7 +182,6 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
             append!(associator_order, [(s, [x_id; y_id; z_id]) for i ∈ 1:k])
         end
     end
-
     #-----------------------------------
     # Associator morphism
     #-----------------------------------
@@ -210,7 +211,7 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
         for (i,k) ∈ zip(1:length(c_ass), c_ass)
             ass_perm[i,k] = F(1)
         end
-
+        
         # Permutation associator -> cod
         cod_perm = zero(MatrixSpace(F,length(cod_i),length(cod_i)))
 
@@ -219,6 +220,7 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
         for (i,k) ∈ zip(1:length(c_cod), c_cod)
             cod_perm[i,k] = F(1)
         end
+        
         comp_maps[i] = ass_perm*comp_maps[i]*cod_perm
 
     end
@@ -435,11 +437,11 @@ function ev(X::RingCatObject)
     return Morphism(X⊗DX,one(C),mats)
 end
 
-function spherical(X::RingCatObject)
-    C = parent(X)
-    sp = C.spherical
-    return dsum([x^k for (x,k) ∈ zip(sp, X.components)])
-end
+# function spherical(X::RingCatObject)
+#     C = parent(X)
+#     sp = C.spherical
+#     return dsum([x^k for (x,k) ∈ zip(sp, X.components)])
+# end
 
 
 *(λ,f::RingCatMorphism) = RingCatMorphism(domain(f), codomain(f), λ .*f.m)
@@ -521,7 +523,6 @@ function tensor_product(f::RingCatMorphism, g::RingCatMorphism)
                 for _ ∈ 1:table[i,j,k]
                     h = h ⊕ RingCatMorphism(simpl[k]^d1,simpl[k]^d2, m)
                 end
-
             end
         end
     end
