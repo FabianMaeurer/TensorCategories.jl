@@ -1,0 +1,2899 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[    118443,       2891]
+NotebookOptionsPosition[    115936,       2838]
+NotebookOutlinePosition[    116329,       2854]
+CellTagsIndexPosition[    116286,       2851]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"NotebookFind", "[", 
+   RowBox[{
+    RowBox[{"SelectedNotebook", "[", "]"}], ",", "\"\<Output\>\"", ",", "All",
+     ",", "CellStyle"}], "]"}], ";", 
+  RowBox[{"FrontEndExecute", "[", 
+   RowBox[{"FrontEndToken", "[", "\"\<Clear\>\"", "]"}], "]"}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"NotebookDelete", "@", 
+    RowBox[{"Cells", "@", 
+     RowBox[{"MessagesNotebook", "[", "]"}]}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Get", "[", 
+   RowBox[{
+    RowBox[{"NotebookDirectory", "[", "]"}], "<>", "\"\<H1Data.m\>\""}], 
+   "]"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Get", "[", 
+   RowBox[{
+    RowBox[{"ParentDirectory", "[", 
+     RowBox[{"NotebookDirectory", "[", "]"}], "]"}], "<>", 
+    "\"\</Functions.m\>\""}], "]"}], ";"}]}], "Input",
+ CellChangeTimes->{{3.824831993408017*^9, 3.824831996476914*^9}, {
+  3.824832762052793*^9, 3.824832762522141*^9}, {3.840725447921421*^9, 
+  3.840725469065135*^9}, {3.8407265581349277`*^9, 3.8407265588376503`*^9}, {
+  3.840886451244186*^9, 3.840886454419198*^9}, {3.8411406214360647`*^9, 
+  3.841140636580696*^9}, {3.8411406837842903`*^9, 3.841140718208004*^9}},
+ CellLabel->"In[56]:=",ExpressionUUID->"2e0a17db-b4d7-4261-85dc-0212620666fc"],
+
+Cell[TextData[StyleBox["Fusion rules", "Subsubsection"]], "Text",
+ CellChangeTimes->{{3.840717720003811*^9, 
+  3.840717724291888*^9}},ExpressionUUID->"086a60b5-e987-4b97-a217-\
+3ca5a6417226"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"TableForm", "[", 
+  RowBox[{
+   RowBox[{"Table", "[", 
+    RowBox[{
+     RowBox[{"Sum", "[", 
+      RowBox[{
+       RowBox[{
+        RowBox[{
+         RowBox[{"V", "[", 
+          RowBox[{"a", ",", "b"}], "]"}], "[", "c", "]"}], 
+        RowBox[{"objNames", "[", "c", "]"}]}], ",", 
+       RowBox[{"{", 
+        RowBox[{"c", ",", "obs"}], "}"}]}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"a", ",", "obs"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"b", ",", "obs"}], "}"}]}], "]"}], ",", 
+   RowBox[{"TableHeadings", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{
+       RowBox[{
+        RowBox[{"objNames", "[", "#", "]"}], "&"}], "/@", "obs"}], ",", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"objNames", "[", "#", "]"}], "&"}], "/@", "obs"}]}], 
+     "}"}]}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.840717415615163*^9, 3.840717420290963*^9}, {
+  3.8407175721469507`*^9, 3.8407176016660633`*^9}, {3.8407254520848923`*^9, 
+  3.840725458781342*^9}, {3.84115803443397*^9, 
+  3.841158036867497*^9}},ExpressionUUID->"d2c33179-89a9-441e-ba72-\
+5a374a315fb2"],
+
+Cell[BoxData[
+ TagBox[
+  TagBox[GridBox[{
+     {
+      StyleBox["\[Null]",
+       ShowStringCharacters->False], 
+      TagBox["1",
+       HoldForm], 
+      TagBox["\[Mu]",
+       HoldForm], 
+      TagBox["\[Eta]",
+       HoldForm], 
+      TagBox["\[Nu]",
+       HoldForm]},
+     {
+      TagBox["1",
+       HoldForm], "1", "\[Mu]", "\[Eta]", "\[Nu]"},
+     {
+      TagBox["\[Mu]",
+       HoldForm], "\[Mu]", 
+      RowBox[{"1", "+", "\[Nu]"}], 
+      RowBox[{"\[Eta]", "+", "\[Nu]"}], 
+      RowBox[{"\[Eta]", "+", "\[Mu]", "+", "\[Nu]"}]},
+     {
+      TagBox["\[Eta]",
+       HoldForm], "\[Eta]", 
+      RowBox[{"\[Eta]", "+", "\[Nu]"}], 
+      RowBox[{"1", "+", "\[Eta]", "+", "\[Mu]", "+", "\[Nu]"}], 
+      RowBox[{"\[Eta]", "+", "\[Mu]", "+", 
+       RowBox[{"2", " ", "\[Nu]"}]}]},
+     {
+      TagBox["\[Nu]",
+       HoldForm], "\[Nu]", 
+      RowBox[{"\[Eta]", "+", "\[Mu]", "+", "\[Nu]"}], 
+      RowBox[{"\[Eta]", "+", "\[Mu]", "+", 
+       RowBox[{"2", " ", "\[Nu]"}]}], 
+      RowBox[{"1", "+", 
+       RowBox[{"2", " ", "\[Eta]"}], "+", "\[Mu]", "+", 
+       RowBox[{"2", " ", "\[Nu]"}]}]}
+    },
+    GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Baseline}}},
+    GridBoxDividers->{
+     "Columns" -> {False, True, {False}, False}, 
+      "Rows" -> {False, True, {False}, False}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[2.0999999999999996`]}, 
+        Offset[0.27999999999999997`]}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}}],
+   {OutputFormsDump`HeadedRows, OutputFormsDump`HeadedColumns}],
+  Function[BoxForm`e$, 
+   TableForm[
+   BoxForm`e$, 
+    TableHeadings -> {{
+      1, $CellContext`\[Mu], $CellContext`\[Eta], $CellContext`\[Nu]}, {
+      1, $CellContext`\[Mu], $CellContext`\[Eta], $CellContext`\[Nu]}}]]]], \
+"Output",
+ CellChangeTimes->{3.841140721336837*^9},
+ CellLabel->
+  "Out[61]//TableForm=",ExpressionUUID->"949d4c40-d349-4e23-b031-\
+63421431248e"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Dimensions", "Subsubsection",
+ CellChangeTimes->{{3.840717771244265*^9, 
+  3.840717773012088*^9}},ExpressionUUID->"7549b54b-b4be-4efb-bc86-\
+4b0d086dde21"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"dim", "[", "#", "]"}], "&"}], "/@", 
+  "obs"}], "\[IndentingNewLine]", 
+ SuperscriptBox[
+  RowBox[{"dtot", "[", "]"}], "2"]}], "Input",
+ CellChangeTimes->{{3.8407177595169487`*^9, 3.840717778868682*^9}},
+ CellLabel->"In[62]:=",ExpressionUUID->"9b4c824e-d109-41ec-8c05-d0f8e37a4d75"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"1", ",", 
+   RowBox[{
+    FractionBox["1", "2"], " ", 
+    RowBox[{"(", 
+     RowBox[{"1", "+", 
+      SqrtBox["13"]}], ")"}]}], ",", 
+   RowBox[{
+    FractionBox["1", "2"], " ", 
+    RowBox[{"(", 
+     RowBox[{"3", "+", 
+      SqrtBox["13"]}], ")"}]}], ",", 
+   RowBox[{
+    FractionBox["1", "2"], " ", 
+    RowBox[{"(", 
+     RowBox[{"5", "+", 
+      SqrtBox["13"]}], ")"}]}]}], "}"}]], "Output",
+ CellChangeTimes->{3.84114072143307*^9},
+ CellLabel->"Out[62]=",ExpressionUUID->"af28db09-7224-421f-864a-1be860a50cae"],
+
+Cell[BoxData[
+ RowBox[{
+  FractionBox["3", "2"], " ", 
+  RowBox[{"(", 
+   RowBox[{"13", "+", 
+    RowBox[{"3", " ", 
+     SqrtBox["13"]}]}], ")"}]}]], "Output",
+ CellChangeTimes->{3.8411407214968357`*^9},
+ CellLabel->"Out[63]=",ExpressionUUID->"e646be66-6499-49bf-9458-14d13ca7fada"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Frobenius-Schur indicators", "Subsubsection",
+ CellChangeTimes->{
+  3.840717739031022*^9},ExpressionUUID->"6a97eab2-5bcf-4e78-8f6c-\
+ea355aa8feef"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"\[Kappa]", "[", "#", "]"}], "&"}], "/@", "obs"}]], "Input",
+ CellChangeTimes->{{3.840717694364314*^9, 3.840717710012581*^9}, 
+   3.8407177415074263`*^9},
+ CellLabel->"In[64]:=",ExpressionUUID->"aa7fcef2-b415-4cd9-ae85-ebbf0b727bcb"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"1", ",", "1", ",", "1", ",", "1"}], "}"}]], "Output",
+ CellChangeTimes->{3.841140721544669*^9},
+ CellLabel->"Out[64]=",ExpressionUUID->"10e555b1-dcc9-4a96-aeb0-4ff79666064d"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Unitary fusion category?", "Subsubsection",
+ CellChangeTimes->{{3.84071899936092*^9, 
+  3.840719007002082*^9}},ExpressionUUID->"d1969c6e-e988-4f39-af07-\
+196c1fe0f5f5"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NpentagonQ", "&&", "NunitaryQ", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"Being", " ", "checked", " ", "numerically"}], ",", " ", 
+    RowBox[{
+    "can", " ", "check", " ", "exactly", " ", "by", " ", "removing", " ", 
+     RowBox[{"leading", " ", "'"}], 
+     RowBox[{"N", "'"}]}]}], "*)"}]}]], "Input",
+ CellChangeTimes->{{3.840719009538295*^9, 3.840719040034535*^9}, {
+  3.840719159594219*^9, 3.84071919230723*^9}},
+ CellLabel->"In[65]:=",ExpressionUUID->"d76bf8bd-703c-44f3-808b-85bd6911b0f4"],
+
+Cell[BoxData["True"], "Output",
+ CellChangeTimes->{3.8411407288136673`*^9},
+ CellLabel->"Out[65]=",ExpressionUUID->"59a21568-8058-48e9-bbad-c132d5cd7093"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Visualizations", "Subsubsection",
+ CellChangeTimes->{{3.8407177928524723`*^9, 
+  3.840717795892415*^9}},ExpressionUUID->"0767cf50-7c6b-4761-a0c4-\
+c910cd4ca1e0"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"ArrayPlot", "[", 
+  RowBox[{
+   RowBox[{"ArrayReshape", "[", 
+    RowBox[{
+     RowBox[{"RandomSample", "[", 
+      FractionBox[
+       RowBox[{"Fs", "+", "1"}], "2"], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"29", ",", "45"}], "}"}], ",", "\[Infinity]"}], "]"}], ",", 
+   RowBox[{"ColorFunction", "\[Rule]", " ", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"Blend", "[", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"White", ",", "Green", ",", "Black"}], "}"}], ",", "#"}], 
+       "]"}], "&"}], ")"}]}], ",", 
+   RowBox[{"Frame", "\[Rule]", "False"}], ",", 
+   RowBox[{"ColorFunctionScaling", "\[Rule]", "False"}]}], 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{"ListPlot", "[", 
+  RowBox[{
+   RowBox[{"RandomSample", "[", "Fs", "]"}], ",", 
+   RowBox[{"PlotRange", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"-", "1.05"}], ",", "1.05"}], "}"}]}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.8279162519047813`*^9, 3.8279162552946043`*^9}, {
+  3.827916377460034*^9, 3.827916379745572*^9}, {3.827916480020465*^9, 
+  3.827916505369752*^9}, {3.827916542456006*^9, 3.827916585247593*^9}, {
+  3.827916775419137*^9, 3.827916911204404*^9}, {3.828000702262329*^9, 
+  3.828000707158712*^9}, {3.828000749830207*^9, 3.828000765846456*^9}, {
+  3.828001849437989*^9, 3.828001860461204*^9}, {3.84071785124191*^9, 
+  3.840717851671194*^9}, {3.840719887945444*^9, 3.840719890252556*^9}},
+ CellLabel->"In[66]:=",ExpressionUUID->"37dbedea-1149-42ac-808c-b2b4ec657174"],
+
+Cell[BoxData[
+ GraphicsBox[RasterBox[CompressedData["
+1:eJylXQlcTlkbvyXEV2PLEkXzIaLIWKahyDqY7BrZsxZjyVhGMrJECU32GNJk
+y56kZYSEZG9RQtKkjZIsWUtf3zfOfZzn9Div+Z7fz0//c+97733Pfc6zn+f9
+euLsoVMqKYpiXP7Povzff/9mdDCuxqN7LzO7KYjMj5VMz16VIoxjytx7zt3j
+bvrH84q6qXjckoJKCafVcYYLfzEfnXXlnjrOY5p8nbWm5p57JJy39PF6999/
+ixXG/ecs3Zz/Gr5X3tQlfsMGX1Tvy3BQfS/tqEVJ6jiPGRUJ1zdZ3GZN1qx8
+YbymRZPo0xsypN+HUbMnlQ/9a1qeen7cuG+me2w/rz4Pw/o3b1wL0s5Rx3ms
+KMF3mt6PzLmgYlu/qzUMEnep5zM8s4X1nDaXMtVxHiuKY5VnS3YW3oF5C9R5
+9oPRCZi3jzhj5KC6W9xuqeM8VpSG48fV/95CnJ897yOn7NYqFMZ/tP8vZYt8
+OH3EDZ+28D2NMobuHX3tgXpfhgPqrWiwyixbHeexomzPNH3gvhP459C0i//q
+8/ahej6PFcUlcsLW071z4Xm2VFpUL/oM8DOHaYrbvq+fQZsE9TyrPx837R4M
+88ljRdG9MC1xXUNxPeZNmDj16DvMl/S6EJ7/Ix28a/ejea44/2O6Rya4nRWv
+TxFeX4z23FFSzCL+Usf7mm97tTUT+ITH5e/XKSGy8/sHwnXwOrJta1alcNt6
+4GcO06T7rXaT75KShfMC+v/6a8MAkd8ows8j45+Wlk7760zIUnGGpaHeysp3
+Yb1wWFE6/z4kNHc3fH5j+w5pQ19nqecznGLVzLHpS+B/jPH/bj7GC5seyhUw
+Kbc/EpYDewZN86tqGKeez/CXyvPwFg931fD8Sz2fxyLVWPl1wGWPDPV8hudd
+6lT1enCiOs5jRRmuZ1laYqS5HMbyXOf9D/cdz8P75TFNupHGrr///Fg4L7T3
+o4J6vVKF8SVPRoV+fRPW49oWjTatjr2v3pdhv8hlhZX6g9xguK+3Wf06ujD/
+DE/ee3FFytHb6jiPKyCtGKsGl0KBfzisKAvTnYK9pmSJ3yv0YNfxxwqk8xI7
+pVuP0tHApzwuX1/9DXVD4tKE67Q87mm8e85dYbyg5suHNaLF94v1EKO+XcMq
+TfxWfE7KzqHkMKa/+T0f8X9+Ny+lcPfKkanqOMO9ri8L/s4E+J/hjEarG23o
+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
+np/sPaa+dQrIZ4YpeSiLG1N1xRciqz1epS/KeSrOPHjckJ4pe8A+o/Iv5qmR
+DiMPQV0uj0Wi6nvZcZ0Rb3svdYK689j/7deBeWCYypNS9jb1vth9Kq43EMk6
+q/vTZ51AL/BYXHey74v39VD68fbgEembjoAc4DGdB6TsQ9/Wb2otHCj6fdQ+
+Dvxe1j6+tyjxO4hr8fjLiYoL1Uzxmm3YC+xYKm/FjkcQ+x/MzaaWlS4S5wd/
+37kvGiXPHgd+B4/L30+cT8DOemDPUfkvdpyyN3A9KqNOmZfMHx0D+16vn3OJ
+ZwboZYYp/XvByE3Lsiacz2NF+WrPwn+Z1ID5lMYNCNKr9+LuhyTRzsf26ufj
+TprXIVP5EcqPpvSFyTrrBI95YP/wmLZDsNyWyRPzl6c+/NFDtN8KbJeGNj4J
+/Cmr88HxW8oeu9j3RE+d7rAeeSz6g82ObEu2LAS5zeNyu2vOhmdT/CEfRNWn
+seN5/bdfSA8T9Q7ej8OIyjeFtEjsZbxe1FNUvf3n952BPRNc3X7rxb6f6E0O
+fzlhe1vmd+C8uUoonsCIyjvbzi/a4OJB1TGLdiDld1PxB5wHkeUl19bT+aH5
+hkLpPFDx0oq/BxCOO92yrzL+SC2o52FY9pyUff7G2qPDQ1OwcwYHWca1swI+
+Z9i/+fZfv7WF9cVjej7x88vqUam4B0VUfHjLM/P+xVXgvVBxDyreSOVn2fWo
++nPr3EVDlO2gLy/cXGv0WwrwA8NrL4/ZahkB8ofHNOXNbFu1qKt4Xs15XXce
+a3Nd+nnZPggqb4vryT+fR6Pz79R+uorzuaLfJKvH488v93eylrhMqgf8xmOR
+ZHX1mvInVWfOjlsOdE2b816sz6f8/cd1dg8bdlCs7/rSfalfHa/aZkRl8frY
+T6TyOP/UD6XiwLhufFLHw6tGTwb/hcf0dah5wPKH4geZfvfSdR2uXfpJ3tS0
+tMWR+yAPeUzHPXA+QlbngPNchwfs7mmUnqKez3Bqu5BjcRvBP2VYs7pZICqP
+w47f9XdrZmeqeR2OY8iZYT2fwfel6mGk+8eJ907l2f8ZifYDjm9TRPWvkO2r
+wvUzjrWiZ8yoHaKez7BMjkU/dTs/e6u4rhv7Rc6JMAD+CS7ePb5jZdCDDMvy
++Jrae9RzUnkBqu6F3Yfyi7HdELKr3fFUG3geHov6moprseOU/0L5sxS5FPR7
+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
+eB/ffwBK+/i0
+   "], {{0, 0}, {45, 29}}, {0, 1}],
+  Frame->False,
+  FrameLabel->{None, None},
+  FrameTicks->{{None, None}, {None, None}},
+  GridLinesStyle->Directive[
+    GrayLevel[0.5, 0.4]],
+  Method->{
+   "DefaultBoundaryStyle" -> Automatic, 
+    "DefaultGraphicsInteraction" -> {
+     "Version" -> 1.2, "TrackMousePosition" -> {True, False}, 
+      "Effects" -> {
+       "Highlight" -> {"ratio" -> 2}, "HighlightPoint" -> {"ratio" -> 2}, 
+        "Droplines" -> {
+         "freeformCursorMode" -> True, 
+          "placement" -> {"x" -> "All", "y" -> "None"}}}}, "DefaultPlotStyle" -> 
+    Automatic}]], "Output",
+ CellChangeTimes->{3.841140728948825*^9},
+ CellLabel->"Out[66]=",ExpressionUUID->"ab5c9cda-fafc-46a6-925c-af1de0a5ac8f"],
+
+Cell[BoxData[
+ GraphicsBox[{{}, 
+   {RGBColor[0.368417, 0.506779, 0.709798], PointSize[0.004583333333333334], 
+    AbsoluteThickness[1.6], PointBox[CompressedData["
+1:eJxdXHl4U1XajyxaHRiCghZFjbJYHNAgiFWLvixqWYSwSaEsoRQoZUvplu63
+2ZMm7U1SoSpCRkQrmwEZqAxKZK2yFQSsihARsQpiVJipivIxX97D8/zO/SfP
+ec49y7uvNw9kLBk/p41Go+nWXqP532/8iT2Lvxr6ov/mdxuDO3mcQCXnyk2z
+7/yWx1qydXr+00XDd/G4C6WcG/LTz4NO7YyPEyk4YOCp8f89x/Pd6dDn33V/
+7o/Peayj6b3zvv+hx0f8/oNk//qDOdUXozzfk4x7nVv3Dxbn9aaXu/X5s2DK
+x/x+EvF9efww/bXa/3Hvv8T6vqSB5xFK2DP/mO/us/y+nk4E7mwqqLnE7/en
+UXUHOnU5torHj9GU71a1v3nfGX5/AG25MOfSkE8v8nggtdk445uJJZd4/Li4
+D68fRKE7rYmOPt/y/BM06K30EVtKvuD5ZOpdfm3ZrpcFvp6U1j9Fi08Xbre8
+cJDHT4vzeZwivT+Y3FXKMwX3b+fxM/ToP455Btwq7vus9D5R4ZyrK707D8XH
+Ckn4GkJbHTv2pX/+ZXy9MoT+6Pnwj5Pe+ZT3G0qx3FFpDyd+x+uHUqNuYNrQ
+3Z/z/DDKXLPXenLjZ7x+GOlXDN4aztrH88Mp4ZXMqomm4zw/nH786s6V//nm
+I77fc3TfwENj/L6jPP8cPfuaJa3o3tM8/zzCozxPG1sf/kynFee/QMs3vjju
+6uVGXv+CdP9UeiU/06rxMD8pqZT+yLs712Wt4/1H0Phle1au3c78rYygdn+M
++sq4+xteP5KSqket2jfvK54fSd0HqM+9XST4a5R0v1H0mWHy6doNgj9H08ej
+f5m069Eonz+a8td/7eox5HuefxHpp7xIx+qe7vn6oDM8P0bwL8+PoeiUsV2X
+lTA+NWNpx/Tf52W0CvjH0iz7Pbpu037g9QbaNvqvCetrmP/IQKMe7XPzpVf8
+/L5B0Cf+fsRAv90U+2nbxh28fhzCR+OoV5s+O97YFOL141BfRMbRu8ebXn/v
+aUG/8fRTYd/0c598yevH0+F59s4bjIxfZTxldo4sXHj7Zl4/nu73pRy15R3l
+9ROEvPL9Jwj6Mr4n0NHfd00JWM7F5yMT8L6aiXT3RKM+Egnz+omIX2Uifbjs
+wu333M30ikyU9MEk3o8fmkSKLqFId1Tw8yTUh5FJ9PCBkeWT1N18/kvk6nJu
+X4+JnzH8L1F2feVI3w6+r/ISbZ/0ffoTykFe/xKlFm2d80ZY8N9klDeaLPDJ
+6ycjP0UmS/o7je6Y2avbAs9ZPj+N9nS/djxJ+wmvT0N8RdLoy67mb0/2Ffp6
+CsJDU+iBHnvf6XLkMK+fQtHzax88v+8k338KnUzuaexxWeBvKr19l6vNjmKm
+F01F/lWmSudPRXnRpFO/jb1i5+79mten09k1H1XYvmD+UtKpIm3qqQvDmvj8
+dOQ3zTRa9FBKziP7BfzTaNeUwxr34+f5/Gn07JjmR2zRvbx+mqAXnz8d70fS
+WJlOy187U1/+6y5eP13C/wwhT0y/GZL8zaCORw4frG9znuGfgftrZtKRUidt
+SmB+oJkS/WeS1hwoC1SzvY3MRHxojLRjwo8Vx7szfDoj1W6e1GVQk8CnEc8z
+GunIf2ctOThN0MdI6kfp7x5dxfcPGQX/83lG5ie2d1FpP80sHvOjmyXx0ywa
+cuBEt0N7mX+NswS8jN9ZtKPjmLM/Df+Qz59Fi5P7PdPvXbYXkVm0Yk+bz6ct
+4/ejs+i5Q5XhJ3UMnyaDtAcaHvhyyAmGP4PWvbh6WPfTzK+UQU/80Pa/u9N4
+vTGDLo4N9IuUsP5RMgQ9+fwM2jfn2aF/prP+iGQIeebzMwR/Mv5n085tpUWR
+NaxfdLORv2k2ZY++a3VGG543zibrqU4zzw2O8Pmzyam5tNo+pZnPn03HJ908
+c0PnFoZ/Nj2/59Puk8cxvaOzJX8ik/4+TL/q0kDmZ10mPZ3iuzbw9h/4/Ey0
+p8ZMeuibj8bcmrOWz88U8hofhzKZfxg/kUx657x++jr1XT4/E/GlmUOpnj53
+3ZHA/KqbQyM2ffBYF2EfaQ7Ks3EOOfrfNv3agU/4/Dmoj0I3xnz+HLSf0TnU
+pdOBm/pu28bwzxX6nPE/F+Ghueh/GucK+Jj/59Jnk7bmfN3A60Nz2Z9ifyAy
+l+5NGrf9XMfVTP+5FD9X8P88Ct66zTVuH+NbN4/y9w+65VBY6KN5+L5xnvC3
++Px5aK9C88g/Y9GAm9KFvZsn9CPDP0/S31moD3VZlO4MfDut8QSfn4X6yZhF
+fTpcPHn6J5YXJYtOv3hqedrvzG+hLDri6JrdPmU/w3/9/cG+xzKe4vtGs6j+
+H+Nmnw2xvtfMp30zHsu2vcpj3XzSTki7MnAX45vmC3+Qz59PJdX3mnusE/DP
+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
+fFqsAuVLo6A8JCjivowPBev3iQrqK92N9+PrkxTkZ70i8BefT1bo9uyMl7dW
+ivqCgvmtVAXl3aCgP5Gm0PmEN2Y+NUfwl0IND32zqpOT4clShDwzvhUK/z7w
+s+hi5iezgvZSUWhT8+PahPc3xceuG/uzPCqo/+oUtPchhXqfvis5WsH2u16h
+ZYfvnnyzkf3RsEJq+MlI9GfmtwYF5SWioD/YqIj6CtNTEfmh+LhZEfEwy7eC
++q1FQf8wJtG3VaHkVwtn7e3H9l5TifF9QiWNrdc39k8W+YBK1D+JlZj/1FUi
+vpMqkX/0lRgfJ1di/Z0qUR5TK0W+gukv9uMnrVKSr0qEN6sS8W2qxPjLXIn4
+Vyox3+6SzlcleOqk+4Qqhb8Sn6+X3g9X0mvvV15qO5LjiQZpfUR6v7ES+b+p
+EvVxcyVdnV7ySert7B9EJXy2VKL/EKtE/mqVztNY0J4nWNBf1lpQfyRaML7Q
+WVDekyzCfjL9LZj/TrZg/wNZaNPR39MXaRj/qRbMtxksaM/SLHh/owXtf5aF
+Nt82afneVOZnk/S+2SL1U1hoxSXPhZlzOb5yWZBfVQv6S3UW9FdCFsR3vUX4
+jyz/FtQXDdJ9ImLMT6MF4/Umi+h/YPpbRL2T6W/BfE6LBf2fmITPVovk/1gx
+fk6wYj5Ka2X5EfS3Yj1VZ8X9kqzo7+utaJ+SpffJSistgabaPCH/VtGvwfS3
+0qG3B9S2C3N+Ns2K9thoRfizrKKexPS3oj01WzH/o1gR/y4rNW7um3Lrmxxf
+qVaMT+qsmJ8PSfept6J+Cov9md4NVvQvIlaU90Yr9W1+P23KOuHPWEW8w/S3
+Yn0rKr3fYhX9ekx/K8ZzrVapf8mG/keCDfWh1obynmijJwZ0+a3jgzyvs0n0
+t2E8q7dhf1+yDe0J2RA/qTasdxik+TSbyC8x/W0YD2XZMH9kktabbTT037++
+f8XD8bBiw/yfyybyhWz/bVhvrLMhf4dsaH/qbegfhm3C32L62zD/EpHgbbTR
+mfyHMuZtZn3cZMN6ZLNN9PfFx1Eb5gtbbEjvmHReqw37fTR2PC/BjvGH1o71
+r0Q75rd0djp3altKzMj+W5Id68V6O+I/WRqTHfkn1Y79DwY7ymuaHesFRjvW
+r7Ps9MTyD8eu++otpr8d8y1mO/eXifqZHenpsmN/omrHfEWdtF/ILvwnpr8d
++73CdrSvDXbUhxE72q9Gu5TPtSN/NdsxXxuV8NliR30Ss2N/Zav0vsaB8CQ4
+cF7rQH2T6MB4X+fA+DDJQbH2mw7cPYDh1zvQ/0p20I6S3SfKbxL5A4eoX7H8
+O9DeGhwYb6Q5MN4zOkT/JtPfIfovmP4O0Y/G9L+xP+t/B8qPyyHiT5Z/B9aj
+6hwi/8P0d2C/cr1Ditccot+Z6S/hN+JA/67RgfnLJgfqo2YHxktRB/qXLQ7a
+1HkDvXGC+TfmQPvU6pD6tZ3YP5ngxP4WrZPvy0+iU/Qfxed1TtGfxPR3Yv5D
+78R4KtmJ/gU5sR6X6kR5NDgFvZn+TvTvjE7sV8ty0qoHM32uBXviY5MT8/dm
+J/oLihP731xOoe+Z/k5ae6E08V9DGH91TpSvkBP9vXonymtYGjc4hf8efz8i
+wdvoxP6sJqfQ16z//3f/kpv0WpaPqKCPkH+nyJfExzEn1jtandTJ/kDoY5vI
+/7uwnz7BJdXDXLh/ogvvp3Oh/CS5sP9OL61PdlGPDa+c0F9iepIL++FTXZjP
+Mkj3SXNhPGN0ifggfl6WS9RrWf5d1LvT3xaPHMbnmV2YT1JctKLL1eGPj2H8
+uFxYH1Bdwr9i+rswHx0S8PFT78J8X9iF/NLgQv8j4hL9K6z/XfThwWCHLfs4
+HmlyYf2x2SX1k7hQf7S4UF/GJPy3SmONG+u/CW5qLb3seq0dr9e6qevO/NRr
+Hdm+JbpFvyHT3437JbnRHuvdSL9kN/oL5CZTnvvwyv6cb09101Pbf+gxJMzw
+Gdwi38X0l84zujF/kOUW9p3l303z+t/6kfMK49/sRv2puJFfXW6hn5j+buxX
+rHNL9JfuU+9GeQq7aczpznXHrWzfG6T3I26spza6sX+yyY398s1utKdRt0R/
+N9qfmBv1daubRu9K2DbvPfYfNB70PxI86L9pPegPJnqwH1XnwX6UJA/aL70H
++THZg/JAHuTvVA/iz+AR/nR8nOah91PSF63rxecZPaJ/hunvob6XPuhQukvY
+fw/yg9mD9FSk+7mksepB/6fOg/QLiTE/9R7Mj4U9aK8aPJi/iXgwvmr0YH2/
+yYP5qGYP+o9RD8pbi4fujBy4Zcki4f97sN+g1YP9wpoq7B9KqEJ/UVuF9YLE
+Kqzv6KpEfMf0r0L86KtEPMz0r0J+oyqMV1KrML42VCF/pFWhv2Gsoo1XVs98
+vD37O1lVNHnSY6895fsny38V2nuzdH9F3Jcfl3R/tQrrDXXSfqEq/J6mvgr7
+WcNVyD8NVegfRaqo9/Qq9+WvmF8aq7B/qUm6T7N0n2gVfo/SUoX1qFgVLbgw
+WlM5lPVvaxXGyxovfbdIM7h6Fce3CV68j9aL+cBEL36vofNif1aSF8/Xe0V/
+VXw+2Sv0HdPfK+ozTH+v6Kdg++/F/HeaF/Fh9GI8kuUV8svy76UNHxy8bUA6
++4NmL/bbKV6sN7m8mG9RpfPqvNgvH5Lm671YLwh7MX5u8GK+MOIV8RDbfy/W
+v5u82J/Y7MX+o6gX8yktXvR3Y9L9Wr0i/8ry78N+yQQf1Xf0u898+xPb/+vj
+bzbdnLn230x/n9Qv66PxM3vcNVTH/J3kw/hN78P7Jvsk++8T+Q22/z7x/Q3T
+30db//ylXfMIrh+l+ZBfjD7s583ySf1WPoTf7EN/W/FhPs7lw3ypeh3eT3v1
+vtqB48s6Hz16f/+6LS8xv4V8qN/qfSI/xvSXzm/wYbwa8WF+rNGH/m2TtL7Z
+h/5O1If5oBafyF8z/aX1rT7Uv5pq7A9OqKaWyKxDo5/ieW21qKey/q/G/XTV
+WO9NqiZTddOnzZNYn+iv7/fupXtOnWV9llyN/jZJ+6WKMT+Gasx3pFVL9Z9q
+tNdZ0n4mad5cjfGdIr3vksaqNK6rRn4JVSM/1VfT5lX9NzUPZvkOV2N+q6Fa
+xD/xcUTCT2M1+qtN1ahvm6sxnxStxvihpRr7W2I37h8ft1bj90OaGvQXE2rw
+ew5tjbAHTP8axIeuhmbe4urYzsH+WlKN6Hdi+tfQyl6vlj1BrJ+SazA/TDXo
+n6XWiP4Olv8a5L+0GvzexViD+jyrBr/HNUn3NdfQA+t+3jbsQd5fqUF+cNVg
+/6wqra+rwXg/VIPf19XXYL4nLK1vqMH+oEgN8mdjjeivYPmX1jfXiPiI5b8G
+48kW6f1YDfqbrTWobzUq9ru3UyV/UMX6eQcV99eqIt8aH3dR0Z4mqmjvuqvY
+z6hTMZ7sqWI/d5KK9ae+qqhPx8d6FevlA1X0h5NVzPemqPi9NKkof8NV/P4m
+VUX7OlpF/9wg4WOiivX5NFXU1+LjaSr6X0YV7U2mivokSxX/HxCfX6hi/sWk
+Yv9DnnQfs4rfP5WqZOqtH9a1o/B/VfTXbKqUD5X286q0cNfiz7sW/pv1o0rv
+9dv6QKe39sf3q5Xer1OxH2eFhL+Qit/rvalivqBeRXu5XsV8X1hF/3eLdH6D
+KvpN4vM7JP6IqJzfZf7Zo2J/eaOK8nVQokeTiv1yx1XMLzer6A+ekvAbVYX/
+HR+fUzG/0KJifH9Rleq7Kn7fflnF/Emrit8XXlXx/wA0fvzeuJ2fhh3qnnw+
+08f2wE+1T5ve6hdi/6uDH/0drR/jwy5+Uc9l+feLeirLvx/pp/Nj/rWnn+nH
+T5If/c++fpQvvR/xO9CP/JTsR32d4qfcX+85sWSG8D/9KH/D/aifUv1Ir9F+
+6h4dvyb9IPObwY/9oxP9SL80P9rPaX6stxj9GE9m+jE/kiXhY6EYC//GT1P7
+7+yc8jbHu3l+zBeY/agvSv34variR//P5kf5cN2gP8u/H/0Z1Y/f+9f6pXyJ
+n669OLjj6AruD1rhF/kRln8/+qNv+rF+W+8X8XV8vN6P+jTsx/z4Fj/m7xok
++u7wo36J+DH/suc6Pfv0qVz6DMtXox/7Tw5K+G+6zo+mM7fVeTj+OC7xS7Nf
+2C+Wfz/2N0T9+D3DOb/o/4iPW/xYH7voR/8z5sfv9y5L57f68fuxq36R/2P5
+D2B+sl0A7XdCgOHlp0MA7aE2gPnCLuJ9US8IoL/XPYD6QhegL14/smHyKb5f
+z4DIb8fnkwLIH30DKM/6APbbDwzg9+nJAfy/oRTpfhQQ9V2Wfwne1ADKx+gA
+fg9vCCC+J0r7pwWw/jMtgPxkDGA8kymdnxXAfMZCaX9TAPMfeQGsp5kD2M9R
+GkD/XAng/+3YAii/rgAFvuiTnvgo498bwHhEDYh6VHxcK92/LoD/b7RCun8o
+gPXuN6X19QHUN+ul9eEAytcW6f4NAeyf2BFA/RgJYDy6J4D6oVGi/0Hpfk0B
+/L+I4wH8fq45gN8jnJLuHw1gvvJcAP37lgD2L18MoD8Xk/a7HKBhujHBxcdF
+vTcg6iss/wHsT9EE0d9pF0R7khDE72U7BDGfpQ1iv1yXIH7vmRjE71m6B0V8
+HB/rgqIeyfIfxPpgUhD7K/sGhf5g+Q+i/R0YRHwkB0U9geU/iP+PQEF6f+pM
+/aNlnC8aHhT+f3w+NYj2cnQQ///FEET/dmJQ6lcIYvw0LSj6hVn+g9i/mymd
+lxVEf2BhEPnZFBT9XCz/EvzmIOrP0qD0/wHifX5sQYyXXEHMD3ql/dUg/XHs
+465H/mL5rA1i/rFOOn9FEOsRIYk+bwaxX7xeOm+9dP9wEPXLliDGsw1B1M87
+giK/wfY/KNn/IP7fQ2OQlG4V9baHOB9yMIj2rimI+um4dF6zxP+ngpiviAYx
+v3suKP5vJD7fIsF/8Tq/Pb7ekZ7J/BsLYn/u5SD2c7cGMb65Ku2nqcVxu1r0
+3xNqER8dpPe1tZif71KL+jCxFvu3utfi/wPppP161uL/ISTVYj6yby32r+lr
+sf94YC3yW7LYn5+UWuzfJen84bXY75lai/podC3qN0Mt5iMmSuen1WI/0bRa
+jIeMtVhfzay9kd/9P2ZT00s=
+     "]]}, {{}, {}}},
+  AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+  Axes->{True, True},
+  AxesLabel->{None, None},
+  AxesOrigin->{0., 0},
+  DisplayFunction->Identity,
+  Frame->{{False, False}, {False, False}},
+  FrameLabel->{{None, None}, {None, None}},
+  FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+  GridLines->{None, None},
+  GridLinesStyle->Directive[
+    GrayLevel[0.5, 0.4]],
+  Method->{
+   "OptimizePlotMarkers" -> True, "OptimizePlotMarkers" -> True, 
+    "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+        Identity[
+         Part[#, 1]], 
+        Identity[
+         Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+        Identity[
+         Part[#, 1]], 
+        Identity[
+         Part[#, 2]]}& )}},
+  PlotRange->{{0., 1305.}, {-1.05, 1.05}},
+  PlotRangeClipping->True,
+  PlotRangePadding->{{
+     Scaled[0.02], 
+     Scaled[0.02]}, {0, 0}},
+  Ticks->{Automatic, Automatic}]], "Output",
+ CellChangeTimes->{3.841140729004195*^9},
+ CellLabel->"Out[67]=",ExpressionUUID->"2ac0fae1-4e5b-447b-b67f-baeac9dfc55e"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"Fblk", "[", 
+    RowBox[{"3", ",", "3", ",", "3"}], "]"}], "[", "3", "]"}], "//", 
+  "MatrixForm"}]], "Input",
+ CellChangeTimes->{{3.8407179971100082`*^9, 3.840718025936262*^9}},
+ CellLabel->"In[68]:=",ExpressionUUID->"9ab7b693-59ea-4372-a6ba-9509fab2d269"],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {
+      RowBox[{
+       FractionBox["1", "6"], " ", 
+       RowBox[{"(", 
+        RowBox[{"5", "-", 
+         SqrtBox["13"]}], ")"}]}], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.353\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.35267697907480322072615308570675551891`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "3"}], "+", 
+                  RowBox[{"23", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"9", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.3526769790748032},
+        "NumericalApproximation"],
+       Root[-3 + 23 #^2 + 9 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.370\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.37004626148571717614288445474812760949`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"11", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"27", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], -0.3700462614857172},
+        "NumericalApproximation"],
+       Root[1 - 11 #^2 + 27 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.204\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.20361814880582163045374954890576191247`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "1"}], "+", 
+                  RowBox[{"23", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"27", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.20361814880582163`},
+        "NumericalApproximation"],
+       Root[-1 + 23 #^2 + 27 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.204\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.20361814880582163045374954890576191247`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "1"}], "+", 
+                  RowBox[{"23", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"27", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.20361814880582163`},
+        "NumericalApproximation"],
+       Root[-1 + 23 #^2 + 27 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.370\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.37004626148571717614288445474812760949`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"11", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"27", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.3700462614857172},
+        "NumericalApproximation"],
+       Root[1 - 11 #^2 + 27 #^4& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.482\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.48208725429739562873265867892769165337`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"5", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"3", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.48208725429739563`},
+        "NumericalApproximation"],
+       Root[1 - 5 #^2 + 3 #^4& , 3, 0]], "0", "0", 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.482\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.48208725429739562873265867892769165337`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"5", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"3", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.48208725429739563`},
+        "NumericalApproximation"],
+       Root[1 - 5 #^2 + 3 #^4& , 3, 0]]},
+     {
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.353\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.35267697907480322072615308570675551891`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "3"}], "+", 
+                  RowBox[{"23", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"9", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.3526769790748032},
+        "NumericalApproximation"],
+       Root[-3 + 23 #^2 + 9 #^4& , 2, 0]], 
+      RowBox[{
+       FractionBox["1", "2"], " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", "3"}], "+", 
+         SqrtBox["13"]}], ")"}]}], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.522\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.52218738799091091173920631263172253966`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"846", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"4059", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"5346", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "4"}], "]"}], 
+          Short[#, 7]& ], 0.5221873879909109},
+        "NumericalApproximation"],
+       Root[1 - 846 #^2 + 4059 #^4 - 5346 #^6 + 6561 #^8& , 4, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.134\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.13418089108033268153086225993320113048`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"57", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"81", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], -0.13418089108033268`},
+        "NumericalApproximation"],
+       Root[1 - 57 #^2 + 81 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.134\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.13418089108033268153086225993320113048`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"57", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"81", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], -0.13418089108033268`},
+        "NumericalApproximation"],
+       Root[1 - 57 #^2 + 81 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.0345\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.03447902409206689278153845634733443148`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"846", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"4059", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"5346", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.03447902409206689},
+        "NumericalApproximation"],
+       Root[1 - 846 #^2 + 4059 #^4 - 5346 #^6 + 6561 #^8& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.471\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.47054895061085127982991593853512313217`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "507"}], "+", 
+                  RowBox[{"2236", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"243", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.4705489506108513},
+        "NumericalApproximation"],
+       Root[-507 + 2236 #^2 + 243 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.237\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.23717705342331948936696051077888114378`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"3", "-", 
+                  RowBox[{"67", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"243", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.2371770534233195},
+        "NumericalApproximation"],
+       Root[3 - 67 #^2 + 243 #^4& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.237\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.23717705342331948936696051077888114378`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"3", "-", 
+                  RowBox[{"67", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"243", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.2371770534233195},
+        "NumericalApproximation"],
+       Root[3 - 67 #^2 + 243 #^4& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.374\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.37436097956812947051830064992827828974`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "16"}], "+", 
+                  RowBox[{"12", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.37436097956812947`},
+        "NumericalApproximation"],
+       Root[-16 + 12 #^2 + 729 #^4& , 1, 0]]},
+     {
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.422\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.4223678327745443716878526174696162343`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "1"}], "+", 
+                  RowBox[{"4", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"9", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.42236783277454437`},
+        "NumericalApproximation"],
+       Root[-1 + 4 #^2 + 9 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.522\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.52218738799091091173920631263172253966`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"846", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"4059", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"5346", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.5221873879909109},
+        "NumericalApproximation"],
+       Root[1 - 846 #^2 + 4059 #^4 - 5346 #^6 + 6561 #^8& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.149\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.14857811152703681578657324280356988311`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"18", " ", "#1"}], "+", 
+                  RowBox[{"144", " ", 
+                    SuperscriptBox["#1", "2"]}], "-", 
+                  RowBox[{"567", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], 0.14857811152703682`},
+        "NumericalApproximation"],
+       Root[1 - 18 # + 144 #^2 - 567 #^3 + 729 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.0343\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.03428061623086858106246310740061744582`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"891", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"34344", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"223074", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.03428061623086858},
+        "NumericalApproximation"],
+       Root[1 - 891 #^2 + 34344 #^4 - 223074 #^6 + 531441 #^8& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.0343\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.03428061623086858106246310740061744582`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"891", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"34344", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"223074", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.03428061623086858},
+        "NumericalApproximation"],
+       Root[1 - 891 #^2 + 34344 #^4 - 223074 #^6 + 531441 #^8& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.273\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.2731781430277340216861148292082361877`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "17"}], "-", 
+                  RowBox[{"6", " ", "#1"}], "+", 
+                  RowBox[{"306", " ", 
+                    SuperscriptBox["#1", "2"]}], "-", 
+                  RowBox[{"405", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.273178143027734},
+        "NumericalApproximation"],
+       Root[-17 - 6 # + 306 #^2 - 405 #^3 + 729 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.159\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.15903318431217652872966539234766969457`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"16", "-", 
+                  RowBox[{"96", " ", "#1"}], "-", 
+                  RowBox[{"56", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"54", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], 0.15903318431217653`},
+        "NumericalApproximation"],
+       Root[16 - 96 # - 56 #^2 + 54 #^3 + 729 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.145\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.14450979849299014357022485910420073196`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"67", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"3028", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"112266", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], -0.14450979849299014`},
+        "NumericalApproximation"],
+       Root[1 - 67 #^2 + 3028 #^4 - 112266 #^6 + 531441 #^8& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.627\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.62659705279038568903615669114515185356`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"841", "-", 
+                  RowBox[{"297001", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"1238656", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"1450710", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.6265970527903857},
+        "NumericalApproximation"],
+       Root[
+       841 - 297001 #^2 + 1238656 #^4 - 1450710 #^6 + 531441 #^8& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.105\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.10523862965020826243378593289889977314`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "43"}], "-", 
+                  RowBox[{"480", " ", "#1"}], "-", 
+                  RowBox[{"342", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"3888", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.10523862965020826`},
+        "NumericalApproximation"],
+       Root[-43 - 480 # - 342 #^2 + 3888 #^3 + 6561 #^4& , 1, 0]]},
+     {"0", 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.134\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.13418089108033268153086225993320113048`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"57", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"81", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], -0.13418089108033268`},
+        "NumericalApproximation"],
+       Root[1 - 57 #^2 + 81 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.336\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.33576564525484858814152744344028178602`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "+", 
+                  RowBox[{"27", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"324", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"65610", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "4"}], "]"}], 
+          Short[#, 7]& ], 0.3357656452548486},
+        "NumericalApproximation"],
+       Root[1 + 27 #^2 + 324 #^4 - 65610 #^6 + 531441 #^8& , 4, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.399\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.39932691824822175163944848463870584965`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "23"}], "-", 
+                  RowBox[{"57", " ", "#1"}], "+", 
+                  RowBox[{"9", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"405", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.39932691824822175`},
+        "NumericalApproximation"],
+       Root[-23 - 57 # + 9 #^2 + 405 #^3 + 729 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.399\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.39932691824822175163944848463870584965`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "23"}], "-", 
+                  RowBox[{"57", " ", "#1"}], "+", 
+                  RowBox[{"9", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"405", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.39932691824822175`},
+        "NumericalApproximation"],
+       Root[-23 - 57 # + 9 #^2 + 405 #^3 + 729 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.287\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.28711088663406181265003169755800627172`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"2401", "-", 
+                  RowBox[{"144207", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"1534140", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"1718982", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.2871108866340618},
+        "NumericalApproximation"],
+       Root[
+       2401 - 144207 #^2 + 1534140 #^4 - 1718982 #^6 + 531441 #^8& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.174\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.17350984901915381120041104168194578961`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "9"}], "+", 
+                  RowBox[{"277", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.1735098490191538},
+        "NumericalApproximation"],
+       Root[-9 + 277 #^2 + 729 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.596\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.59572601594199925401085238263476639986`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "17"}], "+", 
+                  RowBox[{"75", " ", "#1"}], "-", 
+                  RowBox[{"101", " ", 
+                    SuperscriptBox["#1", "2"]}], "-", 
+                  RowBox[{"27", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.5957260159419993},
+        "NumericalApproximation"],
+       Root[-17 + 75 # - 101 #^2 - 27 #^3 + 729 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.280\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.28039719413977809425730924886011052877`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "17"}], "+", 
+                  RowBox[{"75", " ", "#1"}], "-", 
+                  RowBox[{"101", " ", 
+                    SuperscriptBox["#1", "2"]}], "-", 
+                  RowBox[{"27", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.2803971941397781},
+        "NumericalApproximation"],
+       Root[-17 + 75 # - 101 #^2 - 27 #^3 + 729 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.0654\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.06544114285527805052744554359378525987`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "16"}], "+", 
+                  RowBox[{"3708", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.06544114285527805},
+        "NumericalApproximation"],
+       Root[-16 + 3708 #^2 + 6561 #^4& , 2, 0]]},
+     {"0", 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.134\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.13418089108033268153086225993320113048`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"57", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"81", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.13418089108033268`},
+        "NumericalApproximation"],
+       Root[1 - 57 #^2 + 81 #^4& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.146\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.14632160904254704059113123548740986735`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"2401", "-", 
+                  RowBox[{"144207", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"1534140", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"1718982", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.14632160904254704`},
+        "NumericalApproximation"],
+       Root[
+       2401 - 144207 #^2 + 1534140 #^4 - 1718982 #^6 + 531441 #^8& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.477\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.47679629183355565213986437811399810016`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "23"}], "+", 
+                  RowBox[{"57", " ", "#1"}], "+", 
+                  RowBox[{"9", " ", 
+                    SuperscriptBox["#1", "2"]}], "-", 
+                  RowBox[{"405", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.47679629183355565`},
+        "NumericalApproximation"],
+       Root[-23 + 57 # + 9 #^2 - 405 #^3 + 729 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.477\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.47679629183355565213986437811399810016`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "23"}], "+", 
+                  RowBox[{"57", " ", "#1"}], "+", 
+                  RowBox[{"9", " ", 
+                    SuperscriptBox["#1", "2"]}], "-", 
+                  RowBox[{"405", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.47679629183355565`},
+        "NumericalApproximation"],
+       Root[-23 + 57 # + 9 #^2 - 405 #^3 + 729 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.195\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.19497636766333378832705136574077187106`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "+", 
+                  RowBox[{"27", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"324", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"65610", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], -0.1949763676633338},
+        "NumericalApproximation"],
+       Root[1 + 27 #^2 + 324 #^4 - 65610 #^6 + 531441 #^8& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.174\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.17350984901915381120041104168194578961`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "9"}], "+", 
+                  RowBox[{"277", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.1735098490191538},
+        "NumericalApproximation"],
+       Root[-9 + 277 #^2 + 729 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.596\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.59572601594199925401085238263476639986`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "17"}], "-", 
+                  RowBox[{"75", " ", "#1"}], "-", 
+                  RowBox[{"101", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"27", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.5957260159419993},
+        "NumericalApproximation"],
+       Root[-17 - 75 # - 101 #^2 + 27 #^3 + 729 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.280\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           
+           False], -0.28039719413977809425730924886011052877`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "17"}], "-", 
+                  RowBox[{"75", " ", "#1"}], "-", 
+                  RowBox[{"101", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"27", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.2803971941397781},
+        "NumericalApproximation"],
+       Root[-17 - 75 # - 101 #^2 + 27 #^3 + 729 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.0654\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.06544114285527805052744554359378525987`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "16"}], "+", 
+                  RowBox[{"3708", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.06544114285527805},
+        "NumericalApproximation"],
+       Root[-16 + 3708 #^2 + 6561 #^4& , 1, 0]]},
+     {
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.422\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.4223678327745443716878526174696162343`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "1"}], "+", 
+                  RowBox[{"4", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"9", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.42236783277454437`},
+        "NumericalApproximation"],
+       Root[-1 + 4 #^2 + 9 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.0345\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.03447902409206689278153845634733443148`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"846", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"4059", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"5346", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.03447902409206689},
+        "NumericalApproximation"],
+       Root[1 - 846 #^2 + 4059 #^4 - 5346 #^6 + 6561 #^8& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.196\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.19570876944240009343012332010403042659`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "17"}], "+", 
+                  RowBox[{"6", " ", "#1"}], "+", 
+                  RowBox[{"306", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"405", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.1957087694424001},
+        "NumericalApproximation"],
+       Root[-17 + 6 # + 306 #^2 + 405 #^3 + 729 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.175\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.17506989382238336006025747337844222784`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"891", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"34344", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"223074", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.17506989382238336`},
+        "NumericalApproximation"],
+       Root[1 - 891 #^2 + 34344 #^4 - 223074 #^6 + 531441 #^8& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.175\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.17506989382238336006025747337844222784`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"891", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"34344", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"223074", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.17506989382238336`},
+        "NumericalApproximation"],
+       Root[1 - 891 #^2 + 34344 #^4 - 223074 #^6 + 531441 #^8& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.441\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.44061918155429591337224337621591985226`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "+", 
+                  RowBox[{"18", " ", "#1"}], "+", 
+                  RowBox[{"144", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"567", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.4406191815542959},
+        "NumericalApproximation"],
+       Root[1 + 18 # + 144 #^2 + 567 #^3 + 729 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.472\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.47162445929226592955529895334620960057`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"16", "-", 
+                  RowBox[{"96", " ", "#1"}], "-", 
+                  RowBox[{"56", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"54", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.47162445929226593`},
+        "NumericalApproximation"],
+       Root[16 - 96 # - 56 #^2 + 54 #^3 + 729 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.0535\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.0535329505433678951020759484435984632`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"841", "-", 
+                  RowBox[{"297001", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"1238656", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"1450710", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.053532950543367895`},
+        "NumericalApproximation"],
+       Root[
+       841 - 297001 #^2 + 1238656 #^4 - 1450710 #^6 + 531441 #^8& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.429\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.42855430375402769893611321094795130193`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"67", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"3028", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"112266", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.4285543037540277},
+        "NumericalApproximation"],
+       Root[1 - 67 #^2 + 3028 #^4 - 112266 #^6 + 531441 #^8& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.343\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.3430980778670955633202765966416336596`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "43"}], "-", 
+                  RowBox[{"480", " ", "#1"}], "-", 
+                  RowBox[{"342", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"3888", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.34309807786709556`},
+        "NumericalApproximation"],
+       Root[-43 - 480 # - 342 #^2 + 3888 #^3 + 6561 #^4& , 2, 0]]},
+     {
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.482\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.48208725429739562873265867892769165337`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"5", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"3", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.48208725429739563`},
+        "NumericalApproximation"],
+       Root[1 - 5 #^2 + 3 #^4& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.471\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.47054895061085127982991593853512313217`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "507"}], "+", 
+                  RowBox[{"2236", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"243", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.4705489506108513},
+        "NumericalApproximation"],
+       Root[-507 + 2236 #^2 + 243 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.223\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.22297955065631058779729301022598519921`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "29"}], "-", 
+                  RowBox[{"28", " ", "#1"}], "+", 
+                  RowBox[{"289", " ", 
+                    SuperscriptBox["#1", "2"]}], "-", 
+                  RowBox[{"594", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.2229795506563106},
+        "NumericalApproximation"],
+       Root[-29 - 28 # + 289 #^2 - 594 #^3 + 729 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.0753\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           
+           False], -0.0753481347362367354092427262912678998`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "1"}], "+", 
+                  RowBox[{"172", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.07534813473623674},
+        "NumericalApproximation"],
+       Root[-1 + 172 #^2 + 729 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.0753\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.0753481347362367354092427262912678998`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "1"}], "+", 
+                  RowBox[{"172", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.07534813473623674},
+        "NumericalApproximation"],
+       Root[-1 + 172 #^2 + 729 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.497\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.4968480219354221016914152642129920423`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "29"}], "+", 
+                  RowBox[{"28", " ", "#1"}], "+", 
+                  RowBox[{"289", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"594", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.4968480219354221},
+        "NumericalApproximation"],
+       Root[-29 + 28 # + 289 #^2 + 594 #^3 + 729 #^4& , 1, 0]], 
+      RowBox[{
+       FractionBox["1", "81"], " ", 
+       RowBox[{"(", 
+        RowBox[{"121", "-", 
+         RowBox[{"38", " ", 
+          SqrtBox["13"]}]}], ")"}]}], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.307\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.30669460009510851605796233343426138163`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "81"}], "+", 
+                  RowBox[{"244", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.3066946000951085},
+        "NumericalApproximation"],
+       Root[-81 + 244 #^2 + 6561 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.307\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.30669460009510851605796233343426138163`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "81"}], "+", 
+                  RowBox[{"244", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.3066946000951085},
+        "NumericalApproximation"],
+       Root[-81 + 244 #^2 + 6561 #^4& , 1, 0]], 
+      RowBox[{
+       FractionBox["1", "162"], " ", 
+       RowBox[{"(", 
+        RowBox[{"1", "-", 
+         RowBox[{"5", " ", 
+          SqrtBox["13"]}]}], ")"}]}]},
+     {"0", 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.237\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.23717705342331948936696051077888114378`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"3", "-", 
+                  RowBox[{"67", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"243", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.2371770534233195},
+        "NumericalApproximation"],
+       Root[3 - 67 #^2 + 243 #^4& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.414\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.41380030788295429911016753976582549512`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"81", "-", 
+                  RowBox[{"1026", " ", 
+                    SuperscriptBox["#1", "2"]}], "-", 
+                  RowBox[{"6236", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"35721", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "4"}], "]"}], 
+          Short[#, 7]& ], 0.4138003078829543},
+        "NumericalApproximation"],
+       Root[81 - 1026 #^2 - 6236 #^4 - 35721 #^6 + 531441 #^8& , 4, 0]], 
+      RowBox[{
+       FractionBox["1", "27"], " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", "22"}], "+", 
+         RowBox[{"2", " ", 
+          SqrtBox["13"]}]}], ")"}]}], 
+      RowBox[{
+       FractionBox["1", "27"], " ", 
+       RowBox[{"(", 
+        RowBox[{"5", "+", 
+         RowBox[{"2", " ", 
+          SqrtBox["13"]}]}], ")"}]}], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.240\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.24029045886380046015418088245496619493`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"81", "-", 
+                  RowBox[{"1026", " ", 
+                    SuperscriptBox["#1", "2"]}], "-", 
+                  RowBox[{"6236", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"35721", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.24029045886380046`},
+        "NumericalApproximation"],
+       Root[81 - 1026 #^2 - 6236 #^4 - 35721 #^6 + 531441 #^8& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.307\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.30669460009510851605796233343426138163`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "81"}], "+", 
+                  RowBox[{"244", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.3066946000951085},
+        "NumericalApproximation"],
+       Root[-81 + 244 #^2 + 6561 #^4& , 1, 0]], 
+      RowBox[{
+       FractionBox["1", "162"], " ", 
+       RowBox[{"(", 
+        RowBox[{"1", "-", 
+         RowBox[{"5", " ", 
+          SqrtBox["13"]}]}], ")"}]}], 
+      RowBox[{
+       FractionBox["1", "162"], " ", 
+       RowBox[{"(", 
+        RowBox[{"1", "-", 
+         RowBox[{"5", " ", 
+          SqrtBox["13"]}]}], ")"}]}], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.307\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.30669460009510851605796233343426138163`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "81"}], "+", 
+                  RowBox[{"244", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.3066946000951085},
+        "NumericalApproximation"],
+       Root[-81 + 244 #^2 + 6561 #^4& , 2, 0]]},
+     {"0", 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.237\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.23717705342331948936696051077888114378`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"3", "-", 
+                  RowBox[{"67", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"243", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.2371770534233195},
+        "NumericalApproximation"],
+       Root[3 - 67 #^2 + 243 #^4& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.414\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.41380030788295429911016753976582549512`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"81", "-", 
+                  RowBox[{"1026", " ", 
+                    SuperscriptBox["#1", "2"]}], "-", 
+                  RowBox[{"6236", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"35721", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "4"}], "]"}], 
+          Short[#, 7]& ], 0.4138003078829543},
+        "NumericalApproximation"],
+       Root[81 - 1026 #^2 - 6236 #^4 - 35721 #^6 + 531441 #^8& , 4, 0]], 
+      RowBox[{
+       FractionBox["1", "27"], " ", 
+       RowBox[{"(", 
+        RowBox[{"5", "+", 
+         RowBox[{"2", " ", 
+          SqrtBox["13"]}]}], ")"}]}], 
+      RowBox[{
+       FractionBox["1", "27"], " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", "22"}], "+", 
+         RowBox[{"2", " ", 
+          SqrtBox["13"]}]}], ")"}]}], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.240\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.24029045886380046015418088245496619493`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"81", "-", 
+                  RowBox[{"1026", " ", 
+                    SuperscriptBox["#1", "2"]}], "-", 
+                  RowBox[{"6236", " ", 
+                    SuperscriptBox["#1", "4"]}], "-", 
+                  RowBox[{"35721", " ", 
+                    SuperscriptBox["#1", "6"]}], "+", 
+                  RowBox[{"531441", " ", 
+                    SuperscriptBox["#1", "8"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.24029045886380046`},
+        "NumericalApproximation"],
+       Root[81 - 1026 #^2 - 6236 #^4 - 35721 #^6 + 531441 #^8& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.307\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.30669460009510851605796233343426138163`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "81"}], "+", 
+                  RowBox[{"244", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.3066946000951085},
+        "NumericalApproximation"],
+       Root[-81 + 244 #^2 + 6561 #^4& , 1, 0]], 
+      RowBox[{
+       FractionBox["1", "162"], " ", 
+       RowBox[{"(", 
+        RowBox[{"1", "-", 
+         RowBox[{"5", " ", 
+          SqrtBox["13"]}]}], ")"}]}], 
+      RowBox[{
+       FractionBox["1", "162"], " ", 
+       RowBox[{"(", 
+        RowBox[{"1", "-", 
+         RowBox[{"5", " ", 
+          SqrtBox["13"]}]}], ")"}]}], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.307\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.30669460009510851605796233343426138163`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "81"}], "+", 
+                  RowBox[{"244", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.3066946000951085},
+        "NumericalApproximation"],
+       Root[-81 + 244 #^2 + 6561 #^4& , 2, 0]]},
+     {
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.482\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.48208725429739562873265867892769165337`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"1", "-", 
+                  RowBox[{"5", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"3", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "3"}], "]"}], 
+          Short[#, 7]& ], 0.48208725429739563`},
+        "NumericalApproximation"],
+       Root[1 - 5 #^2 + 3 #^4& , 3, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.374\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.37436097956812947051830064992827828974`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "16"}], "+", 
+                  RowBox[{"12", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"729", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.37436097956812947`},
+        "NumericalApproximation"],
+       Root[-16 + 12 #^2 + 729 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.0607\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.0606536651565631537708078724335791776`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"53", "-", 
+                  RowBox[{"1050", " ", "#1"}], "+", 
+                  RowBox[{"3087", " ", 
+                    SuperscriptBox["#1", "2"]}], "-", 
+                  RowBox[{"3402", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], 0.060653665156563154`},
+        "NumericalApproximation"],
+       Root[53 - 1050 # + 3087 #^2 - 3402 #^3 + 6561 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.108\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.10806870616387576067296549808816052973`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "1"}], "+", 
+                  RowBox[{"9", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.10806870616387576`},
+        "NumericalApproximation"],
+       Root[-1 + 9 #^2 + 6561 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.108\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.10806870616387576067296549808816052973`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "1"}], "+", 
+                  RowBox[{"9", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.10806870616387576`},
+        "NumericalApproximation"],
+       Root[-1 + 9 #^2 + 6561 #^4& , 1, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"-0.332\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> 
+           False], -0.33214453023099199668877190561033785343`15.\
+954589770191003, Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{"53", "+", 
+                  RowBox[{"1050", " ", "#1"}], "+", 
+                  RowBox[{"3087", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"3402", " ", 
+                    SuperscriptBox["#1", "3"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "1"}], "]"}], 
+          Short[#, 7]& ], -0.332144530230992},
+        "NumericalApproximation"],
+       Root[53 + 1050 # + 3087 #^2 + 3402 #^3 + 6561 #^4& , 1, 0]], 
+      RowBox[{
+       FractionBox["1", "162"], " ", 
+       RowBox[{"(", 
+        RowBox[{"1", "-", 
+         RowBox[{"5", " ", 
+          SqrtBox["13"]}]}], ")"}]}], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.307\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.30669460009510851605796233343426138163`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "81"}], "+", 
+                  RowBox[{"244", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.3066946000951085},
+        "NumericalApproximation"],
+       Root[-81 + 244 #^2 + 6561 #^4& , 2, 0]], 
+      InterpretationBox[
+       TemplateBox[{"Root", 
+         InterpretationBox[
+          StyleBox[
+           TemplateBox[{"\"0.307\"", 
+             DynamicBox[
+              FEPrivate`FrontEndResource[
+              "FEExpressions", "NumericalApproximationElider"]]}, 
+            "RowDefault"], ShowStringCharacters -> False], 
+          0.30669460009510851605796233343426138163`15.954589770191003, 
+          Editable -> False], 
+         TagBox[
+          RowBox[{"Root", "[", 
+            RowBox[{
+              RowBox[{
+                RowBox[{
+                  RowBox[{"-", "81"}], "+", 
+                  RowBox[{"244", " ", 
+                    SuperscriptBox["#1", "2"]}], "+", 
+                  RowBox[{"6561", " ", 
+                    SuperscriptBox["#1", "4"]}]}], "&"}], ",", "2"}], "]"}], 
+          Short[#, 7]& ], 0.3066946000951085},
+        "NumericalApproximation"],
+       Root[-81 + 244 #^2 + 6561 #^4& , 2, 0]], 
+      RowBox[{
+       FractionBox["1", "81"], " ", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", "14"}], "+", 
+         RowBox[{"16", " ", 
+          SqrtBox["13"]}]}], ")"}]}]}
+    },
+    GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}}], "\[NoBreak]", ")"}],
+  Function[BoxForm`e$, 
+   MatrixForm[BoxForm`e$]]]], "Output",
+ CellChangeTimes->{3.841140729051977*^9},
+ CellLabel->
+  "Out[68]//MatrixForm=",ExpressionUUID->"b0fc6e42-70ff-42c1-b53c-\
+460b5f2d2375"]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{1920, 1119},
+WindowMargins->{{1920, Automatic}, {25, Automatic}},
+FrontEndVersion->"12.3 for Linux x86 (64-bit) (July 9, 2021)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"d35f60ef-8028-4723-abf6-059f873b58c2"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 1405, 34, 141, "Input",ExpressionUUID->"2e0a17db-b4d7-4261-85dc-0212620666fc"],
+Cell[1966, 56, 191, 3, 40, "Text",ExpressionUUID->"086a60b5-e987-4b97-a217-3ca5a6417226"],
+Cell[CellGroupData[{
+Cell[2182, 63, 1108, 32, 30, "Input",ExpressionUUID->"d2c33179-89a9-441e-ba72-5a374a315fb2"],
+Cell[3293, 97, 1981, 62, 119, "Output",ExpressionUUID->"949d4c40-d349-4e23-b031-63421431248e"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5311, 164, 161, 3, 45, "Subsubsection",ExpressionUUID->"7549b54b-b4be-4efb-bc86-4b0d086dde21"],
+Cell[CellGroupData[{
+Cell[5497, 171, 330, 8, 53, "Input",ExpressionUUID->"9b4c824e-d109-41ec-8c05-d0f8e37a4d75"],
+Cell[5830, 181, 558, 19, 49, "Output",ExpressionUUID->"af28db09-7224-421f-864a-1be860a50cae"],
+Cell[6391, 202, 283, 8, 49, "Output",ExpressionUUID->"e646be66-6499-49bf-9458-14d13ca7fada"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6723, 216, 153, 3, 45, "Subsubsection",ExpressionUUID->"6a97eab2-5bcf-4e78-8f6c-ea355aa8feef"],
+Cell[CellGroupData[{
+Cell[6901, 223, 279, 6, 30, "Input",ExpressionUUID->"aa7fcef2-b415-4cd9-ae85-ebbf0b727bcb"],
+Cell[7183, 231, 214, 4, 34, "Output",ExpressionUUID->"10e555b1-dcc9-4a96-aeb0-4ff79666064d"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7446, 241, 174, 3, 45, "Subsubsection",ExpressionUUID->"d1969c6e-e988-4f39-af07-196c1fe0f5f5"],
+Cell[CellGroupData[{
+Cell[7645, 248, 522, 11, 30, "Input",ExpressionUUID->"d76bf8bd-703c-44f3-808b-85bd6911b0f4"],
+Cell[8170, 261, 154, 2, 34, "Output",ExpressionUUID->"59a21568-8058-48e9-bbad-c132d5cd7093"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8373, 269, 167, 3, 45, "Subsubsection",ExpressionUUID->"0767cf50-7c6b-4761-a0c4-c910cd4ca1e0"],
+Cell[CellGroupData[{
+Cell[8565, 276, 1506, 35, 70, "Input",ExpressionUUID->"37dbedea-1149-42ac-808c-b2b4ec657174"],
+Cell[10074, 313, 9699, 166, 254, "Output",ExpressionUUID->"ab5c9cda-fafc-46a6-925c-af1de0a5ac8f"],
+Cell[19776, 481, 11316, 200, 233, "Output",ExpressionUUID->"2ac0fae1-4e5b-447b-b67f-baeac9dfc55e"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[31129, 686, 304, 7, 30, "Input",ExpressionUUID->"9ab7b693-59ea-4372-a6ba-9509fab2d269"],
+Cell[31436, 695, 84472, 2139, 299, "Output",ExpressionUUID->"b0fc6e42-70ff-42c1-b53c-460b5f2d2375"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+

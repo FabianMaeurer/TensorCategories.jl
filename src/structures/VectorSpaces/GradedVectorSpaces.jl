@@ -33,9 +33,19 @@ end
 
 isfusion(C::GradedVectorSpaces) = true
 
+"""
+    function dim(V::GVSObject)
+
+Return the vector space dimension of ``V``.
+"""
 dim(X::GVSObject) = dim(X.V)
 basis(X::GVSObject) = basis(X.V)
 
+"""
+    function Morphism(V::GVSObject, Y::GVSObject, m::MatElem)
+
+Return the morphism ``V → W``defined by ``m``.
+"""
 function Morphism(X::GVSObject, Y::GVSObject, m::MatElem)
     if !isgraded(X,Y,m)
         throw(ErrorException("Matrix does not define graded morphism"))
@@ -43,9 +53,26 @@ function Morphism(X::GVSObject, Y::GVSObject, m::MatElem)
     return GVSMorphism(X,Y,m)
 end
 
+"""
+    function one(C::GradedVectorSpaces)
+
+Return ´´k´´ as the one dimensional graded vector space.
+"""
 one(C::GradedVectorSpaces) = GVSObject(C,VectorSpaceObject(base_ring(C),1), [one(base_group(C))])
+
+"""
+    function zero(C::GradedVectorSpaces)
+
+Return the zero diemsnional graded vector space.
+"""
 zero(C::GradedVectorSpaces) = GVSObject(C,VectorSpaceObject(base_ring(C),0), elem_type(base_group(C))[])
 
+"""
+    function isisomorphic(V::GVSObject, W::GVSObject)
+
+Check whether ``V``and ``W``are isomorphic as ``G``-graded vector spaces and return an
+isomorphism in the positive case.
+"""
 function isisomorphic(X::GVSObject, Y::GVSObject)
     if Set(X.grading) != Set(Y.grading) || !isisomorphic(X.V,Y.V)[1]
         return false, nothing
@@ -65,6 +92,11 @@ end
 #   Functionality: Direct Sums
 #-----------------------------------------------------------------
 
+"""
+    function dsum(V::GVSObject, W::GVSObject)
+
+Return the direct sum object ``V⊕W``.
+"""
 function dsum(X::GVSObject, Y::GVSObject, morphisms::Bool = false)
     W,(ix,iy),(px,py) = dsum(X.V, Y.V, true)
     m,n = dim(X), dim(Y)
@@ -100,6 +132,11 @@ end
 #   Functionality: Tensor Product
 #-----------------------------------------------------------------
 
+"""
+    function tensor_product(V::GVSObject, W::GVSObject)
+
+Return the tensor product ``V⊗W``.
+"""
 function tensor_product(X::GVSObject, Y::GVSObject)
     W = X.V ⊗ Y.V
     G = base_group(X)
@@ -112,6 +149,11 @@ end
 #   Functionality: Simple Objects
 #-----------------------------------------------------------------
 
+"""
+    function simples(C::GradedVectorSpaces)
+
+Return a vector containing the simple objects of ``C``.
+"""
 function simples(C::GradedVectorSpaces)
     K = VectorSpaceObject(base_ring(C),1)
     G = base_group(C)
@@ -119,6 +161,11 @@ function simples(C::GradedVectorSpaces)
     return [GVSObject(C,K,[g]) for g ∈ G]
 end
 
+"""
+    function decompose(V::GVSObject)
+
+Return a vector with the simple objects together with their multiplicities ``[V:Xi]``.
+"""
 function decompose(V::GVSObject)
     simpls = simples(parent(V))
     return filter(e -> e[2] > 0, [(s, dim(Hom(s,V))) for s ∈ simpls])
@@ -127,6 +174,11 @@ end
 #   Functionality: (Co)Kernel
 #-----------------------------------------------------------------
 
+"""
+    function kernel(f::GVSMorphism)
+
+Return the graded vector space kernel of ``f``.
+"""
 function kernel(f::GVSMorphism)
     F = base_ring(f)
     G = base_group(domain(f))
@@ -163,6 +215,11 @@ function kernel(f::GVSMorphism)
     return K, GVSMorphism(K,domain(f), m)
 end
 
+"""
+    function cokernel(f::GVSMorphism)
+
+Return the graded vector space cokernel of ``f``.
+"""
 function cokernel(f::GVSMorphism)
     g = GVSMorphism(codomain(f),domain(f),transpose(f.m))
     C,c = kernel(g)
@@ -173,6 +230,11 @@ end
 #   Functionality: Associators
 #-----------------------------------------------------------------
 
+"""
+    function associator(U::GVSObject, V::GVSObject, W::GVSObject)
+
+return the associator isomorphism ``(U⊗V)⊗W → U⊗(V⊗W)``.
+"""
 function associator(X::GVSObject, Y::GVSObject, Z::GVSObject)
     C = parent(X)
     twist = C.twist
@@ -195,6 +257,11 @@ end
 #   Functionality: Duals
 #-----------------------------------------------------------------
 
+"""
+    function dual(V::GVSObject)
+
+Return the graded dual vector space of ``V``.
+"""
 function dual(V::GVSObject)
     W = dual(V.V)
     G = base_group(V)
@@ -202,14 +269,19 @@ function dual(V::GVSObject)
     return GVSObject(parent(V), W, grading)
 end
 
-function ev(V::GVSObject)
-    dom = dual(V)⊗V
-    cod = one(parent(V))
-    elems = elements(base_group(V))
-    twist = parent(V).twist
-    m = [i == j ? inv(twist(g,inv(g),g)) : 0 for (i,g) ∈ zip(1:dim(V), V.grading), j ∈ 1:dim(V)][:]
-    Morphism(dom,cod, matrix(base_ring(V), reshape(m,dim(dom),1)))
-end
+# """
+#     function ev(V::GVSObject)
+
+# Return the evaluation map ``V*⊗V → 𝟙``.
+# """
+# function ev(V::GVSObject)
+#     dom = dual(V)⊗V
+#     cod = one(parent(V))
+#     elems = elements(base_group(V))
+#     twist = parent(V).twist
+#     m = [i == j ? inv(twist(g,inv(g),g)) : 0 for (i,g) ∈ zip(1:dim(V), V.grading), j ∈ 1:dim(V)][:]
+#     Morphism(dom,cod, matrix(base_ring(V), reshape(m,dim(dom),1)))
+# end
 
 #-----------------------------------------------------------------
 #   Functionality: Hom-Spaces
@@ -222,6 +294,11 @@ struct GVSHomSpace <: HomSpace
     parent::VectorSpaces
 end
 
+"""
+    function Hom(V::GVSObject, W::GVSObject)
+
+Return the space of morphisms between graded vector spaces ``V`` and ``W``.
+"""
 function Hom(V::GVSObject, W::GVSObject)
     G = base_group(V)
     B = VSMorphism[]
@@ -256,7 +333,12 @@ function isgraded(X::GVSObject, Y::GVSObject, m::MatElem)
     true
 end
 
-id(X::GVSObject) = Morphism(X,X,one(MatrixSpace(base_ring(X),dim(X),dim(X))))
+# """
+#     function id(V::GVSObject)
+
+# description
+# """
+# id(X::GVSObject) = Morphism(X,X,one(MatrixSpace(base_ring(X),dim(X),dim(X))))
 #-----------------------------------------------------------------
 #   Pretty Printing
 #-----------------------------------------------------------------

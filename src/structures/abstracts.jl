@@ -38,6 +38,13 @@ Return the parent category of the object X.
 parent(X::Object) = X.parent
 
 """
+    function parent(f::Morphism)
+
+Return the parent category of ``f``.
+"""
+parent(f::Morphism) = parent(domain(f))
+
+"""
     base_ring(X::Object)
 
 Return the base ring ```k``` of the ```k```-linear parent category of ```X```.
@@ -401,6 +408,32 @@ end
 #-------------------------------------------------------
 # Semisimple: Subobjects
 #-------------------------------------------------------
+
+function eigenspaces(f::Morphism)
+    @assert domain(f) == codomain(f) "Not an endomorphism"
+
+    values = collect(keys(eigenspaces(matrix(f))))
+
+    return Dict(λ => kernel(f-λ*id(domain(f)))[1] for λ ∈ values)
+end
+
+function irreducible_subobjects(X::Object)
+    B = basis(End(X))
+
+    if length(B) == 1 return [X] end
+
+    for f ∈ B
+        eig_spaces = eigenspaces(f)
+
+        if length(eig_spaces) == 1 
+            continue
+        end
+
+        simple_subs = vcat([irreducible_subobjects(K) for (_,K) ∈ eig_spaces]...)
+        return unique_simples(simple_subs)
+    end
+    return [X]
+end
 
 function unique_simples(simples::Vector{<:Object})
     unique_simples = simples[1:1]
