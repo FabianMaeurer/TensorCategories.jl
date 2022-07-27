@@ -170,5 +170,8 @@ function I2subcategory(m)
 		gr=length(li)
 		C.ass[lx+1,ly+1,lz+1,lw+1]=matrix(F,gr,gr,[SixJ(q,2*ly,2*lx,2*lw,2*lz,j,i) for i in li, j in lj])	
 	end
+	
+	set_spherical!(C,[id(s) for s in simples(C)])
+	
 	return C
 end
