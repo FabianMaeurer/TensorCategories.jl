@@ -174,7 +174,7 @@ function I2subcategory(m)
 	A=[0 for s in simples(C)]::Vector{Int64}
 	A[1]=1
 	set_one!(C,A)
-	set_spherical!(C,[id(s) for s in simples(C)])
+	set_spherical!(C, [F(1) for s ∈ simples(C)])
 	
 	return C
 end
