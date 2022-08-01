@@ -23,7 +23,8 @@ import Oscar:  Field, elem_type, QQ, FieldElem,
                 splitting_field, change_base_ring, isconstant, coeff, isindependent,
                 coefficients, isabelian, leading_monomial, gcd, msolve, fmpz, fmpq,
                 rref, NumberField, nf_elem, kernel, cokernel, primary_decomposition,
-                Ideal, minpoly, image
+                Ideal, minpoly, image, solve, eigenspace, eigenspaces, diagonal_matrix,
+                permutation_matrix, cyclotomic_field
 
 export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         GradedVectorSpaces, VectorSpaceObject, simples,
@@ -43,21 +44,23 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         ProductObject, ProductMorphism, CohSheaves, CohSheaf, CohSheafMorphism,
         stalks, PullbackFunctor, Pullback, PushforwardFunctor, Pushforward,
         CohSfHomSpace, ConvolutionCategory, ConvolutionObject, ConvolutionMorphism,
-        ConvHomSpace,stalk, induction, restriction, orbit_index, dsum_morphisms,
+        ConvHomSpace,stalk, induction, restriction, orbit_index, dsum_with_morphisms,
         decompose, multiplication_table, print_multiplication_table, grothendieck_ring,
         dual, left_dual, right_dual, ev, coev, left_trace, right_trace, tr, braiding,
         drinfeld_morphism, smatrix, End, CenterCategory, CenterObject, CenterMorphism,
         spherical, iscentral, center_simples, RingCategory, set_tensor_product!,
-        set_braiding!, Ising, zero_morphism, express_in_basis, solve_groebner,
+        set_braiding!, set_one!, Ising, zero_morphism, express_in_basis, solve_groebner,
         Center, CenterCategory, CenterObject, CenterMorphism, ev_coev, matrices,
         orbit_stabilizers, GRepRestriction, GRepInduction, Restriction, Induction,
         print_multiplication_table, RingCatObject, RingCatMorphism, kernel, cokernel,
         image, isgraded, cyclic_group_3cocycle, decompose_morphism,
         central_objects, half_braiding, half_braidings, left_inverse, right_inverse,
-        simple_subobjects, add_simple!, pentagon_axiom
+        add_simple!, pentagon_axiom, set_associator!, dual_basis, pairing,
+        eigenspace, eigenspaces, irreducible_subobjects, I2, I2subcategory
 
 include("Utility/FFE_to_FinField.jl")
 include("Utility/SolveGroebner.jl")
+include("Utility/Technicallities.jl")
 include("structures/abstracts.jl")
 include("structures/MISC/ProductCategory.jl")
 include("structures/MISC/OppositeCategory.jl")
@@ -71,10 +74,12 @@ include("structures/Functors.jl")
 include("structures/ConvolutionCategory/CoherentSheaves.jl")
 include("structures/ConvolutionCategory/ConvolutionCategory.jl")
 include("structures/MultiFusionCategories/FusionCategory.jl")
-include("structures/MultiFusionCategories/Duals.jl")
 include("structures/MISC/multiplication_table.jl")
 include("structures/MISC/PentagonAxiom.jl")
 include("structures/GrothendieckRing.jl")
+include("structures/Center/Induction.jl")
 include("structures/Center/Center.jl")
+include("structures/Examples/I2-fusion.jl")
+
 
 end

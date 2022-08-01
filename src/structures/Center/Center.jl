@@ -146,27 +146,6 @@ function one(C::CenterCategory)
     Z = one(C.category)
     CenterObject(C,Z,[id(s) for s ∈ simples(C.category)])
 end
-#-------------------------------------------------------------------------------
-#   Induction
-#-------------------------------------------------------------------------------
-
-function induction(X::Object, simples::Vector = simples(parent(X)))
-    @assert issemisimple(parent(X)) "Requires semisimplicity"
-    Z = dsum([dual(s)⊗X⊗s for s ∈ simples])
-
-    function γ(W)
-        r = Morphism[]
-        for i ∈ simples, j ∈ simples
-            b1 = basis(Hom(W⊗dual(i),j))
-            b2 = basis(Hom(i,j⊗W))
-            if length(b1)*length(b2) == 0 continue end
-            push!(r,dim(i)*dsum([ϕ ⊗ id(X) ⊗ ψ for (ϕ,ψ) ∈ zip(b1,b2)]))
-        end
-        return dsum(r)
-    end
-    return CenterObject(CenterCategory(base_ring(X),parent(X)),Z,γ)
-end
-
 
 
 #-------------------------------------------------------------------------------
@@ -429,9 +408,19 @@ function half_braiding(X::CenterObject, Y::Object)
     cod = Y⊗X.object
     braid = zero_morphism(dom, cod)
     for (s,ys) ∈ zip(simples(parent(X).category), X.γ)
-        proj = basis(Hom(Y,s))
+        multiplicity = dim(Hom(Y,s))
+        if multiplicity == 0 continue end
+        S,incl,proj = dsum_with_morphisms([s for _ ∈ 1:multiplicity]...)
+        iso = isisomorphic(Y,S)[2]
+        proj = [p ∘ iso for p ∈ proj]
         if length(proj) == 0 continue end
-        incl = basis(Hom(s,Y))
+        incl = [inv(iso) ∘ i for i ∈ incl]
+
+        # for p in proj, i in incl
+        #     m = (i⊗id(X.object))∘ys∘(id(X.object)⊗p)
+        #     @show isequivariant(matrix(m),domain(m), codomain(m))
+        # end
+
         braid = braid + sum([(i⊗id(X.object))∘ys∘(id(X.object)⊗p) for i ∈ incl, p ∈ proj][:])
     end
     return braid

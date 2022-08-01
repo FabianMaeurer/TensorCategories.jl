@@ -115,18 +115,17 @@ Morphisms are implemented analogously by pairs of group elements and vector spac
 GVSMorphism <: Morphism
 ```
 
-The constructors are
+The constructor is given by 
 
 ```@docs
-Morphism(::GVSObject,::GVSObject,::Dict{G,S}) where {S<:VectorSpaceMorphism,G}
-Morphism(::GVSObject, ::GVSObject,::Pair{G,S}...) where {G, S <: VectorSpaceMorphism}
+Morphism(::GVSObject, ::GVSObject,::MatElem) where {G, S <: VectorSpaceMorphism}
 ```
 
 
 ## Functionality
 
-(Graded) vector spaces form a semisimple tensor category. Thus the methods for
-direct sums, standard tensor products, one and zero object are all implemented.
+(Graded) vector spaces form a fusion category. Thus the methods for
+direct sums, tensor products, dual, one and zero object are all implemented.
 
 ```@autodocs
 Modules = [TensorCategories]

@@ -38,6 +38,13 @@ Return the parent category of the object X.
 parent(X::Object) = X.parent
 
 """
+    function parent(f::Morphism)
+
+Return the parent category of ``f``.
+"""
+parent(f::Morphism) = parent(domain(f))
+
+"""
     base_ring(X::Object)
 
 Return the base ring ```k``` of the ```k```-linear parent category of ```X```.
@@ -60,7 +67,7 @@ base_group(X::Object) = parent(X).base_group
 #---------------------------------------------------------
 
 function ⊕(T::Tuple{S,Vector{R},Vector{R2}},X::S1) where {S <: Object,S1 <: Object, R <: Morphism, R2 <: Morphism}
-    Z,ix,px = dsum(T[1],X)
+    Z,ix,px = dsum(T[1],X,true)
     incl = vcat([ix[1] ∘ t for t in T[2]], ix[2:2])
     proj = vcat([t ∘ px[1] for t in T[3]], px[2:2])
     return Z, incl, proj
@@ -77,9 +84,9 @@ function dsum(X::Object...)
     return Z
 end
 
-function dsum_morphisms(X::Object...)
+function dsum_with_morphisms(X::Object...)
     if length(X) == 1
-        return X[1], [id(X[1]),id(X[1])]
+        return X[1], [id(X[1]),id(X[1])],[id(X[1]),id(X[1])]
     end
     Z,ix,px = dsum(X[1],X[2],true)
     for Y in X[3:end]
@@ -114,7 +121,7 @@ function product(X::Object...)
     return Z
 end
 
-function product_morphisms(X::Object...)
+function product_with_morphisms(X::Object...)
     if length(X) == 1
         return X[1], [id(X[1])]
     end
@@ -142,7 +149,7 @@ function coproduct(X::Object...)
     return Z
 end
 
-function coproduct_morphisms(X::Object...)
+function coproduct_with_morphisms(X::Object...)
     if length(X) == 1
         return X[1], [id(X[1])]
     end
@@ -207,9 +214,40 @@ coproduct(X::T) where T <: Union{Vector,Tuple} = coproduct(X...)
 
 product(X::Object,Y::Object) = dsum(X,Y)
 coproduct(X::Object, Y::Object) = dsum(X,Y)
+
+#---------------------------------------------------------
+#   Horizontal and Vertical direct sums
+#---------------------------------------------------------
+
+"""
+    function horizontal_dsum(f::Morphism, g::Morphism)
+
+Return the sum of ``f:X → Z``, ``g:Y → Z`` as ``f+g:X⊕Y → Z.
+"""
+function horizontal_dsum(f::Morphism, g::Morphism)
+    #@assert codomain(f) == codomain(g) "Codomains do not coincide"
+
+    sum = f ⊕ g
+    _,_,(p1,p2) = dsum_with_morphisms(codomain(f),codomain(g))
+    return p1∘sum + p2∘sum
+end
+
+"""
+    function vertical_dsum(f::Morphism, g::Morphism)
+
+Return the sum of ``f:X → Y``, ``g:X → Z`` as ``f+g: X → Y⊕Z.
+"""
+function vertical_dsum(f::Morphism, g::Morphism)
+    #@assert domain(f) == domain(g) "Domains do not coincide"
+
+    sum = f ⊕ g
+    _,(i1,i2),_ = dsum_with_morphisms(domain(f), domain(g))
+    return sum∘i1 + sum∘i2
+end
 #---------------------------------------------------------
 #   tensor_product
 #---------------------------------------------------------
+
 
 function tensor_product(X::Object...)
     if length(X) == 1 return X end
@@ -262,6 +300,7 @@ dim(V::HomSpace) = length(basis(V))
 
 End(X::Object) = Hom(X,X)
 
+zero_morphism(C::Category) = zero_morphism(zero(C), zero(C))
 
 #-------------------------------------------------------
 # Duals
@@ -347,20 +386,18 @@ function decompose_morphism(X::Object)
     @assert issemisimple(C) "Semisimplicity required"
 
     S = simples(C)
+    components = sort( decompose(X), by = e -> findfirst(s -> isisomorphic(s,e[1])[1], S))
+    Z, incl, proj = dsum_with_morphisms([s^d for (s,d) ∈ components]...)
 
-    proj = [basis(Hom(X,s)) for s ∈ S]
-    dims = [length(p) for p ∈ proj]
+    # temporary solution!
+    return isisomorphic(X,Z)[2]
 
-    Z = dsum([s^d for (s,d) ∈ zip(S,dims)])
-    incl = [basis(Hom(s,Z)) for s ∈ S]
-
+    #----------------------------------
     f = zero_morphism(X,Z)
 
-    for (pk,ik) ∈ zip(proj, incl)
-        for (p,i) ∈ zip(pk,ik)
-            g = i∘p
-            f = f + g
-        end
+    for (p,i) ∈ zip(proj, incl)
+        g = i∘p
+        f = f + g
     end
     return f
 end
@@ -372,6 +409,32 @@ end
 # Semisimple: Subobjects
 #-------------------------------------------------------
 
+function eigenspaces(f::Morphism)
+    @assert domain(f) == codomain(f) "Not an endomorphism"
+
+    values = collect(keys(eigenspaces(matrix(f))))
+
+    return Dict(λ => kernel(f-λ*id(domain(f)))[1] for λ ∈ values)
+end
+
+function irreducible_subobjects(X::Object)
+    B = basis(End(X))
+
+    if length(B) == 1 return [X] end
+
+    for f ∈ B
+        eig_spaces = eigenspaces(f)
+
+        if length(eig_spaces) == 1 
+            continue
+        end
+
+        simple_subs = vcat([irreducible_subobjects(K) for (_,K) ∈ eig_spaces]...)
+        return unique_simples(simple_subs)
+    end
+    return [X]
+end
+
 function unique_simples(simples::Vector{<:Object})
     unique_simples = simples[1:1]
     for s ∈ simples[2:end]
@@ -381,3 +444,10 @@ function unique_simples(simples::Vector{<:Object})
     end
     return unique_simples
 end
+
+
+#-------------------------------------------------------
+# Misc
+#-------------------------------------------------------
+
+*(f::Morphism, x) = x*f

@@ -8,6 +8,7 @@ mutable struct RingCategory <: Category
     tensor_product::Array{Int,3}
     spherical::Vector
     twist::Vector
+    one::Vector{Int}
 
     function RingCategory(F::Field, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1])])
         C = New(F, length(mult[1]), names)
@@ -67,21 +68,13 @@ function set_associator!(F::RingCategory, i::Int, j::Int, k::Int, ass::Vector{<:
     F.ass[i,j,k,:] = ass
 end
 
-function set_ev!(F::RingCategory, ev::Vector)
-    F.evals = ev
-end
-
-function set_coev!(F::RingCategory, coev::Vector)
-    F.coevals = coev
-end
-
 function set_spherical!(F::RingCategory, sp::Vector)
     F.spherical = sp
 end
 
-function set_duals!(F::RingCategory, d::Vector)
-    F.duals = d
-end
+function set_one!(F::RingCategory, v::Vector{Int}) 
+    F.one = v
+end 
 
 function set_ribbon!(F::RingCategory, r::Vector)
     F.ribbon = r
@@ -91,13 +84,6 @@ function set_twist!(F::RingCategory, t::Vector)
     F.twist = t
 end
 
-# function set_ev!(F::RingCategory, ev::Vector)
-#     F.ev = ev
-# end
-#
-# function set_coev!(F::RingCategory, coev::Vector)
-#     F.coev = coev
-# end
 
 dim(X::RingCatObject) = base_ring(X)(tr(id(X)))
 
@@ -242,6 +228,7 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
         end
     end
 
+    
     #-----------------------------------
     # Associator morphism
     #-----------------------------------
@@ -271,7 +258,7 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
         for (i,k) ∈ zip(1:length(c_ass), c_ass)
             ass_perm[i,k] = F(1)
         end
-
+        
         # Permutation associator -> cod
         cod_perm = zero(MatrixSpace(F,length(cod_i),length(cod_i)))
 
@@ -280,7 +267,8 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
         for (i,k) ∈ zip(1:length(c_cod), c_cod)
             cod_perm[i,k] = F(1)
         end
-        comp_maps[i] = ass_perm*comp_maps[i]*inv(ass_perm)*cod_perm
+        
+        comp_maps[i] = ass_perm*comp_maps[i]*cod_perm
 
     end
     return Morphism(dom,dom, comp_maps)
@@ -339,7 +327,12 @@ function dual(X::RingCatObject)
     if issimple(X)
         # Check for rigidity
         i = findfirst(e -> e == 1, X.components)
-        j = findall(e -> C.tensor_product[i,e,1] >= 1, 1:C.simples)
+        j = []
+        for k ∈ 1:C.simples 
+            if C.one[k] == 1
+                j = [j; findall(e -> C.tensor_product[i,e,k] >= 1, 1:C.simples)]
+            end
+        end
         if length(j) != 1
             throw(ErrorException("Object not rigid."))
         end
@@ -350,68 +343,101 @@ function dual(X::RingCatObject)
     return dsum([dual(Y)^(X.components[i]) for (Y,i) ∈ zip(simples(C), 1:C.simples)])
 end
 
-function coev(X::RingCatObject) where T
-    DX = dual(X)
-    C = parent(X)
-    F = base_ring(C)
-
-    if sum(X.components) == 0 return zero_morphism(one(C), X) end
-
-    m = []
-
-    for (x,k) ∈ zip(simples(C),X.components), y ∈ simples(C)
-
-        if x == dual(y)
-            c = [F(a==b) for a ∈ 1:k, b ∈ 1:k][:]
-            m = [m; c]
-        else
-            c = [0 for _ ∈ 1:(x⊗y).components[1]]
-            m = [m; c]
-        end
+function coev(X::RingCatObject)
+    if issimple(X)
+        return simple_objects_coev(X)
     end
-
-    mats = matrices(zero_morphism(one(C), X⊗DX))
-    M = parent(mats[1])
-    mats[1] = M(F.(m))
-    return Morphism(one(C), X⊗DX, mats)
 end
 
 function ev(X::RingCatObject)
+    if issimple(X)
+        return simple_objects_ev(X)
+    end
+end
+
+function simple_objects_coev(X::RingCatObject)
     DX = dual(X)
     C = parent(X)
     F = base_ring(C)
 
-    # Simple Objects
-    if issimple(X)
-        # If X is simple
-        e = basis(Hom(DX⊗X, one(C)))[1]
-        # Scale ev
-        f = (id(X)⊗e)∘associator(X,DX,X)∘(coev(X)⊗id(X))
-        return inv(F(f))*e
-    end
+    cod = X ⊗ DX
 
-    m = elem_type(F)[]
-    #Arbitrary Objects
-    for (x,k) ∈ zip(simples(C),DX.components), y ∈ simples(C)
-        if x == dual(y)
-            c = F(ev(y)[1]).*([F(a==b) for a ∈ 1:k, b ∈ 1:k][:])
-            m = [m; c]
-        else
-            c = [0 for _ ∈ 1:(x⊗y).components[1]]
-            m = [m; c]
-        end
-    end
+    if sum(X.components) == 0 return zero_morphism(one(C), X) end
 
-    mats = matrices(zero_morphism(X⊗DX, one(C)))
-    M = parent(mats[1])
-    mats[1] = M(F.(m))
-    return Morphism(X⊗DX,one(C),mats)
+    mats = [diagonal_matrix(F(1),n,m) for (n,m) ∈ zip(C.one, cod.components)]
+
+    return Morphism(one(C), cod, mats)
+
+    # m = []
+
+    # for (x,k) ∈ zip(simples(C),X.components), y ∈ simples(C)
+
+    #     if x == dual(y)
+    #         c = [F(a==b) for a ∈ 1:k, b ∈ 1:k][:]
+    #         m = [m; c]
+    #     else
+    #         c = [0 for _ ∈ 1:(x⊗y).components[1]]
+    #         m = [m; c]
+    #     end
+    # end
+
+    # mats = matrices(zero_morphism(one(C), X⊗DX))
+    # M = parent(mats[1])
+    # mats[1] = M(F.(m))
+    # return Morphism(one(C), X⊗DX, mats)
+end
+
+function simple_objects_ev(X::RingCatObject)
+    DX = dual(X)
+    C = parent(X)
+    F = base_ring(C)
+
+    dom = DX ⊗ X
+
+    if sum(X.components) == 0 return zero_morphism(X,one(C)) end
+
+    mats = [diagonal_matrix(F(1),n,m) for (n,m) ∈ zip(dom.components, C.one)]
+
+    unscaled_ev = Morphism(dom, one(C), mats)
+
+    factor = F((id(X)⊗unscaled_ev)∘associator(X,DX,X)∘(coev(X)⊗id(X)))
+
+
+    return inv(factor) * unscaled_ev
+
+    # # Simple Objects
+    # if issimple(X)
+    #     # If X is simple
+    #     e = basis(Hom(DX⊗X, one(C)))[1]
+    #     # Scale ev
+    #     f = (id(X)⊗e)∘associator(X,DX,X)∘(coev(X)⊗id(X))
+    #     return inv(F(f))*e
+    # end
+
+    # m = elem_type(F)[]
+    # #Arbitrary Objects
+    # for (x,k) ∈ zip(simples(C),DX.components), y ∈ simples(C)
+    #     if x == dual(y)
+    #         c = F(ev(y)[1]).*([F(a==b) for a ∈ 1:k, b ∈ 1:k][:])
+    #         m = [m; c]
+    #     else
+    #         c = [0 for _ ∈ 1:(x⊗y).components[1]]
+    #         m = [m; c]
+    #     end
+    # end
+
+    # mats = matrices(zero_morphism(X⊗DX, one(C)))
+    # M = parent(mats[1])
+    # mats[1] = M(F.(m))
+    # return Morphism(X⊗DX,one(C),mats)
 end
 
 function spherical(X::RingCatObject)
     C = parent(X)
+    F = base_ring(C)
     sp = C.spherical
-    return dsum([x^k for (x,k) ∈ zip(sp, X.components)])
+    mats = [diagonal_matrix(θ, k) for (θ,k) ∈ zip(sp, X.components)]
+    return Morphism(X,X,mats)
 end
 
 
@@ -441,6 +467,10 @@ function matrices(f::RingCatMorphism)
     f.m
 end
 
+function matrix(f::RingCatMorphism)
+    M = dsum([Morphism(m) for m ∈ f.m])
+    return M.m
+end
 
 function (F::Field)(f::RingCatMorphism)
     if !(domain(f) == codomain(f) && issimple(domain(f)))
@@ -449,9 +479,12 @@ function (F::Field)(f::RingCatMorphism)
     i = findfirst(e -> e == 1, domain(f).components)
     return F(f.m[i][1,1])
 end
+
 #-------------------------------------------------------------------------------
 #   Tensor Product
 #-------------------------------------------------------------------------------
+
+
 
 function tensor_product(X::RingCatObject, Y::RingCatObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
@@ -494,7 +527,6 @@ function tensor_product(f::RingCatMorphism, g::RingCatMorphism)
                 for _ ∈ 1:table[i,j,k]
                     h = h ⊕ RingCatMorphism(simpl[k]^d1,simpl[k]^d2, m)
                 end
-
             end
         end
     end
@@ -504,8 +536,12 @@ function tensor_product(f::RingCatMorphism, g::RingCatMorphism)
 end
 
 
-one(C::RingCategory) = simples(C)[1]
-
+function one(C::RingCategory) 
+    if !isdefined(C, :one) 
+        throw(ErrorException("There is no unit object defined"))
+    end
+    RingCatObject(C,C.one)
+end
 #-------------------------------------------------------------------------------
 #   Direct sum
 #-------------------------------------------------------------------------------
@@ -513,6 +549,33 @@ one(C::RingCategory) = simples(C)[1]
 function dsum(X::RingCatObject, Y::RingCatObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
     return RingCatObject(parent(X), X.components .+ Y.components)
+end
+
+function dsum_with_morphisms(X::RingCatObject, Y::RingCatObject)
+    S = dsum(X,Y)
+    ix_mats = matrices(zero_morphism(X,S))
+    iy_mats = matrices(zero_morphism(Y,S))
+    px_mats = matrices(zero_morphism(S,X))
+    py_mats = matrices(zero_morphism(S,Y))
+
+    for i ∈ 1:parent(X).simples
+        (x,y) = X.components[i], Y.components[i]
+        for j ∈ 1:x 
+            ix_mats[i][j,j] = 1
+            px_mats[i][j,j] = 1
+        end
+        for j ∈ 1:y 
+            iy_mats[i][j,j+x] = 1
+            py_mats[i][j+x,j] = 1
+        end
+    end
+
+    ix = Morphism(X,S, ix_mats)
+    px = Morphism(S,X, px_mats)
+    iy = Morphism(Y,S, iy_mats)
+    py = Morphism(S,Y, py_mats)
+
+    return S,[ix,iy],[px,py]
 end
 
 function dsum(f::RingCatMorphism, g::RingCatMorphism)
@@ -536,6 +599,14 @@ zero(C::RingCategory) = RingCatObject(C,[0 for i ∈ 1:C.simples])
 function zero_morphism(X::RingCatObject, Y::RingCatObject)
     return RingCatMorphism(X,Y,[zero(MatrixSpace(base_ring(X), cX, cY)) for (cX,cY) ∈ zip(X.components, Y.components)])
 end
+
+function isisomorphic(X::RingCatObject, Y::RingCatObject)
+    if X != Y
+        return false, nothing
+    else
+        return true, id(X)
+    end
+end
 #-------------------------------------------------------------------------------
 #   Simple Objects
 #-------------------------------------------------------------------------------
@@ -547,6 +618,26 @@ end
 
 function getindex(C::RingCategory, i)
     RingCatObject(C,[i == j ? 1 : 0 for j ∈ 1:C.simples])
+end
+
+#-------------------------------------------------------------------------------
+#   Kernel and Cokernel
+#-------------------------------------------------------------------------------
+
+function kernel(f::RingCatMorphism)
+    C = parent(domain(f))
+    kernels = [kernel(Morphism(m)) for m ∈ f.m]
+    mats = [matrix(m) for (k,m) ∈ kernels]
+    ker = RingCatObject(C,[dim(k) for (k,m) ∈ kernels])
+
+    return ker, Morphism(ker, domain(f), mats)
+end
+
+
+function left_inverse(f::RingCatMorphism)
+    inverses = [left_inverse(Morphism(m)) for m ∈ matrices(f)]
+    mats = [matrix(m) for m ∈ inverses]
+    return Morphism(codomain(f), domain(f), mats)
 end
 
 #-------------------------------------------------------------------------------
@@ -577,7 +668,9 @@ function Ising()
     z = zero(MatrixSpace(F,0,0))
     set_associator!(C,3,3,3, [z, z, inv(a)*matrix(F,[1 1; 1 -1])])
 
-    set_spherical!(C, [id(s) for s ∈ simples(C)])
+    set_one!(C,[1,0,0])
+
+    set_spherical!(C, [F(1) for s ∈ simples(C)])
 
     a,b,c = simples(C)
 
@@ -669,7 +762,7 @@ function show(io::IO, f::RingCatMorphism)
 Domain: $(domain(f))
 Codomain: $(codomain(f))
 Matrices: """)
-print(io, join(["$(m)" for m ∈ f.m], ", "))
+    print(io, join(["$(m)" for m ∈ f.m], ", "))
 end
 
 #-------------------------------------------------------------------------------
