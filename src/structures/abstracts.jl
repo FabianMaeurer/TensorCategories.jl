@@ -25,7 +25,14 @@ abstract type VectorSpaceMorphism <: Morphism end
 
 abstract type HomSet end
 
-abstract type HomSpace <: VectorSpaceObject end
+abstract type AbstractHomSpace <: VectorSpaceObject end
+
+struct HomSpace <: AbstractHomSpace
+    X::Object
+    Y::Object
+    basis::Vector{<:Morphism}
+    parent
+end
 
 domain(m::Morphism) = m.domain
 codomain(m::Morphism) = m.codomain

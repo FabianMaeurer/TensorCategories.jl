@@ -595,7 +595,7 @@ end
 #   Hom Spaces
 #-------------------------------------------------------------------------------
 
-struct CenterHomSpace <: HomSpace
+struct CenterHomSpace <: AbstractHomSpace
     X::CenterObject
     Y::CenterObject
     basis::Vector{CenterMorphism}

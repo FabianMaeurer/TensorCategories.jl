@@ -359,7 +359,7 @@ end
 #   Hom Spaces
 #-----------------------------------------------------------------
 
-struct CohSfHomSpace <: HomSpace
+struct CohSfHomSpace <: AbstractHomSpace
     X::CohSheaf
     Y::CohSheaf
     basis::Vector{CohSheafMorphism}

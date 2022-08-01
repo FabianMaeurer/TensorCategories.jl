@@ -287,7 +287,7 @@ end
 #   Functionality: Hom-Spaces
 #-----------------------------------------------------------------
 
-struct GVSHomSpace <: HomSpace
+struct GVSHomSpace <: AbstractHomSpace
     X::GVSObject
     Y::GVSObject
     basis::Vector{VectorSpaceMorphism}

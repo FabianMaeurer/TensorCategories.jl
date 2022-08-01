@@ -681,7 +681,7 @@ end
 #   Hom Spaces
 #-------------------------------------------------------------------------------
 
-struct RingCatHomSpace<: HomSpace
+struct RingCatHomSpace<: AbstractHomSpace
     X::RingCatObject
     Y::RingCatObject
     basis::Vector{RingCatMorphism}
