@@ -33,7 +33,7 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         Functor, Sets, SetObject, SetMorphism, inv, product, coproduct,
         features, issemisimple, isabelian, ismonoidal, ×, ∐, RepresentationCategory,
         GroupRepresentationCategory, ismultiring, ismultifusion, isring, ismultitensor,
-        istensor,
+        istensor, isfusion,
          FusionCategory, VSHomSpace,HomSpace,
         Hom, GVSHomSpace, HomFunctor, VSObject, GVSObject, GVSMorphism, SetHomSet,
         HomSet, Cocycle, trivial_3_cocylce,*,
@@ -56,15 +56,17 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         image, isgraded, cyclic_group_3cocycle, decompose_morphism,
         central_objects, half_braiding, half_braidings, left_inverse, right_inverse,
         add_simple!, pentagon_axiom, set_associator!, dual_basis, pairing,
-        eigenspace, eigenspaces, irreducible_subobjects, I2, I2subcategory
+        eigenspace, eigenspaces, irreducible_subobjects, I2, I2subcategory,
+        DeligneProdMorphism, DeligneProdObject, DeligneProduct, ⊠, op, AbstractHomSpace
 
 include("Utility/FFE_to_FinField.jl")
 include("Utility/SolveGroebner.jl")
 include("Utility/Technicallities.jl")
 include("structures/abstracts.jl")
+include("structures/VectorSpaces/VectorSpaces.jl")
 include("structures/MISC/ProductCategory.jl")
 include("structures/MISC/OppositeCategory.jl")
-include("structures/VectorSpaces/VectorSpaces.jl")
+include("structures/MISC/DeligneTensorProduct.jl")
 include("structures/VectorSpaces/Cocycles.jl")
 include("structures/VectorSpaces/GradedVectorSpaces.jl")
 include("structures/set.jl")

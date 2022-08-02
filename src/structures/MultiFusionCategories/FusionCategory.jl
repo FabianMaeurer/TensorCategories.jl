@@ -92,7 +92,42 @@ dim(X::RingCatObject) = base_ring(X)(tr(id(X)))
 
 braiding(X::RingCatObject, Y::RingCatObject) = parent(X).braiding(X,Y)
 
-
+# function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
+#     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
+#
+#     C = parent(X)
+#     F = base_ring(C)
+#     n = C.simples
+#     dom = X⊗Y⊗Z
+#
+#     table = C.tensor_product
+#     C_associator = C.ass
+#
+#     #---------------------------------
+#     # associators on simple objects
+#     #---------------------------------
+#     if issimple(X) && issimple(Y) && issimple(Z)
+#         i = findfirst(e -> e ≠ 0, X.components)
+#         j = findfirst(e -> e ≠ 0, Y.components)
+#         k = findfirst(e -> e ≠ 0, Z.components)
+#         return Morphism(X⊗Y⊗Z, X⊗Y⊗Z, C_associator[i,j,k,:])
+#     end
+#
+#     #---------------------------------
+#     # associators for arbitrary objects
+#     #---------------------------------
+#     simple_objects = simples(parent(X))
+#
+#     #-------------------------------------
+#     # Order of summands in domain
+#     #-------------------------------------
+#     ids = ones(Int,n)
+#     domain_order = [[] for _ ∈ 1:n]
+#
+#     for i ∈ (X⊗Y).components, j ∈ Z.components
+#
+#
+# end
 
 function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
@@ -136,9 +171,17 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     end
     sort!(domain_order_temp, by = e -> findfirst(k -> k != 0, e[1].components))
     domain_order = []
+    domain_dict = Dict()
     for (x, x_id) ∈ domain_order_temp, (z, z_id) ∈ Z_summands
         for (s,k) ∈ zip(simple_objects, (x⊗z).components)
-            append!(domain_order, [(s, [x_id; z_id]) for l ∈ 1:k])
+            if k == 0 continue end
+            id = (s, [x_id; z_id])
+            if id ∈ keys(domain_dict)
+                domain_dict[id] = domain_dict[id] + 1
+            else
+                domain_dict[id] = 1
+            end
+            append!(domain_order, [(s, [x_id; z_id], domain_dict[id]) for l ∈ 1:k])
         end
     end
 
@@ -153,9 +196,17 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     end
     sort!(codomain_order_temp, by = e -> findfirst(k -> k != 0, e[1].components))
     codomain_order = []
+    codomain_dict = Dict()
     for (x, x_id) ∈ X_summands, (z, z_id) ∈ codomain_order_temp
         for (s,k) ∈ zip(simple_objects, (x⊗z).components)
-            append!(codomain_order, [(s, [x_id; z_id]) for l ∈ 1:k])
+            if k == 0 continue end
+            id = (s, [x_id; z_id])
+            if id ∈ keys(codomain_dict)
+                codomain_dict[id] = codomain_dict[id] + 1
+            else
+                codomain_dict[id] = 1
+            end
+            append!(codomain_order, [(s, [x_id; z_id], codomain_dict[id]) for l ∈ 1:k])
         end
     end
 
@@ -163,8 +214,16 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     # Order of summands in associator
     #-----------------------------------
     associator_order = []
+    associator_dict = Dict()
     for (x, x_id) ∈ X_summands, (y, y_id) ∈ Y_summands, (z, z_id) ∈ Z_summands
         for (s,k) ∈ zip(simple_objects, ((x⊗y)⊗z).components)
+            if k == 0 continue end
+            id = (s, [x_id; y_id; z_id])
+            if id ∈ keys(associator_dict)
+                associator_dict[id] = associator_dict[id] + 1
+            else
+                associator_dict[id] = 1
+            end
             append!(associator_order, [(s, [x_id; y_id; z_id]) for i ∈ 1:k])
         end
     end
@@ -190,8 +249,8 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
         ass_i = filter(e -> e[1] == C[i], associator_order)
 
         if length(dom_i) == 0 continue end
-
-        c_ass = vector_permutation(dom_i,ass_i)
+        
+        c_ass = vector_permutation([(a,b) for (a,b,c) ∈ dom_i],ass_i)
 
         # Permutation dom -> associator
         ass_perm = zero(MatrixSpace(F,length(dom_i),length(dom_i)))
@@ -203,7 +262,7 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
         # Permutation associator -> cod
         cod_perm = zero(MatrixSpace(F,length(cod_i),length(cod_i)))
 
-        c_cod = vector_permutation(ass_i,cod_i)
+        c_cod = vector_permutation(dom_i,cod_i)
 
         for (i,k) ∈ zip(1:length(c_cod), c_cod)
             cod_perm[i,k] = F(1)
@@ -215,7 +274,6 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     return Morphism(dom,dom, comp_maps)
 
 end
-
 
 
 
@@ -623,7 +681,7 @@ end
 #   Hom Spaces
 #-------------------------------------------------------------------------------
 
-struct RingCatHomSpace<: HomSpace
+struct RingCatHomSpace<: AbstractHomSpace
     X::RingCatObject
     Y::RingCatObject
     basis::Vector{RingCatMorphism}

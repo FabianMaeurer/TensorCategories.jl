@@ -269,7 +269,7 @@ end
 #   Hom Space
 #-----------------------------------------------------------------
 
-struct ConvHomSpace <: HomSpace
+struct ConvHomSpace <: AbstractHomSpace
     X::ConvolutionObject
     Y::ConvolutionObject
     basis::Vector{ConvolutionMorphism}

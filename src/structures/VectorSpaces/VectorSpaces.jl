@@ -366,7 +366,7 @@ end
 #   Hom Spaces
 #----------------------------------------------------------------------------
 
-struct VSHomSpace <: HomSpace
+struct VSHomSpace <: AbstractHomSpace
     X::VectorSpaceObject
     Y::VectorSpaceObject
     basis::Vector{VectorSpaceMorphism}

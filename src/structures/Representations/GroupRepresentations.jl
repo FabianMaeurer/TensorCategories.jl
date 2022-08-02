@@ -485,7 +485,7 @@ end
 #   Hom Spaces
 #-------------------------------------------------------------------------
 
-struct GRHomSpace<: HomSpace
+struct GRHomSpace<: AbstractHomSpace
     X::GroupRepresentation
     Y::GroupRepresentation
     basis::Vector{GroupRepresentationMorphism}
