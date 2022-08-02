@@ -386,11 +386,12 @@ function decompose_morphism(X::Object)
     @assert issemisimple(C) "Semisimplicity required"
 
     S = simples(C)
-    components = sort( decompose(X), by = e -> findfirst(s -> isisomorphic(s,e[1])[1], S))
-    Z, incl, proj = dsum_with_morphisms([s^d for (s,d) ∈ components]...)
+    components = decompose(X)
+    Z, incl, proj = dsum_with_morphisms(vcat([[s for _ ∈ 1:d] for (s,d) ∈ components]...)...)
 
     # temporary solution!
-    return isisomorphic(X,Z)[2]
+    iso = isisomorphic(X,Z)[2]
+    return iso, [inv(iso)∘i for i ∈ incl], [p∘iso for p ∈ proj]
 
     #----------------------------------
     f = zero_morphism(X,Z)
@@ -399,7 +400,7 @@ function decompose_morphism(X::Object)
         g = i∘p
         f = f + g
     end
-    return f
+    return f, incl, proj
 end
 
 

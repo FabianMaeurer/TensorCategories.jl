@@ -224,6 +224,7 @@ end
 #-------------------------------------------------------------------------
 
 function compose(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
+    @assert codomain(f) == domain(g) "Morphisms not compatible"
     return GroupRepresentationMorphism(domain(f),codomain(g), matrix(f)*matrix(g))
 end
 

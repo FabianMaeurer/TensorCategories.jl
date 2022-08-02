@@ -407,21 +407,19 @@ function half_braiding(X::CenterObject, Y::Object)
     dom = X.object⊗Y
     cod = Y⊗X.object
     braid = zero_morphism(dom, cod)
-    for (s,ys) ∈ zip(simples(parent(X).category), X.γ)
-        multiplicity = dim(Hom(Y,s))
-        if multiplicity == 0 continue end
-        S,incl,proj = dsum_with_morphisms([s for _ ∈ 1:multiplicity]...)
-        iso = isisomorphic(Y,S)[2]
-        proj = [p ∘ iso for p ∈ proj]
-        if length(proj) == 0 continue end
-        incl = [inv(iso) ∘ i for i ∈ incl]
+    simpls = simples(parent(Y))
 
-        # for p in proj, i in incl
-        #     m = (i⊗id(X.object))∘ys∘(id(X.object)⊗p)
-        #     @show isequivariant(matrix(m),domain(m), codomain(m))
-        # end
+    iso, incl, proj = decompose_morphism(Y)
 
-        braid = braid + sum([(i⊗id(X.object))∘ys∘(id(X.object)⊗p) for i ∈ incl, p ∈ proj][:])
+    for (p,i) ∈ zip(proj, incl)
+        k = findfirst(e -> isisomorphic(e, domain(i))[1], simpls)
+        incliso = isisomorphic(simpls[k], domain(i))[2]
+        #projiso = isisomorphic(codomain(p), )[2]
+
+        i = i ∘ incliso
+        p = inv(incliso) ∘ p 
+        
+        braid = braid + (i⊗id(X.object))∘X.γ[k]∘(id(X.object)⊗p)
     end
     return braid
 end
@@ -634,6 +632,7 @@ function central_projection(dom::CenterObject, cod::CenterObject, f::Morphism, s
         dXi = dual(Xi)
         yY = half_braiding(cod, dXi)
 
+        @show (ev(dXi)⊗id(Y))∘inv(a(dual(dXi),dXi,Y))∘(spherical(Xi)⊗yY)∘a(Xi,Y,dXi)∘((id(Xi)⊗f)⊗id(dXi))∘(yX⊗id(dXi))
         ϕ = (ev(dXi)⊗id(Y))∘inv(a(dual(dXi),dXi,Y))∘(spherical(Xi)⊗yY)∘a(Xi,Y,dXi)∘((id(Xi)⊗f)⊗id(dXi))∘(yX⊗id(dXi))∘inv(a(X,Xi,dXi))∘(id(X)⊗coev(Xi))
 
         proj = proj + dim(Xi)*ϕ
