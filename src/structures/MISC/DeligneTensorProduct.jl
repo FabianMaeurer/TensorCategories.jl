@@ -28,7 +28,7 @@ end
 struct CompositeDeligneProdMorphism <: DeligneProdMorphism
     domain::CompositeDeligneProdMorphism
     codomain::CompositeDeligneProdMorphism
-    m::Matrix{simpleDeligneProdMorphism}
+    m::Matrix{SimpleDeligneProdMorphism}
 end
 
 #=------------------------------------------------
@@ -75,7 +75,7 @@ one(C::DeligneProduct) = one(C.C) ⊠ one(C.D)
 
 zero(C::DeligneProduct) = zero(C.C) ⊠ zero(C.D)
 
-dsum(X::DeligneProdObject, Y::DeligneProdObject) = ()
+
 
 #=------------------------------------------------
     Checks

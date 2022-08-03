@@ -8,7 +8,7 @@ struct GroupRepresentation <: Representation
     group::GAPGroup
     m
     base_ring::Ring
-    dim::Int64
+    dim::RingElem
 end
 
 struct GroupRepresentationMorphism <: RepresentationMorphism
@@ -45,7 +45,7 @@ function Representation(G::GAPGroup, pre_img::Vector, img::Vector)
     d = size(img[1])[1]
     H = GL(d, F)
     m = hom(G,H, pre_img,H.(img))
-    return GroupRepresentation(RepresentationCategory(G,F),G,m,F,d)
+    return GroupRepresentation(RepresentationCategory(G,F),G,m,F,F(d))
 end
 
 
@@ -59,7 +59,7 @@ function Representation(G::GAPGroup, m::Function)
     d = order(G) == 1 ? size(m(elements(G)[1]))[1] : size(m(G[1]))[1]
     H = GL(d,F)
     m = hom(G,H,g -> H(m(g)))
-    return GroupRepresentation(RepresentationCategory(G,F),G,m,F,d)
+    return GroupRepresentation(RepresentationCategory(G,F),G,m,F,F(d))
 end
 
 
@@ -451,7 +451,7 @@ function simples(Rep::GroupRepresentationCategory)
         dims = [GAP.Globals.DimensionOfMatrixGroup(GAP.Globals.Range(m)) for m ∈ gap_reps]
 
         oscar_reps = [GAPGroupHomomorphism(grp, GL(dims[i],F), gap_reps[i]) for i ∈ 1:length(gap_reps)]
-        reps = [GroupRepresentation(Rep,grp,m,F,d) for (m,d) ∈ zip(oscar_reps,dims)]
+        reps = [GroupRepresentation(Rep,grp,m,F,F(d)) for (m,d) ∈ zip(oscar_reps,dims)]
 
         return reps
     end

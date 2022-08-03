@@ -46,12 +46,11 @@ end
 #-------------------------------------------------------------------------------
 
 function pairing(f::Morphism, g::Morphism)
-    A,B = domain(f), codomain(f)
-
+    A,B = domain(f), codomain(g)
     return ev(B)∘(f⊗g)∘coev(A)
 end
 
-function dual_basis(V::HomSpace,W::HomSpace)
+function dual_basis(V::AbstractHomSpace, W::AbstractHomSpace)
     dual_basis = []
     F = base_ring(V)
     n = length(basis(V))

@@ -171,19 +171,12 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     end
     sort!(domain_order_temp, by = e -> findfirst(k -> k != 0, e[1].components))
     domain_order = []
-    domain_dict = Dict()
     for (x, x_id) ∈ domain_order_temp, (z, z_id) ∈ Z_summands
         for (s,k) ∈ zip(simple_objects, (x⊗z).components)
-            if k == 0 continue end
-            id = (s, [x_id; z_id])
-            if id ∈ keys(domain_dict)
-                domain_dict[id] = domain_dict[id] + 1
-            else
-                domain_dict[id] = 1
-            end
-            append!(domain_order, [(s, [x_id; z_id], domain_dict[id]) for l ∈ 1:k])
+            append!(domain_order, [(s, [x_id; z_id]) for l ∈ 1:k])
         end
     end
+
 
     #-----------------------------------
     # Order of summands in codomain
@@ -196,38 +189,24 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     end
     sort!(codomain_order_temp, by = e -> findfirst(k -> k != 0, e[1].components))
     codomain_order = []
-    codomain_dict = Dict()
     for (x, x_id) ∈ X_summands, (z, z_id) ∈ codomain_order_temp
         for (s,k) ∈ zip(simple_objects, (x⊗z).components)
-            if k == 0 continue end
-            id = (s, [x_id; z_id])
-            if id ∈ keys(codomain_dict)
-                codomain_dict[id] = codomain_dict[id] + 1
-            else
-                codomain_dict[id] = 1
-            end
-            append!(codomain_order, [(s, [x_id; z_id], codomain_dict[id]) for l ∈ 1:k])
+            append!(codomain_order, [(s, [x_id; z_id]) for l ∈ 1:k])
         end
     end
 
+    @show domain_order
+    @show codomain_order
     #-----------------------------------
     # Order of summands in associator
     #-----------------------------------
     associator_order = []
-    associator_dict = Dict()
     for (x, x_id) ∈ X_summands, (y, y_id) ∈ Y_summands, (z, z_id) ∈ Z_summands
         for (s,k) ∈ zip(simple_objects, ((x⊗y)⊗z).components)
-            if k == 0 continue end
-            id = (s, [x_id; y_id; z_id])
-            if id ∈ keys(associator_dict)
-                associator_dict[id] = associator_dict[id] + 1
-            else
-                associator_dict[id] = 1
-            end
             append!(associator_order, [(s, [x_id; y_id; z_id]) for i ∈ 1:k])
         end
     end
-
+    @show associator_order
     
     #-----------------------------------
     # Associator morphism
@@ -250,7 +229,7 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
 
         if length(dom_i) == 0 continue end
         
-        c_ass = vector_permutation([(a,b) for (a,b,c) ∈ dom_i],ass_i)
+        c_ass = vector_permutation(dom_i, ass_i)
 
         # Permutation dom -> associator
         ass_perm = zero(MatrixSpace(F,length(dom_i),length(dom_i)))
@@ -262,7 +241,7 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
         # Permutation associator -> cod
         cod_perm = zero(MatrixSpace(F,length(cod_i),length(cod_i)))
 
-        c_cod = vector_permutation(dom_i,cod_i)
+        c_cod = vector_permutation(ass_i, cod_i)
 
         for (i,k) ∈ zip(1:length(c_cod), c_cod)
             cod_perm[i,k] = F(1)
@@ -274,6 +253,154 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     return Morphism(dom,dom, comp_maps)
 
 end
+
+# function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
+#     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
+
+#     C = parent(X)
+#     F = base_ring(C)
+#     n = C.simples
+#     dom = X⊗Y⊗Z
+
+
+#     table = C.tensor_product
+#     C_associator = C.ass
+
+#     #---------------------------------
+#     # associators on simple objects
+#     #---------------------------------
+#     if issimple(X) && issimple(Y) && issimple(Z)
+#         i = findfirst(e -> e ≠ 0, X.components)
+#         j = findfirst(e -> e ≠ 0, Y.components)
+#         k = findfirst(e -> e ≠ 0, Z.components)
+#         return Morphism(X⊗Y⊗Z, X⊗Y⊗Z, C_associator[i,j,k,:])
+#     end
+
+#     #---------------------------------
+#     # associators for arbitrary objects
+#     #---------------------------------
+#     simple_objects = simples(parent(X))
+
+#     X_summands = vcat([[(s,[k,l]) for l ∈ 1:X.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
+#     Y_summands = vcat([[(s,[k,l]) for l ∈ 1:Y.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
+#     Z_summands = vcat([[(s,[k,l]) for l ∈ 1:Z.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
+
+#     #-------------------------------------
+#     # Order of summands in domain
+#     #-------------------------------------
+#     domain_order_temp = []
+#     for (x, x_id) ∈ X_summands, (y, y_id) ∈ Y_summands
+#          for (s,k) ∈ zip(simple_objects, (x⊗y).components)
+#              append!(domain_order_temp, [(s, [x_id; y_id]) for l ∈ 1:k])
+#          end
+#     end
+#     sort!(domain_order_temp, by = e -> findfirst(k -> k != 0, e[1].components))
+#     domain_order = []
+#     domain_dict = Dict()
+#     for (x, x_id) ∈ domain_order_temp, (z, z_id) ∈ Z_summands
+#         for (s,k) ∈ zip(simple_objects, (x⊗z).components)
+#             if k == 0 continue end
+#             id = (s, [x_id; z_id])
+#             if id ∈ keys(domain_dict)
+#                 domain_dict[id] = domain_dict[id] + 1
+#             else
+#                 domain_dict[id] = 1
+#             end
+#             append!(domain_order, [(s, [x_id; z_id], domain_dict[id]) for l ∈ 1:k])
+#         end
+#     end
+
+
+#     #-----------------------------------
+#     # Order of summands in codomain
+#     #-----------------------------------
+#     codomain_order_temp = []
+#     for (y, y_id) ∈ Y_summands, (z, z_id) ∈ Z_summands
+#         for (s,k) ∈ zip(simple_objects, (y⊗z).components)
+#             append!(codomain_order_temp, [(s, [y_id; z_id]) for l ∈ 1:k])
+#         end
+#     end
+#     sort!(codomain_order_temp, by = e -> findfirst(k -> k != 0, e[1].components))
+#     codomain_order = []
+#     codomain_dict = Dict()
+#     for (x, x_id) ∈ X_summands, (z, z_id) ∈ codomain_order_temp
+#         for (s,k) ∈ zip(simple_objects, (x⊗z).components)
+#             if k == 0 continue end
+#             id = (s, [x_id; z_id])
+#             if id ∈ keys(codomain_dict)
+#                 codomain_dict[id] = codomain_dict[id] + 1
+#             else
+#                 codomain_dict[id] = 1
+#             end
+#             append!(codomain_order, [(s, [x_id; z_id], codomain_dict[id]) for l ∈ 1:k])
+#         end
+#     end
+
+
+#     #-----------------------------------
+#     # Order of summands in associator
+#     #-----------------------------------
+#     associator_order = []
+#     associator_dict = Dict()
+#     for (x, x_id) ∈ X_summands, (y, y_id) ∈ Y_summands, (z, z_id) ∈ Z_summands
+#         for (s,k) ∈ zip(simple_objects, ((x⊗y)⊗z).components)
+#             if k == 0 continue end
+#             id = (s, [x_id; y_id; z_id])
+#             if id ∈ keys(associator_dict)
+#                 associator_dict[id] = associator_dict[id] + 1
+#             else
+#                 associator_dict[id] = 1
+#             end
+#             append!(associator_order, [(s, [x_id; y_id; z_id]) for i ∈ 1:k])
+#         end
+#     end
+
+    
+#     #-----------------------------------
+#     # Associator morphism
+#     #-----------------------------------
+#     m = zero_morphism(zero(C),zero(C))
+#     for (x,_) ∈ X_summands, (y,_) ∈ Y_summands, (z,_) ∈ Z_summands
+#         m = m ⊕ associator(x,y,z)
+#     end
+
+
+#     #-----------------------------------
+#     # permutations
+#     #-----------------------------------
+#     comp_maps = matrices(m)
+
+#     for i ∈ 1:n
+#         dom_i = filter(e -> e[1] == C[i], domain_order)
+#         cod_i = filter(e -> e[1] == C[i], codomain_order)
+#         ass_i = filter(e -> e[1] == C[i], associator_order)
+
+#         if length(dom_i) == 0 continue end
+        
+#         c_ass = vector_permutation([(a,b) for (a,b,c) ∈ dom_i],ass_i)
+
+#         # Permutation dom -> associator
+#         ass_perm = zero(MatrixSpace(F,length(dom_i),length(dom_i)))
+
+#         for (i,k) ∈ zip(1:length(c_ass), c_ass)
+#             ass_perm[i,k] = F(1)
+#         end
+        
+#         # Permutation associator -> cod
+#         cod_perm = zero(MatrixSpace(F,length(cod_i),length(cod_i)))
+
+#         c_cod = vector_permutation(ass_i,[(a,b) for (a,b,c) ∈ cod_i])
+
+#         for (i,k) ∈ zip(1:length(c_cod), c_cod)
+#             cod_perm[i,k] = F(1)
+#         end
+        
+#         comp_maps[i] = ass_perm*comp_maps[i]*cod_perm
+
+#     end
+#     return Morphism(dom,dom, comp_maps)
+
+# end
 
 
 
