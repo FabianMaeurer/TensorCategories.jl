@@ -248,6 +248,7 @@ function vertical_dsum(f::Morphism, g::Morphism)
     #@assert domain(f) == domain(g) "Domains do not coincide"
 
     sum = f ⊕ g
+    @show domain(f),domain(g)
     _,(i1,i2),_ = dsum_with_morphisms(domain(f), domain(g))
     return sum∘i1 + sum∘i2
 end

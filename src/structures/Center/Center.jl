@@ -59,9 +59,21 @@ Add the simple object ```S``` to the vector of simple objects.
 """
 function add_simple!(C::CenterCategory, S::CenterObject)
     @assert dim(End(S)) == 1 "Not simple"
-    C.simples = unique_simples([simples(C); S])
+    if isdefined(C, :simples)
+        C.simples = unique_simples([simples(C); S])
+    else
+        C.simples = unique_simples([S])
+    end
 end
 
+function add_simple!(C::CenterCategory, S::Array{CenterObject})
+    @assert prod(dim(End(s)) for s ∈ S) == 1 "Not simple"
+    if isdefined(C, :simples)
+        C.simples = unique_simples([simples(C); S])
+    else
+        C.simples = unique_simples(S)
+    end
+end
 """
     spherical(X::CenterObject)
 
@@ -564,16 +576,40 @@ Return a tuple ```(K,k)``` where ```K```is the kernel object and ```k```is the i
 """
 function kernel(f::CenterMorphism)
     ker, incl = kernel(f.m)
-    f_inv = left_inverse(incl)
 
-    braiding = [(id(s)⊗f_inv)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), domain(f).γ)]
+    braiding = CenterMorphism[]
+    simples_objects = simples(parent(domain(f.m)))
+
+    # Solve for kernel inclusion
+    for (s,γ) ∈ zip(simples(parent(domain(f.m))), half_braiding(domain(f)))
+        hom_basis = basis(Hom(ker⊗s,s⊗domain(f.m)))
+        braiding_coeffs = express_in_basis(γ∘(incl⊗id(s)), hom_basis)
+
+        mat = []
+        braiding_basis = basis(Hom(ker⊗s, s⊗ker))
+        for g ∈ braiding_basis
+            coeffs = express_in_basis((id(s)⊗incl)∘g, hom_basis)
+            mat = [mat; coeffs]
+        end
+        mat = matrix(base_ring(f),length(braiding_basis), length(hom_basis), mat)
+        braiding_coeffs = matrix(base_ring(f), length(hom_basis), 1, braiding_coeffs)
+
+        ker_coeffs = solve(transpose(mat), braiding_coeffs)
+        compound = sum(braiding_coeffs .* hom_basis)
+        half_braiding = left_inverse(id(s)⊗incl)∘compound
+        braiding = [braiding; half_braiding]
+        @show matrix((id(s)⊗incl)∘half_braiding - γ∘(incl⊗id(s)))
+    end
+    # f_inv = left_inverse(incl)
+    
+    # braiding = [left_inverse((id(s)⊗incl))∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), domain(f).γ)]
 
     Z = CenterObject(parent(domain(f)), ker, braiding)
     return Z, Morphism(Z,domain(f), incl)
 end
 
 """
-    cokernel(f::CenterMoprhism)
+    cokernel(f::CenterMorphism)
 
 Return a tuple ```(C,c)``` where ```C```is the cokernel object and ```c```is the projection.
 """

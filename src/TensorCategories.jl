@@ -57,7 +57,8 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         central_objects, half_braiding, half_braidings, left_inverse, right_inverse,
         add_simple!, pentagon_axiom, set_associator!, dual_basis, pairing,
         eigenspace, eigenspaces, irreducible_subobjects, I2, I2subcategory,
-        DeligneProdMorphism, DeligneProdObject, DeligneProduct, ⊠, op, AbstractHomSpace
+        DeligneProdMorphism, DeligneProdObject, DeligneProduct, ⊠, op, AbstractHomSpace,
+        is_half_braiding
 
 include("Utility/FFE_to_FinField.jl")
 include("Utility/SolveGroebner.jl")
@@ -81,6 +82,7 @@ include("structures/MISC/PentagonAxiom.jl")
 include("structures/GrothendieckRing.jl")
 include("structures/Center/Induction.jl")
 include("structures/Center/Center.jl")
+include("structures/Center/CenterChecks.jl")
 include("structures/Examples/I2-fusion.jl")
 
 

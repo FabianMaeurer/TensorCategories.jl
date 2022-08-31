@@ -14,13 +14,13 @@ function induction(X::Object, simples::Vector = simples(parent(X)))
 
         for S ∈ simples
             dom_i = S⊗X⊗dual(S)⊗simples[i]
-            γ_i_temp = zero_morphism(dom_i, zero(parent(X)))
+            @show γ_i_temp = zero_morphism(dom_i, zero(parent(X)))
             for  T ∈ simples
                 # Set up basis and dual basis
-                basis, basis_dual = dual_basis(Hom(S, simples[i]⊗T), Hom(dual(S), dual(simples[i]⊗T)))
+                basis, basis_dual = dual_basis(Hom(S, simples[i]⊗T), Hom(dual(S), dual(T)⊗dual(simples[i])))
 
                 # Correct dual basis to right (co)domain via Hom(U⊗V,W) ≃ Hom(U,W⊗V∗)
-                basis_dual = [(id(dual(T))⊗ev(simples[i]))∘(f⊗id(simples[i])) for f ∈ basis_dual]
+                basis_dual = [(id(dual(T))⊗ev(simples[i])) ∘ associator(dual(T),dual(simples[i]),simples[i]) ∘ (f⊗id(simples[i])) for f ∈ basis_dual]
 
                 if length(basis) == 0 
                     γ_i_temp = vertical_dsum(γ_i_temp, zero_morphism(dom_i, simples[i]⊗T⊗X⊗dual(T))) 
