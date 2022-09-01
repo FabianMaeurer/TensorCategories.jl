@@ -6,32 +6,36 @@
 function induction(X::Object, simples::Vector = simples(parent(X)))
     @assert issemisimple(parent(X)) "Requires semisimplicity"
     Z = dsum([s⊗X⊗dual(s) for s ∈ simples])
-
+    a = associator
     γ = Vector{Morphism}(undef, length(simples))
 
     for i ∈ 1:length(simples)
-        γ[i] = zero_morphism(zero(parent(X)), dsum([simples[i]⊗s⊗X⊗dual(s) for s ∈ simples]))
+        W = simples[i]
+        γ[i] = zero_morphism(zero(parent(X)), dsum([W⊗s⊗X⊗dual(s) for s ∈ simples]))
 
         for S ∈ simples
             dom_i = S⊗X⊗dual(S)⊗simples[i]
-            @show γ_i_temp = zero_morphism(dom_i, zero(parent(X)))
+            γ_i_temp = zero_morphism(dom_i, zero(parent(X)))
             for  T ∈ simples
                 # Set up basis and dual basis
-                basis, basis_dual = dual_basis(Hom(S, simples[i]⊗T), Hom(dual(S), dual(T)⊗dual(simples[i])))
+                basis, basis_dual = dual_basis(Hom(S, W⊗T), Hom(dual(S), dual(T)⊗dual(W)))
 
                 # Correct dual basis to right (co)domain via Hom(U⊗V,W) ≃ Hom(U,W⊗V∗)
-                basis_dual = [(id(dual(T))⊗ev(simples[i])) ∘ associator(dual(T),dual(simples[i]),simples[i]) ∘ (f⊗id(simples[i])) for f ∈ basis_dual]
+                basis_dual = [(id(dual(T))⊗ev(W)) ∘ a(dual(T),dual(W),W) ∘ (f⊗id(W)) for f ∈ basis_dual]
 
                 if length(basis) == 0 
-                    γ_i_temp = vertical_dsum(γ_i_temp, zero_morphism(dom_i, simples[i]⊗T⊗X⊗dual(T))) 
+                    γ_i_temp = vertical_dsum(γ_i_temp, zero_morphism(dom_i, W⊗T⊗X⊗dual(T))) 
                 else
-                    γ_i_temp = vertical_dsum(γ_i_temp, (dim(S)*sum([f⊗id(X)⊗g for (f,g) ∈ zip(basis, basis_dual)])))
+                    component_iso = sum([(id(W)⊗inv(a(T,X,dual(T)))) ∘ a(W,T,X⊗dual(T)) ∘ a(W⊗T,X,dual(T)) ∘ (f⊗id(X)⊗g) ∘ a(S⊗X,dual(S),W) for (f,g) ∈ zip(basis, basis_dual)])
+
+                    γ_i_temp = vertical_dsum(γ_i_temp, (dim(S)*component_iso))
                 end
             end
             γ[i] = horizontal_dsum(γ[i], γ_i_temp)
         end
-        iso1 = isisomorphic(Z⊗simples[i], domain(γ[i]))[2] #inv(decompose_morphism(domain(γ[i])))∘decompose_morphism(Z⊗simples[i])
-        iso2 = isisomorphic(codomain(γ[i]), simples[i]⊗Z)[2] #inv(decompose_morphism(simples[i]⊗Z))∘decompose_morphism(codomain(γ[i]))
+        iso1 = isisomorphic(Z⊗W, domain(γ[i]))[2] #inv(decompose_morphism(domain(γ[i])))∘decompose_morphis (Z⊗simples[i])
+        basis(Hom(Z⊗W,domain(γ[i])))
+        iso2 = isisomorphic(codomain(γ[i]), W⊗Z)[2] #inv(decompose_morphism(simples[i]⊗Z))∘decompose_morphism(codomain(γ[i]))
 
         γ[i] = iso2 ∘ γ[i] ∘ iso1
 

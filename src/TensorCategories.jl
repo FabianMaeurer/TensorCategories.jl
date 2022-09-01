@@ -56,9 +56,9 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         image, isgraded, cyclic_group_3cocycle, decompose_morphism,
         central_objects, half_braiding, half_braidings, left_inverse, right_inverse,
         add_simple!, pentagon_axiom, set_associator!, dual_basis, pairing,
-        eigenspace, eigenspaces, irreducible_subobjects, I2, I2subcategory,
+        eigenspace, eigenspaces, simple_subobjects, I2, I2subcategory,
         DeligneProdMorphism, DeligneProdObject, DeligneProduct, ⊠, op, AbstractHomSpace,
-        is_half_braiding
+        is_half_braiding, object
 
 include("Utility/FFE_to_FinField.jl")
 include("Utility/SolveGroebner.jl")

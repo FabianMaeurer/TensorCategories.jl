@@ -17,11 +17,22 @@ struct GVSMorphism <: VectorSpaceMorphism
     m::MatElem
 end
 
+"""
+    GradedVectorSpaces(F::Field, G::GAPGroup)
+
+The category of ```G```-graded vector spaces.
+"""
 function GradedVectorSpaces(F::Field, G::GAPGroup)
     elems = elements(G)
     GradedVectorSpaces(F,G,trivial_3_cocycle(G,F))
 end
 
+
+"""
+    VectorSpaceObject(V::Pair{<:GroupElem, <:VectorSpaceObject}...)
+
+TBW
+"""
 function VectorSpaceObject(V::Pair{<:GroupElem, <:VectorSpaceObject}...)
     W = dsum([v for (_,v) ∈ V])
     G = parent(V[1][1])

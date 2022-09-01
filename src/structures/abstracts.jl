@@ -248,7 +248,6 @@ function vertical_dsum(f::Morphism, g::Morphism)
     #@assert domain(f) == domain(g) "Domains do not coincide"
 
     sum = f ⊕ g
-    @show domain(f),domain(g)
     _,(i1,i2),_ = dsum_with_morphisms(domain(f), domain(g))
     return sum∘i1 + sum∘i2
 end
@@ -426,7 +425,7 @@ function eigenspaces(f::Morphism)
     return Dict(λ => kernel(f-λ*id(domain(f)))[1] for λ ∈ values)
 end
 
-function irreducible_subobjects(X::Object)
+function simple_subobjects(X::Object)
     B = basis(End(X))
 
     if length(B) == 1 return [X] end
@@ -438,7 +437,7 @@ function irreducible_subobjects(X::Object)
             continue
         end
 
-        simple_subs = vcat([irreducible_subobjects(K) for (_,K) ∈ eig_spaces]...)
+        simple_subs = vcat([simple_subobjects(K) for (_,K) ∈ eig_spaces]...)
         return unique_simples(simple_subs)
     end
     return [X]

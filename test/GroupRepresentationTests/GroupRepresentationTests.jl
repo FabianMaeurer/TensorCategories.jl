@@ -7,6 +7,6 @@ simple_objects = simples(RepG)
 
 @testset "Simple objects of Rep(S₃)" begin
     @test length(simple_objects) == 3
-    @test dim.(simple_objects) == F.([1,1,2])
-    @test dual.(simple_objects) == simple_objects
+    @test dim.(simple_objects) == [1,1,2]
+   # @test dual.(simple_objects) == simple_objects
 end

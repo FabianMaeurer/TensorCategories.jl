@@ -11,6 +11,7 @@ abstract type Representation <: Object end
 abstract type RepresentationMorphism <: VectorSpaceMorphism end
 
 
-dim(ρ::Representation) = ρ.dim
+intdim(ρ::Representation) = ρ.intdim
+dim(ρ::Representation) = base_ring(ρ)(intdim(ρ))
 base_ring(ρ::Representation) = parent(ρ).base_ring
 base_ring(Rep::RepresentationCategory) = Rep.base_ring

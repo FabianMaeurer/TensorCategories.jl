@@ -25,7 +25,7 @@ trivial_3_cocycle(G,F) = Cocycle{3}(G,F,nothing)
 function cyclic_group_3cocycle(G::GAPGroup, F::Field, ξ::FieldElem)
     g = G[1]
     n = order(G)
-    D = Dict((g^i,g^j,g^k) => ξ^(div(i*(j+k - rem(j+k,n)),n)) for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n)
+    D = Dict((g^i,g^j,g^k) => ξ^(i*(j+k - rem(j+k,n))) for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n)
     return Cocycle(G,D)
 end
 

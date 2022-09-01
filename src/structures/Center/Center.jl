@@ -50,6 +50,15 @@ objects ```S```.
 """
 half_braiding(Z::CenterObject) = Z.γ
 
+
+"""
+    object(X::CenterObject)
+
+Return the onderlying object in ```𝒞```.
+"""
+object(X::CenterObject) = X.object
+
+
 isfusion(C::CenterCategory) = true
 
 """
@@ -82,6 +91,7 @@ Return the spherical structure ```X → X∗∗``` of ```X```.
 spherical(X::CenterObject) = Morphism(X,dual(dual(X)), spherical(X.object))
 
 (F::Field)(f::CenterMorphism) = F(f.m)
+
 #-------------------------------------------------------------------------------
 #   Direct Sum & Tensor Product
 #-------------------------------------------------------------------------------
@@ -598,7 +608,6 @@ function kernel(f::CenterMorphism)
         compound = sum(braiding_coeffs .* hom_basis)
         half_braiding = left_inverse(id(s)⊗incl)∘compound
         braiding = [braiding; half_braiding]
-        @show matrix((id(s)⊗incl)∘half_braiding - γ∘(incl⊗id(s)))
     end
     # f_inv = left_inverse(incl)
     
