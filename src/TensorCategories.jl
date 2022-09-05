@@ -24,7 +24,7 @@ import Oscar:  Field, elem_type, QQ, FieldElem,
                 coefficients, isabelian, leading_monomial, gcd, msolve, fmpz, fmpq,
                 rref, NumberField, nf_elem, kernel, cokernel, primary_decomposition,
                 Ideal, minpoly, image, solve, eigenspace, eigenspaces, diagonal_matrix,
-                permutation_matrix, cyclotomic_field
+                permutation_matrix, cyclotomic_field, jordan_normal_form
 
 export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         GradedVectorSpaces, VectorSpaceObject, simples,
