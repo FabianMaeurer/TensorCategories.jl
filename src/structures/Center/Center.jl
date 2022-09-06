@@ -562,7 +562,7 @@ else return ```(false,nothing)```.
 function isisomorphic(X::CenterObject, Y::CenterObject)
     S = simples(parent(X))
     if [dim(Hom(X,s)) for s ∈ S] == [dim(Hom(Y,s)) for s ∈ S]
-        return true, inv(decompose_morphism(Y))∘decompose_morphism(X)
+        return true, nothing
     else
         return false, nothing
     end

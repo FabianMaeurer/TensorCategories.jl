@@ -155,26 +155,43 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     #=------------------------------------------------
         Correct permutations
     ------------------------------------------------=#
-    mats = MatElem[]
+    mats = matrices(id(X⊗Y⊗Z))
+
+    left_mors = [(f⊗g)⊗h  for f ∈ basis(End(X)), g ∈ basis(End(Y)), h ∈ basis(End(Z))][:]
+    right_mors = [f⊗(g⊗h)  for f ∈ basis(End(X)), g ∈ basis(End(Y)), h ∈ basis(End(Z))][:]
+    k = 1
+    for q in left_mors
+        right_mats = [matrices(w)[k] for w in right_mors]
+        j = findall(e -> e == matrices(q)[k], right_mats)
+        @show j
+        @show matrices(q)[k]
+    end
+
     for f ∈ basis(End(X)), g ∈ basis(End(Y)), h ∈ basis(End(Z))
-        left_morphism  = (f ⊗ g) ⊗ h
-        right_morphism = f ⊗ (g ⊗ h)
+        left_morphism  = m ∘ ((f ⊗ g) ⊗ h) ∘ inv(m)
+        right_morphism = (f ⊗ (g ⊗ h))
         left_mats  = matrices(left_morphism)
         right_mats = matrices(right_morphism)
         for i ∈ 1:n
             left_m  = left_mats[i]
             right_m = right_mats[i]
             if prod(size(left_m)) == 0 
-                mats = [mats; matrix(base_ring(X),0,0,[])] 
                 continue 
             end
 
             corr_mat = similarity_matrix(right_m, left_m)
-            @show mats = [mats; corr_mat]
+
+            mats[i] =  mats[i] * corr_mat
+            left_mats[i] = left_m * corr_mat
+            right_mats[i] = corr_mat * right_m
         end
     end
     correction = Morphism(domain(m), codomain(m), mats)
-    return m ∘ correction
+    # for f ∈ basis(End(X)), g ∈ basis(End(Y)), h ∈ basis(End(Z))
+    #     @show correction ∘ m ∘ ((f⊗g)⊗h) == (f⊗(g⊗h)) ∘ correction ∘ m
+    # end
+
+    return  correction ∘ m
 end
 
 
