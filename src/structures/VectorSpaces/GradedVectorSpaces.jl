@@ -99,6 +99,13 @@ function isisomorphic(X::GVSObject, Y::GVSObject)
         return true, Morphism(X,Y,m)
     end
 end
+
+function ==(V::GVSObject, W::GVSObject)
+    if V.V == W.V && parent(V) == parent(W) && V.grading == W.grading
+        return true
+    end
+    return false
+end
 #-----------------------------------------------------------------
 #   Functionality: Direct Sums
 #-----------------------------------------------------------------

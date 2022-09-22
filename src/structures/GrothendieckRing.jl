@@ -9,13 +9,15 @@ function grothendieck_ring(C::Category, simples = simples(C))
 
     m = multiplication_table(C,simples)
 
-    Z = Integers{Int64}()
+    #Z = Integers{Int64}()
+    Z = QQ
 
-    A = AlgAss(Z, m, coefficients(one(C),simples))
+    A = AlgAss(Z, Z.(m), Z.(coefficients(one(C),simples)))
     function to_gd(X)
         coeffs = coefficients(X,simples)
-        z = AlgAssElem{Int64, AlgAss{Int64}}(A)
-        z.coeffs = coeffs
+        #z = AlgAssElem{Int64, AlgAss{Int64}}(A)
+        z = A(coeffs)
+        #z.coeffs = coeffs
         return z
     end
     return A,to_gd
