@@ -22,7 +22,7 @@ function unitary_3_cocycle(G,n,ρ,i)
 		return D
 	end
 	get_representativeCocycle = GAP.evalstr("x -> x!.representativeCocycle")
-    c = get_representativeCocycle(CH)(classes[i])
+    	c = get_representativeCocycle(CH)(classes[i])
 	f=GAP.Globals.Mapping(c)
 	Elts=GAP.Globals.Elements(B.X)
 	
