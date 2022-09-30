@@ -1,5 +1,3 @@
-using Oscar
-import GAP
 GAP.Packages.install("HAP")
 GAP.Packages.load("HAP") 
 
