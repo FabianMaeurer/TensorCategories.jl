@@ -1,5 +1,5 @@
 #=-------------------------------------------------
-	Examples by Liam Rogel
+	Author: Liam Rogel
 -------------------------------------------------=#
 
 #Calculates the first n quantum numbers where [2]=x

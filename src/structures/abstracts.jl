@@ -251,6 +251,14 @@ function vertical_dsum(f::Morphism, g::Morphism)
     _,(i1,i2),_ = dsum_with_morphisms(domain(f), domain(g))
     return sum∘i1 + sum∘i2
 end
+
+function vertical_dsum(f::Vector{M}) where M <: Morphism
+    f_sum = dsum(f...)
+    _,i,_ = dsum_with_morphisms([domain(fi) for fi ∈ f]...)
+    return sum([f_sum∘ix for ix ∈ i])
+
+end
+
 #---------------------------------------------------------
 #   tensor_product
 #---------------------------------------------------------
@@ -267,6 +275,37 @@ function tensor_product(X::Object...)
 end
 
 tensor_product(X::T) where T <: Union{Vector,Tuple} = tensor_product(X...)
+
+
+"""
+    distribute_left(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
+
+Return the canonical isomorphism ```(X⊕Y)⊗Z → (X⊗Z)⊕(Y⊗Z)```.
+"""
+function distribute_left(X::Object, Y::Object, Z::Object)
+    XY,(ix,iy),(px,py) = dsum_with_morphisms(X,Y)
+    return  vertical_dsum(px⊗id(Z), y⊗id(Z))
+end
+
+"""
+    distribute_left(X::Vector{Object}, Z::Object)
+
+Return the canonical isomorphism ```(⨁Xi)⊗Z → ⨁((Xi⊗Z)```.
+"""
+function distribute_left(X::Vector{O}, Z::O) where O <: Object
+    XY,ix,px = dsum_with_morphisms(X...)
+    return vertical_dsum([pi⊗id(Z) for pi ∈ px])
+end
+
+"""
+    distribute_right(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
+
+Return the canonical isomorphism ```X⊗(Y⊕Z) → (X⊗Y)⊕(X⊗Z)````
+"""
+function distribute_right(X::Object, Y::Object, Z::Object)
+    XY,(iy,iz),(py,pz) = dsum_with_morphisms(Y,Z)
+    return  vertical_dsum(id(X)⊗py, id(X)⊗pz)
+end
 #------------------------------------------------------
 #   Abstract Methods
 #------------------------------------------------------

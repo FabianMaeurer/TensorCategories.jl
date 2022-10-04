@@ -91,7 +91,7 @@ end
 
 F,ξ = CyclotomicField(5, "ξ")
 c = cyclic_group_3cocycle(G,F,ξ)
-VecG = VectorSpaces(G,F,c)
+VecG = GradedVectorSpaces(G,F,c)
 ```
 
 Graded vector spaces decompose into direct sums of vector spaces for each element in

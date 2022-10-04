@@ -437,14 +437,7 @@ function vector_permutation(A::Vector,B::Vector)
 end
 
 
-"""
-    distribute_left(X::RingCatObject, Y::RingCatobject, Z::RingCatObject)
 
-Return the canonical isomorphism ```(X⊕Y)⊗Z → (X⊗Z)⊕(Y⊗Z)```.
-"""
-function distribute_left(X::RingCatObject, Y::RingCatobject, Z::RingCatObject)
-
-end
 #-------------------------------------------------------------------------------
 #   Functionality
 #-------------------------------------------------------------------------------
@@ -702,8 +695,9 @@ end
 #   Direct sum
 #-------------------------------------------------------------------------------
 
-function dsum(X::RingCatObject, Y::RingCatObject)
+function dsum(X::RingCatObject, Y::RingCatObject, morphisms::Bool = false)
     @assert parent(X) == parent(Y) "Mismatching parents"
+    if morphisms return dsum_with_morphisms(X,Y) end
     return RingCatObject(parent(X), X.components .+ Y.components)
 end
 
