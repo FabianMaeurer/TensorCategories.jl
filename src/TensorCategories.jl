@@ -1,30 +1,23 @@
 module TensorCategories
 
-import Base: show,^,==, getindex, in, issubset, iterate, length,*,+,-, iterate,
-                getproperty
-
+import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show
 import Oscar.AbstractAlgebra.Integers
+import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem, FinField,
+    FiniteField, GAP, GAPGroup, GAPGroupHomomorphism, GL, GSet, GroupElem, Ideal, MPolyQuo,
+    Map, MatElem, MatrixElem, MatrixGroup, MatrixSpace, ModuleIsomorphism, NumberField,
+    PolynomialRing, QQ, Ring, RingElem, ZZ, abelian_closure, action, base_field, base_ring,
+    basis, change_base_ring, characteristic, codomain, coeff, coefficients, cokernel,
+    compose, cyclotomic_field, decompose, degree, diagonal_matrix, dim, domain, dual,
+    eigenspace, eigenspaces, elem_type, elements, fmpq, fmpz, gap_to_julia, gcd, gen, gens,
+    groebner_basis, gset, hom, id, ideal, image, index, inv, irreducible_modules, isabelian,
+    iscentral, iscommutative, isconstant, isindependent, isinvertible, isisomorphic,
+    issemisimple, issubgroup, jordan_normal_form, julia_to_gap, kernel, kronecker_product,
+    leading_monomial, left_transversal, matrix, minpoly, msolve, multiplication_table,
+    nf_elem, one, orbit, orbits, order, parent, permutation_matrix, primary_decomposition,
+    product, rank, roots, rref, size, solve, solve_left, splitting_field, stabilizer,
+    symmetric_group, tensor_product, tr, zero, ∘, ⊕, ⊗
 
-import Oscar:  Field, elem_type, QQ, FieldElem,
-                dim, base_ring, MatrixSpace, GAPGroup, GroupElem,
-                ModuleIsomorphism, parent, matrix, basis, MatElem, ∘, gens,
-                ⊕, compose, ⊗, tensor_product, Map, MatrixElem, kronecker_product,
-                id, domain, one, zero, MatrixSpace, size, AbstractSet,
-                 inv, product,
-                Ring, RingElem, base_field, MPolyQuo, iscommutative, isinvertible,
-                MatrixGroup, hom, GAPGroupHomomorphism, GL, MatrixSpace, matrix,
-                codomain, GAP, characteristic, degree, julia_to_gap, GSet, gset,
-                FinField,gen, GSet, gset, orbits, stabilizer, orbit,
-                isisomorphic, issubgroup, left_transversal, ComplexField, order,
-                elements, index, symmetric_group, gap_to_julia, multiplication_table,
-                issemisimple, AlgAss, AlgAssElem, FiniteField, abelian_closure,
-                irreducible_modules, action, decompose,+, dual, tr, iscentral, rank,
-                ZZ, solve_left, PolynomialRing, groebner_basis, ideal, roots,
-                splitting_field, change_base_ring, isconstant, coeff, isindependent,
-                coefficients, isabelian, leading_monomial, gcd, msolve, fmpz, fmpq,
-                rref, NumberField, nf_elem, kernel, cokernel, primary_decomposition,
-                Ideal, minpoly, image, solve, eigenspace, eigenspaces, diagonal_matrix,
-                permutation_matrix, cyclotomic_field, jordan_normal_form
+using Memoize
 
 export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         GradedVectorSpaces, VectorSpaceObject, simples,

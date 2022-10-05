@@ -10,7 +10,7 @@ function grothendieck_ring(C::Category, simples = simples(C))
     m = multiplication_table(C,simples)
 
     #Z = Integers{Int64}()
-    Z = QQ
+    Z = ZZ
 
     A = AlgAss(Z, Z.(m), Z.(coefficients(one(C),simples)))
     function to_gd(X)

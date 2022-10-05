@@ -433,7 +433,7 @@ end
 
 Return a list of the simple objects in Rep.
 """
-function simples(Rep::GroupRepresentationCategory)
+@memoize function simples(Rep::GroupRepresentationCategory)
     grp = base_group(Rep)
     F = base_ring(Rep)
 

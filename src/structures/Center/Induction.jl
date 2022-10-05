@@ -11,34 +11,36 @@ function induction(X::Object, simples::Vector = simples(parent(X)))
 
     for i ∈ 1:length(simples)
         W = simples[i]
-        γ[i] = zero_morphism(zero(parent(X)), dsum([W⊗s⊗X⊗dual(s) for s ∈ simples]))
+        γ[i] = zero_morphism(zero(parent(X)), dsum([((dual(s)⊗X)⊗s)⊗W for s ∈ simples]))
 
         for S ∈ simples
-            dom_i = S⊗X⊗dual(S)⊗simples[i]
+            dom_i = simples[i]⊗((dual(S)⊗X)⊗S)
             γ_i_temp = zero_morphism(dom_i, zero(parent(X)))
             for  T ∈ simples
                 # Set up basis and dual basis
-                basis, basis_dual = dual_basis(Hom(S, W⊗T), Hom(dual(S), dual(T)⊗dual(W)))
+                basis, basis_dual = dual_basis(Hom(S, T⊗W), Hom(dual(S), dual(W)⊗dual(T)))
 
                 # Correct dual basis to right (co)domain via Hom(U⊗V,W) ≃ Hom(U,W⊗V∗)
-                basis_dual = [(id(dual(T))⊗ev(W)) ∘ a(dual(T),dual(W),W) ∘ (f⊗id(W)) for f ∈ basis_dual]
+                basis_dual = [(ev(dual(W))⊗id(dual(T))) ∘ inv(a(dual(dual(W)),dual(W),dual(T))) ∘ ((spherical(W)∘id(W))⊗f) for f ∈ basis_dual]
 
                 if length(basis) == 0 
-                    γ_i_temp = vertical_dsum(γ_i_temp, zero_morphism(dom_i, W⊗T⊗X⊗dual(T))) 
+                    γ_i_temp = vertical_dsum(γ_i_temp, zero_morphism(dom_i, ((dual(T)⊗X)⊗T)⊗W)) 
                 else
-                    component_iso = sum([(id(W)⊗inv(a(T,X,dual(T)))) ∘ a(W,T,X⊗dual(T)) ∘ a(W⊗T,X,dual(T)) ∘ (f⊗id(X)⊗g) ∘ a(S⊗X,dual(S),W) for (f,g) ∈ zip(basis, basis_dual)])
+                    component_iso = sum([inv(a(dual(T)⊗X,T,W)) ∘ (g⊗id(X)⊗f) ∘ (inv(a(W,dual(S),X))⊗id(S)) ∘ inv(a(W,dual(S)⊗X,S)) for (f,g) ∈ zip(basis, basis_dual)])
 
                     γ_i_temp = vertical_dsum(γ_i_temp, (dim(S)*component_iso))
                 end
             end
             γ[i] = horizontal_dsum(γ[i], γ_i_temp)
         end
-        iso1 = isisomorphic(Z⊗W, domain(γ[i]))[2] #inv(decompose_morphism(domain(γ[i])))∘decompose_morphis (Z⊗simples[i])
-        basis(Hom(Z⊗W,domain(γ[i])))
-        iso2 = isisomorphic(codomain(γ[i]), W⊗Z)[2] #inv(decompose_morphism(simples[i]⊗Z))∘decompose_morphism(codomain(γ[i]))
+        # distribution Before
+        distr_before = distribute_right(W,[dual(s)⊗X⊗s for s ∈ simples])
+        @show matrix(distr_before)
+        # distribution After
+        distr_after = distribute_left([dual(s)⊗X⊗s for s ∈ simples],W)
+        @show matrix(distr_after)
 
-        γ[i] = iso2 ∘ γ[i] ∘ iso1
-
+        γ[i] = inv(distr_after) ∘ γ[i] ∘ distr_before
     end
         
     return CenterObject(CenterCategory(base_ring(X),parent(X)),Z,γ)

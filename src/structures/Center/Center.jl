@@ -92,6 +92,12 @@ spherical(X::CenterObject) = Morphism(X,dual(dual(X)), spherical(X.object))
 
 (F::Field)(f::CenterMorphism) = F(f.m)
 
+#=-------------------------------------------------
+    MISC 
+-------------------------------------------------=#
+
+==(f::CenterMorphism, g::CenterMorphism) = f.m == g.m
+
 #-------------------------------------------------------------------------------
 #   Direct Sum & Tensor Product
 #-------------------------------------------------------------------------------
@@ -261,7 +267,7 @@ function braidings_from_ideal(Z::Object, I::Ideal, simples::Vector{<:Object}, C)
             ex = [ex ; e]
             k = k + ks[i]
         end
-        centrals = [centrals; CenterObject(C, Z, ex)]
+        centrals = [centrals; CenterObject(C, Z, inv.(ex))]
     end
     return centrals
 end

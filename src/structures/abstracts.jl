@@ -93,7 +93,7 @@ end
 
 function dsum_with_morphisms(X::Object...)
     if length(X) == 1
-        return X[1], [id(X[1]),id(X[1])],[id(X[1]),id(X[1])]
+        return X[1], [id(X[1])],[id(X[1])]
     end
     Z,ix,px = dsum(X[1],X[2],true)
     for Y in X[3:end]
@@ -284,18 +284,19 @@ Return the canonical isomorphism ```(X⊕Y)⊗Z → (X⊗Z)⊕(Y⊗Z)```.
 """
 function distribute_left(X::Object, Y::Object, Z::Object)
     XY,(ix,iy),(px,py) = dsum_with_morphisms(X,Y)
-    return  vertical_dsum(px⊗id(Z), y⊗id(Z))
+    return  vertical_dsum(px⊗id(Z), py⊗id(Z))
 end
 
 """
-    distribute_left(X::Vector{Object}, Z::Object)
+    distribute_left(X::Vector{O}, Z::O) where O <: Object
 
-Return the canonical isomorphism ```(⨁Xi)⊗Z → ⨁((Xi⊗Z)```.
+Return the canonical isomorphism ```(⨁Xi)⊗Z → ⨁(Xi⊗Z)```.
 """
 function distribute_left(X::Vector{O}, Z::O) where O <: Object
     XY,ix,px = dsum_with_morphisms(X...)
     return vertical_dsum([pi⊗id(Z) for pi ∈ px])
 end
+
 
 """
     distribute_right(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
@@ -306,6 +307,17 @@ function distribute_right(X::Object, Y::Object, Z::Object)
     XY,(iy,iz),(py,pz) = dsum_with_morphisms(Y,Z)
     return  vertical_dsum(id(X)⊗py, id(X)⊗pz)
 end
+
+"""
+    distribute_left(X::O, Z::Vector{O}) where O <: Object
+
+Return the canonical isomorphism ```Z⊗(⨁Xi) → ⨁(Z⊗Xi)```.
+"""
+function distribute_right(X::O, Z::Vector{O}) where O <: Object
+    XY,ix,px = dsum_with_morphisms(Z...)
+    return vertical_dsum([id(X)⊗pi for pi ∈ px])
+end
+
 #------------------------------------------------------
 #   Abstract Methods
 #------------------------------------------------------
@@ -337,6 +349,8 @@ end
 
 -(f::Morphism, g::Morphism) = f + (-1)*g
 -(f::Morphism) = (-1)*f
+
+getindex(C::Category, x::Int) = simples(C)[x]
 
 #-------------------------------------------------------
 # Hom Spaces
