@@ -259,7 +259,6 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     distr_after = dsum([distribute_left(X_summands, Yⱼ⊗Zₖ) for  Zₖ ∈ Z_summands, Yⱼ ∈ Y_summands][:]...) ∘ distr_after
 
 
-
     #-----------------------------------
     # Associator morphism
     #-----------------------------------
@@ -267,7 +266,7 @@ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     for x ∈ X_summands, y ∈ Y_summands, z ∈ Z_summands
         m = m ⊕ associator(x,y,z)
     end
-
+    @show m
     return inv(distr_after) ∘ m ∘ distr_before
 
 
