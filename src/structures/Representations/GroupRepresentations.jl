@@ -439,22 +439,17 @@ Return a list of the simple objects in Rep.
 
     if order(grp) == 1 return [one(Rep)] end
 
-    if characteristic(F) == 0
-        mods = irreducible_modules(grp)
-        reps = [Representation(grp,gens(grp),[matrix(x) for x ∈ action(m)]) for m ∈ mods]
-        return reps
-    else
+    #gap_field = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
+    gap_field = codomain(iso_oscar_gap(F))
+    gap_reps = GAP.Globals.IrreducibleRepresentations(grp.X,gap_field)
 
-        gap_field = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
-        gap_reps = GAP.Globals.IrreducibleRepresentations(grp.X,gap_field)
+    intdims = [GAP.Globals.DimensionOfMatrixGroup(GAP.Globals.Range(m)) for m ∈ gap_reps]
+    @show gap_reps[1]
+    oscar_reps = [GAPGroupHomomorphism(grp, GL(intdims[i],F), gap_reps[i]) for i ∈ 1:length(gap_reps)]
+    reps = [GroupRepresentation(Rep,grp,m,F,d) for (m,d) ∈ zip(oscar_reps,intdims)]
 
-        intdims = [GAP.Globals.DimensionOfMatrixGroup(GAP.Globals.Range(m)) for m ∈ gap_reps]
+    return reps
 
-        oscar_reps = [GAPGroupHomomorphism(grp, GL(intdims[i],F), gap_reps[i]) for i ∈ 1:length(gap_reps)]
-        reps = [GroupRepresentation(Rep,grp,m,F,d) for (m,d) ∈ zip(oscar_reps,intdims)]
-
-        return reps
-    end
 end
 
 """
@@ -503,7 +498,8 @@ function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
 
     if intdim(σ)*intdim(τ) == 0 return GRHomSpace(σ,τ,GroupRepresentationMorphism[],VectorSpaces(F)) end
 
-    gap_F = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
+    gap_to_F = iso_oscar_gap(F)
+    gap_F = codomain(gap_to_F)
     generators = order(grp) == 1 ? elements(grp) : gens(grp)
 
     #Build the modules from σ and τ
@@ -516,7 +512,8 @@ function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
     gap_homs = GAP.Globals.MTX.BasisModuleHomomorphisms(Mσ,Mτ)
 
     intdims_m,intdims_n = intdim(σ), intdim(τ)
-    mat_homs = [matrix(F,[F(m[i,j]) for i ∈ 1:intdims_m, j ∈ 1:intdims_n]) for m ∈ gap_homs]
+
+    mat_homs = [matrix(F,[preimage(gap_to_F, m[i,j]) for i ∈ 1:intdims_m, j ∈ 1:intdims_n]) for m ∈ gap_homs]
 
     rep_homs = [Morphism(σ,τ,m,check = false) for m ∈ mat_homs]
 
@@ -616,7 +613,7 @@ end
 
 function to_gap_module(σ::GroupRepresentation,F::Field)
     grp = σ.group
-    gap_F = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
+    gap_F = codomain(Oscar.iso_oscar_gap(F))
     mats_σ = GAP.GapObj([GAP.julia_to_gap(σ(g)) for g ∈ gens(grp)])
     Mσ = GAP.Globals.GModuleByMats(mats_σ, gap_F)
 end

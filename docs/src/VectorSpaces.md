@@ -85,13 +85,13 @@ of the group ``G``. By now no checking of this condition happens.
 function cyclic_group_3cocycle(G, F, ξ)
 	g = G[1]
 	n = order(G)
-	D = Dict((g^i,g^j,g^k) => ξ^(div(i*(j+k - rem(j+k,n)),n)) for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n)
+	D = Dict((g^i,g^j,g^k) => ξ^(div(i*(j+k - rem(j+k,n)),n)) for i ∈ 0:n-1, j ∈ 0:n-1, k ∈ 0:n-1)
 	return Cocycle(G,D)
 end
 
 F,ξ = CyclotomicField(5, "ξ")
 c = cyclic_group_3cocycle(G,F,ξ)
-VecG = GradedVectorSpaces(G,F,c)
+VecG = GradedVectorSpaces(F,G,c)
 ```
 
 Graded vector spaces decompose into direct sums of vector spaces for each element in

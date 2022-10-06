@@ -619,7 +619,7 @@ function getindex(f::RingCatMorphism, i)
     return RingCatMorphism(dom,cod,m)
 end
 
-getindex(X::RingCatObject, i) = X.components[i]
+getindex(X::RingCatObject, i::Int64) = X.components[i]
 
 function matrices(f::RingCatMorphism)
     f.m
@@ -773,10 +773,6 @@ end
 function simples(C::RingCategory)
     n = C.simples
     [RingCatObject(C, [i == j ? 1 : 0 for j ∈ 1:n]) for i ∈ 1:n]
-end
-
-function getindex(C::RingCategory, i)
-    RingCatObject(C,[i == j ? 1 : 0 for j ∈ 1:C.simples])
 end
 
 #-------------------------------------------------------------------------------
