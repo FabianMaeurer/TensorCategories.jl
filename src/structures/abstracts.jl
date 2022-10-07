@@ -233,10 +233,16 @@ Return the sum of ``f:X → Z``, ``g:Y → Z`` as ``f+g:X⊕Y → Z.
 """
 function horizontal_dsum(f::Morphism, g::Morphism)
     #@assert codomain(f) == codomain(g) "Codomains do not coincide"
-
     sum = f ⊕ g
     _,_,(p1,p2) = dsum_with_morphisms(codomain(f),codomain(g))
     return p1∘sum + p2∘sum
+end
+
+function horizontal_dsum(f::Vector{M}) where M <: Morphism
+    #@assert codomain(f) == codomain(g) "Codomains do not coincide"
+    f_sum = dsum(f...)
+    _,_,p = dsum_with_morphisms([codomain(fi) for fi ∈ f]...)
+    return sum([p1∘f_sum for p1 ∈ p])
 end
 
 """

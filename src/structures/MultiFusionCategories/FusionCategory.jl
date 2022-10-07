@@ -99,7 +99,7 @@ braiding(X::RingCatObject, Y::RingCatObject) = parent(X).braiding(X,Y)
 
 Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 """
-@memoize function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
+function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)
@@ -249,12 +249,37 @@ function coev(X::RingCatObject)
     if issimple(X)
         return simple_objects_coev(X)
     end
+
+    C = parent(X)
+    𝟙 = one(C)
+
+    summands = vcat([[x for _ ∈ 1:k] for (x,k) ∈ decompose(X)]...)
+    dual_summands = dual.(summands)
+    d = length(summands)
+
+    c = vertical_dsum([i == j ? coev(summands[i]) : zero_morphism(𝟙, summands[j]⊗dual_summands[i]) for j ∈ 1:d, i ∈ 1:d][:])
+
+    distr = dsum([distribute_right(x,dual_summands) for x ∈ summands]) ∘ distribute_left(summands, dual(X))
+
+    return distr ∘ c
 end
 
 function ev(X::RingCatObject)
     if issimple(X)
         return simple_objects_ev(X)
     end
+    C = parent(X)
+    𝟙 = one(C)
+
+    summands = vcat([[x for _ ∈ 1:k] for (x,k) ∈ decompose(X)]...)
+    dual_summands = dual.(summands)
+    d = length(summands)
+
+    e = horizontal_dsum([i == j ? ev(summands[i]) : zero_morphism(dual_summands[j]⊗summands[i], 𝟙)  for j ∈ 1:d, i ∈ 1:d][:])
+
+    distr = dsum([distribute_right(x,summands) for x ∈ dual_summands]) ∘ distribute_left(dual_summands, X)
+
+    return e ∘ inv(distr) 
 end
 
 function simple_objects_coev(X::RingCatObject)
