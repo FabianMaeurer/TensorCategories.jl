@@ -17,7 +17,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
     product, rank, roots, rref, size, solve, solve_left, splitting_field, stabilizer,
     symmetric_group, tensor_product, tr, zero, ∘, ⊕, ⊗, iso_oscar_gap, preimage
 
-using Memoize
+using Memoization
 
 export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         GradedVectorSpaces, VectorSpaceObject, simples,
