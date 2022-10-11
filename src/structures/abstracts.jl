@@ -381,9 +381,9 @@ function left_dual(f::Morphism)
     X = domain(f)
     Y = codomain(f)
     a = ev(Y)⊗id(dual(X))
-    b = id(dual(Y)⊗f)⊗id(dual(X))
+    b = (id(dual(Y))⊗f)⊗id(dual(X))
     c = inv(associator(dual(Y),X,dual(X)))
-    d = id(dual(Y)⊗coev(X))
+    d = id(dual(Y))⊗coev(X)
     (a)∘(b)∘(c)∘(d)
 end
 

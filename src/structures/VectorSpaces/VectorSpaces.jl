@@ -124,7 +124,7 @@ base_ring(Vec::VectorSpaces) = Vec.base_ring
 
 Return the vector space dimension of ``V``.
 """
-dim(V::VectorSpaceObject) = length(basis(V))
+dim(V::VectorSpaceObject) = base_ring(V)(length(basis(V)))
 
 basis(V::VectorSpaceObject) = V.basis
 
@@ -162,7 +162,7 @@ function isisomorphic(V::VectorSpaceObject, W::VectorSpaceObject)
     if parent(V) != parent(W) return false, nothing end
     if dim(V) != dim(W) return false, nothing end
 
-    return true, Morphism(V,W,one(MatrixSpace(base_ring(V),dim(V),dim(V))))
+    return true, Morphism(V,W,one(MatrixSpace(base_ring(V),int_dim(V),int_dim(V))))
 end
 
 
@@ -171,19 +171,20 @@ dual(V::VectorSpaceObject) = Hom(V,one(parent(V)))
 function ev(V::VectorSpaceObject)
     dom = dual(V)⊗V
     cod = one(parent(V))
-    m = [matrix(f)[i] for f ∈ basis(dual(V)), i ∈ 1:dim(V)]
-    Morphism(dom,cod, matrix(base_ring(V), reshape(m,dim(dom),1)))
+    m = [matrix(f)[i] for f ∈ basis(dual(V)), i ∈ 1:int_dim(V)]
+    Morphism(dom,cod, matrix(base_ring(V), reshape(m,int_dim(dom),1)))
 end
 
 function coev(V::VectorSpaceObject)
     dom = one(parent(V))
     cod = V ⊗ dual(V)
-    m = [Int(i==j) for i ∈ 1:dim(V), j ∈ 1:dim(V)][:]
-    Morphism(dom,cod, transpose(matrix(base_ring(V), reshape(m,dim(cod),1))))
+    m = [Int(i==j) for i ∈ 1:int_dim(V), j ∈ 1:int_dim(V)][:]
+    Morphism(dom,cod, transpose(matrix(base_ring(V), reshape(m,int_dim(cod),1))))
 end
 
 spherical(V::VectorSpaceObject) = Morphism(V,dual(dual(V)), id(V).m)
 
+int_dim(V::VectorSpaceObject) = length(basis(V))
 #-----------------------------------------------------------------
 #   Functionality: Direct Sum
 #-----------------------------------------------------------------
@@ -208,8 +209,8 @@ function dsum(X::VectorSpaceObject, Y::VectorSpaceObject, morphisms::Bool = fals
 
     if !morphisms return V end
 
-    ix = Morphism(X,V, matrix(F,[i == j ? 1 : 0 for i ∈ 1:dim(X), j ∈ 1:dim(V)]))
-    iy = Morphism(Y,V, matrix(F,[i == j - dim(X) for i ∈ 1:dim(Y), j ∈ 1:dim(V)]))
+    ix = Morphism(X,V, matrix(F,[i == j ? 1 : 0 for i ∈ 1:int_dim(X), j ∈ 1:int_dim(V)]))
+    iy = Morphism(Y,V, matrix(F,[i == j - int_dim(X) for i ∈ 1:int_dim(Y), j ∈ 1:int_dim(V)]))
 
     px = Morphism(V,X, transpose(matrix(ix)))
     py = Morphism(V,Y, transpose(matrix(iy)))
@@ -315,7 +316,7 @@ end
 Return the identity on the vector space ``X``.
 """
 function id(X::VectorSpaceObject)
-    n = dim(X)
+    n = int_dim(X)
     m = matrix(base_ring(X), [i == j ? 1 : 0 for i ∈ 1:n, j ∈ 1:n])
     return Morphism(X,X,m)
 end
@@ -379,17 +380,17 @@ end
 Return the Hom(``X,Y```) as a vector space.
 """
 function Hom(X::VectorSpaceObject, Y::VectorSpaceObject)
-    n1,n2 = (dim(X),dim(Y))
+    n1,n2 = (length(basis(X)), length(basis(Y)))
     mats = [matrix(base_ring(X), [i==k && j == l ? 1 : 0 for i ∈ 1:n1, j ∈ 1:n2]) for k ∈ 1:n1, l ∈ 1:n2]
-    basis = [[Morphism(X,Y,m) for m ∈ mats]...]
-    return VSHomSpace(X,Y,basis,VectorSpaces(base_ring(X)))
+    base = [[Morphism(X,Y,m) for m ∈ mats]...]
+    return VSHomSpace(X,Y,base,VectorSpaces(base_ring(X)))
 end
 
 basis(V::VSHomSpace) = V.basis
 
 zero(V::VSHomSpace) = Morphism(V.X,V.Y,matrix(base_ring(V.X), [0 for i ∈ 1:dim(V.X), j ∈ 1:dim(V.Y)]))
 
-zero_morphism(V::VectorSpaceObject,W::VectorSpaceObject) = Morphism(V,W, zero(MatrixSpace(base_ring(V), dim(V),dim(W))))
+zero_morphism(V::VectorSpaceObject,W::VectorSpaceObject) = Morphism(V,W, zero(MatrixSpace(base_ring(V), int_dim(V), int_dim(W))))
 
 function express_in_basis(f::VectorSpaceMorphism, B::Vector{<:VectorSpaceMorphism})
     F = base_ring(f)

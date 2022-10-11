@@ -85,7 +85,12 @@ end
 
 Return true if C is semisimple else false.
 """
-issemisimple(C::GroupRepresentationCategory) = gcd(characteristic(base_ring(C)), order(base_group(C))) == 1
+function issemisimple(C::GroupRepresentationCategory) 
+    if characteristic(base_ring(C)) == 0
+        return true
+    end 
+    gcd(characteristic(base_ring(C)), order(base_group(C))) == 1
+end
 
 function (ρ::GroupRepresentation)(x)
     if ρ.m == 0
@@ -444,7 +449,7 @@ Return a list of the simple objects in Rep.
     gap_reps = GAP.Globals.IrreducibleRepresentations(grp.X,gap_field)
 
     intdims = [GAP.Globals.DimensionOfMatrixGroup(GAP.Globals.Range(m)) for m ∈ gap_reps]
-    @show gap_reps[1]
+ 
     oscar_reps = [GAPGroupHomomorphism(grp, GL(intdims[i],F), gap_reps[i]) for i ∈ 1:length(gap_reps)]
     reps = [GroupRepresentation(Rep,grp,m,F,d) for (m,d) ∈ zip(oscar_reps,intdims)]
 
@@ -613,7 +618,7 @@ end
 
 function to_gap_module(σ::GroupRepresentation,F::Field)
     grp = σ.group
-    gap_F = codomain(Oscar.iso_oscar_gap(F))
+    gap_F = codomain(iso_oscar_gap(F))
     mats_σ = GAP.GapObj([GAP.julia_to_gap(σ(g)) for g ∈ gens(grp)])
     Mσ = GAP.Globals.GModuleByMats(mats_σ, gap_F)
 end

@@ -5,7 +5,7 @@
 
 function induction(X::Object, simples::Vector = simples(parent(X)))
     @assert issemisimple(parent(X)) "Requires semisimplicity"
-    Z = dsum([s⊗X⊗dual(s) for s ∈ simples])
+    Z = dsum([dual(s)⊗X⊗s for s ∈ simples])
     a = associator
     γ = Vector{Morphism}(undef, length(simples))
 
@@ -14,31 +14,29 @@ function induction(X::Object, simples::Vector = simples(parent(X)))
         γ[i] = zero_morphism(zero(parent(X)), dsum([((dual(s)⊗X)⊗s)⊗W for s ∈ simples]))
 
         for S ∈ simples
-            dom_i = simples[i]⊗((dual(S)⊗X)⊗S)
+            dom_i = W⊗((dual(S)⊗X)⊗S)
             γ_i_temp = zero_morphism(dom_i, zero(parent(X)))
             for  T ∈ simples
                 # Set up basis and dual basis
                 basis, basis_dual = dual_basis(Hom(S, T⊗W), Hom(dual(S), dual(W)⊗dual(T)))
 
-                # Correct dual basis to right (co)domain via Hom(U⊗V,W) ≃ Hom(U,W⊗V∗)
-                basis_dual = [(ev(dual(W))⊗id(dual(T))) ∘ inv(a(dual(dual(W)),dual(W),dual(T))) ∘ ((spherical(W)∘id(W))⊗f) for f ∈ basis_dual]
+                # Correct dual basis to right (co)domain via Hom(U⊗V,W) ≃ Hom(U,U*⊗W)
+                basis_dual = [(ev(dual(W))⊗id(dual(T))) ∘ inv(a(dual(dual(W)),dual(W),dual(T))) ∘ (spherical(W)⊗f) for f ∈ basis_dual]
 
                 if length(basis) == 0 
                     γ_i_temp = vertical_dsum(γ_i_temp, zero_morphism(dom_i, ((dual(T)⊗X)⊗T)⊗W)) 
                 else
                     component_iso = sum([inv(a(dual(T)⊗X,T,W)) ∘ (g⊗id(X)⊗f) ∘ (inv(a(W,dual(S),X))⊗id(S)) ∘ inv(a(W,dual(S)⊗X,S)) for (f,g) ∈ zip(basis, basis_dual)])
 
-                    γ_i_temp = vertical_dsum(γ_i_temp, (dim(S)*component_iso))
+                    γ_i_temp = vertical_dsum(γ_i_temp, component_iso)
                 end
             end
-            γ[i] = horizontal_dsum(γ[i], γ_i_temp)
+            γ[i] = horizontal_dsum(γ[i], dim(S)*γ_i_temp)
         end
         # distribution Before
         distr_before = distribute_right(W,[dual(s)⊗X⊗s for s ∈ simples])
-        @show matrix(distr_before)
         # distribution After
         distr_after = distribute_left([dual(s)⊗X⊗s for s ∈ simples],W)
-        @show matrix(distr_after)
 
         γ[i] = inv(distr_after) ∘ γ[i] ∘ distr_before
     end

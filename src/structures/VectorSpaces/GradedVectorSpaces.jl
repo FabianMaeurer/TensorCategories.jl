@@ -88,7 +88,7 @@ function isisomorphic(X::GVSObject, Y::GVSObject)
     if Set(X.grading) != Set(Y.grading) || !isisomorphic(X.V,Y.V)[1]
         return false, nothing
     else
-        m = zero(MatrixSpace(base_ring(X),dim(X),dim(Y)))
+        m = zero(MatrixSpace(base_ring(X),int_dim(X),int_dim(Y)))
         for g ∈ X.grading
             i = findall(h -> h == g, X.grading)
             j = findall(h -> h == g, Y.grading)
@@ -190,7 +190,7 @@ Return a vector with the simple objects together with their multiplicities ``[V:
 """
 function decompose(V::GVSObject)
     simpls = simples(parent(V))
-    return filter(e -> e[2] > 0, [(s, dim(Hom(s,V))) for s ∈ simpls])
+    return filter(e -> e[2] > 0, [(s, int_dim(Hom(s,V))) for s ∈ simpls])
 end
 #-----------------------------------------------------------------
 #   Functionality: (Co)Kernel
@@ -205,8 +205,8 @@ function kernel(f::GVSMorphism)
     F = base_ring(f)
     G = base_group(domain(f))
     X,Y = domain(f),codomain(f)
-    n = dim(X) - rank(f.m)
-    m = zero(MatrixSpace(F, n, dim(X)))
+    n = int_dim(X) - rank(f.m)
+    m = zero(MatrixSpace(F, n, int_dim(X)))
     l = 1
     grading = elem_type(G)[]
 
@@ -265,7 +265,7 @@ function associator(X::GVSObject, Y::GVSObject, Z::GVSObject)
     dom = (X⊗Y)⊗Z
     cod = X⊗(Y⊗Z)
 
-    m = one(MatrixSpace(base_ring(X),dim(dom),dim(cod)))
+    m = one(MatrixSpace(base_ring(X),int_dim(dom),int_dim(cod)))
 
     j = 1
     for x ∈ X.grading, y ∈ Y.grading, z ∈ Z.grading
@@ -325,7 +325,7 @@ function Hom(V::GVSObject, W::GVSObject)
     G = base_group(V)
     B = VSMorphism[]
 
-    zero_M = MatrixSpace(base_ring(V), dim(V), dim(W))
+    zero_M = MatrixSpace(base_ring(V), int_dim(V), int_dim(W))
 
     for x ∈ unique(V.grading)
         V_grading = findall(e -> e == x, V.grading)
