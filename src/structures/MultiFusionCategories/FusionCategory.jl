@@ -99,7 +99,7 @@ braiding(X::RingCatObject, Y::RingCatObject) = parent(X).braiding(X,Y)
 
 Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 """
-@memoize Dict function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
+function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)
@@ -552,7 +552,7 @@ function kernel(f::RingCatMorphism)
     C = parent(domain(f))
     kernels = [kernel(Morphism(m)) for m ∈ f.m]
     mats = [matrix(m) for (k,m) ∈ kernels]
-    ker = RingCatObject(C,[dim(k) for (k,m) ∈ kernels])
+    ker = RingCatObject(C,[int_dim(k) for (k,m) ∈ kernels])
 
     return ker, Morphism(ker, domain(f), mats)
 end
@@ -595,8 +595,6 @@ function Ising()
     set_one!(C,[1,0,0])
 
     set_spherical!(C, [F(1) for s ∈ simples(C)])
-
-    a,b,c = simples(C)
 
     return C
 end

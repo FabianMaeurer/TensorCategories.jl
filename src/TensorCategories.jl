@@ -51,9 +51,9 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         add_simple!, pentagon_axiom, set_associator!, dual_basis, pairing,
         eigenspace, eigenspaces, simple_subobjects, I2, I2subcategory,
         DeligneProdMorphism, DeligneProdObject, DeligneProduct, ⊠, op, AbstractHomSpace,
-        is_half_braiding, object, distribute_right, distribute_left, is_simple
+        is_half_braiding, object, distribute_right, distribute_left, is_simple,
+        decompose_morphism
 
-include("Utility/FFE_to_FinField.jl")
 include("Utility/SolveGroebner.jl")
 include("Utility/Technicallities.jl")
 include("structures/abstracts.jl")

@@ -368,6 +368,10 @@ End(X::Object) = Hom(X,X)
 
 zero_morphism(C::Category) = zero_morphism(zero(C), zero(C))
 
+Base.iterate(H::AbstractHomSpace, state = 1) = state > int_dim(H) ? nothing : (basis(H)[state], state + 1)
+Base.length(H::AbstractHomSpace) = int_dim(H)
+Base.eltype(::Type{T}) where T <: AbstractHomSpace = Morphism 
+
 #-------------------------------------------------------
 # Duals
 #-------------------------------------------------------
