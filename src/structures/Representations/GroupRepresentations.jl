@@ -20,7 +20,13 @@ end
 istensor(::GroupRepresentationCategory) = true
 isfusion(C::GroupRepresentationCategory) = mod(order(C.group),characteristic(base_ring(C))) != 0
 
-const Group_Rep_Cache = Dict{Any,Dict{Any,Any}}()
+function Base.hash(C::GroupRepresentationCategory, h::UInt)
+    hash((C.group, C.base_ring), h)
+end
+
+function Base.hash(σ::GroupRepresentation, h::UInt)
+    hash((getfield(σ, s) for s ∈ fieldnames(GroupRepresentation)), h)
+end
 #-------------------------------------------------------------------------
 #   Constructors
 #-------------------------------------------------------------------------
@@ -440,15 +446,7 @@ end
 
 Return a list of the simple objects in Rep.
 """
-function simples(Rep::GroupRepresentationCategory)
-    if simples ∈ keys(Group_Rep_Cache) 
-        if Rep ∈ keys(Group_Rep_Cache[simples])
-            return Group_Rep_Cache[simples][Rep]
-        end
-    else
-        Group_Rep_Cache[simples] = Dict{Any,Any}()
-    end
-
+@memoize Dict function simples(Rep::GroupRepresentationCategory)
     grp = base_group(Rep)
     F = base_ring(Rep)
 
@@ -462,9 +460,6 @@ function simples(Rep::GroupRepresentationCategory)
  
     oscar_reps = [GAPGroupHomomorphism(grp, GL(intdims[i],F), gap_reps[i]) for i ∈ 1:length(gap_reps)]
     reps = [GroupRepresentation(Rep,grp,m,F,d) for (m,d) ∈ zip(oscar_reps,intdims)]
-
-    
-    push!(Group_Rep_Cache[simples],Rep => reps)
 
     return reps
 end

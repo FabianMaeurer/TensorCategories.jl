@@ -54,6 +54,15 @@ function ConvolutionCategory(X, K::Field)
 end
 
 Morphism(D::ConvolutionObject, C::ConvolutionObject, m:: CohSheafMorphism) = ConvolutionMorphism(D,C,m)
+
+function Base.hash(C::ConvolutionCategory, h::UInt)
+    hash((getfield(C, s) for s ∈ fieldnames(ConvolutionCategory)), h)
+end
+
+function Base.hash(X::ConvolutionObject, h::UInt)
+    hash((getfield(σ, s) for s ∈ fieldnames(ConvolutionObject)), h)
+end
+
 #-----------------------------------------------------------------
 #   Functionality
 #-----------------------------------------------------------------
@@ -251,7 +260,7 @@ end
 
 Return a list of simple objects in Conv(``X``).
 """
-function simples(C::ConvolutionCategory)
+@memoize Dict function simples(C::ConvolutionCategory)
     return [ConvolutionObject(sh,C) for sh ∈ simples(C.squaredCoh)]
 end
 
