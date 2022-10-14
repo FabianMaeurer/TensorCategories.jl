@@ -4,3 +4,4 @@
 /Manifest.toml
 Codecov.jl
 .DS_Store
+.vscode

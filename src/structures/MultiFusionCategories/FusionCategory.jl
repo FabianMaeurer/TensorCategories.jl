@@ -38,6 +38,15 @@ struct RingCatMorphism <: Morphism
     m::Vector{<:MatElem}
 end
 
+function Base.hash(C::RingCategory, h::UInt)
+    content = (getfield(C, s) for s ∈ fieldnames(typeof(C)) if isdefined(C, s))
+    hash(content, h)
+end
+
+function Base.hash(X::RingCatObject, h::UInt)
+    hash((X.parent, X.components), h)
+end
+
 #-------------------------------------------------------------------------------
 #   Constructors
 #-------------------------------------------------------------------------------
@@ -116,7 +125,7 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     #---------------------------------
     # associators on simple objects
     #---------------------------------
-    if issimple(X) && issimple(Y) && issimple(Z)
+    if is_simple(X) && is_simple(Y) && is_simple(Z)
         i = findfirst(e -> e ≠ 0, X.components)
         j = findfirst(e -> e ≠ 0, Y.components)
         k = findfirst(e -> e ≠ 0, Z.components)
@@ -196,7 +205,7 @@ end
 #-------------------------------------------------------------------------------
 issemisimple(::RingCategory) = true
 
-issimple(X::RingCatObject) = sum(X.components) == 1
+is_simple(X::RingCatObject) = sum(X.components) == 1
 
 ==(X::RingCatObject, Y::RingCatObject) = parent(X) == parent(Y) && X.components == Y.components
 ==(f::RingCatMorphism, g::RingCatMorphism) = domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
@@ -226,7 +235,7 @@ function dual(X::RingCatObject)
     C = parent(X)
 
     # Dual of simple Object
-    if issimple(X)
+    if is_simple(X)
         # Check for rigidity
         i = findfirst(e -> e == 1, X.components)
         j = []
@@ -246,7 +255,7 @@ function dual(X::RingCatObject)
 end
 
 function coev(X::RingCatObject)
-    if issimple(X)
+    if is_simple(X)
         return simple_objects_coev(X)
     end
 
@@ -265,7 +274,7 @@ function coev(X::RingCatObject)
 end
 
 function ev(X::RingCatObject)
-    if issimple(X)
+    if is_simple(X)
         return simple_objects_ev(X)
     end
     C = parent(X)
@@ -333,7 +342,7 @@ function simple_objects_ev(X::RingCatObject)
     return inv(factor) * unscaled_ev
 
     # # Simple Objects
-    # if issimple(X)
+    # if is_simple(X)
     #     # If X is simple
     #     e = basis(Hom(DX⊗X, one(C)))[1]
     #     # Scale ev
@@ -400,7 +409,7 @@ function matrix(f::RingCatMorphism)
 end
 
 function (F::Field)(f::RingCatMorphism)
-    if !(domain(f) == codomain(f) && issimple(domain(f)))
+    if !(domain(f) == codomain(f) && is_simple(domain(f)))
         throw(ErrorException("Cannot convert Morphism to $F"))
     end
     i = findfirst(e -> e == 1, domain(f).components)
@@ -552,7 +561,7 @@ function kernel(f::RingCatMorphism)
     C = parent(domain(f))
     kernels = [kernel(Morphism(m)) for m ∈ f.m]
     mats = [matrix(m) for (k,m) ∈ kernels]
-    ker = RingCatObject(C,[dim(k) for (k,m) ∈ kernels])
+    ker = RingCatObject(C,[int_dim(k) for (k,m) ∈ kernels])
 
     return ker, Morphism(ker, domain(f), mats)
 end
@@ -595,8 +604,6 @@ function Ising()
     set_one!(C,[1,0,0])
 
     set_spherical!(C, [F(1) for s ∈ simples(C)])
-
-    a,b,c = simples(C)
 
     return C
 end

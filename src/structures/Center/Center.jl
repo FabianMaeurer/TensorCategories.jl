@@ -432,21 +432,29 @@ function braiding(X::CenterObject, Y::CenterObject)
 end
 
 function half_braiding(X::CenterObject, Y::Object)
+
+    simpls = simples(parent(Y))
+
+    if is_simple(Y) 
+        k = findfirst(e -> isisomorphic(e, Y)[1], simpls)
+        iso = isisomorphic(Y,simpls[k])[2]
+        return (inv(iso)⊗id(X.object)) ∘ X.γ[k] ∘ (id(X.object)⊗iso)
+    end
     dom = X.object⊗Y
     cod = Y⊗X.object
     braid = zero_morphism(dom, cod)
-    simpls = simples(parent(Y))
-
+   
+  
     iso, incl, proj = decompose_morphism(Y)
 
     for (p,i) ∈ zip(proj, incl)
         k = findfirst(e -> isisomorphic(e, domain(i))[1], simpls)
-        incliso = isisomorphic(simpls[k], domain(i))[2]
+        incliso = isisomorphic(domain(i), domain(i))[2]
         #projiso = isisomorphic(codomain(p), )[2]
 
         i = i ∘ incliso
         p = inv(incliso) ∘ p 
-        
+
         braid = braid + (i⊗id(X.object))∘X.γ[k]∘(id(X.object)⊗p)
     end
     return braid
@@ -648,7 +656,7 @@ function Hom(X::CenterObject, Y::CenterObject)
     return CenterHomSpace(X,Y,H_basis, VectorSpaces(base_ring(X)))
 end
 
-function central_projection(dom::CenterObject, cod::CenterObject, f::Morphism, simples = simples(parent(domain(f))))
+function central_projection(dom::CenterObject, cod::CenterObject, f::Morphism, simpls = simples(parent(domain(f))))
     X = domain(f)
     Y = codomain(f)
     C = parent(X)
@@ -656,11 +664,11 @@ function central_projection(dom::CenterObject, cod::CenterObject, f::Morphism, s
     proj = zero_morphism(X, Y)
     a = associator
 
-    for (Xi, yX) ∈ zip(simples, dom.γ)
+    for (Xi, yX) ∈ zip(simpls, dom.γ)
         dXi = dual(Xi)
+
         yY = half_braiding(cod, dXi)
 
-        #@show (ev(dXi)⊗id(Y))∘inv(a(dual(dXi),dXi,Y))∘(spherical(Xi)⊗yY)∘a(Xi,Y,dXi)∘((id(Xi)⊗f)⊗id(dXi))∘(yX⊗id(dXi))
         ϕ = (ev(dXi)⊗id(Y))∘inv(a(dual(dXi),dXi,Y))∘(spherical(Xi)⊗yY)∘a(Xi,Y,dXi)∘((id(Xi)⊗f)⊗id(dXi))∘(yX⊗id(dXi))∘inv(a(X,Xi,dXi))∘(id(X)⊗coev(Xi))
 
         proj = proj + dim(Xi)*ϕ

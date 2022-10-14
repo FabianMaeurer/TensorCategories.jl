@@ -19,6 +19,14 @@ end
 
 istensor(::GroupRepresentationCategory) = true
 isfusion(C::GroupRepresentationCategory) = mod(order(C.group),characteristic(base_ring(C))) != 0
+
+function Base.hash(C::GroupRepresentationCategory, h::UInt)
+    hash((C.group, C.base_ring), h)
+end
+
+function Base.hash(σ::GroupRepresentation, h::UInt)
+    hash((getfield(σ, s) for s ∈ fieldnames(GroupRepresentation)), h)
+end
 #-------------------------------------------------------------------------
 #   Constructors
 #-------------------------------------------------------------------------
@@ -438,7 +446,7 @@ end
 
 Return a list of the simple objects in Rep.
 """
-@memoize function simples(Rep::GroupRepresentationCategory)
+@memoize Dict function simples(Rep::GroupRepresentationCategory)
     grp = base_group(Rep)
     F = base_ring(Rep)
 
@@ -454,7 +462,6 @@ Return a list of the simple objects in Rep.
     reps = [GroupRepresentation(Rep,grp,m,F,d) for (m,d) ∈ zip(oscar_reps,intdims)]
 
     return reps
-
 end
 
 """
@@ -481,6 +488,9 @@ function decompose(σ::GroupRepresentation)
     ret
 end
 
+function is_simple(σ::GroupRepresentation)
+    length(decompose(σ)) == 1
+end
 #-------------------------------------------------------------------------
 #   Hom Spaces
 #-------------------------------------------------------------------------
@@ -625,5 +635,5 @@ end
 
 function express_in_basis(f::GroupRepresentationMorphism, basis::Vector{GroupRepresentationMorphism})
     o = one(base_group(domain(f)))
-    express_in_basis(Morphism(o => Morphism(f.map)), [Morphism(o => Morphism(g.map)) for g in basis])
+    express_in_basis(Morphism(f.map), [Morphism(g.map) for g in basis])
 end
