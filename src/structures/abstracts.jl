@@ -501,6 +501,7 @@ function simple_subobjects(X::Object)
         end
 
         simple_subs = vcat([simple_subobjects(K) for (_,K) ∈ eig_spaces]...)
+
         return unique_simples(simple_subs)
     end
     return [X]
