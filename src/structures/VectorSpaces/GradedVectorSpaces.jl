@@ -37,7 +37,7 @@ function VectorSpaceObject(V::Pair{<:GroupElem, <:VectorSpaceObject}...)
     W = dsum([v for (_,v) ∈ V])
     G = parent(V[1][1])
     elems = elements(G)
-    grading = vcat([[g for _ ∈ 1:dim(v)] for (g,v) ∈ V]...)
+    grading = vcat([[g for _ ∈ 1:int_dim(v)] for (g,v) ∈ V]...)
     C = GradedVectorSpaces(base_ring(W), G)
     return GVSObject(C, W, grading)
 end
@@ -121,7 +121,7 @@ Return the direct sum object ``V⊕W``.
 """
 function dsum(X::GVSObject, Y::GVSObject, morphisms::Bool = false)
     W,(ix,iy),(px,py) = dsum(X.V, Y.V, true)
-    m,n = dim(X), dim(Y)
+    m,n = int_dim(X), int_dim(Y)
     F = base_ring(X)
     grading = [X.grading; Y.grading]
     j = 1

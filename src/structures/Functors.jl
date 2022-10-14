@@ -137,3 +137,39 @@ end
 function show(io::IO, F::GRepInduction)
     print(io,"Induction functor from $(domain(F)) to $(codomain(F)).")
 end
+
+
+#=------------------------------------------------
+    Dual
+------------------------------------------------=#
+
+# struct DualFunctor <: Functor
+#     domain::Category
+#     codomain::Category
+#     obj_map
+#     mor_map
+# end
+
+# function DualFunctor(C::Category)
+#     @assert ismonoidal(C) "Category has to be monoidal"
+#     obj_map = X -> dual(X)
+#     mor_map = f -> dual(f)
+#     return DualFunctor(C,C,obj_map,mor_map)
+# end
+
+function dual_monoidal_structure(X::Object, Y::Object)
+    (ev(X⊗Y)⊗id(dual(Y)⊗dual(X))) ∘ inv(associator(dual(X⊗Y),X⊗Y,dual(Y)⊗dual(X))) ∘ (id(dual(X⊗Y))⊗product_coev(X,Y))
+end
+
+function product_coev(X::Object, Y::Object)
+    associator(X⊗Y,dual(Y),dual(X)) ∘ (inv(associator(X,Y,dual(Y)))⊗id(dual(X))) ∘ (id(X)⊗coev(Y)⊗id(dual(X))) ∘ coev(X)
+end
+
+function product_ev(X::Object, Y::Object)
+    ev(Y) ∘ (id(dual(Y))⊗ev(X)⊗id(Y)) ∘ (associator(dual(Y),dual(X),X)⊗id(Y)) ∘ inv(associator(dual(Y)⊗dual(X),X,Y))
+end
+
+
+# function show(io::IO, F::DualFunctor)
+#     show(io, "Duality Functor in $(F.domain)")
+# end

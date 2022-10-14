@@ -8,20 +8,22 @@ function induction(X::Object, simples::Vector = simples(parent(X)))
     Z = dsum([dual(s)⊗X⊗s for s ∈ simples])
     a = associator
     γ = Vector{Morphism}(undef, length(simples))
-
+    C = parent(X)
     for i ∈ 1:length(simples)
         W = simples[i]
-        γ[i] = zero_morphism(zero(parent(X)), dsum([((dual(s)⊗X)⊗s)⊗W for s ∈ simples]))
+        γ[i] = zero_morphism(zero(C), dsum([((dual(s)⊗X)⊗s)⊗W for s ∈ simples]))
 
         for S ∈ simples
             dom_i = W⊗((dual(S)⊗X)⊗S)
             γ_i_temp = zero_morphism(dom_i, zero(parent(X)))
             for  T ∈ simples
                 # Set up basis and dual basis
-                basis, basis_dual = dual_basis(Hom(S, T⊗W), Hom(dual(S), dual(W)⊗dual(T)))
-
+                basis, basis_dual = dual_basis(Hom(one(C), (dual(S)⊗W)⊗T), Hom(one(C), dual(T)⊗(dual(W)⊗S)))
+ 
+                # Correct basis
+                basis = [(ev(S)⊗id(W⊗T)) ∘ (inv(a(S,dual(S),W))⊗id(T)) ∘ inv(a(S,dual(S)⊗W,T)) ∘ (id(S)⊗g) for g ∈ basis]
                 # Correct dual basis to right (co)domain via Hom(U⊗V,W) ≃ Hom(U,U*⊗W)
-                basis_dual = [(ev(dual(W))⊗id(dual(T))) ∘ inv(a(dual(dual(W)),dual(W),dual(T))) ∘ (spherical(W)⊗f) for f ∈ basis_dual]
+                basis_dual = [(id(T)⊗ev(dual(W))) ∘ a(dual(T),dual(W),dual(dual(W))) ∘ (id(dual(T))⊗(id(dual(W))⊗ev(S))⊗id(dual(dual(W)))) ∘ (id(dual(T))⊗a(dual(W),S,dual(S))⊗id(dual(dual(W)))) ∘ (a(dual(T),dual(W)⊗S,dual(S))⊗id(dual(dual(W)))) ∘ (f⊗id(dual(S))⊗spherical(W)) for f ∈ basis_dual]
 
                 if length(basis) == 0 
                     γ_i_temp = vertical_dsum(γ_i_temp, zero_morphism(dom_i, ((dual(T)⊗X)⊗T)⊗W)) 
@@ -31,7 +33,7 @@ function induction(X::Object, simples::Vector = simples(parent(X)))
                     γ_i_temp = vertical_dsum(γ_i_temp, component_iso)
                 end
             end
-            γ[i] = horizontal_dsum(γ[i], dim(S)*γ_i_temp)
+            γ[i] = horizontal_dsum(γ[i], γ_i_temp)
         end
         # distribution Before
         distr_before = distribute_right(W,[dual(s)⊗X⊗s for s ∈ simples])
@@ -51,6 +53,7 @@ end
 
 function pairing(f::Morphism, g::Morphism)
     A,B = domain(f), codomain(g)
+    @show codomain(f) == dual(codomain(g))
     return ev(B)∘(f⊗g)∘coev(A)
 end
 
