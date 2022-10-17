@@ -355,6 +355,8 @@ function isgraded(X::GVSObject, Y::GVSObject, m::MatElem)
     true
 end
 
+is_simple(V::VectorSpaceObject) = dim(V) == 1
+
 # """
 #     function id(V::GVSObject)
 

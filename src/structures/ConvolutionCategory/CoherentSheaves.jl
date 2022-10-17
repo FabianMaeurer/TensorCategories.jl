@@ -175,6 +175,21 @@ Return the braiding isomoephism ```X⊗Y → Y⊗X```.
 """
 braiding(X::CohSheaf, Y::CohSheaf) = Morphism(X⊗Y, Y⊗X, [braiding(x,y) for (x,y) ∈ zip(stalks(X),stalks(Y))])
 
+dim(X::CohSheaf) = sum(dim.(stalks(X)))
+
+function (F::Field)(f::CohSheafMorphism) 
+    @assert is_simple(domain(f)) && domain(f) == codomain(f)
+    return sum([F(m) for m ∈ f.m if m != zero_morphism(domain(m),codomain(m))])
+end
+
+function is_simple(X::CohSheaf)
+    non_zero = [s for s ∈ stalks(X) if s != zero(parent(s))]
+    if length(non_zero) != 1
+        return false
+    end
+    return is_simple(non_zero[1])
+end
+
 #-----------------------------------------------------------------
 #   Functionality: Direct Sum
 #-----------------------------------------------------------------
