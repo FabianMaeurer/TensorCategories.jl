@@ -16,7 +16,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
     nf_elem, one, orbit, orbits, order, parent, permutation_matrix, primary_decomposition,
     product, rank, roots, rref, size, solve, solve_left, splitting_field, stabilizer,
     symmetric_group, tensor_product, tr, zero, ∘, ⊕, ⊗, iso_oscar_gap, preimage, is_simple,
-    CyclotomicField
+    CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly
 
 using Memoization
 
@@ -53,7 +53,7 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         eigenspace, eigenspaces, simple_subobjects, I2, I2subcategory,
         DeligneProdMorphism, DeligneProdObject, DeligneProduct, ⊠, op, AbstractHomSpace,
         is_half_braiding, object, distribute_right, distribute_left, is_simple,
-        decompose_morphism
+        decompose_morphism, TambaraYamagami
 
 include("Utility/SolveGroebner.jl")
 include("Utility/Technicallities.jl")
@@ -78,6 +78,7 @@ include("structures/Center/Induction.jl")
 include("structures/Center/Center.jl")
 include("structures/Center/CenterChecks.jl")
 include("structures/Examples/I2-fusion.jl")
+include("structures/Examples/TambaraYamagami.jl")
 
 
 end

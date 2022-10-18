@@ -17,15 +17,15 @@ function induction(X::Object, simples::Vector = simples(parent(X)))
             dom_i = ((S⊗X)⊗dual(S))⊗simples[i]
             γ_i_temp = zero_morphism(dom_i, zero(parent(X)))
             for  T ∈ simples
-                #@show dim(S),dim(T),dim(W)
+                @show S,T,W
                 # Set up basis and dual basis
                 basis, basis_dual = dual_basis(Hom(S, W⊗T), Hom(dual(S), dual(W⊗T)))
-                #@show "dual_transform"
+                @show "dual_transform"
                 # Isomorphism (XY)* ≃ Y*X*
                 dual_transform = dual_monoidal_structure(W,T)
                 basis_dual = [dual_transform ∘ f for f ∈ basis_dual]
 
-               # @show "basis correction"
+                @show "basis correction"
                 # Correct dual basis to right (co)domain via Hom(U⊗V,W) ≃ Hom(U,U*⊗W)
 
                 basis_dual = [(id(dual(T))⊗ev(W)) ∘ inv(a(dual(T),dual(W),W)) ∘ (f⊗id(W)) for f ∈ basis_dual]
@@ -33,9 +33,9 @@ function induction(X::Object, simples::Vector = simples(parent(X)))
                 if length(basis) == 0 
                     γ_i_temp = vertical_dsum(γ_i_temp, zero_morphism(dom_i, W⊗T⊗X⊗dual(T))) 
                 else
-                    #@show "component_iso"
+                    @show "component_iso"
                     component_iso = sum([a(W,T⊗X,dual(T)) ∘ (a(W,T,X)⊗id(dual(T))) ∘ ((f⊗id(X))⊗g) ∘ a(S⊗X,dual(S),W) for (f,g) ∈ zip(basis, basis_dual)])
-                    #@show "sum"
+                    @show "sum"
                     γ_i_temp = vertical_dsum(γ_i_temp, (component_iso))
                 end
             end

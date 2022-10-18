@@ -35,3 +35,33 @@ D = Center(B)
 add_simple!(D, [S₁; S₂; S₃])
 
 end
+
+#=------------------------------------------------
+    Tambara-Yamagami Categories
+------------------------------------------------=#
+
+TY_time = @elapsed begin
+    
+    # the group ZZ/2×ZZ/2
+    A = abelian_group(PcGroup,[2,2])
+
+    TY = TambaraYamagami(A)
+    
+    S = vcat([simple_subobjects(induction(s)) for s ∈ simples(TY)]...)
+
+    ZTY = Center(TY)
+    add_simple!(ZTY, S)
+end
+
+TY2_times = @elapsed begin
+    
+    # The group ZZ/2×ZZ/4
+    A = abelian_group(PcGroup, [2,4])
+
+    TY2 = TambaraYamagami(A)
+
+    S = vcat([simple_subobjects(induction(s)) for s ∈ simples(TY2)]...)
+
+    ZTY2 = Center(TY2)
+    add_simples(ZTY2, S)
+end

@@ -291,19 +291,19 @@ function dual(V::GVSObject)
     return GVSObject(parent(V), W, grading)
 end
 
-# """
-#     function ev(V::GVSObject)
+"""
+    function ev(V::GVSObject)
 
-# Return the evaluation map ``V*⊗V → 𝟙``.
-# """
-# function ev(V::GVSObject)
-#     dom = dual(V)⊗V
-#     cod = one(parent(V))
-#     elems = elements(base_group(V))
-#     twist = parent(V).twist
-#     m = [i == j ? inv(twist(g,inv(g),g)) : 0 for (i,g) ∈ zip(1:dim(V), V.grading), j ∈ 1:dim(V)][:]
-#     Morphism(dom,cod, matrix(base_ring(V), reshape(m,dim(dom),1)))
-# end
+Return the evaluation map ``V*⊗V → 𝟙``.
+"""
+function ev(V::GVSObject)
+    dom = dual(V)⊗V
+    cod = one(parent(V))
+    elems = elements(base_group(V))
+    twist = parent(V).twist
+    m = [i == j ? inv(twist(g,inv(g),g)) : 0 for (i,g) ∈ zip(1:int_dim(V), V.grading), j ∈ 1:int_dim(V)][:]
+    Morphism(dom,cod, matrix(base_ring(V), reshape(m,int_dim(dom),1)))
+end
 
 #-----------------------------------------------------------------
 #   Functionality: Hom-Spaces

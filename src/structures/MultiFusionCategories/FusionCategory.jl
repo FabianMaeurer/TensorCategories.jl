@@ -12,7 +12,7 @@ mutable struct RingCategory <: Category
 
     function RingCategory(F::Field, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1,1,:])])
         C = new(F, length(mult[1,1,:]), names)
-        C.tensor_product = mult
+        set_tensor_product!(C,mult)
         #C.ass = [id(⊗(X,Y,Z)) for X ∈ simples(C), Y ∈ simples(C), Z ∈ simples(C)]
         #C.dims = [1 for i ∈ 1:length(names)]
         return C
@@ -129,7 +129,7 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
         i = findfirst(e -> e ≠ 0, X.components)
         j = findfirst(e -> e ≠ 0, Y.components)
         k = findfirst(e -> e ≠ 0, Z.components)
-        return Morphism(X⊗Y⊗Z, X⊗Y⊗Z, C_associator[i,j,k,:])
+        return Morphism(dom,dom, C_associator[i,j,k,:])
     end
 
     #---------------------------------
@@ -146,35 +146,17 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     -------------------------------------------------=#
 
     # Before
-    distr_before = distribute_left(X_summands, Y) ⊗ id(Z)
-    distr_before = (dsum([distribute_right(Xᵢ,Y_summands) for Xᵢ ∈ X_summands]...)⊗id(Z)) ∘ distr_before
-    distr_before = distribute_left([Xᵢ⊗Yⱼ for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:], Z) ∘ distr_before
-    distr_before = dsum([distribute_right(Xᵢ⊗Yⱼ,Z_summands) for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:]...) ∘ distr_before
-
+    @show distr_before = distribute_left(X_summands, Y) ⊗ id(Z)
+    @show distr_before = (dsum([distribute_right(Xᵢ,Y_summands) for Xᵢ ∈ X_summands]...)⊗id(Z)) ∘ distr_before
+    @show distr_before = distribute_left([Xᵢ⊗Yⱼ for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:], Z) ∘ distr_before
+    @show distr_before = dsum([distribute_right(Xᵢ⊗Yⱼ,Z_summands) for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:]...) ∘ distr_before
+    
     # After
     distr_after = id(X)⊗distribute_left(Y_summands, Z)
     distr_after = (id(X)⊗dsum([distribute_right(Yⱼ,Z_summands) for Yⱼ ∈ Y_summands]...)) ∘ distr_after
     distr_after = distribute_left(X_summands, Y⊗Z) ∘ distr_after
     YZ_arr = [Yⱼ⊗Zₖ for  Zₖ ∈ Z_summands, Yⱼ ∈ Y_summands][:]
     distr_after = dsum([distribute_right(Xᵢ, YZ_arr) for Xᵢ ∈ X_summands]) ∘ distr_after
-
-    # for f in Base.product([[basis(End(x)); zero_morphism(x,x)] for x in X_summands]...),
-    #     g in Base.product([[basis(End(x)); zero_morphism(x,x)] for x in Y_summands]...),
-    #     h in Base.product([[basis(End(x)); zero_morphism(x,x)] for x in Z_summands]...)
-
-    #     if distr_before∘((dsum(f)⊗dsum(g))⊗dsum(h))!= dsum([(fi⊗gi)⊗hi for hi in h, gi in g, fi in f][:])∘distr_before
-    #         @error "Distribution before failed"
-    #     end
-    # end
-
-    # for f in Base.product([[basis(End(x)); zero_morphism(x,x)] for x in X_summands]...),
-    #     g in Base.product([[basis(End(x)); zero_morphism(x,x)] for x in Y_summands]...),
-    #     h in Base.product([[basis(End(x)); zero_morphism(x,x)] for x in Z_summands]...)
-
-    #     if distr_after∘(dsum(f)⊗(dsum(g)⊗dsum(h)))!= dsum([fi⊗(gi⊗hi) for hi in h, gi in g, fi in f][:])∘distr_after
-    #         @error "Distribution after failed"
-    #     end
-    # end
 
     #-----------------------------------
     # Associator morphism
@@ -218,6 +200,7 @@ id(X::RingCatObject) = RingCatMorphism(X,X, [one(MatrixSpace(base_ring(X),d,d)) 
 
 function compose(f::RingCatMorphism, g::RingCatMorphism)
     @assert codomain(f) == domain(g) "Morphisms not compatible"
+    
     return RingCatMorphism(domain(f), codomain(g), [m*n for (m,n) ∈ zip(f.m,g.m)])
 end
 
