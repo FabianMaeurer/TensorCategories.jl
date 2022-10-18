@@ -146,10 +146,10 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     -------------------------------------------------=#
 
     # Before
-    @show distr_before = distribute_left(X_summands, Y) ⊗ id(Z)
-    @show distr_before = (dsum([distribute_right(Xᵢ,Y_summands) for Xᵢ ∈ X_summands]...)⊗id(Z)) ∘ distr_before
-    @show distr_before = distribute_left([Xᵢ⊗Yⱼ for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:], Z) ∘ distr_before
-    @show distr_before = dsum([distribute_right(Xᵢ⊗Yⱼ,Z_summands) for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:]...) ∘ distr_before
+    distr_before = distribute_left(X_summands, Y) ⊗ id(Z)
+    distr_before = (dsum([distribute_right(Xᵢ,Y_summands) for Xᵢ ∈ X_summands]...)⊗id(Z)) ∘ distr_before
+    distr_before = distribute_left([Xᵢ⊗Yⱼ for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:], Z) ∘ distr_before
+    distr_before = dsum([distribute_right(Xᵢ⊗Yⱼ,Z_summands) for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:]...) ∘ distr_before
     
     # After
     distr_after = id(X)⊗distribute_left(Y_summands, Z)
@@ -200,7 +200,7 @@ id(X::RingCatObject) = RingCatMorphism(X,X, [one(MatrixSpace(base_ring(X),d,d)) 
 
 function compose(f::RingCatMorphism, g::RingCatMorphism)
     @assert codomain(f) == domain(g) "Morphisms not compatible"
-    
+
     return RingCatMorphism(domain(f), codomain(g), [m*n for (m,n) ∈ zip(f.m,g.m)])
 end
 
