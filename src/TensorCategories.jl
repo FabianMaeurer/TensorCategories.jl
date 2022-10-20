@@ -53,11 +53,12 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         eigenspace, eigenspaces, simple_subobjects, I2, I2subcategory,
         DeligneProdMorphism, DeligneProdObject, DeligneProduct, ⊠, op, AbstractHomSpace,
         is_half_braiding, object, distribute_right, distribute_left, is_simple,
-        decompose_morphism, TambaraYamagami
+        decompose_morphism, TambaraYamagami, RingSubcategory, SubcategoryMorphism,
+        SubcategoryObject
 
 include("Utility/SolveGroebner.jl")
-include("Utility/Technicallities.jl")
 include("structures/abstracts.jl")
+include("Utility/Technicallities.jl")
 include("structures/VectorSpaces/VectorSpaces.jl")
 include("structures/MISC/ProductCategory.jl")
 include("structures/MISC/OppositeCategory.jl")
@@ -73,6 +74,7 @@ include("structures/ConvolutionCategory/ConvolutionCategory.jl")
 include("structures/MultiFusionCategories/FusionCategory.jl")
 include("structures/MISC/multiplication_table.jl")
 include("structures/MISC/PentagonAxiom.jl")
+include("structures/MISC/Subcategories.jl")
 include("structures/GrothendieckRing.jl")
 include("structures/Center/Induction.jl")
 include("structures/Center/Center.jl")

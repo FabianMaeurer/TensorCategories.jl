@@ -1,10 +1,18 @@
-function duplicate_row(M::MatElem, i::Int, k::Int)
-    duplicated = vcat([M[i,:] for _ ∈ 1:k]...)
-    return [M[1:i-1, :]; duplicated; M[i+1:end, :]]
+function Base.hash(C::T, h::UInt) where T <: Union{Morphism, Category, Object}
+    content = (getfield(C, s) for s ∈ fieldnames(typeof(C)) if isdefined(C, s))
+    hash(content, h)
 end
 
-function duplicate_column(M::MatElem, i::Int, k::Int)
-    duplicated = hcat(M[:,i] for _ ∈ 1:k)
-    return [M[:, 1:i-1] duplicated M[:,i+1:end]]
+function ==(X::T,Y::T) where T <: Union{Morphism, Category, Object}
+    for s ∈ fieldnames(typeof(X)) 
+        if (isdefined(X, s) ⊻ isdefined(Y, s)) 
+            return false
+        elseif isdefined(X,s) && isdefined(Y,s)
+            if getfield(X,s) != getfield(Y,s)
+                return false
+            end
+        end
+    end
+    return true
 end
-
+            

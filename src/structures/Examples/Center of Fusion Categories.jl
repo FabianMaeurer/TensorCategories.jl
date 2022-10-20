@@ -36,6 +36,25 @@ add_simple!(D, [S₁; S₂; S₃])
 
 end
 
+I27_time = @elapsed begin
+    
+    B7 = I2subcategory(7)
+    
+    Bs, Bsts, Bststs = simples(B7)
+    
+    S₁ = simple_subobjects(induction(Bs))
+    S₂ = simple_subobjects(induction(Bsts))
+    S₃ = simple_subobjects(induction(Bststs))
+    
+    D2 = Center(B)
+    
+    add_simple!(D2, [S₁; S₂; S₃])
+
+    s_matrix_7 = smatrix(D2)
+    
+end
+    
+
 #=------------------------------------------------
     Tambara-Yamagami Categories
 ------------------------------------------------=#

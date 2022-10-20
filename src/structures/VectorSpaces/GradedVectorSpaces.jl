@@ -44,12 +44,6 @@ end
 
 isfusion(C::GradedVectorSpaces) = true
 
-"""
-    function dim(V::GVSObject)
-
-Return the vector space dimension of ``V``.
-"""
-dim(X::GVSObject) = dim(X.V)
 basis(X::GVSObject) = basis(X.V)
 
 """
@@ -112,6 +106,13 @@ function ==(f::GVSMorphism, g::GVSMorphism)
 end
 
 dim(V::GVSObject) = base_ring(V)(tr(id(V)))
+
+function spherical(V::GVSObject) 
+    DDV = dual(dual(V))
+    dims = filter!(e -> e != 0, collect(matrix(ev(V)))[:])
+    m = diagonal_matrix([d for d ∈ dims])
+    Morphism(V,DDV,m)
+end
 #-----------------------------------------------------------------
 #   Functionality: Direct Sums
 #-----------------------------------------------------------------

@@ -65,10 +65,11 @@ Morphism(X::RingCatObject, Y::RingCatObject, m::Vector) = RingCatMorphism(X,Y,m)
 function set_tensor_product!(F::RingCategory, tensor::Array{Int,3})
     F.tensor_product = tensor
     n = size(tensor,1)
-    F.ass = Array{MatElem,4}(undef,n,n,n,n)
+    ass = Array{MatElem,4}(undef,n,n,n,n)
     for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n
-        F.ass[i,j,k,:] = matrices(id(F[i]⊗F[j]⊗F[k]))
+        ass[i,j,k,:] = matrices(id(F[i]⊗F[j]⊗F[k]))
     end
+    F.ass = ass
 end
 
 function set_braiding!(F::RingCategory, braiding::Function)
