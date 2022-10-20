@@ -13,6 +13,8 @@ mutable struct RingCategory <: Category
     function RingCategory(F::Field, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1,1,:])])
         C = new(F, length(mult[1,1,:]), names)
         set_tensor_product!(C,mult)
+        set_spherical!(C, [F(1) for _ ∈ names])
+
         #C.ass = [id(⊗(X,Y,Z)) for X ∈ simples(C), Y ∈ simples(C), Z ∈ simples(C)]
         #C.dims = [1 for i ∈ 1:length(names)]
         return C
@@ -21,6 +23,7 @@ mutable struct RingCategory <: Category
     function RingCategory(F::Field, names::Vector{String})
         C = new(F,length(names), names)
         #C.dims = [1 for i ∈ 1:length(names)]
+        set_spherical!(C, [F(1) for _ ∈ names])
         return C
     end
 
@@ -170,7 +173,6 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 end
 
 
-
 function vector_permutation(A::Vector,B::Vector)
     perm = Int[]
     for a ∈ A
@@ -186,6 +188,7 @@ end
 #   Functionality
 #-------------------------------------------------------------------------------
 issemisimple(::RingCategory) = true
+ismultiring(::RingCategory) = true
 
 is_simple(X::RingCatObject) = sum(X.components) == 1
 

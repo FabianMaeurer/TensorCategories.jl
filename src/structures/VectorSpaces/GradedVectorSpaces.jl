@@ -110,6 +110,8 @@ end
 function ==(f::GVSMorphism, g::GVSMorphism)
     return domain(f) == domain(g) && codomain(f) == codomain(g) && matrix(f) == matrix(g)
 end
+
+dim(V::GVSObject) = base_ring(V)(tr(id(V)))
 #-----------------------------------------------------------------
 #   Functionality: Direct Sums
 #-----------------------------------------------------------------

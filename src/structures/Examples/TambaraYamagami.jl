@@ -14,6 +14,9 @@ function (B::BilinearForm)(x::GroupElem, y::GroupElem)
     B.map(x,y,B.root_of_unity)
 end
 
+#=-------------------------------------------------
+    ToDO: Quelle 
+-------------------------------------------------=#
 function TambaraYamagami(A::GAPGroup, χ = nothing)
     n = Int(order(A))
     @assert is_abelian(A)

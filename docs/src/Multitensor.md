@@ -1,17 +1,14 @@
 # Multitensor Categories
 
-The main idea of TensorCategories is to provide abstract methods for categorical computations.
-The abstract types `MultiTensorCategory` and `TensorCategory` are intended for
-this purpose. To use these abstract methods you need to provide some functionality
-for your categories.
+The main idea of TensorCategories is to provide abstract methods for categorical computations in (multi)tensor, respectively (multi)fusion categories. To use this framework with custom structs implementing such a category one has to follow some rules.
 
 # Necessities
 
-For minimal function of `YourCategory <: MultiTensorCategory` together with Objects
+For basic functionality of `YourCategory <: Category` together with Objects
 `YourObject <: Object` and morphisms `YourMorphism <: Morphism` you have to minimally build
 
 ```julia
-struct YourCategory <: MultiTensorCategory
+struct YourCategory <: Category
   base_ring::Field
 end
 
@@ -25,7 +22,7 @@ struct YourMorphism <: Morphism
 end
 ```
 
-For basic functionality on objects you need to provide some methods:
+For objects you need to provide the following methods:
 
 ```
 dsum(X::YourObject, Y::YourObject) ::YourObject
@@ -50,7 +47,7 @@ zero(C::YourCategory) ::YourObject
 
 # Groethendieck Ring
 
-TensorCategories can compute the Groethendieck ring of a semisimple `MultiTensorCategory`,
+TensorCategories can compute the Groethendieck ring of a semisimple multitensor category,
 if provided with methods
 
 ```
@@ -64,7 +61,7 @@ decompose(X::YourObject) ::Vector{Tuple{YourObject, Int}}
 isisomorphic(X::YourObject, Y::YourObject) ::Tuple{Bool, Union{YourMorphism, Nothing}}
 ```
 
-Provided these methods exist you can call the function `groethendieck_ring` on your
+Provided these methods exist you can call the function `grothendieck_ring` on your
 category.
 
 ```@docs

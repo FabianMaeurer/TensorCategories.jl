@@ -181,11 +181,11 @@ end
 #-------------------------------------------------------------------------------
 
 """
-    iscentral(Z::Object)
+    is_central(Z::Object)
 
 Return true if ```Z``` is in the categorical center, i.e. there exists a half-braiding on ```Z```.
 """
-function iscentral(Z::Object, simples::Vector{<:Object} = simples(parent(Z)))
+function is_central(Z::Object, simples::Vector{<:Object} = simples(parent(Z)))
     if prod([isisomorphic(Z⊗s,s⊗Z)[1] for s ∈ simples]) == 0
         return false
     end
@@ -335,7 +335,7 @@ function center_simples(C::CenterCategory, simples = simples(C.category))
 
         X = dsum([simples[j]^c[j] for j ∈ 1:k])
 
-        ic = iscentral(X)
+        ic = is_central(X)
 
         if ic
             so = half_braidings(X, simples = simples, parent = C)
@@ -393,7 +393,7 @@ function find_centrals(simples::Vector{<:Object})
     c_simples = typeof(simples[1])[]
     non_central = typeof(simples[1])[]
     for s ∈ simples
-        ic, so = iscentral(s)
+        ic, so = is_central(s)
         if ic
             c_simples = [c_simples; so]
         else

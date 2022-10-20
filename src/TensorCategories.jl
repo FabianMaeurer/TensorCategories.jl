@@ -10,13 +10,13 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
     compose, cyclotomic_field, decompose, degree, diagonal_matrix, dim, domain, dual,
     eigenspace, eigenspaces, elem_type, elements, fmpq, fmpz, gap_to_julia, gcd, gen, gens,
     groebner_basis, gset, hom, id, ideal, image, index, inv, irreducible_modules, isabelian,
-    iscentral, iscommutative, isconstant, isindependent, isinvertible, isisomorphic,
+    is_central, iscommutative, isconstant, isindependent, isinvertible, isisomorphic,
     issemisimple, issubgroup, jordan_normal_form, julia_to_gap, kernel, kronecker_product,
     leading_monomial, left_transversal, matrix, minpoly, msolve, multiplication_table,
     nf_elem, one, orbit, orbits, order, parent, permutation_matrix, primary_decomposition,
     product, rank, roots, rref, size, solve, solve_left, splitting_field, stabilizer,
     symmetric_group, tensor_product, tr, zero, ∘, ⊕, ⊗, iso_oscar_gap, preimage, is_simple,
-    CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly
+    CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det
 
 using Memoization
 
@@ -42,7 +42,7 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         decompose, multiplication_table, print_multiplication_table, grothendieck_ring,
         dual, left_dual, right_dual, ev, coev, left_trace, right_trace, tr, braiding,
         drinfeld_morphism, smatrix, End, CenterCategory, CenterObject, CenterMorphism,
-        spherical, iscentral, center_simples, RingCategory, set_tensor_product!,
+        spherical, is_central, center_simples, RingCategory, set_tensor_product!,
         set_braiding!, set_one!, Ising, zero_morphism, express_in_basis, solve_groebner,
         Center, CenterCategory, CenterObject, CenterMorphism, ev_coev, matrices,
         orbit_stabilizers, GRepRestriction, GRepInduction, Restriction, Induction,

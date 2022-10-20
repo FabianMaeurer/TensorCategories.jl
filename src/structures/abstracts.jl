@@ -324,6 +324,20 @@ function distribute_right(X::O, Z::Vector{O}) where O <: Object
     return vertical_dsum([id(X)⊗pi for pi ∈ px])
 end
 
+function distribute_left_to_right(X::Vector{T}, Y::Vector{T}) where T <: Object
+    X_sum,ix,px = dsum_with_morphisms(X...)
+    Y_sum,iy,py = dsum_with_morphisms(Y...)
+    Z_sum,iz,pz = dsum_with_morphisms(Z...)
+    dsum([(pxk ⊗ pyj ⊗ pzi) ∘ (ixk ⊗ iyj ⊗ izi) for (izi, pzi) ∈ zip(iz,pz), (iyj,pyj) ∈ zip(iy,py), (ixk,pxk) ∈ zip(ix,px)][:]...)
+end
+
+function distribute_right_to_left(X::Vector{T}, Y::Vector{T}, Z::Vector{T}) where T <: Object
+    X_sum,ix,px = dsum_with_morphisms(X...)
+    Y_sum,iy,py = dsum_with_morphisms(Y...)
+    Z_sum,iz,pz = dsum_with_morphisms(Z...)
+    dsum([(pxk ⊗ (pyj ⊗ pzi)) ∘ (ixk ⊗ (iyj ⊗ izi)) for (izi, pzi) ∈ zip(iz,pz), (iyj,pyj) ∈ zip(iy,py), (ixk,pxk) ∈ zip(ix,px)][:]...)
+end
+
 #------------------------------------------------------
 #   Abstract Methods
 #------------------------------------------------------

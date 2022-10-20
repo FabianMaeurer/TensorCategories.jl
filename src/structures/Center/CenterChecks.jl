@@ -6,6 +6,7 @@ TBW
 function is_half_braiding(Z::Object, half_braiding::Vector{<:Morphism})
     simple_objects = simples(parent(Z))
     n = length(simple_objects)
+    flag = false
     for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n
         Xᵢ,Xⱼ,Xₖ = simple_objects[[i,j,k]]
         γᵢ,γⱼ,γₖ = half_braiding[[i,j,k]]
@@ -17,9 +18,11 @@ function is_half_braiding(Z::Object, half_braiding::Vector{<:Morphism})
                 @show (i,j,k)
                 @show matrix(left)
                 @show matrix(right)
-                return false
+                flag = true
             end
         end
     end
-    return true
+    return !flag 
 end
+
+is_central(X::CenterObject) = is_half_braiding(object(X), half_braiding(X))
