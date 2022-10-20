@@ -93,7 +93,7 @@ function spherical(X::SubcategoryObject)
 end
 
 issemisimple(C::AbstractSubcategory) = issemisimple(C.category)
-ismultifusion()
+ismultifusion(C::AbstractSubcategory) = ismultifusion(C.category)
 #=-------------------------------------------------
     Functionality for RingSubcategory 
 -------------------------------------------------=#
