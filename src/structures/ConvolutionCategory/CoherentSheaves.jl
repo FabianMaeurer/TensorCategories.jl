@@ -324,6 +324,11 @@ function inv(f::CohSheafMorphism)
     return Morphism(codomain(f), domain(f), [inv(g) for g in f.m])
 end
 
+
+function matrix(f::CohSheafMorphism)
+    diagonal_matrix(matrices(f))
+end
+
 #-----------------------------------------------------------------
 #   Simple Objects
 #-----------------------------------------------------------------

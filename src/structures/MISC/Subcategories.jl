@@ -20,7 +20,7 @@ end
 
 object(X::SubcategoryObject) = X.object
 morphism(f::SubcategoryMorphism) = f.m
-
+base_ring(C::RingSubcategory) = base_ring(C.category)
 #=-------------------------------------------------
     Constructors 
 -------------------------------------------------=#
@@ -92,17 +92,61 @@ function spherical(X::SubcategoryObject)
     return SubcategoryMorphism(X,dual(dual(X)), spherical(object(X)))
 end
 
+function id(X::SubcategoryObject) 
+    return SubcategoryMorphism(X,X, id(object(X)))
+end
+
+function zero_morphism(X::SubcategoryObject, Y::SubcategoryObject)
+    return SubcategoryMorphism(X,Y, zero_morphism(object(X),object(Y)))
+end
+
+function Hom(X::SubcategoryObject, Y::SubcategoryObject)
+    sub_basis = [SubcategoryMorphism(X,Y,f) for f ∈ Hom(object(X),object(Y))]
+    return HomSpace(X,Y,sub_basis,VectorSpaces(base_ring(X)))
+end
+
+function isisomorphic(X::SubcategoryObject, Y::SubcategoryObject)
+    b, iso = isisomorphic(object(X),object(Y))
+    if !b 
+        return false, nothing
+    end
+    return true, SubcategoryMorphism(X,Y, iso)
+end
+
+function kernel(f::SubcategoryMorphism)
+    @assert isabelian(parent(f))
+    k,i = kernel(morphism(f))
+    sub_k = SubcategoryObject(parent(f), k)
+    return sub_k, SubcategoryMorphism(sub_k, domain(f), i)
+end
+
+is_simple(X::SubcategoryObject) = is_simple(object(X))
+
+matrix(f::SubcategoryMorphism) = matrix(morphism(f))
+
 issemisimple(C::AbstractSubcategory) = issemisimple(C.category)
 ismultifusion(C::AbstractSubcategory) = ismultifusion(C.category)
+
+*(x, f::SubcategoryMorphism) = SubcategoryMorphism(domain(f),codomain(f), x*morphism(f))
++(f::SubcategoryMorphism, g::SubcategoryMorphism) = SubcategoryMorphism(domain(f),codomain(f), morphism(f) + morphism(g))
+inv(f::SubcategoryMorphism) = SubcategoryMorphism(codomain(f),domain(f), inv(morphism(f)))
+
+function express_in_basis(f::SubcategoryMorphism, B::Vector{SubcategoryMorphism})
+    express_in_basis(morphism(f), morphism.(B))
+end
 #=-------------------------------------------------
     Functionality for RingSubcategory 
 -------------------------------------------------=#
 
 one(C::RingSubcategory) = SubcategoryObject(C,C.projector)
+zero(C::AbstractSubcategory) = SubcategoryObject(C,zero(C.category))
 simples(C::RingSubcategory) = [SubcategoryObject(C,s) for s in C.simples]
+
+spherical(X::SubcategoryObject) = SubcategoryMorphism(X,dual(dual(X)), spherical(object(X)))
+
 
 function associator(X::SubcategoryObject, Y::SubcategoryObject, Z::SubcategoryObject)
     dom = (X ⊗ Y) ⊗ Z
     cod = X ⊗ (Y ⊗ Z)
-    return SubcategoryMorphism(dom,cod, associator(object(X), obejct(Y), object(Z)))
+    return SubcategoryMorphism(dom,cod, associator(object(X), object(Y), object(Z)))
 end

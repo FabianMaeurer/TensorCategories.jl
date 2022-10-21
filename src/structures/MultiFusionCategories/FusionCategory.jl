@@ -290,24 +290,6 @@ function simple_objects_coev(X::RingCatObject)
     mats = [diagonal_matrix(F(1),n,m) for (n,m) ∈ zip(C.one, cod.components)]
 
     return Morphism(one(C), cod, mats)
-
-    # m = []
-
-    # for (x,k) ∈ zip(simples(C),X.components), y ∈ simples(C)
-
-    #     if x == dual(y)
-    #         c = [F(a==b) for a ∈ 1:k, b ∈ 1:k][:]
-    #         m = [m; c]
-    #     else
-    #         c = [0 for _ ∈ 1:(x⊗y).components[1]]
-    #         m = [m; c]
-    #     end
-    # end
-
-    # mats = matrices(zero_morphism(one(C), X⊗DX))
-    # M = parent(mats[1])
-    # mats[1] = M(F.(m))
-    # return Morphism(one(C), X⊗DX, mats)
 end
 
 function simple_objects_ev(X::RingCatObject)
@@ -327,32 +309,6 @@ function simple_objects_ev(X::RingCatObject)
 
 
     return inv(factor) * unscaled_ev
-
-    # # Simple Objects
-    # if is_simple(X)
-    #     # If X is simple
-    #     e = basis(Hom(DX⊗X, one(C)))[1]
-    #     # Scale ev
-    #     f = (id(X)⊗e)∘associator(X,DX,X)∘(coev(X)⊗id(X))
-    #     return inv(F(f))*e
-    # end
-
-    # m = elem_type(F)[]
-    # #Arbitrary Objects
-    # for (x,k) ∈ zip(simples(C),DX.components), y ∈ simples(C)
-    #     if x == dual(y)
-    #         c = F(ev(y)[1]).*([F(a==b) for a ∈ 1:k, b ∈ 1:k][:])
-    #         m = [m; c]
-    #     else
-    #         c = [0 for _ ∈ 1:(x⊗y).components[1]]
-    #         m = [m; c]
-    #     end
-    # end
-
-    # mats = matrices(zero_morphism(X⊗DX, one(C)))
-    # M = parent(mats[1])
-    # mats[1] = M(F.(m))
-    # return Morphism(X⊗DX,one(C),mats)
 end
 
 function spherical(X::RingCatObject)
@@ -366,14 +322,6 @@ end
 
 *(λ,f::RingCatMorphism) = RingCatMorphism(domain(f), codomain(f), λ .*f.m)
 
-# function tr(f::RingCatMorphism)
-#     sum(tr.(f.m))
-# end
-
-# function smatrix(C::RingCategory)
-#     θ = C.twist
-#     #[inv(θ(i))*inv(θ(j))*sum() i ∈ simples(C), j ∈ simples(C)]
-# end
 
 function getindex(f::RingCatMorphism, i)
     simple = simples(parent(domain(f)))

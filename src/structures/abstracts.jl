@@ -56,9 +56,9 @@ parent(f::Morphism) = parent(domain(f))
 
 Return the base ring ```k``` of the ```k```-linear parent category of ```X```.
 """
-base_ring(X::Object) = parent(X).base_ring
-
+base_ring(X::Object) = base_ring(parent(X))
 base_ring(X::Morphism) = parent(domain(X)).base_ring
+
 """
     base_ring(C::Category)
 
@@ -386,6 +386,23 @@ Base.iterate(H::AbstractHomSpace, state = 1) = state > int_dim(H) ? nothing : (b
 Base.length(H::AbstractHomSpace) = int_dim(H)
 Base.eltype(::Type{T}) where T <: AbstractHomSpace = Morphism 
 
+function (F::Field)(f::Morphism)
+    m = matrix(f)
+    m = collect(m)[m .!= 0]
+    if size(m) == (1,)
+        return F(m[1,1])
+    end
+    @show size(m)
+    throw(ErrorException("Cannot convert to element of $F"))
+end
+
+function express_in_basis(f::T, B::Vector{T}) where T <: Morphism
+    F = base_ring(f)
+    B_mat = matrix(F,hcat([[x for x ∈ matrix(b)][:] for b ∈ B]...))
+    f_mat = matrix(F, 1, *(size(matrix(f))...), [x for x ∈ matrix(f)][:])
+
+    return [x for x ∈ solve_left(transpose(B_mat),f_mat)][:]
+end
 #-------------------------------------------------------
 # Duals
 #-------------------------------------------------------
@@ -461,16 +478,17 @@ end
 function decompose(X::Object, S = simples(parent(X)))
     C = parent(X)
     @assert issemisimple(C) "Category not semisimple"
-    dimensions = [dim(Hom(X,s)) for s ∈ S]
+    dimensions = [int_dim(Hom(X,s)) for s ∈ S]
     return [(s,d) for (s,d) ∈ zip(S,dimensions) if d > 0]
 end
 
-function decompose_morphism(X::Object)
+function decompose_morphism(X::Object, S = simples(parent(X)))
     C = parent(X)
     @assert issemisimple(C) "Semisimplicity required"
+    
+    if X == zero(C) return id(X), [], [] end
 
-    S = simples(C)
-    components = decompose(X)
+    components = decompose(X,S)
     Z, incl, proj = dsum_with_morphisms(vcat([[s for _ ∈ 1:d] for (s,d) ∈ components]...)...)
 
     # temporary solution!
@@ -529,6 +547,76 @@ function unique_simples(simples::Vector{<:Object})
         end
     end
     return unique_simples
+end
+
+
+#=-------------------------------------------------
+    Duals in Fusion Categories
+-------------------------------------------------=#
+
+function coev(X::Object)
+    if is_simple(X)
+        return simple_objects_coev(X)
+    end
+
+    C = parent(X)
+    𝟙 = one(C)
+
+    summands = vcat([[x for _ ∈ 1:k] for (x,k) ∈ decompose(X)]...)
+    dual_summands = dual.(summands)
+    d = length(summands)
+
+    c = vertical_dsum([i == j ? coev(summands[i]) : zero_morphism(𝟙, summands[j]⊗dual_summands[i]) for j ∈ 1:d, i ∈ 1:d][:])
+
+    distr = dsum([distribute_right(x,dual_summands) for x ∈ summands]) ∘ distribute_left(summands, dual(X))
+
+    return distr ∘ c
+end
+
+function ev(X::Object)
+    if is_simple(X)
+        return simple_objects_ev(X)
+    end
+    C = parent(X)
+    𝟙 = one(C)
+
+    summands = vcat([[x for _ ∈ 1:k] for (x,k) ∈ decompose(X)]...)
+    dual_summands = dual.(summands)
+    d = length(summands)
+
+    e = horizontal_dsum([i == j ? ev(summands[i]) : zero_morphism(dual_summands[j]⊗summands[i], 𝟙)  for j ∈ 1:d, i ∈ 1:d][:])
+
+    distr = dsum([distribute_right(x,summands) for x ∈ dual_summands]) ∘ distribute_left(dual_summands, X)
+
+    return e ∘ inv(distr) 
+end
+
+function simple_objects_coev(X::Object)
+    DX = dual(X)
+    C = parent(X)
+    F = base_ring(C)
+
+    cod = X ⊗ DX
+
+    if X == zero(C) return zero_morphism(one(C), X) end
+
+    return basis(Hom(one(C), cod))[1]
+end
+
+function simple_objects_ev(X::Object)
+    DX = dual(X)
+    C = parent(X)
+    F = base_ring(C)
+
+    dom = DX ⊗ X
+
+    if X == zero(C) return zero_morphism(X,one(C)) end
+
+    unscaled_ev = basis(Hom(dom,one(C)))[1]
+
+    factor = F((id(X)⊗unscaled_ev)∘associator(X,DX,X)∘(coev(X)⊗id(X)))
+
+    return inv(factor) * unscaled_ev
 end
 
 

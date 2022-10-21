@@ -111,7 +111,9 @@ id(X::ConvolutionObject) = ConvolutionMorphism(X,X,id(X.sheaf))
 function associator(X::ConvolutionObject, Y::ConvolutionObject, Z::ConvolutionObject)
     dom = (X⊗Y)⊗Z
     cod = X⊗(Y⊗Z)
-    return inv(decompose_morphism(cod))∘decompose_morphism(dom)
+    S = simples(parent(X))
+    #@show codomain(decompose_morphism(cod,S)[1]) == codomain(decompose_morphism(dom,S)[1])
+    return inv(decompose_morphism(cod,S)[1])∘decompose_morphism(dom,S)[1]
 end
 #-----------------------------------------------------------------
 #   Functionality: Direct Sum
@@ -163,12 +165,14 @@ zero(C::ConvolutionCategory) = ConvolutionObject(zero(C.squaredCoh),C)
 
 function kernel(f::ConvolutionMorphism)
     K,k = kernel(f.m)
-    return ConvolutionObject(K,parent(domain(f))), Morphism(K, domain(f), k)
+    Conv_K = ConvolutionObject(K,parent(f))
+    return ConvolutionObject(K,parent(domain(f))), Morphism(Conv_K, domain(f), k)
 end
 
 function cokernel(f::ConvolutionMorphism)
     C,c = cokernel(f.m)
-    return ConvolutionObject(C, parent(domain(f))), Morphism(codomain(f), C, c)
+    Conv_C = ConvolutionObject(C,parent(f))
+    return ConvolutionObject(C, parent(domain(f))), Morphism(codomain(f), Conv_C, c)
 end
 
 #-----------------------------------------------------------------
@@ -224,6 +228,8 @@ function dual(X::ConvolutionObject)
     reps = [dual(ρ) for ρ ∈ stalks(X)][perm]
     return ConvolutionObject(CohSheaf(parent(X.sheaf), reps), parent(X))
 end
+
+spherical(X::ConvolutionObject) = id(X)
 #-----------------------------------------------------------------
 #   Functionality: Morphisms
 #-----------------------------------------------------------------
@@ -248,6 +254,8 @@ function matrices(f::ConvolutionMorphism)
     matrices(f.m)
 end
 
+matrix(f::ConvolutionMorphism) = matrix(f.m)
+
 function inv(f::ConvolutionMorphism)
     return Morphism(codomain(f), domain(f), inv(f.m))
 end
@@ -260,7 +268,7 @@ end
 
 Return a list of simple objects in Conv(``X``).
 """
-@memoize Dict function simples(C::ConvolutionCategory)
+function simples(C::ConvolutionCategory)
     return [ConvolutionObject(sh,C) for sh ∈ simples(C.squaredCoh)]
 end
 
@@ -273,6 +281,14 @@ function decompose(X::ConvolutionObject)
     facs = decompose(X.sheaf)
     return [(ConvolutionObject(sh,parent(X)),d) for (sh,d) ∈ facs]
 end
+
+function is_simple(X::ConvolutionObject)
+    non_zero_stalks = [s for s ∈ stalks(X) if s != zero(parent(s))]
+    if length(non_zero_stalks) != 1
+        return false
+    end
+    return is_simple(non_zero_stalks[1])
+end 
 
 #-----------------------------------------------------------------
 #   Hom Space

@@ -432,7 +432,6 @@ function braiding(X::CenterObject, Y::CenterObject)
 end
 
 function half_braiding(X::CenterObject, Y::Object)
-
     simpls = simples(parent(Y))
 
     if is_simple(Y) 
