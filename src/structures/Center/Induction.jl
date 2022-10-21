@@ -35,7 +35,7 @@ function induction(X::Object, simples::Vector = simples(parent(X)))
                 
 
                 #@show "basis correction"
-                # Correct dual basis to right (co)domain via Hom(U⊗V,W) ≃ Hom(U,U*⊗W)
+                # Correct dual basis to right (co)domain via Hom(U⊗V,W) ≃ Hom(U,V*⊗W)
                
                 basis_dual = [(id(dual(T))⊗ev(W)) ∘ a(dual(T),dual(W),W) ∘ (f⊗id(W)) for f ∈ basis_dual]
 
