@@ -22,13 +22,13 @@ end
 ------------------------------------------------=#
 I26_time = @elapsed begin
     
-B = I2subcategory(6)
+B = I2subcategory(5)
 
-Bs, Bsts, Bststs = simples(B)
+Bs, Bsts = simples(B)
 
 S₁ = simple_subobjects(induction(Bs))
 S₂ = simple_subobjects(induction(Bsts))
-S₃ = simple_subobjects(induction(Bststs))
+
 
 D = Center(B)
 
@@ -50,7 +50,7 @@ I27_time = @elapsed begin
     
     add_simple!(D2, [S₁; S₂; S₃])
 
-    s_matrix_7 = smatrix(D2)
+    #s_matrix_7 = smatrix(D2)
     
 end
     

@@ -120,6 +120,8 @@ function kernel(f::SubcategoryMorphism)
     return sub_k, SubcategoryMorphism(sub_k, domain(f), i)
 end
 
+left_inverse(f::SubcategoryMorphism) = SubcategoryMorphism(codomain(f),domain(f), left_inverse(morphism(f)))
+
 is_simple(X::SubcategoryObject) = is_simple(object(X))
 
 matrix(f::SubcategoryMorphism) = matrix(morphism(f))
@@ -149,4 +151,21 @@ function associator(X::SubcategoryObject, Y::SubcategoryObject, Z::SubcategoryOb
     dom = (X ⊗ Y) ⊗ Z
     cod = X ⊗ (Y ⊗ Z)
     return SubcategoryMorphism(dom,cod, associator(object(X), object(Y), object(Z)))
+end
+
+
+#=-------------------------------------------------
+    Pretty Printing 
+-------------------------------------------------=#
+
+function show(io::IO, X::SubcategoryObject)
+    show(io, """(Subcategory) $(object(X)))""")
+end
+
+function show(io::IO, f::SubcategoryMorphism)
+    show(io, """(Subcategory) $(morphism(f))""")
+end
+
+function show(io::IO, C::RingSubcategory)
+    show(io, """$i-th component fusion category of $(C.category)""")
 end

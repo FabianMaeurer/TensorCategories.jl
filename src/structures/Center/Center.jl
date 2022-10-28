@@ -421,13 +421,14 @@ Return the braiding isomorphism ```X⊗Y → Y⊗X```.
 function braiding(X::CenterObject, Y::CenterObject)
     dom = X.object⊗Y.object
     cod = Y.object⊗X.object
-    braid = zero_morphism(dom, cod)
-    for (s,ys) ∈ zip(simples(parent(X).category), X.γ)
-        proj = basis(Hom(Y.object,s))
-        if length(proj) == 0 continue end
-        incl = basis(Hom(s,Y.object))
-        braid = braid + sum([(i⊗id(X.object))∘ys∘(id(X.object)⊗p) for i ∈ incl, p ∈ proj][:])
-    end
+    # braid = zero_morphism(dom, cod)
+    # for (s,ys) ∈ zip(simples(parent(X).category), X.γ)
+    #     proj = basis(Hom(Y.object,s))
+    #     if length(proj) == 0 continue end
+    #     incl = basis(Hom(s,Y.object))
+    #     braid = braid + sum([(i⊗id(X.object))∘ys∘(id(X.object)⊗p) for i ∈ incl, p ∈ proj][:])
+    # end
+    braid = half_braiding(X,object(Y))
     return Morphism(X⊗Y,Y⊗X,braid)
 end
 

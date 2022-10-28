@@ -259,6 +259,8 @@ matrix(f::ConvolutionMorphism) = matrix(f.m)
 function inv(f::ConvolutionMorphism)
     return Morphism(codomain(f), domain(f), inv(f.m))
 end
+
+left_inverse(f::ConvolutionMorphism) = Morphism(codomain(f),domain(f), left_inverse(f.m))
 #-----------------------------------------------------------------
 #   Simple Objects
 #-----------------------------------------------------------------

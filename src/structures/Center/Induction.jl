@@ -20,29 +20,30 @@ function induction(X::Object, simples::Vector = simples(parent(X)))
                 #@show S,T,W
                 # Set up basis and dual basis
                 
-                basis, basis_dual = dual_basis(Hom(S, W⊗T), Hom(dual(S), dual(W⊗T)))
-                #basis, basis_dual = dual_basis(S,W,T)
-                if length(basis) == 0 
+                #basis, basis_dual = dual_basis(Hom(S, W⊗T), Hom(dual(S), dual(W⊗T)))
+                _basis, basis_dual = basis(Hom(S, W⊗T)), basis(Hom(dual(S)⊗W, dual(T)))
+
+                if length(_basis) == 0 
                     γ_i_temp = vertical_dsum(γ_i_temp, zero_morphism(dom_i, W⊗T⊗X⊗dual(T))) 
                     continue
                 end
                 #@show "dual_transform"
                 # Isomorphism (XY)* ≃ Y*X*
-                dual_transform = dual_monoidal_structure(W,T)
+                #dual_transform = dual_monoidal_structure(W,T)
                 #dual_transform = inv(det(matrix(dual_transform)))*dual_transform
                # @show matrix(dual_transform)
-                basis_dual = [dual_transform ∘ f for f ∈ basis_dual]
+                #basis_dual = [dual_transform ∘ f for f ∈ basis_dual]
                 
 
                 #@show "basis correction"
                 # Correct dual basis to right (co)domain via Hom(U⊗V,W) ≃ Hom(U,V*⊗W)
                
-                basis_dual = [(id(dual(T))⊗ev(W)) ∘ a(dual(T),dual(W),W) ∘ (f⊗id(W)) for f ∈ basis_dual]
+                #basis_dual = [(id(dual(T))⊗ev(W)) ∘ a(dual(T),dual(W),W) ∘ (f⊗id(W)) for f ∈ basis_dual]
 
-                k =  base_ring(X)((id(W)⊗ev(T))∘(associator(W,T,dual(T)))∘(id(W⊗T)⊗basis_dual[1])∘(associator(W⊗T,dual(S),W))∘((basis[1]⊗id(dual(S)))⊗id(W))∘(coev(S)⊗id(W)))
+                corrections = base_ring(X).([(id(W)⊗ev(dual(T))) ∘ (id(W)⊗(spherical(T)⊗id(dual(T)))) ∘ a(W,T,dual(T)) ∘ (f⊗g) ∘ a(S,dual(S),W) ∘ (coev(S)⊗id(W)) for (f,g) ∈ zip(_basis,basis_dual)])
     
                 #@show "component_iso"
-                component_iso = dim(W)*k * sum([a(W,T⊗X,dual(T)) ∘ (a(W,T,X)⊗id(dual(T))) ∘ ((f⊗id(X))⊗g) ∘ a(S⊗X,dual(S),W) for (f,g) ∈ zip(basis, basis_dual)])
+                component_iso = sum([a(W,T⊗X,dual(T)) ∘ (a(W,T,X)⊗id(dual(T))) ∘ ((f⊗id(X))⊗(inv(dim(W))*inv(k)*g)) ∘ a(S⊗X,dual(S),W) for (k,f,g) ∈ zip(corrections,_basis, basis_dual)])
                 #@show "sum"
                 γ_i_temp = vertical_dsum(γ_i_temp, (component_iso))
             end

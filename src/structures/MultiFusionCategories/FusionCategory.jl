@@ -191,6 +191,15 @@ end
 issemisimple(::RingCategory) = true
 ismultiring(::RingCategory) = true
 
+function ismultifusion(C::RingCategory)
+    try 
+        dual.(simples(C))
+    catch 
+        return false
+    end
+    true
+end
+
 is_simple(X::RingCatObject) = sum(X.components) == 1
 
 ==(X::RingCatObject, Y::RingCatObject) = parent(X) == parent(Y) && X.components == Y.components
@@ -576,7 +585,7 @@ function Hom(X::RingCatObject, Y::RingCatObject)
     return RingCatHomSpace(X,Y,basis_mors, VectorSpaces(F))
 end
 
-function express_in_basis(f::RingCatMorphism, base::Vector)
+function express_in_basis(f::RingCatMorphism, base::Vector{RingCatMorphism})
     F = base_ring(domain(f))
     A = Array{elem_type(F),2}(undef,length(base),0)
     b = []

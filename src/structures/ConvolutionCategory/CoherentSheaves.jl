@@ -329,6 +329,9 @@ function matrix(f::CohSheafMorphism)
     diagonal_matrix(matrices(f))
 end
 
+function left_inverse(f::CohSheafMorphism)
+    return Morphism(codomain(f),domain(f), [left_inverse(g) for g ∈ f.m])
+end
 #-----------------------------------------------------------------
 #   Simple Objects
 #-----------------------------------------------------------------

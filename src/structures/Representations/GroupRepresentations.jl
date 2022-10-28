@@ -250,16 +250,6 @@ function +(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
     return Morphism(domain(f), codomain(f), f.map + g.map)
 end
 
-function (F::Field)(f::GroupRepresentationMorphism)
-    D = domain(f)
-    C = codomain(f)
-    if intdim(D) == intdim(C) == 1
-        return F(f.map[1,1])
-    else
-        throw(ErrorException("Cannot coerce"))
-    end
-end
-
 #-------------------------------------------------------------------------
 #   Functionality: (Co)Kernel
 #-------------------------------------------------------------------------
