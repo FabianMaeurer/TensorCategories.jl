@@ -118,7 +118,7 @@ function I2(m)
 	#println(q)
 
 	M=multifusionmultmatrix(m)
-	C=RingCategory(F,vcat([if rem(i,2)==1 join(["Bs",repeat("ts",div(i,2))]) else join(["B",repeat("st",div(i,2))]) end for i in 1:n],[if rem(i,2)==1 join(["Bt",repeat("st",div(i,2))]) else join(["B",repeat("ts",div(i,2))]) end for i in 1:n]))
+	C=RingCategory(F,vcat([rem(i,2)==1 ? join(["Bs",repeat("ts",div(i,2))]) : join(["B",repeat("st",div(i,2))]) for i in 1:n],[if rem(i,2)==1 join(["Bt",repeat("st",div(i,2))]) else join(["B",repeat("ts",div(i,2))]) end for i in 1:n]))
 	set_tensor_product!(C,M)
 
 	#Now set associators using SixJ symbols above
@@ -145,7 +145,7 @@ function I2(m)
 			C.ass[lx+1+n,ly+1+n,lz+1+n,lw+1+n]=matrix(F,gr,gr,[SixJ(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
 		end
 	end
-	
+	set_one!(C, [mod(i,n) == 1 ? 1 : 0 for i ∈ 1:2*n])
 	return C
 end
 

@@ -388,12 +388,33 @@ Base.eltype(::Type{T}) where T <: AbstractHomSpace = Morphism
 
 function (F::Field)(f::Morphism)
     m = matrix(f)
+    b,c = is_scalar_multiple(m, matrix(id(domain(f))))
+    if b 
+        return c
+    end
     m = collect(m)[m .!= 0]
     if size(m) == (1,)
         return F(m[1,1])
     end
     @show size(m)
     throw(ErrorException("Cannot convert to element of $F"))
+end
+
+function is_scalar_multiple(M::MatElem,N::MatElem)
+    n,m = size(M)
+    (i,j) = Tuple(findfirst(e -> M[e...] != 0 && M[e...] != 0, [(i,j) for i ∈ 1:n, j ∈ 1:m]))
+    if i === nothing return false, nothing end
+    k = M[i,j] * inv(N[i,j])
+    for (a,b) ∈ zip(M,N)
+        if a == b == 0 
+            continue
+        elseif a == 0 || b == 0 
+            return false, nothing
+        elseif a * inv(b) != k
+            return false, nothing
+        end
+    end
+    return true,k
 end
 
 function express_in_basis(f::T, B::Vector{T}) where T <: Morphism

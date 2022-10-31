@@ -3,7 +3,7 @@
 #   Induction
 #-------------------------------------------------------------------------------
 
-function induction(X::Object, simples::Vector = simples(parent(X)))
+function induction(X::Object, simples::Vector = simples(parent(X)); parent_category::CenterCategory = Center(parent(X)))
     @assert issemisimple(parent(X)) "Requires semisimplicity"
     Z = dsum([s⊗X⊗dual(s) for s ∈ simples])
     a = associator
@@ -27,18 +27,6 @@ function induction(X::Object, simples::Vector = simples(parent(X)))
                     γ_i_temp = vertical_dsum(γ_i_temp, zero_morphism(dom_i, W⊗T⊗X⊗dual(T))) 
                     continue
                 end
-                #@show "dual_transform"
-                # Isomorphism (XY)* ≃ Y*X*
-                #dual_transform = dual_monoidal_structure(W,T)
-                #dual_transform = inv(det(matrix(dual_transform)))*dual_transform
-               # @show matrix(dual_transform)
-                #basis_dual = [dual_transform ∘ f for f ∈ basis_dual]
-                
-
-                #@show "basis correction"
-                # Correct dual basis to right (co)domain via Hom(U⊗V,W) ≃ Hom(U,V*⊗W)
-               
-                #basis_dual = [(id(dual(T))⊗ev(W)) ∘ a(dual(T),dual(W),W) ∘ (f⊗id(W)) for f ∈ basis_dual]
 
                 corrections = base_ring(X).([(id(W)⊗ev(dual(T))) ∘ (id(W)⊗(spherical(T)⊗id(dual(T)))) ∘ a(W,T,dual(T)) ∘ (f⊗g) ∘ a(S,dual(S),W) ∘ (coev(S)⊗id(W)) for (f,g) ∈ zip(_basis,basis_dual)])
     
@@ -60,7 +48,7 @@ function induction(X::Object, simples::Vector = simples(parent(X)))
         γ[i] = inv(distr_after) ∘ γ[i] ∘ distr_before 
     end
 
-    return CenterObject(CenterCategory(base_ring(X),parent(X)),Z,γ)
+    return CenterObject(parent_category,Z,γ)
 end
 
 

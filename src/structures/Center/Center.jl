@@ -436,9 +436,14 @@ function half_braiding(X::CenterObject, Y::Object)
     simpls = simples(parent(Y))
 
     if is_simple(Y) 
-        k = findfirst(e -> isisomorphic(e, Y)[1], simpls)
-        iso = isisomorphic(Y,simpls[k])[2]
-        return (inv(iso)⊗id(X.object)) ∘ X.γ[k] ∘ (id(X.object)⊗iso)
+        if !(Y ∈ simpls)
+            k = findfirst(e -> isisomorphic(e, Y)[1], simpls)
+            iso = isisomorphic(Y,simpls[k])[2]
+            return (inv(iso)⊗id(X.object)) ∘ X.γ[k] ∘ (id(X.object)⊗iso)
+        else
+            k = indexin([Y],simpls)[1]
+            return X.γ[k]
+        end
     end
     dom = X.object⊗Y
     cod = Y⊗X.object
@@ -478,8 +483,13 @@ dim(X::CenterObject) = dim(X.object)
 Return a vector containing the simple objects of ```C```. The list might be incomplete.
 """
 function simples(C::CenterCategory)
-    if isdefined(C, :simples) return C.simples end
-    C.simples = center_simples(C)
+    if isdefined(C, :simples) 
+        if dim(RingSubcategory(C.category,1))^2 != sum((dim.(C.simples)).^2)
+            @warn "List not complete"
+        end
+        return C.simples 
+    end
+    simples_by_induction!(C)
     return C.simples
 end
 
@@ -668,7 +678,7 @@ function central_projection(dom::CenterObject, cod::CenterObject, f::Morphism, s
         dXi = dual(Xi)
 
         yY = half_braiding(cod, dXi)
-
+        
         ϕ = (ev(dXi)⊗id(Y))∘inv(a(dual(dXi),dXi,Y))∘(spherical(Xi)⊗yY)∘a(Xi,Y,dXi)∘((id(Xi)⊗f)⊗id(dXi))∘(yX⊗id(dXi))∘inv(a(X,Xi,dXi))∘(id(X)⊗coev(Xi))
 
         proj = proj + dim(Xi)*ϕ
@@ -697,4 +707,25 @@ end
 
 function show(io::IO, f::CenterMorphism)
     print(io, "Morphism in $(parent(domain(f)))")
+end
+
+
+#=------------------------------------------------
+    Center by Induction
+------------------------------------------------=#
+
+function simples_by_induction!(C::CenterCategory)
+    S = CenterObject[]
+    d = dim(C.category)^2
+    for s ∈ simples(C.category)
+        induced_s = induction(s, parent_category = C)
+        # for t ∈ S
+        #     while dim(Hom(t, induced_s)) != 0
+        #         induced_s = cokernel(basis(Hom(t,induced_s))[1])[1]
+        #     end
+        # end
+        if induced_s == zero(C) continue end
+        S = [S; simple_subobjects(induced_s)]
+    end
+    add_simple!(C,S)
 end

@@ -352,13 +352,13 @@ function matrix(f::RingCatMorphism)
     return M.m
 end
 
-function (F::Field)(f::RingCatMorphism)
-    if !(domain(f) == codomain(f) && is_simple(domain(f)))
-        throw(ErrorException("Cannot convert Morphism to $F"))
-    end
-    i = findfirst(e -> e == 1, domain(f).components)
-    return F(f.m[i][1,1])
-end
+# function (F::Field)(f::RingCatMorphism)
+#     if !(domain(f) == codomain(f) && is_simple(domain(f)))
+#         throw(ErrorException("Cannot convert Morphism to $F"))
+#     end
+#     i = findfirst(e -> e == 1, domain(f).components)
+#     return F(f.m[i][1,1])
+# end
 
 #-------------------------------------------------------------------------------
 #   Tensor Product
@@ -504,15 +504,30 @@ end
 function kernel(f::RingCatMorphism)
     C = parent(domain(f))
     kernels = [kernel(Morphism(m)) for m ∈ f.m]
-    mats = [matrix(m) for (k,m) ∈ kernels]
+    mats = [matrix(m) for (_,m) ∈ kernels]
     ker = RingCatObject(C,[int_dim(k) for (k,m) ∈ kernels])
 
     return ker, Morphism(ker, domain(f), mats)
 end
 
+function cokernel(f::RingCatMorphism)
+    C = parent(domain(f))
+    cokernels = [cokernel(Morphism(m)) for m ∈ f.m]
+    mats = [matrix(m) for (_,m) ∈ cokernels]
+    coker = RingCatObject(C,[int_dim(k) for (k,m) ∈ cokernels])
+
+    return coker, Morphism(codomain(f),coker, mats)
+end
+
 
 function left_inverse(f::RingCatMorphism)
     inverses = [left_inverse(Morphism(m)) for m ∈ matrices(f)]
+    mats = [matrix(m) for m ∈ inverses]
+    return Morphism(codomain(f), domain(f), mats)
+end
+
+function right_inverse(f::RingCatMorphism)
+    inverses = [right_inverse(Morphism(m)) for m ∈ matrices(f)]
     mats = [matrix(m) for m ∈ inverses]
     return Morphism(codomain(f), domain(f), mats)
 end

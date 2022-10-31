@@ -120,7 +120,15 @@ function kernel(f::SubcategoryMorphism)
     return sub_k, SubcategoryMorphism(sub_k, domain(f), i)
 end
 
+function cokernel(f::SubcategoryMorphism)
+    @assert isabelian(parent(f))
+    c,i = cokernel(morphism(f))
+    sub_c = SubcategoryObject(parent(f), c)
+    return sub_c, SubcategoryMorphism(codomain(f),sub_c, i)
+end
+
 left_inverse(f::SubcategoryMorphism) = SubcategoryMorphism(codomain(f),domain(f), left_inverse(morphism(f)))
+right_inverse(f::SubcategoryMorphism) = SubcategoryMorphism(codomain(f),domain(f), right_inverse(morphism(f)))
 
 is_simple(X::SubcategoryObject) = is_simple(object(X))
 
@@ -159,13 +167,14 @@ end
 -------------------------------------------------=#
 
 function show(io::IO, X::SubcategoryObject)
-    show(io, """(Subcategory) $(object(X)))""")
+    print(io, """(Subcategory) $(object(X))""")
 end
 
 function show(io::IO, f::SubcategoryMorphism)
-    show(io, """(Subcategory) $(morphism(f))""")
+    print(io, """(Subcategory) $(morphism(f))""")
 end
 
 function show(io::IO, C::RingSubcategory)
-    show(io, """$i-th component fusion category of $(C.category)""")
+    i = findfirst(e -> e == C.projector, [c for (c,k) ∈ decompose(one(C.category))])
+    print(io, """$i-th component fusion category of $(C.category)""")
 end
