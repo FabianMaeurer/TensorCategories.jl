@@ -152,9 +152,6 @@ one(C::RingSubcategory) = SubcategoryObject(C,C.projector)
 zero(C::AbstractSubcategory) = SubcategoryObject(C,zero(C.category))
 simples(C::RingSubcategory) = [SubcategoryObject(C,s) for s in C.simples]
 
-spherical(X::SubcategoryObject) = SubcategoryMorphism(X,dual(dual(X)), spherical(object(X)))
-
-
 function associator(X::SubcategoryObject, Y::SubcategoryObject, Z::SubcategoryObject)
     dom = (X ⊗ Y) ⊗ Z
     cod = X ⊗ (Y ⊗ Z)

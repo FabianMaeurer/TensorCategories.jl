@@ -1,7 +1,7 @@
 module TensorCategories
 
 import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show
-import Oscar.AbstractAlgebra.Integers
+
 import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem, FinField,
     FiniteField, GAP, GAPGroup, GAPGroupHomomorphism, GL, GSet, GroupElem, Ideal, MPolyQuo,
     Map, MatElem, MatrixElem, MatrixGroup, MatrixSpace, ModuleIsomorphism, NumberField,
@@ -16,7 +16,10 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
     nf_elem, one, orbit, orbits, order, parent, permutation_matrix, primary_decomposition,
     product, rank, roots, rref, size, solve, solve_left, splitting_field, stabilizer,
     symmetric_group, tensor_product, tr, zero, ∘, ⊕, ⊗, iso_oscar_gap, preimage, is_simple,
-    CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det
+    CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det, load,save,
+    @registerSerializationType, SerializerState, DeserializerState, save_internal, load_internal,
+    save_type_dispatch, load_type_dispatch, encodeType
+
 
 using Memoization
 
@@ -54,9 +57,10 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         DeligneProdMorphism, DeligneProdObject, DeligneProduct, ⊠, op, AbstractHomSpace,
         is_half_braiding, object, distribute_right, distribute_left, is_simple,
         decompose_morphism, TambaraYamagami, RingSubcategory, SubcategoryMorphism,
-        SubcategoryObject
+        SubcategoryObject,load,save
 
-include("Utility/SolveGroebner.jl")
+
+
 include("structures/abstracts.jl")
 include("Utility/Technicallities.jl")
 include("structures/VectorSpaces/VectorSpaces.jl")
@@ -81,6 +85,7 @@ include("structures/Center/Induction.jl")
 include("structures/Center/CenterChecks.jl")
 include("structures/Examples/I2-fusion.jl")
 include("structures/Examples/TambaraYamagami.jl")
+#include("Utility/Serialization.jl")
 
 
 end
