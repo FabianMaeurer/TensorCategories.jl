@@ -5,7 +5,7 @@
 function cat_fr_8122(n) #n gives the number of associator
     K,ζ = CyclotomicField(24)
     
-    dic=include("asso_$n.jl")#This imports a dictionary of associators.
+    dic=include(joinpath(@__DIR__, "asso_$n.jl"))#This imports a dictionary of associators.
 
     #(1,7,8) are class of one in D3/Z3; (2,3,4) are other class (5) is element t_1, (6) is other one
     C = RingCategory(K,["e", "a", "b", "aba", "t", "s", "ba", "ab"])

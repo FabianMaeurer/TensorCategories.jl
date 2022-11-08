@@ -717,6 +717,7 @@ end
 function simples_by_induction!(C::CenterCategory)
     S = CenterObject[]
     d = dim(C.category)^2
+    
     for s ∈ simples(C.category)
         induced_s = induction(s, parent_category = C)
         # for t ∈ S

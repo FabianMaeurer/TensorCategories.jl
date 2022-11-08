@@ -30,5 +30,3 @@ function save_internal(s::SerializerState, C::Category)
     return Dict(v => save_type_dispatch(s, getfield(C,v)) for v ∈ fields)
 end
 
-function load_internal(s::DeserializerState, ::Type{<:Category}, dict::Dict)
-    return 

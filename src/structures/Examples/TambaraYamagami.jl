@@ -64,6 +64,8 @@ function TambaraYamagami(A::GAPGroup, χ = nothing)
     set_associator!(TY, n+1, n+1, n+1, [[zero_mat for _ ∈ 1:n]; inv(a)*matrix(K,[inv(χ(els[i],els[j])) for i ∈ 1:n, j ∈ 1:n])])
     set_one!(TY, [1; [0 for _ ∈ 1:n]])
     set_spherical!(TY, [K(1) for _ ∈ 1:n+1])
+
+    set_name!(TY, "Tambara-Yamagami fusion category over $A")
     return TY
 end
 

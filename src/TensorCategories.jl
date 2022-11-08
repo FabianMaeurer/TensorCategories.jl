@@ -57,7 +57,7 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         DeligneProdMorphism, DeligneProdObject, DeligneProduct, ⊠, op, AbstractHomSpace,
         is_half_braiding, object, distribute_right, distribute_left, is_simple,
         decompose_morphism, TambaraYamagami, RingSubcategory, SubcategoryMorphism,
-        SubcategoryObject,load,save
+        SubcategoryObject,load,save, cat_fr_8122
 
 
 
@@ -85,6 +85,7 @@ include("structures/Center/Induction.jl")
 include("structures/Center/CenterChecks.jl")
 include("structures/Examples/I2-fusion.jl")
 include("structures/Examples/TambaraYamagami.jl")
+include("structures/Examples/VercleyenSingerland/vercleyen_singerland.jl")
 #include("Utility/Serialization.jl")
 
 
