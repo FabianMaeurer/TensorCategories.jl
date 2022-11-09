@@ -146,6 +146,7 @@ function I2(m)
 		end
 	end
 	set_one!(C, [mod(i,n) == 1 ? 1 : 0 for i ∈ 1:2*n])
+	set_name!(C, "I₂($m)")
 	return C
 end
 
@@ -175,6 +176,6 @@ function I2subcategory(m)
 	A[1]=1
 	set_one!(C,A)
 	set_spherical!(C, [F(1) for s ∈ simples(C)])
-	
+	set_name!(C, "Fusion subcategory of I₂($m)")
 	return C
 end

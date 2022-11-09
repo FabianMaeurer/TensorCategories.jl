@@ -9,6 +9,10 @@ mutable struct CenterCategory <: Category
         Z.category = C
         return Z
     end
+
+    function CenterCategory()
+        new()
+    end
 end
 
 struct CenterObject <: Object

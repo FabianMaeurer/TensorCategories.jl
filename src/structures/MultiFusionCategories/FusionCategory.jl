@@ -9,6 +9,7 @@ mutable struct RingCategory <: Category
     spherical::Vector
     twist::Vector
     one::Vector{Int}
+    name::String
 
     function RingCategory(F::Field, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1,1,:])])
         C = new(F, length(mult[1,1,:]), names)
@@ -25,6 +26,10 @@ mutable struct RingCategory <: Category
         #C.dims = [1 for i ∈ 1:length(names)]
         set_spherical!(C, [F(1) for _ ∈ names])
         return C
+    end
+
+    function RingCategory()
+        new()
     end
 
 end
@@ -95,6 +100,10 @@ end
 
 function set_twist!(F::RingCategory, t::Vector)
     F.twist = t
+end
+
+function set_name!(F::RingCategory, name::String)
+    F.name = name
 end
 
 
@@ -564,6 +573,7 @@ function Ising()
 
     set_spherical!(C, [F(1) for s ∈ simples(C)])
 
+    set_name!(C, "Ising fusion category")
     return C
 end
 
@@ -624,7 +634,11 @@ end
 #-------------------------------------------------------------------------------
 
 function show(io::IO, C::RingCategory)
-    print(io, "Fusion Category with $(C.simples) simple objects")
+    if isdefined(C,:name)
+        print(io, "$(C.name)")
+    else
+      print(io, "Fusion Category with $(C.simples) simple objects")
+    end
 end
 
 function show(io::IO, X::RingCatObject)
