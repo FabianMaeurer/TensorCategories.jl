@@ -494,7 +494,7 @@ end
 
 function tmatrix(C::Category, simples = simples(C))
     F=base_ring(C)
-    T=[1//dim(S)*F(tr(braiding(dual(S),S))) for S in simples]
+    T=[1//dim(S)*F(tr(braiding(S,dal(S)))) for S in simples]
     return diagonal_matrix(T)
 end
 
