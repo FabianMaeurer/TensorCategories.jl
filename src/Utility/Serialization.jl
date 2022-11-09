@@ -1,32 +1,53 @@
-encodeType(::Type{CenterCategory}) = "TensorCategories.CenterCategory"
+function save(path::String, C::Category)
+    try 
+        mkdir(path)
+    catch 
+        rm(path, recursive = true)
+        mkdir(path)
+    end
 
-function save_internal(s::SerializerState, C::CenterCategory)
-    if isdefined(C,:simples)
-        return Dict(
-            :base_ring => save_type_dispatch(s, C.base_ring),
-            :category => save_type_dispatch(s, C.category),
-            :simples => save_type_dispatch(s, C.simples)
-        )
+    for field ∈ fieldnames(typeof(C))
+        save(joinpath(path, "$field"), (getfield(C,field)))
+    end
+end
+
+function load(path::AbstractString, T::Type{<:Category})
+    if ismutabletype(T)
+        C = T()
+        for field ∈ fieldnames(T)
+            try
+                val = load(joinpath(path, "$field"), fieldtype(T,field))
+                setfield!(C, field, val)
+            catch 
+                continue
+            end
+        end
+        return C
     else
-        return Dict(
-            :base_ring => save_type_dispatch(s, C.base_ring),
-            :category => save_type_dispatch(s, C.category)
-        )
+        values = [load(joinpath(path, "$field"), fieldtype(T,field)) for field ∈ fieldnames(T)]
+        return T(values...)
     end
 end
 
-function load_internal(s::DeserializerState, ::Type{CenterCategory}, dict::Dict)
-    C = CenterCategory(dict[:base_ring], dict[:category])
-    if :simples ∈ keys(dict)
-        C.simples = dict[:simples]
+#=-------------------------------------------------
+    Arrays 
+-------------------------------------------------=#
+
+function save(path::String, A::Array{<:Any,N}) where N
+    try 
+        mkdir(path)
+    catch 
+        rm(path, recursive = true)
+        mkdir(path)
     end
-    return C
+    dims = size(A)
+    iter = Base.product([1:k for k ∈ dims]...)
+    for i ∈ iter
+        save(joinpath(path, "$i"), A[i...])
+    end
 end
 
-encodeType(T::Type{<:Category}) = "TensorCategories.$T"
-
-function save_internal(s::SerializerState, C::Category)
-    fields = [s for s ∈ fieldnames(typeof(C)) if isdefined(C,s)]
-    return Dict(v => save_type_dispatch(s, getfield(C,v)) for v ∈ fields)
-end
-
+function load(path::String, T::Array{<:Any,N}) where N
+    indecies = [readdir(path)
+    A = [load(joinpath(path, "$(i)")) ]
+    
