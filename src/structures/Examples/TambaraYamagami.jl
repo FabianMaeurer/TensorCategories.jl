@@ -33,7 +33,7 @@ function TambaraYamagami(A::GAPGroup, χ = nothing)
     end
 
     if χ === nothing
-        χ = nondegenerate_bilinear_form(A, ξ^4)
+        χ = nondegenerate_bilinear_form(A, ξ^8)
     end
 
     els = elements(A)
