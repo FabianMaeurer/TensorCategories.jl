@@ -15,7 +15,8 @@ function (B::BilinearForm)(x::GroupElem, y::GroupElem)
 end
 
 #=-------------------------------------------------
-    ToDO: Quelle 
+    ToDO: Centers of graded fusion categories (2009). Gelaki, Naidu, Nikhshych
+            https://msp.org/ant/2009/3-8/ant-v3-n8-p05-s.pdf
 -------------------------------------------------=#
 function TambaraYamagami(A::GAPGroup, χ = nothing)
     n = Int(order(A))

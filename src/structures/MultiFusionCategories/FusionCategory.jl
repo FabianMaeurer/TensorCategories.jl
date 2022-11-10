@@ -3,7 +3,7 @@ mutable struct RingCategory <: Category
     base_ring::Field
     simples::Int64
     simples_names::Vector{String}
-    ass::Array{<:MatElem,4}
+    ass::Array{MatElem,4}
     braiding::Function
     tensor_product::Array{Int,3}
     spherical::Vector
