@@ -23,7 +23,7 @@ function TambaraYamagami(A::GAPGroup, χ = nothing)
     
     m = Int(exponent(A))
 
-    K,ξ = CyclotomicField(4*m, "ξ($(m^4))")
+    K,ξ = CyclotomicField(8*m, "ξ($(8*m))")
     _,x = K["x"]
 
     if is_square(n) 
