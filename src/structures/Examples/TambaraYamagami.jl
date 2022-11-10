@@ -15,7 +15,8 @@ function (B::BilinearForm)(x::GroupElem, y::GroupElem)
 end
 
 #=-------------------------------------------------
-    ToDO: Quelle 
+    ToDO: Centers of graded fusion categories (2009). Gelaki, Naidu, Nikhshych
+            https://msp.org/ant/2009/3-8/ant-v3-n8-p05-s.pdf
 -------------------------------------------------=#
 function TambaraYamagami(A::GAPGroup, χ = nothing)
     n = Int(order(A))
@@ -23,7 +24,7 @@ function TambaraYamagami(A::GAPGroup, χ = nothing)
     
     m = Int(exponent(A))
 
-    K,ξ = CyclotomicField(4*m, "ξ($(m^4))")
+    K,ξ = CyclotomicField(8*m, "ξ($(8*m))")
     _,x = K["x"]
 
     if is_square(n) 
@@ -33,7 +34,7 @@ function TambaraYamagami(A::GAPGroup, χ = nothing)
     end
 
     if χ === nothing
-        χ = nondegenerate_bilinear_form(A, ξ^4)
+        χ = nondegenerate_bilinear_form(A, ξ^8)
     end
 
     els = elements(A)

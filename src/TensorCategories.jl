@@ -16,10 +16,11 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
     nf_elem, one, orbit, orbits, order, parent, permutation_matrix, primary_decomposition,
     product, rank, roots, rref, size, solve, solve_left, splitting_field, stabilizer,
     symmetric_group, tensor_product, tr, zero, ∘, ⊕, ⊗, iso_oscar_gap, preimage, is_simple,
-    CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det, load,save
+    CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det, load,save,
+    factor, zero_matrix
 
 
-using Memoization
+using Memoization, Serialization
 
 export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         GradedVectorSpaces, VectorSpaceObject, simples,
@@ -55,7 +56,7 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         DeligneProdMorphism, DeligneProdObject, DeligneProduct, ⊠, op, AbstractHomSpace,
         is_half_braiding, object, distribute_right, distribute_left, is_simple,
         decompose_morphism, TambaraYamagami, RingSubcategory, SubcategoryMorphism,
-        SubcategoryObject,load,save, cat_fr_8122
+        SubcategoryObject,load,save, cat_fr_8122, E6subfactor
 
 
 
@@ -84,7 +85,9 @@ include("structures/Center/CenterChecks.jl")
 include("structures/Examples/I2-fusion.jl")
 include("structures/Examples/TambaraYamagami.jl")
 include("structures/Examples/VercleyenSingerland/vercleyen_singerland.jl")
-#include("Utility/Serialization.jl")
+include("structures/Examples/E6subfactor.jl")
+
+include("Utility/Serialization.jl")
 
 
 end
