@@ -1,10 +1,9 @@
 function E6subfactor()
-    C24,ξ = CyclotomicField(24,"ξ₂₄")
-    _,x = C24["x"]
-    r3 = -ξ^6 + ξ^2
+    K,ξ = CyclotomicField(24,"ξ₂₄") 
+
+    r3 = -ξ^6 + 2*ξ^2
     r2 = -ξ^5 + ξ^3 + ξ
-    K,v = NumberField(x^2 - r3 - 1, "√(1+√3)")
-    d = 1 + r3
+
     i = ξ^6
     E6 = RingCategory(K,["𝟙","y","x"])
 
@@ -25,7 +24,6 @@ function E6subfactor()
     F1 = inv(r2)*ξ^7*matrix(K,[1 i; 1 -i])
     Fy = inv(r2)*ξ^7*matrix(K,[i 1; -i 1])
 
-    k = inv(r2*v)
     # Fx = matrix(K,[inv(d) inv(d)  k k k -k;
     #       inv(d) -inv(d) k k -k k;
     #       k*ξ^(-10) k*ξ^(-10) inv(r2*d)*ξ^(-5) 1//2*ξ^4 inv(r2*d)*ξ^(-10) 1//2*ξ^(-11);
@@ -41,8 +39,10 @@ function E6subfactor()
                     1 -1 -1//2*(ξ^2-1) 1//2*(ξ^(-4)+i) -1//2*(ξ^(-4)+i) -1//2*ξ^4;
                     -1 1 -1//2*ξ^4 -1//2*(ξ^(-4)+i) 1//2*ξ^10 -1//2*(ξ^2-1)])
 
-    set_associator!(E6,3,3,3,[F1,Fy,Fx])
-    #set_associator!(E6, [transpose(m) for m in E6.ass])
+    P = permutation_matrix(K,[1,2,3,4,5,6])
+
+    set_associator!(E6,3,3,3,[F1,Fy, P*Fx*P])
+    #set_associator!(E6, [inv(m) for m in E6.ass])
     set_name!(E6, "E6 subfactor fusion category")
     set_one!(E6, [1,0,0])
     return E6

@@ -21,6 +21,9 @@ function pentagon_axiom(objects::Vector{<:Object}, log::Bool = false)
         z ∈ objects, w ∈ objects
 
         pentagon_axiom(x,y,z,w) ? nothing : push!(failed, (x,y,z,w))
+        if !log && length(failed) > 0 
+            return false
+        end
     end
 
     if log

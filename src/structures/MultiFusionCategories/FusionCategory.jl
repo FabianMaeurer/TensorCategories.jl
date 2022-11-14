@@ -409,13 +409,12 @@ function tensor_product(f::RingCatMorphism, g::RingCatMorphism)
         d1,d2 = size(A)
         #if d1*d2 == 0 continue end
         for k ∈ 1:C.simples
-            if table[i,j,k] > 0
-                m = zero_morphism(simpl[k]^d1,simpl[k]^d2).m
-                m[k] = A
-
-                for _ ∈ 1:table[i,j,k]
-                    h = h ⊕ RingCatMorphism(simpl[k]^d1,simpl[k]^d2, m)
-                end
+            if (c = table[i,j,k]) > 0
+                m = zero_morphism(simpl[k]^(c*d1),simpl[k]^(c*d2)).m
+                m[k] = kronecker_product(identity_matrix(base_ring(C),c), A)
+                
+                h = h ⊕ RingCatMorphism(simpl[k]^(c*d1),simpl[k]^(c*d2), m)
+                
             end
         end
     end
