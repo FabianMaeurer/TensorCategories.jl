@@ -20,7 +20,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
     factor, zero_matrix
 
 
-using Memoization, Serialization
+using Memoization
 
 export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         GradedVectorSpaces, VectorSpaceObject, simples,
@@ -87,7 +87,7 @@ include("structures/Examples/TambaraYamagami.jl")
 include("structures/Examples/VercleyenSingerland/vercleyen_singerland.jl")
 include("structures/Examples/E6subfactor.jl")
 
-include("Utility/Serialization.jl")
+#include("Utility/Serialization.jl")
 
 
 end

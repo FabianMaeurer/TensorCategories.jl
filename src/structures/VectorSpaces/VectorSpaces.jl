@@ -149,7 +149,7 @@ zero(Vec::VectorSpaces) = VectorSpaceObject(base_ring(Vec), 0)
 
 ==(V::VectorSpaces,W::VectorSpaces) = V.base_ring == W.base_ring
 
-function ==(X::VectorSpaceObject, Y::VectorSpaceObject) where T
+function ==(X::VectorSpaceObject, Y::VectorSpaceObject) 
     basis(X) == basis(Y) && base_ring(X) == base_ring(Y)
 end
 

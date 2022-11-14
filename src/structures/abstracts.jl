@@ -212,7 +212,7 @@ Return the n-fold product object ```X^n```.
 
 Return the tensor product morphism of ```f```and ```g```.
 """
-⊗(f::Morphism, g::Morphism) where {T} = tensor_product(f,g)
+⊗(f::Morphism, g::Morphism) = tensor_product(f,g)
 
 
 dsum(X::T) where T <: Union{Vector,Tuple} = dsum(X...)
