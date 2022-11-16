@@ -41,7 +41,7 @@ function E6subfactor()
 
 
     set_associator!(E6,3,3,3,[F1,Fy,(Fx)])
-    set_associator!(E6, [inv(m) for m in E6.ass])
+    #set_associator!(E6, [inv(m) for m in E6.ass])
     set_name!(E6, "E6 subfactor fusion category")
     set_one!(E6, [1,0,0])
     return E6
