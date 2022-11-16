@@ -17,7 +17,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
     product, rank, roots, rref, size, solve, solve_left, splitting_field, stabilizer,
     symmetric_group, tensor_product, tr, zero, ∘, ⊕, ⊗, iso_oscar_gap, preimage, is_simple,
     CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det, load,save,
-    factor, zero_matrix, identity_matrix
+    factor, zero_matrix, identity_matrix, complex_embeddings
 
 
 using Memoization
@@ -56,7 +56,7 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         DeligneProdMorphism, DeligneProdObject, DeligneProduct, ⊠, op, AbstractHomSpace,
         is_half_braiding, object, distribute_right, distribute_left, is_simple,
         decompose_morphism, TambaraYamagami, RingSubcategory, SubcategoryMorphism,
-        SubcategoryObject,load,save, cat_fr_8122, E6subfactor
+        SubcategoryObject,load,save, cat_fr_8122, E6subfactor, fpdim, set_cannonical_spherical!
 
 
 

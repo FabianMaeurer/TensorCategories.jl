@@ -2,7 +2,7 @@
 
 #One needs to include the wanted associator of the other files ???
 #In total there are 97 different associators; So far only 10 can be used; For the other one also has to check pentagox; Maybe the import does not work for all
-function cat_fr_8122(n) #n gives the number of associator
+function cat_fr_8122(n::Int) #n gives the number of associator
     K,ζ = CyclotomicField(24)
     
     dic=include(joinpath(@__DIR__, "asso_$n.jl"))#This imports a dictionary of associators.

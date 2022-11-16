@@ -90,6 +90,11 @@ function set_spherical!(F::RingCategory, sp::Vector)
     F.spherical = sp
 end
 
+function set_cannonical_spherical!(C::RingCategory)
+    @assert isfusion(C)
+    set_spherical!(C, [fpdim(s)*inv(dim(s)) for s ∈ simples(C)])
+end
+
 function set_one!(F::RingCategory, v::Vector{Int}) 
     F.one = v
 end 
@@ -574,6 +579,19 @@ function Ising()
 
     set_name!(C, "Ising fusion category")
     return C
+end
+
+function ismultifusion(C::RingCategory)
+    try 
+        dual.(simples(C))
+    catch
+        return false
+    end
+    return true
+end
+
+function isfusion(C::RingCategory)
+    ismultifusion(C) && sum(one(C).components) == 1
 end
 
 #-------------------------------------------------------------------------------
