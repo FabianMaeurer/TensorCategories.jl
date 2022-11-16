@@ -39,10 +39,9 @@ function E6subfactor()
                     1 -1 -1//2*(ξ^2-1) 1//2*(ξ^(-4)+i) -1//2*(ξ^(-4)+i) -1//2*ξ^4;
                     -1 1 -1//2*ξ^4 -1//2*(ξ^(-4)+i) 1//2*ξ^10 -1//2*(ξ^2-1)])
 
-    P = permutation_matrix(K,[1,2,3,4,5,6])
 
-    set_associator!(E6,3,3,3,[F1,Fy, P*Fx*P])
-    #set_associator!(E6, [inv(m) for m in E6.ass])
+    set_associator!(E6,3,3,3,[F1,Fy,(Fx)])
+    set_associator!(E6, [inv(m) for m in E6.ass])
     set_name!(E6, "E6 subfactor fusion category")
     set_one!(E6, [1,0,0])
     return E6
