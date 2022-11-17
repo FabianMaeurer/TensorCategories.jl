@@ -388,6 +388,9 @@ Base.eltype(::Type{T}) where T <: AbstractHomSpace = Morphism
 
 function (F::Field)(f::Morphism)
     m = matrix(f)
+    if m == zero(parent(m))
+        return zero(F)
+    end
     b,c = is_scalar_multiple(m, matrix(id(domain(f))))
     if b 
         return c
@@ -402,8 +405,9 @@ end
 
 function is_scalar_multiple(M::MatElem,N::MatElem)
     n,m = size(M)
-    (i,j) = Tuple(findfirst(e -> M[e...] != 0 && M[e...] != 0, [(i,j) for i ∈ 1:n, j ∈ 1:m]))
-    if i === nothing return false, nothing end
+    ind = findfirst(e -> M[e...] != 0 && M[e...] != 0, [(i,j) for i ∈ 1:n, j ∈ 1:m])
+    if ind === nothing return false, nothing end
+    i,j = Tuple(ind)
     k = M[i,j] * inv(N[i,j])
     for (a,b) ∈ zip(M,N)
         if a == b == 0 
@@ -657,12 +661,20 @@ function fpdim(X::Object)
 
     K = base_ring(X)
 
+ 
     A = Array{Int,2}(undef,n,n)
     for i ∈ 1:n
         Y = S[i]
         A[:,i] = [length(basis(Hom(X⊗Y,S[j]))) for j ∈ 1:n]
     end
     
+    if characteristic(K) != 0
+        K = QQBar
+        λ = eigenvalues(matrix(QQ,A),K)
+        filter!(e -> isreal(e), λ)
+        return findmax(e -> abs(e), λ)
+    end
+
     f = complex_embeddings(K)[1]
 
     λ = [k for (k,_) ∈ eigenspaces(matrix(K,A))]

@@ -24,18 +24,17 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
                 _basis, basis_dual = basis(Hom(S, W⊗T)), basis(Hom(dual(S)⊗W, dual(T)))
 
                 if length(_basis) == 0 
-                    γ_i_temp = vertical_dsum(γ_i_temp, zero_morphism(dom_i, W⊗T⊗X⊗dual(T))) 
+                    γ_i_temp = vertical_dsum(γ_i_temp, zero_morphism(dom_i, W⊗((T⊗X)⊗dual(T)))) 
                     continue
                 end
 
                 corrections = base_ring(X).([(id(W)⊗ev(dual(T))) ∘ (id(W)⊗(spherical(T)⊗id(dual(T)))) ∘ a(W,T,dual(T)) ∘ (f⊗g) ∘ a(S,dual(S),W) ∘ (coev(S)⊗id(W)) for (f,g) ∈ zip(_basis,basis_dual)])
-    
+                
                 #@show "component_iso"
                 component_iso = sum([a(W,T⊗X,dual(T)) ∘ (a(W,T,X)⊗id(dual(T))) ∘ ((f⊗id(X))⊗(inv(dim(W))*inv(k)*g)) ∘ a(S⊗X,dual(S),W) for (k,f,g) ∈ zip(corrections,_basis, basis_dual)])
                 #@show "sum"
                 γ_i_temp = vertical_dsum(γ_i_temp, (component_iso))
             end
-            
             γ[i] = horizontal_dsum(γ[i], dim(S)*γ_i_temp)
         end
       

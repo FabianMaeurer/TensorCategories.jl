@@ -17,7 +17,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
     product, rank, roots, rref, size, solve, solve_left, splitting_field, stabilizer,
     symmetric_group, tensor_product, tr, zero, ∘, ⊕, ⊗, iso_oscar_gap, preimage, is_simple,
     CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det, load,save,
-    factor, zero_matrix, identity_matrix, complex_embeddings
+    factor, zero_matrix, identity_matrix, complex_embeddings, QQBar, eigenvalues
 
 
 using Memoization
