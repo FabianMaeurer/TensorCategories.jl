@@ -15,7 +15,7 @@ mutable struct RingCategory <: Category
         C = new(F, length(mult[1,1,:]), names)
         set_tensor_product!(C,mult)
         set_spherical!(C, [F(1) for _ ∈ names])
-
+        set_cannonical_spherical!(C)
         #C.ass = [id(⊗(X,Y,Z)) for X ∈ simples(C), Y ∈ simples(C), Z ∈ simples(C)]
         #C.dims = [1 for i ∈ 1:length(names)]
         return C
@@ -25,6 +25,7 @@ mutable struct RingCategory <: Category
         C = new(F,length(names), names)
         #C.dims = [1 for i ∈ 1:length(names)]
         set_spherical!(C, [F(1) for _ ∈ names])
+        set_cannonical_spherical!(C)
         return C
     end
 
@@ -126,7 +127,7 @@ braiding(X::RingCatObject, Y::RingCatObject) = parent(X).braiding(X,Y)
 
 Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 """
-@memoize Dict function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
+function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)

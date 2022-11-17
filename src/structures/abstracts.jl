@@ -657,20 +657,25 @@ function fpdim(X::Object)
 
     K = base_ring(X)
 
-    A = Array{elem_type(K),2}(undef,n,n)
+    A = Array{Int,2}(undef,n,n)
     for i ∈ 1:n
         Y = S[i]
-        A[:,i] = [dim(Hom(X⊗Y,S[j])) for j ∈ 1:n]
+        A[:,i] = [length(basis(Hom(X⊗Y,S[j]))) for j ∈ 1:n]
     end
-    @show roots(minpoly(matrix(K,A)))
+    
     f = complex_embeddings(K)[1]
 
-    @show λ = [k for (k,_) ∈ eigenspaces(matrix(K,A))]
-    @show (f.(λ))
-    @show filter!(e -> real(f(e)) > 0, λ)
+    λ = [k for (k,_) ∈ eigenspaces(matrix(K,A))]
+    
+    filter!(e -> real(f(e)) > 0, λ)
 
     _,i = findmax(e -> abs(f(e)), λ)
     return λ[i]
+end
+
+function fpdim(C::Category)
+    @assert isfusion(C)
+    sum(fpdim.(simples(C)).^2)
 end
 
 

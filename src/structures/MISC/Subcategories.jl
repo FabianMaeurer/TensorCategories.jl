@@ -81,11 +81,13 @@ end
 function ev(X::SubcategoryObject)
     dom = dual(X)⊗X
     cod = one(parent(X))
-    return SubcategoryMorphism(dom,cod, ev(object(X)))
+    proj = basis(Hom(one(parent(X).category), parent(X).projector))[1]
+    return SubcategoryMorphism(dom,cod, proj ∘ ev(object(X)))
 end
 
 function coev(X::SubcategoryObject)
-    return SubcategoryMorphism(X⊗dual(X),one(parent(X)), coev(object(X)))
+    incl = basis(Hom(parent(X).projector, one(parent(X).category)))[1]
+    return SubcategoryMorphism(X⊗dual(X),one(parent(X)), coev(object(X)) ∘ incl)
 end
     
 function spherical(X::SubcategoryObject)
@@ -158,7 +160,7 @@ function associator(X::SubcategoryObject, Y::SubcategoryObject, Z::SubcategoryOb
     return SubcategoryMorphism(dom,cod, associator(object(X), object(Y), object(Z)))
 end
 
-
+isfusion(C::RingSubcategory) = ismultifusion(C.category)
 #=-------------------------------------------------
     Pretty Printing 
 -------------------------------------------------=#
