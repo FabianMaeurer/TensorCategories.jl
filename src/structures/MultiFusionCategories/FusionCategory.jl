@@ -226,6 +226,7 @@ is_simple(X::RingCatObject) = sum(X.components) == 1
 ==(X::RingCatObject, Y::RingCatObject) = parent(X) == parent(Y) && X.components == Y.components
 ==(f::RingCatMorphism, g::RingCatMorphism) = domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
 
+
 decompose(X::RingCatObject) = [(x,k) for (x,k) ∈ zip(simples(parent(X)), X.components) if k != 0]
 
 inv(f::RingCatMorphism) = RingCatMorphism(codomain(f),domain(f), inv.(f.m))

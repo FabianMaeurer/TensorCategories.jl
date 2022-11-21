@@ -27,8 +27,22 @@ struct CenterMorphism <: Morphism
     m::Morphism
 end
 
+function ==(C::CenterCategory, D::CenterCategory)
+    if !isdefined(C, :simples) || !isdefined(D, :simples)
+        if !isdefined(C, :simples) ⊻ !isdefined(D, :simples)
+            return false
+        else
+            return base_ring(C) == base_ring(D) && C.category == D.category
+        end
+    elseif length(C.simples) != length(D.simples)
+        return false
+    end
+    return base_ring(C) == base_ring(D) && C.category == D.category && *([isequal_without_parent(s,t) for (s,t) ∈ zip(C.simples, D.simples)]...)
+end
 
-
+function isequal_without_parent(X::CenterObject, Y::CenterObject)
+    return object(X) == object(Y) && half_braiding(X) == half_braiding(Y)
+end
 #-------------------------------------------------------------------------------
 #   Center Constructor
 #-------------------------------------------------------------------------------
