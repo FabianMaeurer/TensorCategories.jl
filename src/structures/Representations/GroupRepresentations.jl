@@ -479,7 +479,7 @@ function decompose(σ::GroupRepresentation)
 end
 
 function is_simple(σ::GroupRepresentation)
-    length(decompose(σ)) == 1
+    sum([k for (_,k) ∈ decompose(σ)]) == 1
 end
 #-------------------------------------------------------------------------
 #   Hom Spaces

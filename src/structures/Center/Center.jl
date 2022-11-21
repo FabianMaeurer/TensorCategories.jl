@@ -486,7 +486,7 @@ dim(X::CenterObject) = dim(X.object)
 
 Return a vector containing the simple objects of ```C```. The list might be incomplete.
 """
-function simples(C::CenterCategory)
+function simples(C::CenterCategory; sort = false)
     if isdefined(C, :simples) 
         if dim(RingSubcategory(C.category,1))^2 != sum((dim.(C.simples)).^2)
             @warn "List not complete"
@@ -494,6 +494,9 @@ function simples(C::CenterCategory)
         return C.simples 
     end
     simples_by_induction!(C)
+    if sort 
+        sort_simples_by_dimension!(C)
+    end
     return C.simples
 end
 
@@ -733,4 +736,12 @@ function simples_by_induction!(C::CenterCategory)
         S = [S; simple_subobjects(induced_s)]
     end
     add_simple!(C,S)
+end
+
+function sort_simples_by_dimension!(C::CenterCategory)
+    fp_dims = [fpdim(s) for s ∈ simples(C)]
+    K = base_ring(C)
+    f = complex_embeddings(K)[1]
+    σ = sortperm(fp_dims, by = e -> abs(f(e)))
+    C.simples = C.simples[σ]
 end

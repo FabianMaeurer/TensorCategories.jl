@@ -56,7 +56,8 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         DeligneProdMorphism, DeligneProdObject, DeligneProduct, ⊠, op, AbstractHomSpace,
         is_half_braiding, object, distribute_right, distribute_left, is_simple,
         decompose_morphism, TambaraYamagami, RingSubcategory, SubcategoryMorphism,
-        SubcategoryObject,load,save, cat_fr_8122, E6subfactor, fpdim, set_cannonical_spherical!
+        SubcategoryObject,load,save, cat_fr_8122, E6subfactor, fpdim, set_cannonical_spherical!,
+        normalized_smatrix, sort_simples_by_dimension!
 
 
 

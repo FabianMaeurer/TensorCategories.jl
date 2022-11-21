@@ -496,6 +496,18 @@ function smatrix(C::Category, simples = simples(C))
     return matrix(F,m)
 end
 
+function normalized_smatrix(C::Category, simples = simples(C))
+    d = inv(sqrt(dim(C)))
+    K = base_ring(C)
+    if characteristic(K) == 0
+        f = complex_embeddings(K)[1]
+        if real(f(d)) < 0
+            d = -d
+        end
+    end
+    return d * smatrix(C)
+end
+
 function tmatrix(C::Category, simples = simples(C))
     F=base_ring(C)
     T=[1//dim(S)*F(tr(braiding(S,dual(S)))) for S in simples]

@@ -215,6 +215,12 @@ function ismultifusion(C::RingCategory)
     true
 end
 
+function isfusion(C::RingCategory)
+    ismultifusion(C) && sum(one(C).components) == 1
+end
+
+
+
 is_simple(X::RingCatObject) = sum(X.components) == 1
 
 ==(X::RingCatObject, Y::RingCatObject) = parent(X) == parent(Y) && X.components == Y.components
@@ -582,18 +588,6 @@ function Ising()
     return C
 end
 
-function ismultifusion(C::RingCategory)
-    try 
-        dual.(simples(C))
-    catch
-        return false
-    end
-    return true
-end
-
-function isfusion(C::RingCategory)
-    ismultifusion(C) && sum(one(C).components) == 1
-end
 
 #-------------------------------------------------------------------------------
 #   Hom Spaces
