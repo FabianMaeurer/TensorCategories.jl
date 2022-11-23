@@ -127,7 +127,7 @@ braiding(X::RingCatObject, Y::RingCatObject) = parent(X).braiding(X,Y)
 
 Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 """
-function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
+@memoize Dict function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)
