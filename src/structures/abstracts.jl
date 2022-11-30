@@ -338,7 +338,7 @@ function distribute_right_to_left(X::Vector{T}, Y::Vector{T}, Z::Vector{T}) wher
     dsum([(pxk ⊗ (pyj ⊗ pzi)) ∘ (ixk ⊗ (iyj ⊗ izi)) for (izi, pzi) ∈ zip(iz,pz), (iyj,pyj) ∈ zip(iy,py), (ixk,pxk) ∈ zip(ix,px)][:]...)
 end
 
-inv_associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject) = inv(associator(X,Y,Z))
+inv_associator(X::Object, Y::Object, Z::Object) = inv(associator(X,Y,Z))
 
 
 #------------------------------------------------------
