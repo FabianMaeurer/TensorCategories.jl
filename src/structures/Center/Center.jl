@@ -154,10 +154,11 @@ function tensor_product(X::CenterObject, Y::CenterObject)
     Z = X.object ⊗ Y.object
     γ = Morphism[]
     a = associator
+    inv_a = inv_associator
     s = simples(parent(X.object))
     x,y = X.object, Y.object
     for (S, yX, yY) ∈ zip(s, X.γ, Y.γ)
-        push!(γ, a(S,x,y)∘(yX⊗id(y))∘inv(a(x,S,y))∘(id(x)⊗yY)∘a(x,y,S))
+        push!(γ, a(S,x,y)∘(yX⊗id(y))∘inv_a(x,S,y)∘(id(x)⊗yY)∘a(x,y,S))
     end
     return CenterObject(parent(X), Z, γ)
 end
@@ -249,7 +250,7 @@ function build_center_ideal(Z::Object, simples::Vector = simples(parent(Z)))
             end
             for bi ∈ 1:dim(Homs[j]), ci ∈ 1:dim(Homs[i])
                 b,c = basis(Homs[j])[bi], basis(Homs[i])[ci]
-                l2 = l2 .+ ((vars[j][bi]*vars[i][ci]) .* QQ.(express_in_basis((id(simples[i])⊗b)∘associator(simples[i],Z,simples[j]) ∘ (c⊗id(simples[j])) ∘ inv(associator(Z,simples[i],simples[j])) ∘ (id(Z) ⊗ t), base)))
+                l2 = l2 .+ ((vars[j][bi]*vars[i][ci]) .* QQ.(express_in_basis((id(simples[i])⊗b)∘associator(simples[i],Z,simples[j]) ∘ (c⊗id(simples[j])) ∘ inv_associator(Z,simples[i],simples[j]) ∘ (id(Z) ⊗ t), base)))
             end
             push!(eqs, l1 .-l2)
         end
@@ -543,12 +544,13 @@ Return the (left) dual object of ```X```.
 """
 function dual(X::CenterObject)
     a = associator
+    inv_a = inv_associator
     e = ev(X.object)
     c = coev(X.object)
     γ = Morphism[]
     dX = dual(X.object)
     for (Xi,yXi) ∈ zip(simples(parent(X).category), X.γ)
-        f = (e⊗id(Xi⊗dX))∘inv(a(dX,X.object,Xi⊗dX))∘(id(dX)⊗a(X.object,Xi,dX))∘(id(dX)⊗(inv(yXi)⊗id(dX)))∘(id(dX)⊗inv(a(Xi,X.object,dX)))∘a(dX,Xi,X.object⊗dX)∘(id(dX⊗Xi)⊗c)
+        f = (e⊗id(Xi⊗dX))∘inv_a(dX,X.object,Xi⊗dX)∘(id(dX)⊗a(X.object,Xi,dX))∘(id(dX)⊗(inv(yXi)⊗id(dX)))∘(id(dX)⊗inv_a(Xi,X.object,dX))∘a(dX,Xi,X.object⊗dX)∘(id(dX⊗Xi)⊗c)
         γ = [γ; f]
     end
     return CenterObject(parent(X),dX,γ)
@@ -694,13 +696,14 @@ function central_projection(dom::CenterObject, cod::CenterObject, f::Morphism, s
     D = dim(C)
     proj = zero_morphism(X, Y)
     a = associator
+    inv_a = inv_associator
 
     for (Xi, yX) ∈ zip(simpls, dom.γ)
         dXi = dual(Xi)
 
         yY = half_braiding(cod, dXi)
         
-        ϕ = (ev(dXi)⊗id(Y))∘inv(a(dual(dXi),dXi,Y))∘(spherical(Xi)⊗yY)∘a(Xi,Y,dXi)∘((id(Xi)⊗f)⊗id(dXi))∘(yX⊗id(dXi))∘inv(a(X,Xi,dXi))∘(id(X)⊗coev(Xi))
+        ϕ = (ev(dXi)⊗id(Y))∘inv_a(dual(dXi),dXi,Y)∘(spherical(Xi)⊗yY)∘a(Xi,Y,dXi)∘((id(Xi)⊗f)⊗id(dXi))∘(yX⊗id(dXi))∘inv_a(X,Xi,dXi)∘(id(X)⊗coev(Xi))
 
         proj = proj + dim(Xi)*ϕ
     end

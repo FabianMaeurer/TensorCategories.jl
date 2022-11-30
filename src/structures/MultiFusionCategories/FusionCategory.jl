@@ -132,7 +132,7 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 
     C = parent(X)
 
-    if zero(C) in [X,Y,Z]
+    if zero(C) == X ⊗ Y ⊗ Z
         return zero_morphism(zero(C),zero(C))
     end
     F = base_ring(C)
@@ -188,6 +188,66 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     return inv(distr_after) ∘ m ∘ distr_before
 end
 
+function inv_associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
+    @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
+
+    C = parent(X)
+
+    if zero(C) == X ⊗ Y ⊗ Z
+        return zero_morphism(zero(C),zero(C))
+    end
+    F = base_ring(C)
+    n = C.simples
+    dom = X⊗Y⊗Z
+
+    C_associator = C.ass
+
+    #---------------------------------
+    # associators on simple objects
+    #---------------------------------
+    if is_simple(X) && is_simple(Y) && is_simple(Z)
+        i = findfirst(e -> e ≠ 0, X.components)
+        j = findfirst(e -> e ≠ 0, Y.components)
+        k = findfirst(e -> e ≠ 0, Z.components)
+        return inv(Morphism(dom,dom, C_associator[i,j,k,:]))
+    end
+
+    #---------------------------------
+    # associators for arbitrary objects
+    #---------------------------------
+    simple_objects = simples(parent(X))
+
+    X_summands = vcat([[s for l ∈ 1:X.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
+    Y_summands = vcat([[s for l ∈ 1:Y.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
+    Z_summands = vcat([[s for l ∈ 1:Z.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
+
+    #=-------------------------------------------------
+        Distribution 
+    -------------------------------------------------=#
+
+    # Before
+    distr_before = distribute_left(X_summands, Y) ⊗ id(Z)
+    distr_before = (dsum([distribute_right(Xᵢ,Y_summands) for Xᵢ ∈ X_summands]...)⊗id(Z)) ∘ distr_before
+    distr_before = distribute_left([Xᵢ⊗Yⱼ for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:], Z) ∘ distr_before
+    distr_before = dsum([distribute_right(Xᵢ⊗Yⱼ,Z_summands) for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:]...) ∘ distr_before
+    
+    # After
+    distr_after = id(X)⊗distribute_left(Y_summands, Z)
+    distr_after = (id(X)⊗dsum([distribute_right(Yⱼ,Z_summands) for Yⱼ ∈ Y_summands]...)) ∘ distr_after
+    distr_after = distribute_left(X_summands, Y⊗Z) ∘ distr_after
+    YZ_arr = [Yⱼ⊗Zₖ for  Zₖ ∈ Z_summands, Yⱼ ∈ Y_summands][:]
+    distr_after = dsum([distribute_right(Xᵢ, YZ_arr) for Xᵢ ∈ X_summands]) ∘ distr_after
+
+    #-----------------------------------
+    # Associator morphism
+    #-----------------------------------
+    m = zero_morphism(zero(C),zero(C))
+    for x ∈ X_summands, y ∈ Y_summands, z ∈ Z_summands
+        m = m ⊕ inv(associator(x,y,z))
+    end
+
+    return inv(distr_before) ∘ m ∘ distr_after
+end
 
 function vector_permutation(A::Vector,B::Vector)
     perm = Int[]
