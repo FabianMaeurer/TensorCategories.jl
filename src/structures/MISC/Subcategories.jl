@@ -25,14 +25,16 @@ base_ring(C::RingSubcategory) = base_ring(C.category)
     Constructors 
 -------------------------------------------------=#
 
-function RingSubcategory(C::Category,i::Int)
+
+function RingSubcategory(C::Category,i::Int...)
     @assert ismultitensor(C)
-    𝟙ᵢ = decompose(one(C))[i][1] 
+    𝟙ᵢ = dsum([decompose(one(C))[iₖ][1] for iₖ ∈ i]...)
     projection = [𝟙ᵢ⊗S⊗𝟙ᵢ for S ∈ simples(C)]
     filter!(e -> e != zero(C), projection)
     return RingSubcategory(C,projection,𝟙ᵢ)
 end
 
+RingSubcategory(C::Category,i::Vector{Int}) = RingSubcategory(C,i...)
 #=-------------------------------------------------
     Functionality 
 -------------------------------------------------=#
@@ -160,7 +162,7 @@ function associator(X::SubcategoryObject, Y::SubcategoryObject, Z::SubcategoryOb
     return SubcategoryMorphism(dom,cod, associator(object(X), object(Y), object(Z)))
 end
 
-isfusion(C::RingSubcategory) = ismultifusion(C.category)
+isfusion(C::RingSubcategory) = ismultifusion(C.category) && length(decompose(C.projector)) == 1
 #=-------------------------------------------------
     Pretty Printing 
 -------------------------------------------------=#
@@ -174,6 +176,6 @@ function show(io::IO, f::SubcategoryMorphism)
 end
 
 function show(io::IO, C::RingSubcategory)
-    i = findfirst(e -> e == C.projector, [c for (c,k) ∈ decompose(one(C.category))])
-    print(io, """$i-th component fusion category of $(C.category)""")
+   # i = findfirst(e -> e == C.projector, [c for (c,k) ∈ decompose(one(C.category))])
+    print(io, """Ring subcategory of $(C.category)""")
 end

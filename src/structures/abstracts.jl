@@ -57,7 +57,7 @@ parent(f::Morphism) = parent(domain(f))
 Return the base ring ```k``` of the ```k```-linear parent category of ```X```.
 """
 base_ring(X::Object) = base_ring(parent(X))
-base_ring(X::Morphism) = parent(domain(X)).base_ring
+base_ring(X::Morphism) = base_ring(parent(domain(X)))
 
 """
     base_ring(C::Category)
@@ -74,7 +74,7 @@ base_group(X::Object) = parent(X).base_group
 #---------------------------------------------------------
 
 function ⊕(T::Tuple{S,Vector{R},Vector{R2}},X::S1) where {S <: Object,S1 <: Object, R <: Morphism, R2 <: Morphism}
-    Z,ix,px = dsum(T[1],X,true)
+    Z,ix,px = dsum_with_morphisms(T[1],X)
     incl = vcat([ix[1] ∘ t for t in T[2]], ix[2:2])
     proj = vcat([t ∘ px[1] for t in T[3]], px[2:2])
     return Z, incl, proj
@@ -95,7 +95,7 @@ function dsum_with_morphisms(X::Object...)
     if length(X) == 1
         return X[1], [id(X[1])],[id(X[1])]
     end
-    Z,ix,px = dsum(X[1],X[2],true)
+    Z,ix,px = dsum_with_morphisms(X[1],X[2])
     for Y in X[3:end]
         Z,ix,px = ⊕((Z,ix,px),Y)
     end
@@ -265,6 +265,7 @@ function vertical_dsum(f::Vector{M}) where M <: Morphism
 
 end
 
+is_simple(X::Object) = sum([dim(Hom(X,s)) for s ∈ simples(parent(X))]) == 1
 #---------------------------------------------------------
 #   tensor_product
 #---------------------------------------------------------
@@ -363,6 +364,19 @@ islinear(C::Category) = isabelian(C)
 
 issemisimple(C::Category) = ismultitensor(C)
 
+@alias is_fusion isfusion 
+@alias is_mutltifusion ismultifusion 
+@alias is_tensor istensor
+@alias is_multitensor ismultitensor
+@alias is_semisimple issemisimple
+@alias is_ring isring
+@alias is_multiring ismultiring
+@alias is_monoidal ismonoidal 
+@alias is_abelian isabelian
+@alias is_additive isadditive
+@alias is_linear islinear
+
+
 function image(f::Morphism)
     C,c = cokernel(f)
     return kernel(c)
@@ -374,6 +388,37 @@ end
 -(f::Morphism) = (-1)*f
 
 getindex(C::Category, x::Int) = simples(C)[x]
+
+#=-------------------------------------------------
+    Multifusion Categories 
+-------------------------------------------------=#
+
+function decompose(C::Category)
+    @assert is_multitensor(C)
+    one_components = [o for (o,_) in decompose(one(C), simples(C))] 
+
+    if length(one_components) == 1
+        return [C]
+    end
+    S = simples(C)
+    structure = [length(filter!(e -> e != zero(C), [𝟙ᵢ⊗s⊗𝟙ⱼ for s ∈ S])) for 𝟙ⱼ ∈ one_components, 𝟙ᵢ ∈ one_components]
+
+    components = []
+    comp = [1]
+    while Set(vcat(components...)) != Set([i for i ∈ 1:length(one_components)])
+        js = findall(e -> e != 0, filter(e -> e != structure[comp[end],comp[end]], structure[:,comp[end]]))
+        if length(js) == 0
+            components = [components; [comp]]
+            k = findfirst(e -> !(e ∈ vcat(components...)), 1:length(one_components))
+            if k === nothing
+                continue
+            end
+            comp = [k]
+        end
+        comp = [comp; js]
+    end
+    return [RingSubcategory(C,c) for c ∈ components]
+end
 
 #-------------------------------------------------------
 # Hom Spaces

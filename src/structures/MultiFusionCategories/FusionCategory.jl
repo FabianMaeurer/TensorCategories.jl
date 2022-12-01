@@ -117,9 +117,9 @@ dim(X::RingCatObject) = base_ring(X)(tr(id(X)))
 
 (::Type{Int})(x::fmpq) = Int(numerator(x))
 
-
 braiding(X::RingCatObject, Y::RingCatObject) = parent(X).braiding(X,Y)
 
+associator(C::RingCategory) = C.ass
 
 
 """
@@ -333,6 +333,10 @@ function dual(X::RingCatObject)
 end
 
 function coev(X::RingCatObject)
+    if X == zero(parent(X))
+        return zero_morphism(one(parent(X)),X)
+    end
+
     if is_simple(X)
         return simple_objects_coev(X)
     end
@@ -352,6 +356,9 @@ function coev(X::RingCatObject)
 end
 
 function ev(X::RingCatObject)
+    if X == zero(parent(X))
+        return zero_morphism(X,one(parent(X)))
+    end
     if is_simple(X)
         return simple_objects_ev(X)
     end
@@ -362,7 +369,7 @@ function ev(X::RingCatObject)
     dual_summands = dual.(summands)
     d = length(summands)
 
-    e = horizontal_dsum([i == j ? ev(summands[i]) : zero_morphism(dual_summands[j]⊗summands[i], 𝟙)  for j ∈ 1:d, i ∈ 1:d][:])
+    e = horizontal_dsum(RingCatMorphism[i == j ? ev(summands[i]) : zero_morphism(dual_summands[j]⊗summands[i], 𝟙)  for j ∈ 1:d, i ∈ 1:d][:])
 
     distr = dsum([distribute_right(x,summands) for x ∈ dual_summands]) ∘ distribute_left(dual_summands, X)
 
@@ -636,7 +643,6 @@ function Ising()
     set_tensor_product!(C,M)
 
     set_associator!(C,2,3,2, matrices(-id(C[3])))
-    set_associator!(C,3,1,3, matrices(id(C[1])⊕(id(C[2]))))
     set_associator!(C,3,2,3, matrices((id(C[1]))⊕(-id(C[2]))))
     z = zero(MatrixSpace(F,0,0))
     set_associator!(C,3,3,3, [z, z, inv(a)*matrix(F,[1 1; 1 -1])])

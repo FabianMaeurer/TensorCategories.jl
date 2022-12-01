@@ -51,9 +51,9 @@ end
 
 Return the Drinfeld center of ```C```.
 """
-function Center(C::Category)
+function Center(C::Category; equivalence = false)
     @assert issemisimple(C) "Semisimplicity required"
-    return CenterCategory(base_ring(C), C)
+    return CenterCategory(base_ring(C),C)
 end
 
 function Morphism(dom::CenterObject, cod::CenterObject, m::Morphism)
@@ -120,6 +120,19 @@ spherical(X::CenterObject) = Morphism(X,dual(dual(X)), spherical(X.object))
 #   Direct Sum & Tensor Product
 #-------------------------------------------------------------------------------
 
+
+function dsum_with_morphisms(X::CenterObject, Y::CenterObject)
+    S = simples(parent(X.object))
+    Z,(ix,iy),(px,py) = dsum_with_morphisms(X.object, Y.object)
+
+    γZ = [(id(S[i])⊗ix)∘(X.γ[i])∘(px⊗id(S[i])) + (id(S[i])⊗iy)∘(Y.γ[i])∘(py⊗id(S[i])) for i ∈ 1:length(S)]
+
+    CZ = CenterObject(parent(X), Z, γZ)
+    ix,iy = CenterMorphism(X,CZ,ix), CenterMorphism(Y,CZ, iy)
+    px,py = CenterMorphism(CZ,X,px), CenterMorphism(CZ,Y,py)
+    return CZ,[ix,iy],[px,py]
+end
+
 """
     dsum(X::CenterObject, Y::CenterObject)
 
@@ -127,7 +140,7 @@ Return the direct sum object of ```X``` and ```Y```.
 """
 function dsum(X::CenterObject, Y::CenterObject)
     S = simples(parent(X.object))
-    Z,(ix,iy),(px,py) = dsum(X.object, Y.object,true)
+    Z,(ix,iy),(px,py) = dsum_with_morphisms(X.object, Y.object)
 
     γZ = [(id(S[i])⊗ix)∘(X.γ[i])∘(px⊗id(S[i])) + (id(S[i])⊗iy)∘(Y.γ[i])∘(py⊗id(S[i])) for i ∈ 1:length(S)]
     return CenterObject(parent(X), Z, γZ)
@@ -453,14 +466,14 @@ end
 
 function half_braiding(X::CenterObject, Y::Object)
     simpls = simples(parent(Y))
-
+    Y in simpls
     if is_simple(Y) 
         if !(Y ∈ simpls)
             k = findfirst(e -> isisomorphic(e, Y)[1], simpls)
             iso = isisomorphic(Y,simpls[k])[2]
             return (inv(iso)⊗id(X.object)) ∘ X.γ[k] ∘ (id(X.object)⊗iso)
         else
-            k = indexin([Y],simpls)[1]
+            k = findfirst(e -> e == Y, simpls)
             return X.γ[k]
         end
     end

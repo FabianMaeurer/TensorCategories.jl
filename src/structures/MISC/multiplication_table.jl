@@ -28,7 +28,7 @@ function pretty_print_semisimple(m::Object,simples::Vector{<:Object},names::Vect
         i = findfirst(x -> x == o, simples)
         if i == nothing i = findfirst(x -> isisomorphic(x,o)[1], simples) end
 
-        str = length(str) > 0 ? str*"⊕"*"$(names[i])^$k" : str*"$(names[i])^$k"
+        str = length(str) > 0 ? str*"⊕"* (k > 1 ? "$(names[i])^$k" : "$(names[i])") : (k > 1 ? str*"$(names[i])^$k" : str*"$(names[i])")
     end
     return str
 end
