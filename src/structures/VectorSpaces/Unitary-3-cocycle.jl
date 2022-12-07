@@ -2,8 +2,7 @@
 	Author: Liam Rogel
 ------------------------------------------------=#
 
-GAP.Packages.install("HAP")
-GAP.Packages.load("HAP") 
+
 
 function exponent_of_third_homology(G)
 	torsion_coefficients=GAP.Globals.GroupHomology(G.X,3)
@@ -42,7 +41,7 @@ function unitary_3_cocycle(G,n,ρ,i)
 	return Cocycle(G,D)
 end
 
-function twisted_graded_vector_spaces(G,i) #Inputs finite group G and the number of Cocycle we want in the twisted_graded_vector_spaces
+function GradedVectorSpaces(G::GAPGroup,i::Int) #Inputs finite group G and the number of Cocycle we want in the twisted_graded_vector_spaces
     n=exponent_of_third_homology(G)
     K,ρ=CyclotomicField(Int(n),"ρ") #for some reason cyclotomic_field wants Int64...
     ξ=unitary_3_cocycle(G,n,ρ,i) #One must know whetever we have i many classes

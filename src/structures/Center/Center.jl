@@ -466,7 +466,7 @@ end
 
 function half_braiding(X::CenterObject, Y::Object)
     simpls = simples(parent(Y))
-    Y in simpls
+
     if is_simple(Y) 
         if !(Y ∈ simpls)
             k = findfirst(e -> isisomorphic(e, Y)[1], simpls)
@@ -621,8 +621,10 @@ else return ```(false,nothing)```.
 """
 function isisomorphic(X::CenterObject, Y::CenterObject)
     S = simples(parent(X))
+
     if [dim(Hom(X,s)) for s ∈ S] == [dim(Hom(Y,s)) for s ∈ S]
-        return true, nothing
+        _, iso = isisomorphic(X.object, Y.object)
+        return true, central_projection(X,Y,iso)
     else
         return false, nothing
     end

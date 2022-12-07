@@ -218,6 +218,8 @@ function dsum(X::VectorSpaceObject, Y::VectorSpaceObject, morphisms::Bool = fals
     return V,[ix,iy], [px,py]
 end
 
+dsum_with_morphisms(X::VectorSpaceObject, Y::VectorSpaceObject) = dsum(X,Y,true)
+
 product(X::VectorSpaceObject, Y::VectorSpaceObject, projections::Bool = false) = projections ? dsum(X,Y, projections)[[1,3]] : dsum(X,Y)
 coproduct(X::VectorSpaceObject, Y::VectorSpaceObject, injections::Bool = false) = injections ? dsum(X,Y, injections)[[1,2]] : dsum(X,Y)
 
@@ -294,7 +296,7 @@ function compose(f::VectorSpaceMorphism...)
     if [isisomorphic(domain(f[i]), codomain(f[i-1]))[1] for i ∈ 2:length(f)] != trues(length(f)-1)
         throw(ErrorException("Morphisms not compatible"))
     end
-    return VSMorphism(*([g.m for g ∈ f]...),domain(f[1]),codomain(f[end]))
+    return Morphism(domain(f[1]),codomain(f[end]),*([g.m for g ∈ f]...))
 end
 
 

@@ -59,7 +59,8 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         SubcategoryObject,load,save, cat_fr_8122, E6subfactor, fpdim, set_cannonical_spherical!,
         normalized_smatrix, sort_simples_by_dimension!, set_spherical!, inv_associator
 
-
+        GAP.Packages.install("HAP")
+        GAP.Packages.load("HAP") 
 
 include("structures/abstracts.jl")
 include("Utility/Technicallities.jl")
@@ -68,6 +69,7 @@ include("structures/MISC/ProductCategory.jl")
 include("structures/MISC/OppositeCategory.jl")
 include("structures/MISC/DeligneTensorProduct.jl")
 include("structures/VectorSpaces/Cocycles.jl")
+include("structures/VectorSpaces/Unitary-3-cocycle.jl")
 include("structures/VectorSpaces/GradedVectorSpaces.jl")
 include("structures/set.jl")
 include("structures/Representations/Representations.jl")
