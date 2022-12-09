@@ -364,8 +364,33 @@ islinear(C::Category) = isabelian(C)
 
 issemisimple(C::Category) = ismultitensor(C)
 
+function is_modular(C::Category) 
+     try
+        return det(smatrix(C)) != 0 
+    catch 
+        return false 
+    end
+end
+
+function is_spherical(C::Category)
+    @assert is_multifusion(C) "Generic checking only available for multifusion categories"
+
+    obj_type = typeof(one(C))
+    if  !hasmethod(spherical, Tuple{obj_type})
+        return false
+    end
+    try 
+        for x ∈ simples(C)
+            spherical(x)
+        end
+        return true
+    catch
+        return false
+    end
+end
+
 @alias is_fusion isfusion 
-@alias is_mutltifusion ismultifusion 
+@alias is_multifusion ismultifusion 
 @alias is_tensor istensor
 @alias is_multitensor ismultitensor
 @alias is_semisimple issemisimple

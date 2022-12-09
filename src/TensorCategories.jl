@@ -17,7 +17,8 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
     product, rank, roots, rref, size, solve, solve_left, splitting_field, stabilizer,
     symmetric_group, tensor_product, tr, zero, ∘, ⊕, ⊗, iso_oscar_gap, preimage, is_simple,
     CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det, load,save,
-    factor, zero_matrix, identity_matrix, complex_embeddings, QQBar, eigenvalues, @alias
+    factor, zero_matrix, identity_matrix, complex_embeddings, QQBar, eigenvalues, @alias,
+    abelian_group, PcGroup, is_modular
 
 
 using Memoization
@@ -27,9 +28,9 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         VectorSpaceMorphism, parent, dsum,⊕, domain, codomain, compose, ∘, ^, ⊗,
         tensor_product,==, associator, basis, id, getindex, one, zero, Forgetful,
         Functor, Sets, SetObject, SetMorphism, inv, product, coproduct,
-        features, issemisimple, isabelian, ismonoidal, ×, ∐, RepresentationCategory,
-        GroupRepresentationCategory, ismultiring, ismultifusion, isring, ismultitensor,
-        istensor, isfusion,
+        features, is_semisimple, is_abelian, is_monoidal, ×, ∐, RepresentationCategory,
+        GroupRepresentationCategory, is_multiring, is_multifusion, is_ring, is_multitensor,
+        is_tensor, is_fusion, is_multifusion, is_abelian, is_ring,
          FusionCategory, VSHomSpace,HomSpace,
         Hom, GVSHomSpace, HomFunctor, VSObject, GVSObject, GVSMorphism, SetHomSet,
         HomSet, Cocycle, trivial_3_cocylce,*,
@@ -57,7 +58,8 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         is_half_braiding, object, distribute_right, distribute_left, is_simple,
         decompose_morphism, TambaraYamagami, RingSubcategory, SubcategoryMorphism,
         SubcategoryObject,load,save, cat_fr_8122, E6subfactor, fpdim, set_cannonical_spherical!,
-        normalized_smatrix, sort_simples_by_dimension!, set_spherical!, inv_associator
+        normalized_smatrix, sort_simples_by_dimension!, set_spherical!, inv_associator,
+        is_modular, is_spherical
 
         GAP.Packages.install("HAP")
         GAP.Packages.load("HAP") 

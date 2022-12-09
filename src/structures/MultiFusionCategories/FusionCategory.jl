@@ -4,7 +4,7 @@ mutable struct RingCategory <: Category
     simples::Int64
     simples_names::Vector{String}
     ass::Array{MatElem,4}
-    braiding::Function
+    braiding::Array{MatElem,3}
     tensor_product::Array{Int,3}
     spherical::Vector
     twist::Vector
@@ -78,7 +78,7 @@ function set_tensor_product!(F::RingCategory, tensor::Array{Int,3})
     F.ass = ass
 end
 
-function set_braiding!(F::RingCategory, braiding::Function)
+function set_braiding!(F::RingCategory, braiding::Array{MatElem,3})
     F.braiding = braiding
 end
 
@@ -112,12 +112,33 @@ function set_name!(F::RingCategory, name::String)
     F.name = name
 end
 
+function set_simples_name!(F::RingCategory, names::Vector{String})
+    F.simples_names = names
+end
 
 dim(X::RingCatObject) = base_ring(X)(tr(id(X)))
 
 (::Type{Int})(x::fmpq) = Int(numerator(x))
 
-braiding(X::RingCatObject, Y::RingCatObject) = parent(X).braiding(X,Y)
+function braiding(X::RingCatObject, Y::RingCatObject) 
+    if is_simple(X) && is_simple(Y)
+        i = findfirst(e -> e != 0, X.components)
+        j = findfirst(e -> e != 0, Y.components)
+        return Morphism(X⊗Y,Y⊗X, parent(X).braiding[i,j,:])
+    end
+
+    simple_objects = simples(parent(X))
+
+    X_summands = vcat([[s for l ∈ 1:X.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
+    Y_summands = vcat([[s for l ∈ 1:Y.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
+
+    braid = dsum([braiding(x,y) for x ∈ X_summands, y ∈ Y_summands][:])
+
+    distr_before = dsum([distribute_right(x,Y_summands) for x ∈ X_summands]) ∘ distr_left(X_summands,Y) 
+    distr_after = dsum([distribute_left(y, X_summands) for y ∈ Y_summands]) ∘ distribute_right(Y,X_summands)
+    
+    return inv(distr_after) ∘ braid ∘ distr_before
+end
 
 associator(C::RingCategory) = C.ass
 
@@ -620,40 +641,6 @@ function right_inverse(f::RingCatMorphism)
     return Morphism(codomain(f), domain(f), mats)
 end
 
-#-------------------------------------------------------------------------------
-#   Examples
-#-------------------------------------------------------------------------------
-
-function Ising()
-    F,ξ = CyclotomicField(16, "ξ₁₆")
-    a = ξ^2 + ξ^14
-    C = RingCategory(F,["𝟙", "χ", "X"])
-    M = zeros(Int,3,3,3)
-
-    M[1,1,:] = [1,0,0]
-    M[1,2,:] = [0,1,0]
-    M[1,3,:] = [0,0,1]
-    M[2,1,:] = [0,1,0]
-    M[2,2,:] = [1,0,0]
-    M[2,3,:] = [0,0,1]
-    M[3,1,:] = [0,0,1]
-    M[3,2,:] = [0,0,1]
-    M[3,3,:] = [1,1,0]
-
-    set_tensor_product!(C,M)
-
-    set_associator!(C,2,3,2, matrices(-id(C[3])))
-    set_associator!(C,3,2,3, matrices((id(C[1]))⊕(-id(C[2]))))
-    z = zero(MatrixSpace(F,0,0))
-    set_associator!(C,3,3,3, [z, z, inv(a)*matrix(F,[1 1; 1 -1])])
-
-    set_one!(C,[1,0,0])
-
-    set_spherical!(C, [F(1) for s ∈ simples(C)])
-
-    set_name!(C, "Ising fusion category")
-    return C
-end
 
 
 #-------------------------------------------------------------------------------

@@ -76,7 +76,7 @@ end
     https://mathoverflow.net/questions/374021/is-there-a-non-degenerate-quadratic-form-on-every-finite-abelian-group
 ------------------------------------------------=#
 
-function nondegenerate_bilinear_form(G::GAPGroup, ξ::FieldElem = CyclotomicField(exponent(G))[2])
+function nondegenerate_bilinear_form(G::GAPGroup, ξ::FieldElem = CyclotomicField(Int(exponent(G)))[2])
     @assert is_abelian(G)
 
     function nondeg(x::GroupElem, y::GroupElem, ξ::FieldElem)
@@ -91,6 +91,67 @@ function nondegenerate_bilinear_form(G::GAPGroup, ξ::FieldElem = CyclotomicFiel
     end
 
     return BilinearForm(G,parent(ξ),ξ,nondeg)
+end
+
+#-------------------------------------------------------------------------------
+#   Examples
+#-------------------------------------------------------------------------------
+
+function Ising()
+    F,ξ = CyclotomicField(16, "ξ₁₆")
+    # a = ξ^2 + ξ^14
+    # C = RingCategory(F,["𝟙", "χ", "X"])
+    # M = zeros(Int,3,3,3)
+
+    # M[1,1,:] = [1,0,0]
+    # M[1,2,:] = [0,1,0]
+    # M[1,3,:] = [0,0,1]
+    # M[2,1,:] = [0,1,0]
+    # M[2,2,:] = [1,0,0]
+    # M[2,3,:] = [0,0,1]
+    # M[3,1,:] = [0,0,1]
+    # M[3,2,:] = [0,0,1]
+    # M[3,3,:] = [1,1,0]
+
+    # set_tensor_product!(C,M)
+
+    # set_associator!(C,2,3,2, matrices(-id(C[3])))
+    # set_associator!(C,3,2,3, matrices((id(C[1]))⊕(-id(C[2]))))
+    # z = zero(MatrixSpace(F,0,0))
+    # set_associator!(C,3,3,3, [z, z, inv(a)*matrix(F,[1 1; 1 -1])])
+
+    # set_one!(C,[1,0,0])
+
+    # set_spherical!(C, [F(1) for s ∈ simples(C)])
+
+    G = abelian_group(PcGroup, [2])
+    χ = nondegenerate_bilinear_form(G,ξ^8)
+
+    C = TambaraYamagami(G)
+
+    set_simples_name!(C,["𝟙","χ","X"])
+
+    set_name!(C, "Ising fusion category")
+
+    # set one of the four possible braidings 
+    # http://arxiv.org/abs/2010.00847v1 (Ex. 4.13)
+    ξ = gen(base_ring(C))
+
+    α = ξ^2
+
+    braid = Array{MatElem,3}(undef, 3,3,3)
+    a,b = elements(G)
+    braid[1,1,:] = χ(a,a).*matrices(id(C[1]))
+    braid[1,2,:] = braid[2,1,:] = χ(a,b).*matrices(id(C[2]))
+    braid[2,2,:] = χ(b,b).*matrices(id(C[1]))
+
+    braid[1,3,:] = braid[3,1,:] = matrices(id(C[3]))
+    braid[2,3,:] = braid[3,2,:] = ξ^4 .* matrices(id(C[3]))
+
+    braid[3,3,:] = α .* matrices((id(C[1]) ⊕ (inv(ξ^4) * id(C[2]))))
+
+    set_braiding!(C,braid)
+    return C
 end
 
     
