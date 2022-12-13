@@ -41,10 +41,15 @@ function unitary_3_cocycle(G,n,ρ,i)
 	return Cocycle(G,D)
 end
 
-function GradedVectorSpaces(G::GAPGroup,i::Int) #Inputs finite group G and the number of Cocycle we want in the twisted_graded_vector_spaces
+function TwistedGradedVectorSpaces(G::GAPGroup,i::Int = 2) #Inputs finite group G and the number of Cocycle we want in the twisted_graded_vector_spaces
+	GAP.Packages.install("HAP")
+	GAP.Packages.load("HAP") 
     n=exponent_of_third_homology(G)
-    K,ρ=CyclotomicField(Int(n),"ρ") #for some reason cyclotomic_field wants Int64...
-    ξ=unitary_3_cocycle(G,n,ρ,i) #One must know whetever we have i many classes
+	if n == 1
+		i = 1
+	end
+    K,ρ=CyclotomicField(6*Int(n),"ρ") #for some reason cyclotomic_field wants Int64...
+    ξ=unitary_3_cocycle(G,n,ρ^6,i) #One must know whetever we have i many classes
     return GradedVectorSpaces(K,G,ξ)
     #pentagon_axiom(VecGtw)
 end

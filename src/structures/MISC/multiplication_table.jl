@@ -18,6 +18,8 @@ function print_multiplication_table(simples::Vector{<:Object}, names::Vector{Str
     return [pretty_print_semisimple(s⊗t,simples,names) for s ∈ simples, t ∈ simples]
 end
 
+print_multiplication_table(C::Category) = print_multiplication_table(simples(C), simples_names(C))
+
 function pretty_print_semisimple(m::Object,simples::Vector{<:Object},names::Vector{String})
     facs = decompose(m, simples)
 
@@ -28,7 +30,7 @@ function pretty_print_semisimple(m::Object,simples::Vector{<:Object},names::Vect
         i = findfirst(x -> x == o, simples)
         if i == nothing i = findfirst(x -> isisomorphic(x,o)[1], simples) end
 
-        str = length(str) > 0 ? str*"⊕"* (k > 1 ? "$(names[i])^$k" : "$(names[i])") : (k > 1 ? str*"$(names[i])^$k" : str*"$(names[i])")
+        str = length(str) > 0 ? str*" ⊕ "* (k > 1 ? "$(names[i])^$k" : "$(names[i])") : (k > 1 ? str*"$(names[i])^$k" : str*"$(names[i])")
     end
     return str
 end

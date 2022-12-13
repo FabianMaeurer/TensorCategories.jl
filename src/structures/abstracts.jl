@@ -631,6 +631,7 @@ end
 function eigenspaces(f::Morphism)
     @assert domain(f) == codomain(f) "Not an endomorphism"
 
+    #@show factor(minpoly(matrix(f)))
     values = collect(keys(eigenspaces(matrix(f))))
 
     return Dict(λ => kernel(f-λ*id(domain(f)))[1] for λ ∈ values)
@@ -665,6 +666,10 @@ function unique_simples(simples::Vector{<:Object})
     return unique_simples
 end
 
+function simples_names(C::Category) 
+    @assert is_semisimple(C)
+    return ["X$i" for i ∈ 1:length(simples(C))]
+end
 
 #=-------------------------------------------------
     Duals in Fusion Categories

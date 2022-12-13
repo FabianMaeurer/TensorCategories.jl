@@ -433,7 +433,7 @@ end
 #   Functors
 #-----------------------------------------------------------------
 
-struct PullbackFunctor <: Functor
+struct PullbackFunctor <: AbstractFunctor
     domain::Category
     codomain::Category
     obj_map
@@ -463,7 +463,7 @@ function Pullback(CY::CohSheaves, CX::CohSheaves, f::Function)
     return PullbackFunctor(CY, CX, obj_map, mor_map)
 end
 
-struct PushforwardFunctor <: Functor
+struct PushforwardFunctor <: AbstractFunctor
     domain::Category
     codomain::Category
     obj_map

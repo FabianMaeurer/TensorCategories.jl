@@ -1,0 +1,108 @@
+function RingCategory(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:length(simples(C))])
+    @assert is_multifusion(C)
+
+    S = simples(C)
+    n = length(S)
+    F = base_ring(C)
+
+    mult = Array{Int,3}(undef,n,n,n)
+
+    for i ∈ 1:n, j ∈ 1:n
+        mult[i,j,:] = [int_dim(Hom(S[i]⊗S[j], S[k])) for k ∈ 1:n]
+    end
+
+    # Define RingCategory
+    skel_C = RingCategory(F,names)
+
+    set_tensor_product!(skel_C,mult)
+
+    set_associator!(skel_C, six_j_symbols(C, S))
+
+    # Try to set spherical
+    try 
+        set_spherical!(skel_C,[F(spherical(s)) for s ∈ S])
+    catch
+    end
+
+    set_one!(skel_C, [int_dim(Hom(one(C), s)) for s ∈ S])
+
+    set_name!(skel_C, "Skeletization of $C")
+
+    return skel_C, SkeletizationFunctor(C, skel_C)
+end
+
+function six_j_symbols(C::Category, S = simples(C))
+    @assert is_multifusion(C)
+
+    n = length(S)
+    ass = Array{MatElem,4}(undef,n,n,n,n)
+
+    for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n
+        before, before_incl, before_proj = decompose_morphism(S[i]⊗S[j]⊗S[k], S)
+        after,  after_incl,  after_proj  = decompose_morphism(S[i]⊗(S[j]⊗S[k]), S)
+
+        ass_mor = associator(S[i],S[j],S[k])
+
+        for l ∈ 1:n
+            before_incl_l = filter(f -> domain(f) == S[l], before_incl)
+            before_proj_l = filter(f -> codomain(f) == S[l], before_proj)
+            after_incl_l = filter(f -> domain(f) == S[l], after_incl)
+            after_proj_l = filter(f -> codomain(f) == S[l], after_proj)
+            
+            if length(before_incl_l) == 0
+                ass[i,j,k,l] = zero_matrix(base_ring(C),0,0)
+                continue
+            end
+
+            ass[i,j,k,l] = matrix(vertical_dsum(after_proj_l) ∘ ass_mor ∘ horizontal_dsum(before_incl_l))
+        end
+    end
+    return ass
+end
+
+struct SkeletizationFunctor <: AbstractFunctor
+    domain::Category
+    codomain::Category
+end
+
+function SkeletizationFunctor(C::Category)
+    SkeletizationFunctor(C,RingCategory(C))
+end
+
+function (F::SkeletizationFunctor)(X::Object)
+    return RingCatObject(codomain(F), [int_dim(Hom(X,s)) for s ∈ simples(C)])
+end
+
+function (F::SkeletizationFunctor)(f::Morphism)
+    X = domain(F)
+    Y = codomain(F)
+
+    S = simples(domain(f))
+    n = length(S)
+
+    before, before_incl, before_proj = decompose_morphism(X, S)
+    after,  after_incl,  after_proj  = decompose_morphism(Y, S)
+
+    m = Vector{MatElem}(undef,n)
+
+    for l ∈ 1:n
+        before_incl_l = filter(f -> domain(f) == S[l], before_incl)
+        before_proj_l = filter(f -> codomain(f) == S[l], before_proj)
+        after_incl_l = filter(f -> domain(f) == S[l], after_incl)
+        after_proj_l = filter(f -> codomain(f) == S[l], after_proj)
+        
+        if length(before_incl_l) == 0
+            m[l] = zero_matrix(base_ring(C),0,0)
+            continue
+        end
+        m[l] = matrix(dsum(after_proj_l) ∘ ass_mor ∘ dsum(before_incl_l))
+    end
+
+    return Morphism(F(X),F(Y),m)
+end
+
+function show(io::IO, F::SkeletizationFunctor)
+    print(io,"Skeletal projection of $(domain(F))")
+end
+
+

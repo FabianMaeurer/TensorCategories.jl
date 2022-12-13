@@ -116,6 +116,8 @@ function set_simples_name!(F::RingCategory, names::Vector{String})
     F.simples_names = names
 end
 
+simples_names(C::RingCategory) = C.simples_names
+
 dim(X::RingCatObject) = base_ring(X)(tr(id(X)))
 
 (::Type{Int})(x::fmpq) = Int(numerator(x))

@@ -18,7 +18,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
     symmetric_group, tensor_product, tr, zero, ∘, ⊕, ⊗, iso_oscar_gap, preimage, is_simple,
     CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det, load,save,
     factor, zero_matrix, identity_matrix, complex_embeddings, QQBar, eigenvalues, @alias,
-    abelian_group, PcGroup, is_modular
+    abelian_group, PcGroup, is_modular, subgroup
 
 
 using Memoization
@@ -59,10 +59,9 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         decompose_morphism, TambaraYamagami, RingSubcategory, SubcategoryMorphism,
         SubcategoryObject,load,save, cat_fr_8122, E6subfactor, fpdim, set_cannonical_spherical!,
         normalized_smatrix, sort_simples_by_dimension!, set_spherical!, inv_associator,
-        is_modular, is_spherical
+        is_modular, is_spherical, TwistedGradedVectorSpaces, six_j_symbols, simples_names
 
-        GAP.Packages.install("HAP")
-        GAP.Packages.load("HAP") 
+
 
 include("structures/abstracts.jl")
 include("Utility/Technicallities.jl")
@@ -80,6 +79,7 @@ include("structures/Functors.jl")
 include("structures/ConvolutionCategory/CoherentSheaves.jl")
 include("structures/ConvolutionCategory/ConvolutionCategory.jl")
 include("structures/MultiFusionCategories/FusionCategory.jl")
+include("structures/MultiFusionCategories/Skeletization.jl")
 include("structures/MISC/multiplication_table.jl")
 include("structures/MISC/PentagonAxiom.jl")
 include("structures/MISC/Subcategories.jl")

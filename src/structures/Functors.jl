@@ -1,8 +1,8 @@
-abstract type Functor end
+abstract type AbstractFunctor end
 
 
-domain(F::Functor) = F.domain
-codomain(F::Functor) = F.codomain
+domain(F::AbstractFunctor) = F.domain
+codomain(F::AbstractFunctor) = F.codomain
 
 #-------------------------------------------------------------------------------
 #   Functors Functionality
@@ -14,7 +14,7 @@ codomain(F::Functor) = F.codomain
 #   Forgetful Functors
 #-------------------------------------------------------------------------------
 
-struct Forgetful <: Functor
+struct Forgetful <: AbstractFunctor
     domain::Category
     codomain::Category
     obj_map
@@ -27,8 +27,8 @@ function Forgetful(C::GradedVectorSpaces, D::VectorSpaces)
     return Forgetful(C,D,obj_map, mor_map)
 end
 
-(F::Functor)(x::T) where {T <: Object} = F.obj_map(x)
-(F::Functor)(x::T) where {T <: Morphism} = F.mor_map(x)
+(F::AbstractFunctor)(x::T) where {T <: Object} = F.obj_map(x)
+(F::AbstractFunctor)(x::T) where {T <: Morphism} = F.mor_map(x)
 
 function show(io::IO, F::Forgetful)
     print(io, "Forgetful functor from $(domain(F)) to $(codomain(F))")
@@ -37,7 +37,7 @@ end
 #   Hom Functors
 #-------------------------------------------------------------------------------
 
-struct HomFunctor <: Functor
+struct HomFunctor <: AbstractFunctor
     domain::Category
     codomain::Category
     obj_map
@@ -79,28 +79,28 @@ end
 #   Tensor Product Functors
 #-------------------------------------------------------------------------------
 
-struct TensorFunctor <: Functor
+struct TensorProductFunctor <: AbstractFunctor
     domain::ProductCategory{2}
     codomain::Category
     obj_map
     mor_map
 end
 
-function TensorFunctor(C::Category)
+function TensorProductFunctor(C::Category)
     domain = ProductCategory(C,C)
     obj_map = X -> X[1]⊗X[2]
     mor_map = f -> f[1]⊗f[2]
-    return TensorFunctor(domain, C, obj_map, mor_map)
+    return TensorProductFunctor(domain, C, obj_map, mor_map)
 end
 
-⊗(C::Category) = TensorFunctor(C)
+⊗(C::Category) = TensorProductFunctor(C)
 
 
 #-------------------------------------------------------------------------------
 #   Restriction and Induction
 #-------------------------------------------------------------------------------
 
-struct GRepRestriction <: Functor
+struct GRepRestriction <: AbstractFunctor
     domain::GroupRepresentationCategory
     codomain::GroupRepresentationCategory
     obj_map
@@ -115,7 +115,7 @@ function Restriction(C::GroupRepresentationCategory, D::GroupRepresentationCateg
     return GRepRestriction(C,D,obj_map,mor_map)
 end
 
-struct GRepInduction <: Functor
+struct GRepInduction <: AbstractFunctor
     domain::GroupRepresentationCategory
     codomain::GroupRepresentationCategory
     obj_map
@@ -173,3 +173,38 @@ end
 # function show(io::IO, F::DualFunctor)
 #     show(io, "Duality Functor in $(F.domain)")
 # end
+
+#=----------------------------------------------------------
+    Just a Functor 
+----------------------------------------------------------=#
+
+struct Functor <: AbstractFunctor
+    domain::Category
+    codomain::Category
+    obj_map
+    mor_map
+end
+
+#=----------------------------------------------------------
+    Induction Functor 
+----------------------------------------------------------=#
+
+struct InductionFunctor <: AbstractFunctor
+    domain::Category
+    codomain::Category
+    obj_map
+    mor_map
+end
+
+function Induction(C::Category)
+    @assert ismultifusion(C)
+    obj_map = x -> induction(x)
+    mor_map = induction_mor_map
+    return InductionFunctor(C,Center(C),obj_map,mor_map)
+end
+
+function induction_mor_map(f::Morphism)
+    S = simples(parent(domain(f)))
+
+    return dsum([id(s)⊗f⊗id(dual(s)) for s ∈ S])
+end

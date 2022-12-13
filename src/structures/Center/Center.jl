@@ -76,6 +76,7 @@ Return the onderlying object in ```𝒞```.
 """
 object(X::CenterObject) = X.object
 
+morphism(f::CenterMorphism) = f.m
 
 isfusion(C::CenterCategory) = true
 
@@ -620,11 +621,12 @@ Check if ```X≃Y```. Return ```(true, m)``` where ```m```is an isomorphism if t
 else return ```(false,nothing)```.
 """
 function isisomorphic(X::CenterObject, Y::CenterObject)
+    # TODO: Fix This. How to compute a central isomorphism?
     S = simples(parent(X))
 
     if [dim(Hom(X,s)) for s ∈ S] == [dim(Hom(Y,s)) for s ∈ S]
         _, iso = isisomorphic(X.object, Y.object)
-        return true, central_projection(X,Y,iso)
+        return true, Morphism(X,Y,central_projection(X,Y,iso))
     else
         return false, nothing
     end
@@ -672,6 +674,12 @@ function cokernel(f::CenterMorphism)
 end
 
 
+function left_inverse(f::CenterMorphism)
+    X = domain(f)
+    Y = codomain(f)
+    l_inv = central_projection(Y,X,left_inverse(morphism(f)))
+    return Morphism(Y,X,l_inv)
+end
 
 #-------------------------------------------------------------------------------
 #   Hom Spaces
