@@ -8,7 +8,7 @@ function RingCategory(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:le
     mult = Array{Int,3}(undef,n,n,n)
 
     for i ∈ 1:n, j ∈ 1:n
-        mult[i,j,:] = [int_dim(Hom(S[i]⊗S[j], S[k])) for k ∈ 1:n]
+        mult[i,j,:] = [int_dim(Hom(S[k],S[i]⊗S[j])) for k ∈ 1:n]
     end
 
     # Define RingCategory
@@ -38,23 +38,33 @@ function six_j_symbols(C::Category, S = simples(C))
     ass = Array{MatElem,4}(undef,n,n,n,n)
 
     for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n
-        before, before_incl, before_proj = decompose_morphism(S[i]⊗S[j]⊗S[k], S)
-        after,  after_incl,  after_proj  = decompose_morphism(S[i]⊗(S[j]⊗S[k]), S)
+        X = S[i] ⊗ S[j] ⊗ S[k]
+        Y = S[i] ⊗ (S[j] ⊗ S[k])
+        summands = vcat([[x for _ ∈ 1:k] for (x,k) ∈ decompose(X, S)]...)
 
-        ass_mor = associator(S[i],S[j],S[k])
+        Z, incl, proj = dsum_with_morphisms(summands...)
+
+        _,before = isisomorphic(Z,X)
+        _,after  = isisomorphic(Y,Z)
+
+        ass_mor = after ∘ associator(S[i],S[j],S[k]) ∘ before
 
         for l ∈ 1:n
-            before_incl_l = filter(f -> domain(f) == S[l], before_incl)
-            before_proj_l = filter(f -> codomain(f) == S[l], before_proj)
-            after_incl_l = filter(f -> domain(f) == S[l], after_incl)
-            after_proj_l = filter(f -> codomain(f) == S[l], after_proj)
+            before_incl_l = filter(f -> domain(f) == S[l], incl)
+            after_proj_l = filter(f -> codomain(f) == S[l], proj)
             
             if length(before_incl_l) == 0
                 ass[i,j,k,l] = zero_matrix(base_ring(C),0,0)
                 continue
             end
 
-            ass[i,j,k,l] = matrix(vertical_dsum(after_proj_l) ∘ ass_mor ∘ horizontal_dsum(before_incl_l))
+            m = length(before_incl_l)
+            F = base_ring(C)
+            ass[i,j,k,l] = zero_matrix(F,m,m)
+            for q ∈ 1:m, p ∈ 1:m
+                ass[i,j,k,l][p,q] = F(after_proj_l[p] ∘ ass_mor ∘ before_incl_l[q])
+            end
+    
         end
     end
     return ass

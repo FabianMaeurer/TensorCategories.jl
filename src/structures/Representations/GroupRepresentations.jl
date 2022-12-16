@@ -179,7 +179,7 @@ end
 
 Check whether σ and τ are isomorphic. If true return the isomorphism.
 """
-function isisomorphic(σ::GroupRepresentation, τ::GroupRepresentation)
+@memoize Dict function isisomorphic(σ::GroupRepresentation, τ::GroupRepresentation)
     @assert parent(σ) == parent(τ) "Mismatching parents"
 
     if intdim(σ) != intdim(τ) return false, nothing end
@@ -403,6 +403,8 @@ function dsum(ρ::GroupRepresentation, τ::GroupRepresentation, morphisms::Bool 
 
     return S, [incl_ρ, incl_τ], [proj_ρ, proj_τ]
 end
+
+dsum_with_morphisms(σ::GroupRepresentation, τ::GroupRepresentation) = dsum(σ,τ,true)
 
 """
     dsum(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)

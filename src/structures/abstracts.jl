@@ -594,7 +594,7 @@ end
 function decompose(X::Object, S = simples(parent(X)))
     C = parent(X)
     @assert issemisimple(C) "Category not semisimple"
-    dimensions = [int_dim(Hom(X,s)) for s ∈ S]
+    dimensions = [int_dim(Hom(s,X)) for s ∈ S]
     return [(s,d) for (s,d) ∈ zip(S,dimensions) if d > 0]
 end
 
