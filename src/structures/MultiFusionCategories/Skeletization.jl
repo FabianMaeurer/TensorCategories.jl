@@ -37,17 +37,36 @@ function six_j_symbols(C::Category, S = simples(C))
     n = length(S)
     ass = Array{MatElem,4}(undef,n,n,n,n)
 
+    objects = []
+    isos = []
+
     for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n
         X = S[i] ⊗ S[j] ⊗ S[k]
         Y = S[i] ⊗ (S[j] ⊗ S[k])
+
         summands = vcat([[x for _ ∈ 1:k] for (x,k) ∈ decompose(X, S)]...)
 
         Z, incl, proj = dsum_with_morphisms(summands...)
 
-        _,before = isisomorphic(Z,X)
-        _,after  = isisomorphic(Y,Z)
+        if X ∈ objects
+            before = isos[findfirst(e -> e == X, objects)]
+        else
+            _,before = isisomorphic(Z,X)
+            isos = [isos; before]
+            objects = [objects; X]
+        end
 
-        ass_mor = after ∘ associator(S[i],S[j],S[k]) ∘ before
+        if Y ∈ objects
+            after = isos[findfirst(e -> e == Y, objects)]
+        else
+            _,after = isisomorphic(Z,Y)
+            isos = [isos; after]
+            objects = [objects; Y]
+        end
+
+    
+
+        ass_mor = inv(after) ∘ associator(S[i],S[j],S[k]) ∘ before
 
         for l ∈ 1:n
             before_incl_l = filter(f -> domain(f) == S[l], incl)
@@ -62,7 +81,7 @@ function six_j_symbols(C::Category, S = simples(C))
             F = base_ring(C)
             ass[i,j,k,l] = zero_matrix(F,m,m)
             for q ∈ 1:m, p ∈ 1:m
-                ass[i,j,k,l][p,q] = F(after_proj_l[p] ∘ ass_mor ∘ before_incl_l[q])
+                ass[i,j,k,l][p,q] = F(after_proj_l[q] ∘ ass_mor ∘ before_incl_l[p])
             end
     
         end

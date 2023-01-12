@@ -37,7 +37,7 @@ function unitary_3_cocycle(G,n,ρ,i)
 			for k in elements(G)
 				#print(f(g.X,h.X,k.X))
 				exponent=GAP.Globals.Position(Elts,f(g.X,h.X,k.X))-1
-				push!(D,(g,h,k)=>ρ^exponent)
+				push!(D,(k,h,g)=>ρ^exponent)
 			end
 		end
 	end
