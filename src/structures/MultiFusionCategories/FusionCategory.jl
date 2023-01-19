@@ -120,7 +120,7 @@ simples_names(C::RingCategory) = C.simples_names
 
 dim(X::RingCatObject) = base_ring(X)(tr(id(X)))
 
-(::Type{Int})(x::fmpq) = Int(numerator(x))
+#(::Type{Int})(x::fmpq) = Int(numerator(x))
 
 function braiding(X::RingCatObject, Y::RingCatObject) 
     if is_simple(X) && is_simple(Y)
@@ -299,7 +299,7 @@ function ismultifusion(C::RingCategory)
 end
 
 function isfusion(C::RingCategory)
-    ismultifusion(C) && sum(one(C).components) == 1
+    ismultifusion(C) && (sum(one(C).components) == 1)
 end
 
 

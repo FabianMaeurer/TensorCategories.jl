@@ -11,6 +11,9 @@ function exponent_of_third_homology(G)
 end
 
 function unitary_3_cocycle(G,n,ρ,i) 
+	GAP.Packages.install("HAP")
+	GAP.Packages.load("HAP") 
+
 	x=gens(symmetric_group(Int(n)))[1]  #We create a cyclic group of order n
 	B,g=subgroup(x)
 	D = Dict{NTuple{3,elem_type(G)},elem_type(parent(ρ))}()

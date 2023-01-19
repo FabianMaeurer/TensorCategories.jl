@@ -99,37 +99,37 @@ end
 
 function Ising()
     F,ξ = CyclotomicField(16, "ξ₁₆")
-    # a = ξ^2 + ξ^14
-    # C = RingCategory(F,["𝟙", "χ", "X"])
-    # M = zeros(Int,3,3,3)
+    a = ξ^2 + ξ^14
+    C = RingCategory(F,["𝟙", "χ", "X"])
+    M = zeros(Int,3,3,3)
 
-    # M[1,1,:] = [1,0,0]
-    # M[1,2,:] = [0,1,0]
-    # M[1,3,:] = [0,0,1]
-    # M[2,1,:] = [0,1,0]
-    # M[2,2,:] = [1,0,0]
-    # M[2,3,:] = [0,0,1]
-    # M[3,1,:] = [0,0,1]
-    # M[3,2,:] = [0,0,1]
-    # M[3,3,:] = [1,1,0]
+    M[1,1,:] = [1,0,0]
+    M[1,2,:] = [0,1,0]
+    M[1,3,:] = [0,0,1]
+    M[2,1,:] = [0,1,0]
+    M[2,2,:] = [1,0,0]
+    M[2,3,:] = [0,0,1]
+    M[3,1,:] = [0,0,1]
+    M[3,2,:] = [0,0,1]
+    M[3,3,:] = [1,1,0]
 
-    # set_tensor_product!(C,M)
+    set_tensor_product!(C,M)
 
-    # set_associator!(C,2,3,2, matrices(-id(C[3])))
-    # set_associator!(C,3,2,3, matrices((id(C[1]))⊕(-id(C[2]))))
-    # z = zero(MatrixSpace(F,0,0))
-    # set_associator!(C,3,3,3, [z, z, inv(a)*matrix(F,[1 1; 1 -1])])
+    set_associator!(C,2,3,2, matrices(-id(C[3])))
+    set_associator!(C,3,2,3, matrices((id(C[1]))⊕(-id(C[2]))))
+    z = zero(MatrixSpace(F,0,0))
+    set_associator!(C,3,3,3, [z, z, inv(a)*matrix(F,[1 1; 1 -1])])
 
-    # set_one!(C,[1,0,0])
+    set_one!(C,[1,0,0])
 
-    # set_spherical!(C, [F(1) for s ∈ simples(C)])
+    set_spherical!(C, [F(1) for s ∈ simples(C)])
 
-    G = abelian_group(PcGroup, [2])
-    χ = nondegenerate_bilinear_form(G,ξ^8)
+    # G = abelian_group(PcGroup, [2])
+    # χ = nondegenerate_bilinear_form(G,ξ^8)
 
-    C = TambaraYamagami(G)
+    # C = TambaraYamagami(G)
 
-    set_simples_name!(C,["𝟙","χ","X"])
+    # set_simples_name!(C,["𝟙","χ","X"])
 
     set_name!(C, "Ising fusion category")
 
