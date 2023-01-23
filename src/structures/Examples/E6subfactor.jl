@@ -40,7 +40,7 @@ function E6subfactor()
                     -1 1 -1//2*ξ^4 -1//2*(ξ^(-4)+i) 1//2*ξ^10 -1//2*(ξ^2-1)])
 
     set_associator!(E6,2,2,2,[F1,Fx,Fy])
-    #set_associator!(E6, [transpose(m) for m in E6.ass])
+    #set_associator!(E6, [inv(m) for m in E6.ass])
     set_name!(E6, "E6 subfactor fusion category")
     set_one!(E6, [1,0,0])
     return E6
