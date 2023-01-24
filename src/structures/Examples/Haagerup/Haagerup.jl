@@ -1,4 +1,4 @@
-@doc""" 
+""" 
 
     HaagerupH3([p1 = 1, p2 = 2])
 
@@ -6,7 +6,7 @@ Build the Haagerup H₃ subfactor category. The category is build as RingCategor
 
 https://arxiv.org/pdf/1906.01322
 
-where p1,p2 are parameters for the different possible sets of associators.
+where p1,p2 = ±1 are parameters for the different possible sets of associators.
 """
 function HaagerupH3(p1 = 1, p2 = 1)
     _,x = QQ["x"]
