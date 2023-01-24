@@ -16,3 +16,18 @@ function ==(X::T,Y::T) where T <: Union{Morphism, Category, Object}
     return true
 end
             
+#=----------------------------------------------------------
+    Replace terms in Expression 
+----------------------------------------------------------=#
+
+function replace!(e, old, new)
+    for (i,a) in enumerate(e.args)
+        if a==old
+            e.args[i] = new
+        elseif a isa Expr
+            replace!(a, old, new)
+        end
+        ## otherwise do nothing
+    end
+    e
+end
