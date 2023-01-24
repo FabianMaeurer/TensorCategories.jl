@@ -10,10 +10,10 @@ where p1,p2 = ±1 are parameters for the different possible sets of associators.
 """
 function HaagerupH3(p1 = 1, p2 = 1)
     _,x = QQ["x"]
-    K,_ = NumberField(x^8 - 18*x^6 - 1217*x^4 + 19794*x^2 + 113569)
+    K,_ = NumberField(x^16 + 8*x^15 - 140*x^13 - 2798*x^12 - 14604*x^11 + 49816*x^10 + 378660*x^9 + 1657809*x^8 + 4206068*x^7 - 44420456*x^6 - 146239416*x^5 - 43179044*x^4 + 161447664*x^3 + 6489256272*x^2 + 6383583360*x + 11201692752)
 
     _,x = K["x"]
-    r13 = roots(x^2-13)[1]
+    r13 = roots(x^2-13)[2]
 
     H = RingCategory(K,["𝟙", "α", "α∗", "ρ", "αρ", "α∗ρ"])
 
@@ -45,13 +45,11 @@ function HaagerupH3(p1 = 1, p2 = 1)
 
     set_one!(H,[1,0,0,0,0,0])
 
-    A  = 1//2*(r13 - 3)
-    B  = 1//3*(r13 - 2)
-    C  = 1//6*(r13 + 1)
-    D₊ = 1//12*(5 - r13 + √(6*(r13 + 1)))
-    D₋ = 1//12*(5 - r13 + √(6*(r13 + 1)))
-    D  = k -> 1//12*(5 - r13 + k*√(6*(r13 + 1)))
-
+    #=----------------------------------------------------------
+      load the associators from the file.
+      Format:
+        associator(H[i], H[j], H[k])[l] = [l,i,j,k,:,:]
+    ----------------------------------------------------------=#    
     function modifier(x::Expr)
         replace!(x, :r13, r13)
         replace!(x, :p1, p1)

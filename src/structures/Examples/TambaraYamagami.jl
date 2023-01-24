@@ -124,8 +124,8 @@ function Ising()
 
     set_spherical!(C, [F(1) for s ∈ simples(C)])
 
-    # G = abelian_group(PcGroup, [2])
-    # χ = nondegenerate_bilinear_form(G,ξ^8)
+    G = abelian_group(PcGroup, [2])
+    χ = nondegenerate_bilinear_form(G,ξ^8)
 
     # C = TambaraYamagami(G)
 

@@ -631,7 +631,7 @@ end
 function eigenspaces(f::Morphism)
     @assert domain(f) == codomain(f) "Not an endomorphism"
 
-    #@show factor(minpoly(matrix(f)))
+    @show factor(minpoly(matrix(f)))
     values = collect(keys(eigenspaces(matrix(f))))
 
     return Dict(λ => kernel(f-λ*id(domain(f)))[1] for λ ∈ values)
@@ -645,7 +645,7 @@ function simple_subobjects(X::Object)
     for f ∈ B
         eig_spaces = eigenspaces(f)
 
-        if length(eig_spaces) == 1 
+        if length(eig_spaces) == 1 && values(eig_spaces)[1] == X
             continue
         end
 
