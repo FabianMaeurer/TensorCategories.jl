@@ -2,7 +2,7 @@
 
     HaagerupH3([p1 = 1, p2 = 2])
 
-Build the Haagerup H₃ subfactor category. The category is build as RingCategory. The associators are taken from the paper 
+Build the Haagerup ℋ₃ subfactor category. The category is build as RingCategory. The associators are taken from the paper 
 
 https://arxiv.org/pdf/1906.01322
 
@@ -86,5 +86,6 @@ function HaagerupH3(p1 = 1, p2 = 1)
         end
     end
 
+    set_name!(H, "Fusion category from Haagerup ℋ₃ subfactor")
     return H
 end
