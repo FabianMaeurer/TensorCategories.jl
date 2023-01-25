@@ -645,7 +645,7 @@ function simple_subobjects(X::Object)
     for f ∈ B
         eig_spaces = eigenspaces(f)
 
-        if length(eig_spaces) == 1 && values(eig_spaces)[1] == X
+        if length(eig_spaces) == 1 && collect(values(eig_spaces))[1] == X
             continue
         end
 
