@@ -50,7 +50,10 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
     return CenterObject(parent_category,Z,γ)
 end
 
-
+function induction_restriction(X::Object, simples::Vector = simples(parent(X)))
+    @assert issemisimple(parent(X)) "Requires semisimplicity"
+    Z = dsum([s⊗X⊗dual(s) for s ∈ simples])
+end
 # function induction(X::Object, simples::Vector = simples(parent(X)))
 #     @assert issemisimple(parent(X)) "Requires semisimplicity"
 #     Z = dsum([s⊗X⊗dual(s) for s ∈ simples])

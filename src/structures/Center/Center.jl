@@ -650,7 +650,7 @@ Return a tuple ```(K,k)``` where ```K```is the kernel object and ```k```is the i
 """
 function kernel(f::CenterMorphism)
     ker, incl = kernel(f.m)
-    f_inv = left_inverse(incl)
+    #f_inv = left_inverse(incl)
 
     braiding = [left_inverse(id(s)⊗incl)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), domain(f).γ)]
 
@@ -665,9 +665,9 @@ Return a tuple ```(C,c)``` where ```C```is the cokernel object and ```c```is the
 """
 function cokernel(f::CenterMorphism)
     coker, proj = cokernel(f.m)
-    f_inv = right_inverse(proj)
+    #f_inv = right_inverse(proj)
 
-    braiding = [(proj⊗id(s))∘γ∘(id(s)⊗f_inv) for (s,γ) ∈ zip(simples(parent(domain(f.m))), codomain(f).γ)]
+    braiding = [(proj⊗id(s))∘γ∘(right_inverse(id(s)⊗proj)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), codomain(f).γ)]
 
     Z = CenterObject(parent(domain(f)), coker, braiding)
     return Z, Morphism(codomain(f),Z, proj)
@@ -692,25 +692,25 @@ struct CenterHomSpace <: AbstractHomSpace
     parent::VectorSpaces
 end
 
-function Hom(X::CenterObject, Y::CenterObject)
-    b = basis(Hom(X.object, Y.object))
+# function Hom(X::CenterObject, Y::CenterObject)
+#     b = basis(Hom(X.object, Y.object))
 
-    projs = [central_projection(X,Y,f) for f in b]
+#     projs = [central_projection(X,Y,f) for f in b]
 
-    proj_exprs = [express_in_basis(p,b) for p ∈ projs]
+#     proj_exprs = [express_in_basis(p,b) for p ∈ projs]
 
-    M = zero(MatrixSpace(base_ring(X), length(b),length(b)))
-    for i ∈ 1:length(proj_exprs)
-        M[i,:] = proj_exprs[i]
-    end
-    r, M = rref(M)
-    H_basis = CenterMorphism[]
-    for i ∈ 1:r
-        f = Morphism(X,Y,sum([m*bi for (m,bi) ∈ zip(M[i,:], b)]))
-        H_basis = [H_basis; f]
-    end
-    return CenterHomSpace(X,Y,H_basis, VectorSpaces(base_ring(X)))
-end
+#     M = zero(MatrixSpace(base_ring(X), length(b),length(b)))
+#     for i ∈ 1:length(proj_exprs)
+#         M[i,:] = proj_exprs[i]
+#     end
+#     r, M = rref(M)
+#     H_basis = CenterMorphism[]
+#     for i ∈ 1:r
+#         f = Morphism(X,Y,sum([m*bi for (m,bi) ∈ zip(M[i,:], b)]))
+#         H_basis = [H_basis; f]
+#     end
+#     return CenterHomSpace(X,Y,H_basis, VectorSpaces(base_ring(X)))
+# end
 
 function central_projection(dom::CenterObject, cod::CenterObject, f::Morphism, simpls = simples(parent(domain(f))))
     X = domain(f)
@@ -785,3 +785,54 @@ function sort_simples_by_dimension!(C::CenterCategory)
     σ = sortperm(fp_dims, by = e -> abs(f(e)))
     C.simples = C.simples[σ]
 end
+
+
+#=----------------------------------------------------------
+    Hom Spaces 2.0 
+----------------------------------------------------------=#
+
+function Hom(X::CenterObject, Y::CenterObject)
+    @assert parent(X) == parent(Y)
+
+    H = Hom(object(X), object(Y))
+    B = basis(H)
+    F = base_ring(X)
+    n = length(basis(H))
+
+    Fx,poly_basis = PolynomialRing(F,n)
+    
+    eqs = []
+
+    S = simples(parent(object(X)))
+
+    for (s,γₛ,λₛ) ∈ zip(S,half_braiding(X), half_braiding(Y))
+
+        Hs = Hom(s⊗object(X), object(Y)⊗s)
+        base = basis(Hs)
+        eq_i = [zero(Fx) for _ ∈ 1:length(base)]
+        for (f,a) ∈ zip(B,poly_basis)
+            coeffs = express_in_basis((id(s)⊗f)∘γₛ - λₛ ∘(f⊗id(s)), base)
+            eq_i = eq_i .+ (a .* coeffs)
+        end
+        
+        eqs = [eqs; eq_i]
+
+    end
+
+    M = zero(MatrixSpace(F,length(eqs),n))
+
+    for (i,e) ∈ zip(1:length(eqs),eqs)
+        M[i,:] = [coeff(e, a) for a ∈ poly_basis]
+    end
+
+    N = nullspace(M)[2]
+
+    _,cols = size(N)
+
+    basis_coeffs = [N[:,i] for i ∈ 1:cols]
+
+    center_basis = [CenterMorphism(X,Y,sum(b .* B)) for b ∈ basis_coeffs]
+
+    return HomSpace(X,Y,center_basis, VectorSpaces(F))
+end
+

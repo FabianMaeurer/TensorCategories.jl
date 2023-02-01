@@ -757,7 +757,7 @@ function fpdim(X::Object)
         Y = S[i]
         A[:,i] = [length(basis(Hom(X⊗Y,S[j]))) for j ∈ 1:n]
     end
-    
+
     if characteristic(K) != 0
         K = QQBar
         λ = eigenvalues(matrix(QQ,A),K)

@@ -18,7 +18,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
     symmetric_group, tensor_product, tr, zero, ∘, ⊕, ⊗, iso_oscar_gap, preimage, is_simple,
     CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det, load,save,
     factor, zero_matrix, identity_matrix, complex_embeddings, QQBar, eigenvalues, @alias,
-    abelian_group, PcGroup, is_modular, subgroup
+    abelian_group, PcGroup, is_modular, subgroup, nullspace
 
 
 using Memoization
