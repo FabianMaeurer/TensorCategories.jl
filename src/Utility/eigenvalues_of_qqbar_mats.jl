@@ -1,9 +1,8 @@
-# function eigenvalues(M::MatElem{qqbar})
-#     p = minpoly(M)
+function eigenvalues(M::MatElem{qqbar})
+    p = minpoly(M)
 
-#     facs = factor(p)
-    
-# end
+    rs = unique(roots(p))
+end
 
 function factor(p::Poly{qqbar})
 

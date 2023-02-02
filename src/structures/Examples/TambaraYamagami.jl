@@ -24,17 +24,13 @@ function TambaraYamagami(A::GAPGroup, χ = nothing)
     
     m = Int(exponent(A))
 
-    K,ξ = CyclotomicField(8*m, "ξ($(8*m))")
-    _,x = K["x"]
+    #K,ξ = CyclotomicField(8*m, "ξ($(8*m))")
+    K = QQBar
 
-    if is_square(n) 
-        a = K(ZZ(√n))
-    else
-        a = roots(x^2-n)[1]
-    end
+    a = sqrt(K(n))
 
     if χ === nothing
-        χ = nondegenerate_bilinear_form(A, ξ^8)
+        χ = nondegenerate_bilinear_form(A, root_of_unity(K,m))
     end
 
     els = elements(A)
@@ -98,8 +94,9 @@ end
 #-------------------------------------------------------------------------------
 
 function Ising()
-    F,ξ = CyclotomicField(16, "ξ₁₆")
-    a = ξ^2 + ξ^14
+    #F,ξ = CyclotomicField(16, "ξ₁₆")
+    F = QQBar
+    a = sqrt(F(2))
     C = RingCategory(F,["𝟙", "χ", "X"])
     M = zeros(Int,3,3,3)
 
@@ -125,7 +122,7 @@ function Ising()
     set_spherical!(C, [F(1) for s ∈ simples(C)])
 
     G = abelian_group(PcGroup, [2])
-    χ = nondegenerate_bilinear_form(G,ξ^8)
+    χ = nondegenerate_bilinear_form(G,F(-1))
 
     # C = TambaraYamagami(G)
 
@@ -135,9 +132,9 @@ function Ising()
 
     # set one of the four possible braidings 
     # http://arxiv.org/abs/2010.00847v1 (Ex. 4.13)
-    ξ = gen(base_ring(C))
+    ξ = root_of_unity(F,16)
 
-    α = ξ^2
+    α = root_of_unity(F,8)
 
     braid = Array{MatElem,3}(undef, 3,3,3)
     a,b = elements(G)
