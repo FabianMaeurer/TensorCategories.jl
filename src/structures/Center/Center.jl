@@ -807,11 +807,11 @@ function Hom(X::CenterObject, Y::CenterObject)
 
     for (s,γₛ,λₛ) ∈ zip(S,half_braiding(X), half_braiding(Y))
 
-        Hs = Hom(s⊗object(X), object(Y)⊗s)
+        Hs = Hom(object(X)⊗s, s⊗object(Y))
         base = basis(Hs)
         eq_i = [zero(Fx) for _ ∈ 1:length(base)]
         for (f,a) ∈ zip(B,poly_basis)
-            coeffs = express_in_basis((id(s)⊗f)∘γₛ - λₛ ∘(f⊗id(s)), base)
+            coeffs = express_in_basis((id(s)⊗s)∘γₛ - λₛ ∘(f⊗id(s)), base)
             eq_i = eq_i .+ (a .* coeffs)
         end
         
