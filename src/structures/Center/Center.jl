@@ -667,7 +667,7 @@ function cokernel(f::CenterMorphism)
     coker, proj = cokernel(f.m)
     #f_inv = right_inverse(proj)
 
-    braiding = [(proj⊗id(s))∘γ∘(right_inverse(id(s)⊗proj)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), codomain(f).γ)]
+    braiding = [(id(s)⊗proj)∘γ∘(right_inverse(proj⊗id(s))) for (s,γ) ∈ zip(simples(parent(domain(f.m))), codomain(f).γ)]
 
     Z = CenterObject(parent(domain(f)), coker, braiding)
     return Z, Morphism(codomain(f),Z, proj)
@@ -681,6 +681,9 @@ function left_inverse(f::CenterMorphism)
     return Morphism(Y,X,l_inv)
 end
 
+
+function quotient(X::CenterObject, Y::CenterObject)
+end
 #-------------------------------------------------------------------------------
 #   Hom Spaces
 #-------------------------------------------------------------------------------

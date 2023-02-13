@@ -788,3 +788,23 @@ end
 
 *(f::Morphism, x) = x*f
 
+
+function is_subobject(X::Object, Y::Object)
+    @assert parent(X) == parent(Y)
+    S = simples(parent(X))
+
+    incl = zero_morphism(X,Y)
+
+    for s ∈ S
+        X_s = basis(Hom(X,s))
+        s_Y = basis(Hom(s,Y))
+
+        if length(X_s) > length(s_Y) 
+            return false, nothing
+        elseif length(X_s) > 0
+            incl = incl + sum([f∘g for (f,g) ∈ zip(s_Y,X_s)])
+        end
+    end
+
+    return true,incl
+end

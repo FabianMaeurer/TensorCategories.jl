@@ -103,7 +103,7 @@ function Base.show(io::IO, C::VectorSpaces)
 end
 
 function Base.show(io::IO, V::VectorSpaceObject)
-    print(io, "Vector space of dimension $(dim(V)) over $(base_ring(V)).")
+    print(io, "Vector space of dimension $(int_dim(V)) over $(base_ring(V)).")
 end
 
 function Base.show(io::IO, m::VectorSpaceMorphism)
