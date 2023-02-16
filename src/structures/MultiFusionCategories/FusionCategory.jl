@@ -87,6 +87,14 @@ function set_associator!(F::RingCategory, i::Int, j::Int, k::Int, ass::Vector{<:
     F.ass[i,j,k,:] = ass
 end
 
+function set_associator!(F::RingCategory, i::Int, j::Int, k::Int, l::Int, ass::MatElem)
+    F.ass[i,j,k,l] = ass
+end
+
+function set_associator!(F::RingCategory, i::Int, j::Int, k::Int, l::Int, ass::Array{T,N}) where {T,N}
+    F.ass[i,j,k,l] = matrix(base_ring(F), (N > 1 ? size(ass) : (1,1))..., ass)
+end
+
 function set_spherical!(F::RingCategory, sp::Vector)
     F.spherical = sp
 end
