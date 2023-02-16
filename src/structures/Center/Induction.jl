@@ -50,6 +50,53 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
     return CenterObject(parent_category,Z,γ)
 end
 
+function partial_induction(X::Object, ind_simples::Vector, simples::Vector = simples(parent(X)); parent_category::CenterCategory = Center(parent(X)))
+    @assert issemisimple(parent(X)) "Requires semisimplicity"
+    Z = dsum([s⊗X⊗dual(s) for s ∈ ind_simples])
+    a = associator
+    γ = Vector{Morphism}(undef, length(simples))
+    C = parent(X)
+    for i ∈ 1:length(simples)
+        W = simples[i]
+        γ[i] = zero_morphism(zero(parent(X)), dsum([W⊗((s⊗X)⊗dual(s)) for s ∈ ind_simples]))
+  
+        for S ∈ ind_simples
+            dom_i = ((S⊗X)⊗dual(S))⊗simples[i]
+            γ_i_temp = zero_morphism(dom_i, zero(parent(X)))
+            for  T ∈ ind_simples
+                #@show S,T,W
+                # Set up basis and dual basis
+                
+                #basis, basis_dual = dual_basis(Hom(S, W⊗T), Hom(dual(S), dual(W⊗T)))
+                _basis, basis_dual = basis(Hom(S, W⊗T)), basis(Hom(dual(S)⊗W, dual(T)))
+
+                if length(_basis) == 0 
+                    γ_i_temp = vertical_dsum(γ_i_temp, zero_morphism(dom_i, W⊗((T⊗X)⊗dual(T)))) 
+                    continue
+                end
+
+                corrections = base_ring(X).([(id(W)⊗ev(dual(T))) ∘ (id(W)⊗(spherical(T)⊗id(dual(T)))) ∘ a(W,T,dual(T)) ∘ (f⊗g) ∘ a(S,dual(S),W) ∘ (coev(S)⊗id(W)) for (f,g) ∈ zip(_basis,basis_dual)])
+                
+                #@show "component_iso"
+                component_iso = sum([a(W,T⊗X,dual(T)) ∘ (a(W,T,X)⊗id(dual(T))) ∘ ((f⊗id(X))⊗(inv(dim(W))*inv(k)*g)) ∘ a(S⊗X,dual(S),W) for (k,f,g) ∈ zip(corrections,_basis, basis_dual)])
+                #@show "sum"
+                γ_i_temp = vertical_dsum(γ_i_temp, (component_iso))
+            end
+            γ[i] = horizontal_dsum(γ[i], dim(S)*γ_i_temp)
+        end
+      
+
+        # distribution Before
+        distr_before = distribute_left([s⊗X⊗dual(s) for s ∈ ind_simples],W)
+        # distribution After
+        distr_after = distribute_right(W,[s⊗X⊗dual(s) for s ∈ ind_simples])
+
+        γ[i] = inv(distr_after) ∘ γ[i] ∘ distr_before 
+    end
+
+    return CenterObject(parent_category,Z,γ)
+end
+
 function induction_restriction(X::Object, simples::Vector = simples(parent(X)))
     @assert issemisimple(parent(X)) "Requires semisimplicity"
     Z = dsum([s⊗X⊗dual(s) for s ∈ simples])

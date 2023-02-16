@@ -18,12 +18,15 @@ To use TensorCategories the structures from the [OSCAR-System](https://github.co
 
 ```@repl
 using TensorCategories, Oscar;
-F,_ = FiniteField(5)
-G = symmetric_group(2)
-X = gset(G,[1,2,3])
-C = ConvolutionCategory(X,F)
-simples(C)
-groethendieck_ring(C)
+
+# Define an Ising Fusion category
+I = Ising()
+
+# Define the categorical center
+C = Center(Ising)
+
+# Compute the S-matrix of the center
+S = smatrix(C)
 ```
 
 ## Acknowledgements

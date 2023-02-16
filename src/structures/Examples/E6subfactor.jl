@@ -1,10 +1,10 @@
 function E6subfactor()
-    K,ξ = CyclotomicField(24,"ξ₂₄") 
-
-    r3 = -(-ξ^6 + 2*ξ^2)
-    r2 = (-ξ^5 + ξ^3 + ξ)
-
-    i = ξ^6
+    #K,ξ = CyclotomicField(24,"ξ₂₄") 
+    K = QQBar
+    r3 = sqrt(K(3))
+    r2 = sqrt(K(2))
+    ξ = root_of_unity(K,24)
+    i = sqrt(K(-1))
     E6 = RingCategory(K,["𝟙","x","y"])
 
     mult = Array{Int,3}(undef,3,3,3)
@@ -24,23 +24,26 @@ function E6subfactor()
     F1 = inv(r2)*ξ^7*matrix(K,[1 i; 1 -i])
     Fy = inv(r2)*ξ^7*matrix(K,[i 1; -i 1])
 
-    # Fx = matrix(K,[inv(d) inv(d)  k k k -k;
-    #       inv(d) -inv(d) k k -k k;
-    #       k*ξ^(-10) k*ξ^(-10) inv(r2*d)*ξ^(-5) 1//2*ξ^4 inv(r2*d)*ξ^(-10) 1//2*ξ^(-11);
-    #       k*ξ^(-4) k*ξ^(-4) 1//2*ξ^10 inv(r2*d)*ξ 1//2*ξ^10 inv(r2*d)*ξ^(-11);
-    #       k*ξ^(-4) k*ξ^(8) inv(r2*d)*ξ 1//2*ξ^10 inv(r2*d)*ξ^(-11) 1//2*ξ^10;
-    #       k*ξ^(-10) k*ξ^2 1//2*ξ^4 inv(r2*d)*ξ^(-5) 1//2*ξ^(-8) inv(r2*d)*ξ^(-5)])
-    a = 1//4*(1-r3)
+    d = 1 + r3
+    k = inv(r2*sqrt(d))
+    Fx = matrix(K,[inv(d) inv(d)  k k k -k;
+           inv(d) -inv(d) k k -k k;
+           k*ξ^(-10) k*ξ^(-10) inv(r2*d)*ξ^(-5) inv(K(2))*ξ^4 inv(r2*d)*ξ^(-5) inv(K(2))*ξ^(-8);
+           k*ξ^(-4) k*ξ^(-4) inv(K(2))*ξ^10 inv(r2*d)*ξ inv(K(2))*ξ^10 inv(r2*d)*ξ^(-11);
+           k*ξ^(-4) k*ξ^(8) inv(r2*d)*ξ inv(K(2))*ξ^10 inv(r2*d)*ξ^(-11) inv(K(2))*ξ^10;
+           k*ξ^(-10) k*ξ^2 inv(K(2))*ξ^4 inv(r2*d)*ξ^(-5) inv(K(2))*ξ^(-8) inv(r2*d)*ξ^(-5)])
+    a = inv(K(4))*(1-r3)
 
-    Fx = matrix(K, [-2*a -2*a a*ξ^2 a*ξ^8 a*ξ^8 a*ξ^2;
-                    -2*a 2*a a*ξ^2 a*ξ^8 -a*ξ^8 -a*ξ^2;
-                    1 1 -1//2*(ξ^2-1) 1//2*ξ^10 1//2*(ξ^(-4)+i) 1//2*ξ^4;
-                    1 1 1//2*ξ^4 1//2*(ξ^(-4)+i) 1//2*ξ^10 -1//2*(ξ^2-1);
-                    1 -1 -1//2*(ξ^2-1) 1//2*(ξ^10) -1//2*(ξ^(-4)+i) -1//2*ξ^4;
-                    -1 1 -1//2*ξ^4 -1//2*(ξ^(-4)+i) 1//2*ξ^10 -1//2*(ξ^2-1)])
 
-    set_associator!(E6,2,2,2,[F1,Fx,Fy])
-    #set_associator!(E6, [inv(m) for m in E6.ass])
+    # Fx = matrix(K, [-2*a -2*a a*ξ^2 a*ξ^8 a*ξ^8 a*ξ^2;
+    #                 -2*a 2*a a*ξ^2 a*ξ^8 -a*ξ^8 -a*ξ^2;
+    #                 1 1 -inv(K(2))*(ξ^2-1) inv(K(2))*ξ^10 inv(K(2))*(ξ^(-4)+i) inv(K(2))*ξ^4;
+    #                 1 1 inv(K(2))*ξ^4 inv(K(2))*(ξ^(-4)+i) inv(K(2))*ξ^10 -inv(K(2))*(ξ^2-1);
+    #                 1 -1 -inv(K(2))*(ξ^2-1) inv(K(2))*(ξ^10) -inv(K(2))*(ξ^(-4)+i) -inv(K(2))*ξ^4;
+    #                 -1 1 -inv(K(2))*ξ^4 -inv(K(2))*(ξ^(-4)+i) inv(K(2))*ξ^10 -inv(K(2))*(ξ^2-1)])
+
+    set_associator!(E6,2,2,2,[F1,transpose(Fx),Fy])
+    set_associator!(E6, [transpose(m) for m in E6.ass])
     set_name!(E6, "E6 subfactor fusion category")
     set_one!(E6, [1,0,0])
     return E6

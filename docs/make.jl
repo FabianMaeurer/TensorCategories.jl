@@ -1,6 +1,4 @@
-using Documenter, TensorCategories
-
-#DocMeta.setdocmeta!(JuCat, :DocTestSetup, :(using JuCat); recursive=true)
+using Documenter, TensorCategories, Oscar
 
 makedocs(
     sitename = "TensorCategories.jl",
@@ -10,13 +8,13 @@ makedocs(
     ),
     pages = [
         "Home" => "index.md",
-        "Exampes" => [
+        "Concrete Examples" => [
             "Vector Spaces" => "VectorSpaces.md",
             "Representations" => "Representations.md",
-            "Coherent Sheaves" => "CoherentSheaves.md",
-            "Ring Categories" => "RingCategories.md"
+            "Coherent Sheaves" => "CoherentSheaves.md"
         ],
-        "Multitensor Categories" => "Multitensor.md",
+        "Fusion Categories from 6j Symbols" => "RingCategory.md",
+        "Multitensor Category Interface" => "Multitensor.md",
         "The Center Construction" => "Center.md",
     ],
 )

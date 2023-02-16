@@ -234,15 +234,16 @@ function build_center_ideal(Z::Object, simples::Vector = simples(parent(Z)))
     n = length(simples)
     ks = [dim(Homs[i]) for i ∈ 1:n]
 
-    var_count = sum([dim(H) for H ∈ Homs])
+    var_count = sum([int_dim(H) for H ∈ Homs])
 
-    R,x = PolynomialRing(QQ, var_count, ordering = :lex)
+    K = base_ring(Z)
+    R,x = PolynomialRing(K, var_count, ordering = :lex)
 
     # For convinience: build arrays with the variables xi
     vars = []
     q = 1
     for i ∈ 1:n
-        m = dim(Homs[i])
+        m = int_dim(Homs[i])
         vars = [vars; [x[q:q+m-1]]]
         q = q + m
     end
@@ -258,13 +259,13 @@ function build_center_ideal(Z::Object, simples::Vector = simples(parent(Z)))
             l1 = [zero(R) for i ∈ base]
             l2 = [zero(R) for i ∈ base]
 
-            for ai ∈ 1:dim(Homs[k])
+            for ai ∈ 1:int_dim(Homs[k])
                 a = basis(Homs[k])[ai]
-                l1 = l1 .+ (vars[k][ai] .* QQ.(express_in_basis(associator(simples[i],simples[j],Z)∘(t⊗id(Z))∘a, base)))
+                l1 = l1 .+ (vars[k][ai] .* K.(express_in_basis(associator(simples[i],simples[j],Z)∘(t⊗id(Z))∘a, base)))
             end
-            for bi ∈ 1:dim(Homs[j]), ci ∈ 1:dim(Homs[i])
+            for bi ∈ 1:int_dim(Homs[j]), ci ∈ 1:int_dim(Homs[i])
                 b,c = basis(Homs[j])[bi], basis(Homs[i])[ci]
-                l2 = l2 .+ ((vars[j][bi]*vars[i][ci]) .* QQ.(express_in_basis((id(simples[i])⊗b)∘associator(simples[i],Z,simples[j]) ∘ (c⊗id(simples[j])) ∘ inv_associator(Z,simples[i],simples[j]) ∘ (id(Z) ⊗ t), base)))
+                l2 = l2 .+ ((vars[j][bi]*vars[i][ci]) .* K.(express_in_basis((id(simples[i])⊗b)∘associator(simples[i],Z,simples[j]) ∘ (c⊗id(simples[j])) ∘ inv_associator(Z,simples[i],simples[j]) ∘ (id(Z) ⊗ t), base)))
             end
             push!(eqs, l1 .-l2)
         end
@@ -278,7 +279,7 @@ function build_center_ideal(Z::Object, simples::Vector = simples(parent(Z)))
 
     #Require e_Z(1) = id(Z)
     one_index = findfirst(e -> isisomorphic(one(parent(Z)), e)[1], simples)
-    one_c = QQ.(express_in_basis(id(Z), basis(End(Z))))
+    one_c = K.(express_in_basis(id(Z), basis(End(Z))))
     push!(ideal_eqs, (vars[one_index] .- one_c)...)
 
     I = ideal([f for f ∈ unique(ideal_eqs) if f != 0])
@@ -286,8 +287,9 @@ end
 
 function braidings_from_ideal(Z::Object, I::Ideal, simples::Vector{<:Object}, C)
     Homs = [Hom(Z⊗Xi, Xi⊗Z) for Xi ∈ simples]
-    coeffs = recover_solutions(msolve(I),base_ring(Z))
-    ks = [dim(H) for H ∈ Homs]
+    I = rational_lift(I)
+    coeffs = recover_solutions(real_solutions(I),base_ring(Z))
+    ks = [int_dim(H) for H ∈ Homs]
     centrals = CenterObject[]
 
     for c ∈ coeffs
@@ -681,9 +683,18 @@ function left_inverse(f::CenterMorphism)
     return Morphism(Y,X,l_inv)
 end
 
-
-function quotient(X::CenterObject, Y::CenterObject)
+function quotient(Y::CenterObject, X::Object)
+    # TODO: Compute quotient
+    @assert parent(X) == parent(Y).Category
 end
+
+
+function quotient(Y::CenterObject, X::Object)
+    # TODO: Compute quotient
+    @assert parent(X) == parent(Y).Category
+end
+
+
 #-------------------------------------------------------------------------------
 #   Hom Spaces
 #-------------------------------------------------------------------------------

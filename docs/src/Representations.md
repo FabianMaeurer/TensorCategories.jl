@@ -4,7 +4,7 @@ CurrentModule = TensorCategories
 
 # Representations
 
-We provide a simple abstract type hirarchy for representation categories:
+We provide a simple abstract type hierarchy for representation categories:
 
 ```
 abstract type RepresentationCategory <:Category
@@ -18,7 +18,7 @@ base_ring::Field
 
 ## Representations of Finite groups
 
-Let ``G`` be a finite group. We consider the category of finite dimensinal
+Let ``G`` be a finite group. We consider the category of finite dimensional
 ``k``-representations of ``G``.
 
 ```
@@ -48,7 +48,7 @@ Representation(::GAPGroup,::Function)
 
 where in both cases the images are required to be fitting MatrixElem objects.
 
-Since group reprsentation categories are tensor categories, we again have methods
+Since group representation categories are tensor categories, we again have methods
 for the important operations
 
 ```@autodocs

@@ -12,16 +12,15 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
     groebner_basis, gset, hom, id, ideal, image, index, inv, irreducible_modules, isabelian,
     is_central, iscommutative, isconstant, isindependent, isinvertible, isisomorphic,
     issemisimple, issubgroup, jordan_normal_form, julia_to_gap, kernel, kronecker_product,
-    leading_monomial, left_transversal, matrix, minpoly, msolve, multiplication_table,
+    leading_monomial, left_transversal, matrix, minpoly, real_solutions, multiplication_table,
     nf_elem, one, orbit, orbits, order, parent, permutation_matrix, primary_decomposition,
     product, rank, roots, rref, size, solve, solve_left, splitting_field, stabilizer,
     symmetric_group, tensor_product, tr, zero, ∘, ⊕, ⊗, iso_oscar_gap, preimage, is_simple,
     CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det, load,save,
     factor, zero_matrix, identity_matrix, complex_embeddings, QQBar, eigenvalues, @alias,
     abelian_group, PcGroup, is_modular, subgroup, nullspace, factor, qqbar,
-    leading_coefficient, roots, is_rational, fmpq_mpoly, lex, Fac, root_of_unity
+    leading_coefficient, roots, is_rational, fmpq_mpoly, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal
 
-import Oscar.Generic.Poly
 
 
 using Memoization
@@ -62,13 +61,14 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         decompose_morphism, TambaraYamagami, RingSubcategory, SubcategoryMorphism,
         SubcategoryObject,load,save, cat_fr_8122, E6subfactor, fpdim, set_cannonical_spherical!,
         normalized_smatrix, sort_simples_by_dimension!, set_spherical!, inv_associator,
-        is_modular, is_spherical, TwistedGradedVectorSpaces, six_j_symbols, simples_names, HaagerupH3, factor, roots, is_subobject
+        is_modular, is_spherical, TwistedGradedVectorSpaces, six_j_symbols, simples_names, HaagerupH3, factor, roots, is_subobject, rational_lift
 
 
 
 include("structures/abstracts.jl")
 include("Utility/Technicallities.jl")
-include("Utility/eigenvalues_of_qqbar_mats.jl")
+include("Utility/QQBar_Polynomials.jl")
+include("Utility/SolveGroebner.jl")
 include("structures/VectorSpaces/VectorSpaces.jl")
 include("structures/MISC/ProductCategory.jl")
 include("structures/MISC/OppositeCategory.jl")

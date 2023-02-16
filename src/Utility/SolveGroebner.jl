@@ -1,12 +1,9 @@
 function recover_solutions(p::Tuple, K::Field)
-    p = p[1]
-    f = p[1]
-    g = p[2]
-    v = p[3] .* p[4]
-    F = splitting_field(f)
+    p = p[2]
+    f = p.elim
+    g = p.denom
+    v = length(p.lf_cfs) == length(p.param) ? p.lf_cfs .* p.param : p.param
 
-    if degree(F) > degree(K) @warn "would split over $F" end
-    f = change_base_ring(K,f)
     rs = roots(f)
     solutions = []
     for r ∈ rs
