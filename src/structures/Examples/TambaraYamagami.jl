@@ -75,6 +75,10 @@ end
 function nondegenerate_bilinear_form(G::GAPGroup, ξ::FieldElem = CyclotomicField(Int(exponent(G)))[2])
     @assert is_abelian(G)
 
+    if order(G) == 1
+        return BilinearForm(G,parent(ξ),ξ,(x,y,_) -> one(parent(ξ)))
+    end
+
     function nondeg(x::GroupElem, y::GroupElem, ξ::FieldElem)
         G = parent(x)
         m = GAP.gap_to_julia(GAP.Globals.AbelianInvariants(G.X))
@@ -151,6 +155,27 @@ function Ising()
     return C
 end
 
-    
+#=----------------------------------------------------------
+    https://arxiv.org/pdf/1103.3537.pdf 
+----------------------------------------------------------=#
+function Fibonacci(a::Int = 1)
+    C = RingCategory(QQBar, ["𝟙", "τ"])
+
+    _,x = QQ["x"]
+    a = roots(x^2-x-1, QQBar)[a]
+
+    M = zeros(Int, 2,2,2)
+
+    M[1,1,:] = [1,0]
+    M[1,2,:] = M[2,1,:] = [0,1]
+    M[2,2,:] = [1,1]
+
+    set_tensor_product!(C, M)
+
+    set_associator!(C,2,2,2,2,matrix(QQBar, [a 1; -a -a]))
+    set_name!(C, "Fibonacci fusion category")
+
+    return C
+end
         
         

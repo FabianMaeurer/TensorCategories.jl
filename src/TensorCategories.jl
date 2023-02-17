@@ -61,7 +61,7 @@ export Category, TensorCategory, Morphism, Object, VectorSpaces, base_ring, hom,
         decompose_morphism, TambaraYamagami, RingSubcategory, SubcategoryMorphism,
         SubcategoryObject,load,save, cat_fr_8122, E6subfactor, fpdim, set_cannonical_spherical!,
         normalized_smatrix, sort_simples_by_dimension!, set_spherical!, inv_associator,
-        is_modular, is_spherical, TwistedGradedVectorSpaces, six_j_symbols, simples_names, HaagerupH3, factor, roots, is_subobject, rational_lift
+        is_modular, is_spherical, TwistedGradedVectorSpaces, six_j_symbols, simples_names, HaagerupH3, factor, roots, is_subobject, rational_lift, Fibonacci
 
 
 

@@ -158,7 +158,7 @@ associator(C::RingCategory) = C.ass
 
 Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 """
-@memoize Dict function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
+ function associator(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)
