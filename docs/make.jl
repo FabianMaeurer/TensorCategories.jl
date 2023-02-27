@@ -13,7 +13,10 @@ makedocs(
             "Representations" => "Representations.md",
             "Coherent Sheaves" => "CoherentSheaves.md"
         ],
-        "Fusion Categories from 6j Symbols" => "RingCategory.md",
+        "Fusion Categories from 6j Symbols" => [
+            "Idea" => "RingCategory.md",
+            "Examples" => "RingCatExamples.md"
+        ],
         "Multitensor Category Interface" => "Multitensor.md",
         "The Center Construction" => "Center.md",
     ],

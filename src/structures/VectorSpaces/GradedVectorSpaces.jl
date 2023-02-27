@@ -27,7 +27,9 @@ function GradedVectorSpaces(F::Field, G::GAPGroup)
     GradedVectorSpaces(F,G,trivial_3_cocycle(G,F))
 end
 
-
+function GradedVectorSpaces(G::GAPGroup)
+    GradedVectorSpaces(QQBar, G)
+end
 """
     VectorSpaceObject(V::Pair{<:GroupElem, <:VectorSpaceObject}...)
 
@@ -36,7 +38,6 @@ TBW
 function VectorSpaceObject(V::Pair{<:GroupElem, <:VectorSpaceObject}...)
     W = dsum([v for (_,v) ∈ V])
     G = parent(V[1][1])
-    elems = elements(G)
     grading = vcat([[g for _ ∈ 1:int_dim(v)] for (g,v) ∈ V]...)
     C = GradedVectorSpaces(base_ring(W), G)
     return GVSObject(C, W, grading)
@@ -375,5 +376,5 @@ function show(io::IO, C::GradedVectorSpaces)
 end
 function show(io::IO, V::GVSObject)
     elems = elements(base_group(V))
-    print(io, "Graded vector space of dimension $(dim(V)) with grading\n$(V.grading)")
+    print(io, "Graded vector space of dimension $(int_dim(V)) with grading\n$(V.grading)")
 end
