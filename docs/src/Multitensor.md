@@ -106,7 +106,7 @@ Hence you see you need to provide a trace function and a braiding. The braiding
 braiding(X::YourObject, Y::YourObject) ::YourMorphism
 ```
 
-There are two ways to archieve the trace: either you provide the trace by yourself
+There are two ways to archive the trace: either you provide the trace by yourself
 
 ```
 tr(f::YourMorphism) ::YourMorphism

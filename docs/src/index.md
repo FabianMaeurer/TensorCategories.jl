@@ -23,7 +23,7 @@ using TensorCategories, Oscar;
 I = Ising()
 
 # Define the categorical center
-C = Center(Ising)
+C = Center(Ising())
 
 # Compute the S-matrix of the center
 S = smatrix(C)
