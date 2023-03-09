@@ -3,10 +3,8 @@
 #One needs to include the wanted associator of the other files ???
 #In total there are 97 different associators; So far only 10 can be used; For the other one also has to check pentagox; Maybe the import does not work for all
 function cat_fr_8122(n::Int) #n gives the number of associator
-    K,ζ = CyclotomicField(24)
+    K = QQBar
     
-    dic=include(joinpath(@__DIR__, "asso_$n.jl"))#This imports a dictionary of associators.
-
     #(1,7,8) are class of one in D3/Z3; (2,3,4) are other class (5) is element t_1, (6) is other one
     C = RingCategory(K,["e", "a", "b", "aba", "t", "s", "ba", "ab"])
 
@@ -75,6 +73,15 @@ function cat_fr_8122(n::Int) #n gives the number of associator
     end
 
     set_tensor_product!(C,M)
+
+    ζ = root_of_unity(QQBar, 24)
+    function modifier(x::Expr)
+        replace!(x, :ζ, ζ)
+        return x
+    end
+
+    dic = include(modifier, joinpath(@__DIR__, "asso_$n.jl"))
+
 
     #Now we import the associators given. 
     kk=collect(keys(dic))
