@@ -779,17 +779,26 @@ function simples_by_induction!(C::CenterCategory)
     S = CenterObject[]
     d = dim(C.category)^2
     
-    for s ∈ simples(C.category)
-        induced_s = induction(s, parent_category = C)
-        # for t ∈ S
-        #     while dim(Hom(t, induced_s)) != 0
-        #         induced_s = cokernel(basis(Hom(t,induced_s))[1])[1]
-        #     end
-        # end
-        if induced_s == zero(C) continue end
-        S = [S; simple_subobjects(induced_s)]
+    ordered_simples = sort(simples(C.category), by = fpdim)
+
+    FI_simples = induction_restriction.(ordered_simples)
+
+    for (s, Is) ∈ zip(ordered_simples, FI_simples)
+        contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
+        if length(contained_simples) > 0
+            if isisomorphic(Is, dsum(object.(contained_simples)))[1]
+                continue
+            end
+        end
+
+        Z = induction(s)
+        for x ∈ contained_simples
+            f = horizontal_dsum(basis(Hom(x,Z)))
+            Z = cokernel(f)[1]
+        end
+        S = [S; simple_subobjects(Z)]
     end
-    add_simple!(C,S)
+    C.simples = S
 end
 
 function sort_simples_by_dimension!(C::CenterCategory)

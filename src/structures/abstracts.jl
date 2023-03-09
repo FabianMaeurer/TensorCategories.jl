@@ -632,7 +632,11 @@ function eigenspaces(f::Morphism)
     @assert domain(f) == codomain(f) "Not an endomorphism"
 
     #@show factor(minpoly(matrix(f)))
-    values = collect(keys(eigenspaces(matrix(f))))
+    if base_ring(f) == QQBar
+        values = eigenvalues(matrix(f))
+    else
+        values = collect(keys(eigenspaces(matrix(f))))
+    end
 
     return Dict(λ => kernel(f-λ*id(domain(f)))[1] for λ ∈ values)
 end

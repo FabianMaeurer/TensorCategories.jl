@@ -19,7 +19,8 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
     CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det, load,save,
     factor, zero_matrix, identity_matrix, complex_embeddings, QQBar, eigenvalues, @alias,
     abelian_group, PcGroup, is_modular, subgroup, nullspace, factor, qqbar,
-    leading_coefficient, roots, is_rational, fmpq_mpoly, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal
+    leading_coefficient, roots, is_rational, fmpq_mpoly, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
+    height_bits, lcm, change_base_ring, guess
 
 
 
