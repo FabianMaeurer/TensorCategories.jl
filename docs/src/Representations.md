@@ -36,14 +36,14 @@ A group representation is defined by a group homomorphism from ``G`` into a
 finite dimensional vector space ``k^n``. These objects are of type
 
 ```
-GroupRepresentation <: Representation
+GroupRepresentationCategoryObject <: RepresentationCategoryObject
 ```
 
 They are constructed in one of two ways, either by images of generators or by a function
 
 ```@docs
-Representation(::GAPGroup,::Vector,::Vector)
-Representation(::GAPGroup,::Function)
+RepresentationCategoryObject(::GAPGroup,::Vector,::Vector)
+RepresentationCategoryObject(::GAPGroup,::Function)
 ```
 
 where in both cases the images are required to be fitting MatrixElem objects.

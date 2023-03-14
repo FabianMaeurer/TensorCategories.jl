@@ -8,6 +8,7 @@ makedocs(
     ),
     pages = [
         "Home" => "index.md",
+        "Introduction" => "Interface.md",
         "Concrete Examples" => [
             "Vector Spaces" => "VectorSpaces.md",
             "Representations" => "Representations.md",
@@ -17,7 +18,7 @@ makedocs(
             "Idea" => "RingCategory.md",
             "Examples" => "RingCatExamples.md"
         ],
-        "Multitensor Category Interface" => "Multitensor.md",
+       #"Multitensor Category Interface" => "Multitensor.md",
         "The Center Construction" => "Center.md",
     ],
 )

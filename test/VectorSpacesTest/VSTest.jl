@@ -2,9 +2,9 @@
 m = matrix(QQ, [1 -1 1; -1 1 -1; 1 -1 1])
 f = Morphism(m)
 
-@testset "Objects" begin
-    V = VectorSpaceObject(QQ, 2)
-    W = VectorSpaceObject(QQ, ["v", "w", "x"])
+@testset "CategoryObjects" begin
+    V = VectorSpaceCategoryObject(QQ, 2)
+    W = VectorSpaceCategoryObject(QQ, ["v", "w", "x"])
     @test dim(V ⊕ W) == 5
     @test dim(V⊗W) == 6
 end

@@ -16,7 +16,7 @@ for the orbits.
 We provide the datatype
 
 ```
-CoherentSheaf <: Object
+CoherentSheaf <: CategoryObject
 ```
 
 The category of equivariant coherent sheafes has type
@@ -34,7 +34,7 @@ CohSheaves
 Morphisms are given by morphisms of representations of the stalks and are of type
 
 ```
-CohSheafMorphism{T,G} <: Morphism
+CohSheafCategoryMorphism{T,G} <: CategoryMorphism
 ```
 
 ```@autodocs
@@ -58,10 +58,10 @@ x\otimes y = p_{13}_\ast(p_{12}^\ast(x)\otimes' p_{23}^\ast(y))
 where ``\otimes'``is the monoidal product of ``Coh(X\times X\times X)``. Similar for
 morphisms.
 
-Objects in this category are of type
+CategoryObjects in this category are of type
 
 ```
-ConvolutionObject <: Object
+ConvolutionCategoryObject <: CategoryObject
 ```
 
 while the convolution category is of type

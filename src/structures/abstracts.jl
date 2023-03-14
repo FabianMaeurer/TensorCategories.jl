@@ -4,60 +4,60 @@
 
 abstract type Category end
 
-abstract type Object end
+abstract type CategoryObject end
 
-abstract type Morphism end
+abstract type CategoryMorphism end
 
 
 """
-    VectorSpaceObject
+    VectorSpaceCategoryObject
 
 An object in the category of finite dimensional vector spaces.
 """
-abstract type VectorSpaceObject <: Object end
+abstract type VectorSpaceCategoryObject <: CategoryObject end
 
 """
-    VectorSpaceMorphism
+    VectorSpaceCategoryMorphism
 
 A morphism in the category of finite dimensional vector spaces.
 """
-abstract type VectorSpaceMorphism <: Morphism end
+abstract type VectorSpaceCategoryMorphism <: CategoryMorphism end
 
-abstract type HomSet end
+abstract type CategoryHomSet end
 
-abstract type AbstractHomSpace <: VectorSpaceObject end
+abstract type AbstractCategoryHomSpace <: VectorSpaceCategoryObject end
 
-struct HomSpace <: AbstractHomSpace
-    X::Object
-    Y::Object
-    basis::Vector{<:Morphism}
+struct CategoryHomSpace <: AbstractCategoryHomSpace
+    X::CategoryObject
+    Y::CategoryObject
+    basis::Vector{<:CategoryMorphism}
     parent
 end
 
-domain(m::Morphism) = m.domain
-codomain(m::Morphism) = m.codomain
+domain(m::CategoryMorphism) = m.domain
+codomain(m::CategoryMorphism) = m.codomain
 
 """
-    parent(X::Object)
+    parent(X::CategoryObject)
 
 Return the parent category of the object X.
 """
-parent(X::Object) = X.parent
+parent(X::CategoryObject) = X.parent
 
 """
-    function parent(f::Morphism)
+    function parent(f::CategoryMorphism)
 
 Return the parent category of ``f``.
 """
-parent(f::Morphism) = parent(domain(f))
+parent(f::CategoryMorphism) = parent(domain(f))
 
 """
-    base_ring(X::Object)
+    base_ring(X::CategoryObject)
 
 Return the base ring ```k``` of the ```k```-linear parent category of ```X```.
 """
-base_ring(X::Object) = base_ring(parent(X))
-base_ring(X::Morphism) = base_ring(parent(domain(X)))
+base_ring(X::CategoryObject) = base_ring(parent(X))
+base_ring(X::CategoryMorphism) = base_ring(parent(domain(X)))
 
 """
     base_ring(C::Category)
@@ -67,42 +67,42 @@ Return the base ring ```k```of the ```k```-linear category ```C```.
 base_ring(C::Category) = C.base_ring
 
 base_group(C::Category) = C.base_group
-base_group(X::Object) = parent(X).base_group
+base_group(X::CategoryObject) = parent(X).base_group
 
 #---------------------------------------------------------
 #   Direct Sums, Products, Coproducts
 #---------------------------------------------------------
 
-function ⊕(T::Tuple{S,Vector{R},Vector{R2}},X::S1) where {S <: Object,S1 <: Object, R <: Morphism, R2 <: Morphism}
-    Z,ix,px = dsum_with_morphisms(T[1],X)
+function ⊕(T::Tuple{S,Vector{R},Vector{R2}},X::S1) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism, R2 <: CategoryMorphism}
+    Z,ix,px = direct_sum_with_CategoryMorphisms(T[1],X)
     incl = vcat([ix[1] ∘ t for t in T[2]], ix[2:2])
     proj = vcat([t ∘ px[1] for t in T[3]], px[2:2])
     return Z, incl, proj
 end
 
-⊕(X::S1,T::Tuple{S,Vector{R}, Vector{R2}}) where {S <: Object,S1 <: Object, R <: Morphism, R2 <: Morphism} = ⊕(T,X)
+⊕(X::S1,T::Tuple{S,Vector{R}, Vector{R2}}) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism, R2 <: CategoryMorphism} = ⊕(T,X)
 
-function dsum(X::Object...)
+function direct_sum(X::CategoryObject...)
     if length(X) == 0 return nothing end
     Z = X[1]
     for Y ∈ X[2:end]
-        Z = dsum(Z,Y)
+        Z = direct_sum(Z,Y)
     end
     return Z
 end
 
-function dsum_with_morphisms(X::Object...)
+function direct_sum_with_morphisms(X::CategoryObject...)
     if length(X) == 1
         return X[1], [id(X[1])],[id(X[1])]
     end
-    Z,ix,px = dsum_with_morphisms(X[1],X[2])
+    Z,ix,px = direct_sum_with_morphisms(X[1],X[2])
     for Y in X[3:end]
         Z,ix,px = ⊕((Z,ix,px),Y)
     end
     return Z,ix,px
 end
 
-function dsum(f::Morphism...)
+function direct_sum(f::CategoryMorphism...)
     g = f[1]
 
     for h ∈ f[2:end]
@@ -111,15 +111,15 @@ function dsum(f::Morphism...)
     return g
 end
 
-function ×(T::Tuple{S,Vector{R}},X::S1) where {S <: Object,S1 <: Object, R <: Morphism}
+function ×(T::Tuple{S,Vector{R}},X::S1) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism}
     Z,px = product(T[1],X)
     m = vcat([t ∘ px[1] for t in T[2]], px[2])
     return Z, m
 end
 
-×(X::S1,T::Tuple{S,Vector{R}}) where {S <: Object,S1 <: Object, R <: Morphism} = ×(T,X)
+×(X::S1,T::Tuple{S,Vector{R}}) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism} = ×(T,X)
 
-function product(X::Object...)
+function product(X::CategoryObject...)
     if length(X) == 0 return nothing end
     Z = X[1]
     for Y ∈ X[2:end]
@@ -128,7 +128,7 @@ function product(X::Object...)
     return Z
 end
 
-function product_with_morphisms(X::Object...)
+function product_with_morphisms(X::CategoryObject...)
     if length(X) == 1
         return X[1], [id(X[1])]
     end
@@ -139,15 +139,15 @@ function product_with_morphisms(X::Object...)
     return Z,px
 end
 
-function ∐(T::Tuple{S,Vector{R}},X::S1) where {S <: Object,S1 <: Object, R <: Morphism}
+function ∐(T::Tuple{S,Vector{R}},X::S1) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism}
     Z,px = coproduct(T[1],X)
     m = vcat([px[1] ∘ t for t in T[2]], px[2])
     return Z, m
 end
 
-∐(X::S1,T::Tuple{S,Vector{R}}) where {S <: Object,S1 <: Object, R <: Morphism} = ∐(T,X)
+∐(X::S1,T::Tuple{S,Vector{R}}) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism} = ∐(T,X)
 
-function coproduct(X::Object...)
+function coproduct(X::CategoryObject...)
     if length(X) == 0 return nothing end
     Z = X[1]
     for Y in X[2:end]
@@ -156,7 +156,7 @@ function coproduct(X::Object...)
     return Z
 end
 
-function coproduct_with_morphisms(X::Object...)
+function coproduct_with_morphisms(X::CategoryObject...)
     if length(X) == 1
         return X[1], [id(X[1])]
     end
@@ -168,110 +168,110 @@ function coproduct_with_morphisms(X::Object...)
 end
 
 """
-    ×(X::Object...)
+    ×(X::CategoryObject...)
 
-Return the product Object and an array containing the projection morphisms.
+Return the product CategoryObject and an array containing the projection morphisms.
 """
-×(X::Object...) = product(X...)
-
-"""
-    ∐(X::Object...)
-
-Return the coproduct Object and an array containing the injection morphisms.
-"""
-∐(X::Object...) = coproduct(X...)
+×(X::CategoryObject...) = product(X...)
 
 """
-    ⊕(X::Object...)
+    ∐(X::CategoryObject...)
 
-Return the direct sum Object and arrays containing the injection and projection
+Return the coproduct CategoryObject and an array containing the injection morphisms.
+"""
+∐(X::CategoryObject...) = coproduct(X...)
+
+"""
+    ⊕(X::CategoryObject...)
+
+Return the direct sum CategoryObject and arrays containing the injection and projection
 morphisms.
 """
 
-⊕(X::Object...) = dsum(X...)
+⊕(X::CategoryObject...) = direct_sum(X...)
 
-⊕(X::Morphism...) = dsum(X...)
+⊕(X::CategoryMorphism...) = direct_sum(X...)
 
 """
-    ⊗(X::Object...)
+    ⊗(X::CategoryObject...)
 
 Return the tensor product object.
 """
-⊗(X::Object...) = tensor_product(X...)
+⊗(X::CategoryObject...) = tensor_product(X...)
 
 """
-    ^(X::Object, n::Integer)
+    ^(X::CategoryObject, n::Integer)
 
 Return the n-fold product object ```X^n```.
 """
-^(X::Object,n::Integer) = n == 0 ? zero(parent(X)) : product([X for i in 1:n]...)
+^(X::CategoryObject,n::Integer) = n == 0 ? zero(parent(X)) : product([X for i in 1:n]...)
 
-^(X::Morphism,n::Integer) = n == 0 ? zero_morphism(zero(parent(domain(X))), zero(parent(domain(X)))) : dsum([X for i in 1:n]...)
+^(X::CategoryMorphism,n::Integer) = n == 0 ? zero_morphism(zero(parent(domain(X))), zero(parent(domain(X)))) : direct_sum([X for i in 1:n]...)
 """
-    ⊗(f::Morphism, g::Morphism)
+    ⊗(f::CategoryMorphism, g::CategoryMorphism)
 
 Return the tensor product morphism of ```f```and ```g```.
 """
-⊗(f::Morphism, g::Morphism) = tensor_product(f,g)
+⊗(f::CategoryMorphism, g::CategoryMorphism) = tensor_product(f,g)
 
 
-dsum(X::T) where T <: Union{Vector,Tuple} = dsum(X...)
+direct_sum(X::T) where T <: Union{Vector,Tuple} = direct_sum(X...)
 product(X::T) where T <: Union{Vector,Tuple} = product(X...)
 coproduct(X::T) where T <: Union{Vector,Tuple} = coproduct(X...)
 
-product(X::Object,Y::Object) = dsum(X,Y)
-coproduct(X::Object, Y::Object) = dsum(X,Y)
+product(X::CategoryObject,Y::CategoryObject) = direct_sum(X,Y)
+coproduct(X::CategoryObject, Y::CategoryObject) = direct_sum(X,Y)
 
 #---------------------------------------------------------
 #   Horizontal and Vertical direct sums
 #---------------------------------------------------------
 
 """
-    function horizontal_dsum(f::Morphism, g::Morphism)
+    function horizontal_direct_sum(f::CategoryMorphism, g::CategoryMorphism)
 
 Return the sum of ``f:X → Z``, ``g:Y → Z`` as ``f+g:X⊕Y → Z.
 """
-function horizontal_dsum(f::Morphism, g::Morphism)
+function horizontal_direct_sum(f::CategoryMorphism, g::CategoryMorphism)
     #@assert codomain(f) == codomain(g) "Codomains do not coincide"
     sum = f ⊕ g
-    _,_,(p1,p2) = dsum_with_morphisms(codomain(f),codomain(g))
+    _,_,(p1,p2) = direct_sum_with_morphisms(codomain(f),codomain(g))
     return p1∘sum + p2∘sum
 end
 
-function horizontal_dsum(f::Vector{M}) where M <: Morphism
+function horizontal_direct_sum(f::Vector{M}) where M <: CategoryMorphism
     #@assert codomain(f) == codomain(g) "Codomains do not coincide"
-    f_sum = dsum(f...)
-    _,_,p = dsum_with_morphisms([codomain(fi) for fi ∈ f]...)
+    f_sum = direct_sum(f...)
+    _,_,p = direct_sum_with_morphisms([codomain(fi) for fi ∈ f]...)
     return sum([p1∘f_sum for p1 ∈ p])
 end
 
 """
-    function vertical_dsum(f::Morphism, g::Morphism)
+    function vertical_direct_sum(f::CategoryMorphism, g::CategoryMorphism)
 
 Return the sum of ``f:X → Y``, ``g:X → Z`` as ``f+g: X → Y⊕Z.
 """
-function vertical_dsum(f::Morphism, g::Morphism)
+function vertical_direct_sum(f::CategoryMorphism, g::CategoryMorphism)
     #@assert domain(f) == domain(g) "Domains do not coincide"
 
     sum = f ⊕ g
-    _,(i1,i2),_ = dsum_with_morphisms(domain(f), domain(g))
+    _,(i1,i2),_ = direct_sum_with_morphisms(domain(f), domain(g))
     return sum∘i1 + sum∘i2
 end
 
-function vertical_dsum(f::Vector{M}) where M <: Morphism
-    f_sum = dsum(f...)
-    _,i,_ = dsum_with_morphisms([domain(fi) for fi ∈ f]...)
+function vertical_direct_sum(f::Vector{M}) where M <: CategoryMorphism
+    f_sum = direct_sum(f...)
+    _,i,_ = direct_sum_with_morphisms([domain(fi) for fi ∈ f]...)
     return sum([f_sum∘ix for ix ∈ i])
 
 end
 
-is_simple(X::Object) = sum([dim(Hom(X,s)) for s ∈ simples(parent(X))]) == 1
+is_simple(X::CategoryObject) = sum([dim(Hom(X,s)) for s ∈ simples(parent(X))]) == 1
 #---------------------------------------------------------
 #   tensor_product
 #---------------------------------------------------------
 
 
-function tensor_product(X::Object...)
+function tensor_product(X::CategoryObject...)
     if length(X) == 1 return X end
 
     Z = X[1]
@@ -285,132 +285,77 @@ tensor_product(X::T) where T <: Union{Vector,Tuple} = tensor_product(X...)
 
 
 """
-    distribute_left(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
+    distribute_left(X::RingCatCategoryObject, Y::RingCatCategoryObject, Z::RingCatCategoryObject)
 
 Return the canonical isomorphism ```(X⊕Y)⊗Z → (X⊗Z)⊕(Y⊗Z)```.
 """
-function distribute_left(X::Object, Y::Object, Z::Object)
-    XY,(ix,iy),(px,py) = dsum_with_morphisms(X,Y)
-    return  vertical_dsum(px⊗id(Z), py⊗id(Z))
+function distribute_left(X::CategoryObject, Y::CategoryObject, Z::CategoryObject)
+    XY,(ix,iy),(px,py) = direct_sum_with_morphisms(X,Y)
+    return  vertical_direct_sum(px⊗id(Z), py⊗id(Z))
 end
 
 """
-    distribute_left(X::Vector{O}, Z::O) where O <: Object
+    distribute_left(X::Vector{O}, Z::O) where O <: CategoryObject
 
 Return the canonical isomorphism ```(⨁Xi)⊗Z → ⨁(Xi⊗Z)```.
 """
-function distribute_left(X::Vector{O}, Z::O) where O <: Object
-    XY,ix,px = dsum_with_morphisms(X...)
-    return vertical_dsum([pi⊗id(Z) for pi ∈ px])
+function distribute_left(X::Vector{O}, Z::O) where O <: CategoryObject
+    XY,ix,px = direct_sum_with_morphisms(X...)
+    return vertical_direct_sum([pi⊗id(Z) for pi ∈ px])
 end
 
 
 """
-    distribute_right(X::RingCatObject, Y::RingCatObject, Z::RingCatObject)
+    distribute_right(X::RingCatCategoryObject, Y::RingCatCategoryObject, Z::RingCatCategoryObject)
 
 Return the canonical isomorphism ```X⊗(Y⊕Z) → (X⊗Y)⊕(X⊗Z)````
 """
-function distribute_right(X::Object, Y::Object, Z::Object)
-    XY,(iy,iz),(py,pz) = dsum_with_morphisms(Y,Z)
-    return  vertical_dsum(id(X)⊗py, id(X)⊗pz)
+function distribute_right(X::CategoryObject, Y::CategoryObject, Z::CategoryObject)
+    XY,(iy,iz),(py,pz) = direct_sum_with_morphisms(Y,Z)
+    return  vertical_direct_sum(id(X)⊗py, id(X)⊗pz)
 end
 
 """
-    distribute_left(X::O, Z::Vector{O}) where O <: Object
+    distribute_left(X::O, Z::Vector{O}) where O <: CategoryObject
 
 Return the canonical isomorphism ```Z⊗(⨁Xi) → ⨁(Z⊗Xi)```.
 """
-function distribute_right(X::O, Z::Vector{O}) where O <: Object
-    XY,ix,px = dsum_with_morphisms(Z...)
-    return vertical_dsum([id(X)⊗pi for pi ∈ px])
+function distribute_right(X::O, Z::Vector{O}) where O <: CategoryObject
+    XY,ix,px = direct_sum_with_morphisms(Z...)
+    return vertical_direct_sum([id(X)⊗pi for pi ∈ px])
 end
 
-function distribute_left_to_right(X::Vector{T}, Y::Vector{T}) where T <: Object
-    X_sum,ix,px = dsum_with_morphisms(X...)
-    Y_sum,iy,py = dsum_with_morphisms(Y...)
-    Z_sum,iz,pz = dsum_with_morphisms(Z...)
-    dsum([(pxk ⊗ pyj ⊗ pzi) ∘ (ixk ⊗ iyj ⊗ izi) for (izi, pzi) ∈ zip(iz,pz), (iyj,pyj) ∈ zip(iy,py), (ixk,pxk) ∈ zip(ix,px)][:]...)
+function distribute_left_to_right(X::Vector{T}, Y::Vector{T}) where T <: CategoryObject
+    X_sum,ix,px = direct_sum_with_morphisms(X...)
+    Y_sum,iy,py = direct_sum_with_morphisms(Y...)
+    Z_sum,iz,pz = direct_sum_with_morphisms(Z...)
+    direct_sum([(pxk ⊗ pyj ⊗ pzi) ∘ (ixk ⊗ iyj ⊗ izi) for (izi, pzi) ∈ zip(iz,pz), (iyj,pyj) ∈ zip(iy,py), (ixk,pxk) ∈ zip(ix,px)][:]...)
 end
 
-function distribute_right_to_left(X::Vector{T}, Y::Vector{T}, Z::Vector{T}) where T <: Object
-    X_sum,ix,px = dsum_with_morphisms(X...)
-    Y_sum,iy,py = dsum_with_morphisms(Y...)
-    Z_sum,iz,pz = dsum_with_morphisms(Z...)
-    dsum([(pxk ⊗ (pyj ⊗ pzi)) ∘ (ixk ⊗ (iyj ⊗ izi)) for (izi, pzi) ∈ zip(iz,pz), (iyj,pyj) ∈ zip(iy,py), (ixk,pxk) ∈ zip(ix,px)][:]...)
+function distribute_right_to_left(X::Vector{T}, Y::Vector{T}, Z::Vector{T}) where T <: CategoryObject
+    X_sum,ix,px = direct_sum_with_morphisms(X...)
+    Y_sum,iy,py = direct_sum_with_morphisms(Y...)
+    Z_sum,iz,pz = direct_sum_with_morphisms(Z...)
+    direct_sum([(pxk ⊗ (pyj ⊗ pzi)) ∘ (ixk ⊗ (iyj ⊗ izi)) for (izi, pzi) ∈ zip(iz,pz), (iyj,pyj) ∈ zip(iy,py), (ixk,pxk) ∈ zip(ix,px)][:]...)
 end
 
-inv_associator(X::Object, Y::Object, Z::Object) = inv(associator(X,Y,Z))
+inv_associator(X::CategoryObject, Y::CategoryObject, Z::CategoryObject) = inv(associator(X,Y,Z))
 
 
 #------------------------------------------------------
 #   Abstract Methods
 #------------------------------------------------------
-isfusion(C::Category) = false
-ismultifusion(C::Category) = isfusion(C)
-
-istensor(C::Category) = isfusion(C)
-ismultitensor(C::Category) = ismultifusion(C) || istensor(C)
-
-isring(C::Category) = istensor(C)
-ismultiring(C::Category) = ismultitensor(C)
-
-ismonoidal(C::Category) = ismultitensor(C)
-
-isabelian(C::Category) = ismultitensor(C)
-
-isadditive(C::Category) = isabelian(C)
-
-islinear(C::Category) = isabelian(C)
-
-issemisimple(C::Category) = ismultitensor(C)
-
-function is_modular(C::Category) 
-     try
-        return det(smatrix(C)) != 0 
-    catch 
-        return false 
-    end
-end
-
-function is_spherical(C::Category)
-    @assert is_multifusion(C) "Generic checking only available for multifusion categories"
-
-    obj_type = typeof(one(C))
-    if  !hasmethod(spherical, Tuple{obj_type})
-        return false
-    end
-    try 
-        for x ∈ simples(C)
-            spherical(x)
-        end
-        return true
-    catch
-        return false
-    end
-end
-
-@alias is_fusion isfusion 
-@alias is_multifusion ismultifusion 
-@alias is_tensor istensor
-@alias is_multitensor ismultitensor
-@alias is_semisimple issemisimple
-@alias is_ring isring
-@alias is_multiring ismultiring
-@alias is_monoidal ismonoidal 
-@alias is_abelian isabelian
-@alias is_additive isadditive
-@alias is_linear islinear
 
 
-function image(f::Morphism)
+function image(f::CategoryMorphism)
     C,c = cokernel(f)
     return kernel(c)
 end
 
-∘(f::Morphism...) = compose(reverse(f)...)
+∘(f::CategoryMorphism...) = compose(reverse(f)...)
 
--(f::Morphism, g::Morphism) = f + (-1)*g
--(f::Morphism) = (-1)*f
+-(f::CategoryMorphism, g::CategoryMorphism) = f + (-1)*g
+-(f::CategoryMorphism) = (-1)*f
 
 getindex(C::Category, x::Int) = simples(C)[x]
 
@@ -449,17 +394,17 @@ end
 # Hom Spaces
 #-------------------------------------------------------
 
-dim(V::HomSpace) = length(basis(V))
+dim(V::CategoryHomSpace) = length(basis(V))
 
-End(X::Object) = Hom(X,X)
+End(X::CategoryObject) = Hom(X,X)
 
 zero_morphism(C::Category) = zero_morphism(zero(C), zero(C))
 
-Base.iterate(H::AbstractHomSpace, state = 1) = state > int_dim(H) ? nothing : (basis(H)[state], state + 1)
-Base.length(H::AbstractHomSpace) = int_dim(H)
-Base.eltype(::Type{T}) where T <: AbstractHomSpace = Morphism 
+Base.iterate(H::AbstractCategoryHomSpace, state = 1) = state > int_dim(H) ? nothing : (basis(H)[state], state + 1)
+Base.length(H::AbstractCategoryHomSpace) = int_dim(H)
+Base.eltype(::Type{T}) where T <: AbstractCategoryHomSpace = CategoryMorphism 
 
-function (F::Field)(f::Morphism)
+function (F::Field)(f::CategoryMorphism)
     m = matrix(f)
     if m == zero(parent(m))
         return zero(F)
@@ -494,7 +439,7 @@ function is_scalar_multiple(M::MatElem,N::MatElem)
     return true,k
 end
 
-function express_in_basis(f::T, B::Vector{T}) where T <: Morphism
+function express_in_basis(f::T, B::Vector{T}) where T <: CategoryMorphism
     F = base_ring(f)
     B_mat = matrix(F,hcat([[x for x ∈ matrix(b)][:] for b ∈ B]...))
     f_mat = matrix(F, 1, *(size(matrix(f))...), [x for x ∈ matrix(f)][:])
@@ -505,12 +450,12 @@ end
 # Duals
 #-------------------------------------------------------
 
-left_dual(X::Object) = dual(X)
-right_dual(X::Object) = dual(X)
+left_dual(X::CategoryObject) = dual(X)
+right_dual(X::CategoryObject) = dual(X)
 
-dual(f::Morphism) = left_dual(f)
+dual(f::CategoryMorphism) = left_dual(f)
 
-function left_dual(f::Morphism)
+function left_dual(f::CategoryMorphism)
     X = domain(f)
     Y = codomain(f)
     a = ev(Y)⊗id(dual(X))
@@ -520,9 +465,9 @@ function left_dual(f::Morphism)
     (a)∘(b)∘(c)∘(d)
 end
 
-tr(f::Morphism) = left_trace(f)
+tr(f::CategoryMorphism) = left_trace(f)
 
-function left_trace(f::Morphism)
+function left_trace(f::CategoryMorphism)
     V = domain(f)
     W = codomain(f)
     C = parent(V)
@@ -534,12 +479,12 @@ function left_trace(f::Morphism)
     return ev(left_dual(V)) ∘ (f ⊗ id(left_dual(V))) ∘ coev(V)
 end
 
-function right_trace(f::Morphism)
+function right_trace(f::CategoryMorphism)
     V = domain(f)
     W = codomain(f)
     dV = right_dual(V)
-    _,i = isisomorphic(left_dual(dV),V)
-    _,j = isisomorphic(right_dual(V), left_dual(right_dual(dV)))
+    _,i = is_isomorphic(left_dual(dV),V)
+    _,j = is_isomorphic(right_dual(V), left_dual(right_dual(dV)))
     return (ev(right_dual(dV))) ∘ (j⊗(f∘i)) ∘ coev(right_dual(V))
 end
 
@@ -547,11 +492,11 @@ end
 # Spherical structure
 #-------------------------------------------------------
 
-function drinfeld_morphism(X::Object)
+function drinfeld_morphism(X::CategoryObject)
      (ev(X)⊗id(dual(dual(X)))) ∘ (braiding(X,dual(X))⊗id(dual(dual(X)))) ∘ (id(X)⊗coev(dual(X)))
  end
 
-dim(X::Object) = base_ring(X)(tr(spherical(X)))
+dim(X::CategoryObject) = base_ring(X)(tr(spherical(X)))
 
 dim(C::Category) = sum(dim(s)^2 for s ∈ simples(C))
 #-------------------------------------------------------
@@ -559,7 +504,7 @@ dim(C::Category) = sum(dim(s)^2 for s ∈ simples(C))
 #-------------------------------------------------------
 
 function smatrix(C::Category, simples = simples(C))
-    @assert issemisimple(C) "Category has to be semisimple"
+    @assert is_semisimple(C) "Category has to be semisimple"
     F = base_ring(C)
     m = [tr(braiding(s,t)∘braiding(t,s)) for s ∈ simples, t ∈ simples]
     try
@@ -591,24 +536,24 @@ end
 # decomposition morphism
 #-------------------------------------------------------
 
-function decompose(X::Object, S = simples(parent(X)))
+function decompose(X::CategoryObject, S = simples(parent(X)))
     C = parent(X)
-    @assert issemisimple(C) "Category not semisimple"
+    @assert is_semisimple(C) "Category not semisimple"
     dimensions = [int_dim(Hom(s,X)) for s ∈ S]
     return [(s,d) for (s,d) ∈ zip(S,dimensions) if d > 0]
 end
 
-function decompose_morphism(X::Object, S = simples(parent(X)))
+function decompose_morphism(X::CategoryObject, S = simples(parent(X)))
     C = parent(X)
-    @assert issemisimple(C) "Semisimplicity required"
+    @assert is_semisimple(C) "Semisimplicity required"
     
     if X == zero(C) return id(X), [], [] end
 
     components = decompose(X,S)
-    Z, incl, proj = dsum_with_morphisms(vcat([[s for _ ∈ 1:d] for (s,d) ∈ components]...)...)
+    Z, incl, proj = direct_sum_with_morphisms(vcat([[s for _ ∈ 1:d] for (s,d) ∈ components]...)...)
 
     # temporary solution!
-    iso = isisomorphic(X,Z)[2]
+    iso = is_isomorphic(X,Z)[2]
     return iso, [inv(iso)∘i for i ∈ incl], [p∘iso for p ∈ proj]
 
     #----------------------------------
@@ -628,7 +573,7 @@ end
 # Semisimple: Subobjects
 #-------------------------------------------------------
 
-function eigenspaces(f::Morphism)
+function eigenspaces(f::CategoryMorphism)
     @assert domain(f) == codomain(f) "Not an endomorphism"
 
     #@show factor(minpoly(matrix(f)))
@@ -641,7 +586,7 @@ function eigenspaces(f::Morphism)
     return Dict(λ => kernel(f-λ*id(domain(f)))[1] for λ ∈ values)
 end
 
-function simple_subobjects(X::Object)
+function simple_subobjects(X::CategoryObject)
     B = basis(End(X))
 
     if length(B) == 1 return [X] end
@@ -660,7 +605,7 @@ function simple_subobjects(X::Object)
     return [X]
 end
 
-function unique_simples(simples::Vector{<:Object})
+function unique_simples(simples::Vector{<:CategoryObject})
     unique_simples = simples[1:1]
     for s ∈ simples[2:end]
         if sum([dim(Hom(s,u)) for u ∈ unique_simples]) == 0
@@ -679,7 +624,7 @@ end
     Duals in Fusion Categories
 -------------------------------------------------=#
 
-function coev(X::Object)
+function coev(X::CategoryObject)
     if is_simple(X)
         return simple_objects_coev(X)
     end
@@ -691,14 +636,14 @@ function coev(X::Object)
     dual_summands = dual.(summands)
     d = length(summands)
 
-    c = vertical_dsum([i == j ? coev(summands[i]) : zero_morphism(𝟙, summands[j]⊗dual_summands[i]) for j ∈ 1:d, i ∈ 1:d][:])
+    c = vertical_direct_sum([i == j ? coev(summands[i]) : zero_morphism(𝟙, summands[j]⊗dual_summands[i]) for j ∈ 1:d, i ∈ 1:d][:])
 
-    distr = dsum([distribute_right(x,dual_summands) for x ∈ summands]) ∘ distribute_left(summands, dual(X))
+    distr = direct_sum([distribute_right(x,dual_summands) for x ∈ summands]) ∘ distribute_left(summands, dual(X))
 
     return distr ∘ c
 end
 
-function ev(X::Object)
+function ev(X::CategoryObject)
     if is_simple(X)
         return simple_objects_ev(X)
     end
@@ -709,14 +654,14 @@ function ev(X::Object)
     dual_summands = dual.(summands)
     d = length(summands)
 
-    e = horizontal_dsum([i == j ? ev(summands[i]) : zero_morphism(dual_summands[j]⊗summands[i], 𝟙)  for j ∈ 1:d, i ∈ 1:d][:])
+    e = horizontal_direct_sum([i == j ? ev(summands[i]) : zero_morphism(dual_summands[j]⊗summands[i], 𝟙)  for j ∈ 1:d, i ∈ 1:d][:])
 
-    distr = dsum([distribute_right(x,summands) for x ∈ dual_summands]) ∘ distribute_left(dual_summands, X)
+    distr = direct_sum([distribute_right(x,summands) for x ∈ dual_summands]) ∘ distribute_left(dual_summands, X)
 
     return e ∘ inv(distr) 
 end
 
-function simple_objects_coev(X::Object)
+function simple_objects_coev(X::CategoryObject)
     DX = dual(X)
     C = parent(X)
     F = base_ring(C)
@@ -728,7 +673,7 @@ function simple_objects_coev(X::Object)
     return basis(Hom(one(C), cod))[1]
 end
 
-function simple_objects_ev(X::Object)
+function simple_objects_ev(X::CategoryObject)
     DX = dual(X)
     C = parent(X)
     F = base_ring(C)
@@ -748,8 +693,8 @@ end
     Frobenius Perron dimension 
 -------------------------------------------------=#
 
-function fpdim(X::Object)
-    @assert isfusion(parent(X))
+function fpdim(X::CategoryObject)
+    @assert is_fusion(parent(X))
     S = simples(parent(X))
     n = length(S)
 
@@ -781,7 +726,7 @@ function fpdim(X::Object)
 end
 
 function fpdim(C::Category)
-    @assert isfusion(C)
+    @assert is_fusion(C)
     sum(fpdim.(simples(C)).^2)
 end
 
@@ -790,10 +735,10 @@ end
 # Misc
 #-------------------------------------------------------
 
-*(f::Morphism, x) = x*f
+*(f::CategoryMorphism, x) = x*f
 
 
-function is_subobject(X::Object, Y::Object)
+function is_subobject(X::CategoryObject, Y::CategoryObject)
     @assert parent(X) == parent(Y)
     S = simples(parent(X))
 
