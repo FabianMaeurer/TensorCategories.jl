@@ -28,7 +28,7 @@ base_ring(C::RingSubcategory) = base_ring(C.category)
 
 function RingSubcategory(C::Category,i::Int...)
     @assert is_multitensor(C)
-    𝟙ᵢ = direct_sum([decompose(one(C))[iₖ][1] for iₖ ∈ i]...)
+    𝟙ᵢ = direct_sum([decompose(one(C))[iₖ][1] for iₖ ∈ i]...)[1]
     projection = [𝟙ᵢ⊗S⊗𝟙ᵢ for S ∈ simples(C)]
     filter!(e -> e != zero(C), projection)
     return RingSubcategory(C,projection,𝟙ᵢ)
