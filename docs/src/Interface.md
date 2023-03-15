@@ -38,7 +38,7 @@ compose(f::YourMorphism, g::YourMorphism) ::YourMorphism
 
 At the current state TensorCategories.jl knows about the following kinds of categories:
 
-  - $k$-linear 
+  - ``k``-linear 
   - additive
   - abelian
   - monoidal
@@ -49,10 +49,23 @@ At the current state TensorCategories.jl knows about the following kinds of cate
   - (multi)tensor
   - (multi)fusion
 
-These structures/properties are handled by providing the corresponding methods for any given category. I.e. we require the following methods:
+For the precise definitions take a look at [EGNO](@ref), which we use as a general reference in most concerns. The above labels are generically tested by functions `is_label(::Category)::Bool`. In general it is only necessary to implement the necessary methods for a specific type. In some special cases it might be useful to explicitly falsify some labels. For example it is not feasible to check whether a preabelian category is in fact abelian. Thus TensorCategories will always see a preabelian category as abelian by omitting to check for (co)normality of epi/monomorphisms. 
 
-| Structure/Property | Required Structures/Properties | Additional Methods |
-|:------------------ | :----------------------------- | :----------------- |
-| Additive           |                                | `direct_sum(::YourObject,::YourObject)::YourObject` <br> `zero(::YourCategory)::YourObject` |
-| Linear             |                                | `base_ring(::YourCategory)::Field`|
-| Abelian            | Additive, Linear               | `kernel(::YourMorphism)::Tuple{YourObject, YourMorphism}` <br> `cokernel(::YourMorphism)::Tuple{YourObject,YourMorphism}`|
+| Structure/Property | Required Structures/Properties | Defining Methods   | Useful Methods  | 
+|:------------------ | :----------------------------- | :----------------- | :-------------- |
+| Additive           |                                | `direct_sum(::YourObject,::YourObject)::Tuple{YourObject, Vector{YourMorphism}, Vector{YourMorphism}`  `direct_sum(::YourMorphism,::YourMoprhism)::YourMorphism`  `zero(::YourCategory)::YourObject`  `+(::YourMorphism, ::YourMorphism)`| |
+| Linear             |                                | `base_ring(::YourCategory)::Field`  `*(::FieldElem,::YourMorphism`  `+(::YourMorphism, ::YourMorphism)` | |
+| Abelian            | Additive                       | `kernel(::YourMorphism)::Tuple{YourObject, YourMorphism}`  `cokernel(::YourMorphism)::Tuple{YourObject,YourMorphism}`| `indecomposables(::YourCategory)::Vector{YourObject}`  `simples(::YourCategory)::Vector{YourObject}`| 
+| Monoidal           |                                | `tensor_product(::YourObject,::YourObject)::YourObject`  `tensor_product(::YourMorphism,::YourMorphism)::YourMorphism`  `one(::YourCategory)::YourObject` | | 
+| Rigid              | Monoidal                       | `left_dual(X::YourObject)::YourObject`  `right_dual(X::YourObject)::YourObject`  or, if the dual is two sided  `dual(::YourObject)::YourObject`  `ev(::YourObject)::YourMorphism`  `coev(::YourObject)::YourMorphism` | |
+| Spherical          | Monoidal, Rigid                | `spherical(X::YourObject)::YourMorphism` |
+| Krull-Schmidt      | Additive, Linear               | **Coming Soon** ||
+| (Multi)Ring        | Abelian, Monoidal, linear      | | |
+| (Multi)Tensor      | Multiring, Rigid               | | |
+| (Multi)Fusion      | Multitensor, Semisimple        | | |
+
+!!! warn "Beware"
+    If any of the above functions are implemented only partially it might be useful to manually specify the according label to be false. Otherwise there might be unwanted behavior. 
+
+!!! note "Direct sums"
+    Direct sums return always the object and the corresponding inclusions and projections.

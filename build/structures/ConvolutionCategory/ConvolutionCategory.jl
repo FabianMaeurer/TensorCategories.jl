@@ -10,7 +10,7 @@ struct ConvolutionCategory <: Category
 end
 
 struct ConvolutionCategoryObject <: CategoryObject
-    sheaf::CohSheaf
+    sheaf::CohSheafCategoryObject
     parent::ConvolutionCategory
 end
 
@@ -218,7 +218,7 @@ function one(C::ConvolutionCategory)
     for i ∈ [orbit_index(C,d) for d ∈ diag]
         stlks[i] = one(RepresentationCategory(orbit_stabilizers(C)[i], F))
     end
-    return ConvolutionCategoryObject(CohSheaf(C.squaredCoh, stlks), C)
+    return ConvolutionCategoryObject(CohSheafCategoryObject(C.squaredCoh, stlks), C)
 end
 
 function dual(X::ConvolutionCategoryObject)
@@ -226,7 +226,7 @@ function dual(X::ConvolutionCategoryObject)
     GSet = parent(X).squaredCoh.GSet
     perm = [findfirst(e -> e ∈ orbit(GSet, (y,x)), orbit_reps) for (x,y) ∈ orbit_reps]
     reps = [dual(ρ) for ρ ∈ stalks(X)][perm]
-    return ConvolutionCategoryObject(CohSheaf(parent(X.sheaf), reps), parent(X))
+    return ConvolutionCategoryObject(CohSheafCategoryObject(parent(X.sheaf), reps), parent(X))
 end
 
 spherical(X::ConvolutionCategoryObject) = id(X)

@@ -6,14 +6,14 @@ struct CohSheaves <: Category
     orbit_stabilizers
 end
 
-struct CohSheaf <: CategoryObject
+struct CohSheafCategoryObject <: CategoryObject
     parent::CohSheaves
     stalks::Vector{GroupRepresentation}
 end
 
 struct CohSheafCategoryMorphism <: CategoryMorphism
-    domain::CohSheaf
-    codomain::CohSheaf
+    domain::CohSheafCategoryObject
+    codomain::CohSheafCategoryObject
     m::Vector{GroupRepresentationCategoryMorphism}
 end
 
@@ -45,7 +45,7 @@ function CohSheaves(X,F::Field)
     return CohSheaves(gset(G,X), F)
 end
 
-Morphism(X::CohSheaf, Y::CohSheaf, m::Vector) = CohSheafCategoryMorphism(X,Y,m)
+Morphism(X::CohSheafCategoryObject, Y::CohSheafCategoryObject, m::Vector) = CohSheafCategoryMorphism(X,Y,m)
 
 
 #-----------------------------------------------------------------
@@ -59,15 +59,15 @@ Return whether ``C``is semisimple.
 is_semisimple(C::CohSheaves) = gcd(order(C.group), characteristic(base_ring(C))) == 1
 
 """
-    stalks(X::CohSheaf)
+    stalks(X::CohSheafCategoryObject)
 
 Return the stalks of ``X``.
 """
-stalks(X::CohSheaf) = X.stalks
+stalks(X::CohSheafCategoryObject) = X.stalks
 
 orbit_stabilizers(Coh::CohSheaves) = Coh.orbit_stabilizers
 
-function orbit_index(X::CohSheaf, y)
+function orbit_index(X::CohSheafCategoryObject, y)
     i = findfirst(x -> y ∈ x, orbits(parent(X).GSet))
 end
 
@@ -75,7 +75,7 @@ function orbit_index(C::CohSheaves, y)
     i = findfirst(x -> y ∈ x, orbits(C.GSet))
 end
 
-function stalk(X::CohSheaf,y)
+function stalk(X::CohSheafCategoryObject,y)
     return stalks(X)[orbit_index(X,y)]
 end
 
@@ -84,16 +84,16 @@ end
 
 Return the zero sheaf on the ``G``-set.
 """
-zero(C::CohSheaves) = CohSheaf(C,[zero(RepresentationCategory(H,base_ring(C))) for H ∈ C.orbit_stabilizers])
+zero(C::CohSheaves) = CohSheafCategoryObject(C,[zero(RepresentationCategory(H,base_ring(C))) for H ∈ C.orbit_stabilizers])
 
 """
-    zero_morphism(X::CohSheaf, Y::CohSheaf)
+    zero_morphism(X::CohSheafCategoryObject, Y::CohSheafCategoryObject)
 
 Return the zero morphism ```0:X → Y```.
 """
-zero_morphism(X::CohSheaf, Y::CohSheaf) = CohSheafCategoryMorphism(X,Y,[zero(Hom(x,y)) for (x,y) ∈ zip(stalks(X),stalks(Y))])
+zero_morphism(X::CohSheafCategoryObject, Y::CohSheafCategoryObject) = CohSheafCategoryMorphism(X,Y,[zero(Hom(x,y)) for (x,y) ∈ zip(stalks(X),stalks(Y))])
 
-function ==(X::CohSheaf, Y::CohSheaf)
+function ==(X::CohSheafCategoryObject, Y::CohSheafCategoryObject)
     if parent(X) != parent(Y) return false end
     for (s,r) ∈ zip(stalks(X),stalks(Y))
         if s != r return false end
@@ -102,11 +102,11 @@ function ==(X::CohSheaf, Y::CohSheaf)
 end
 
 """
-    is_isomorphic(X::CohSheaf, Y::CohSheaf)
+    is_isomorphic(X::CohSheafCategoryObject, Y::CohSheafCategoryObject)
 
 Check whether ``X``and ``Y`` are isomorphic and the isomorphism if possible.
 """
-function is_isomorphic(X::CohSheaf, Y::CohSheaf)
+function is_isomorphic(X::CohSheafCategoryObject, Y::CohSheafCategoryObject)
     m = GroupRepresentationCategoryMorphism[]
     for (s,r) ∈ zip(stalks(X),stalks(Y))
         b, iso = is_isomorphic(s,r)
@@ -119,70 +119,70 @@ end
 ==(f::CohSheafCategoryMorphism, g::CohSheafCategoryMorphism) = f.m == g.m
 
 """
-    id(X::CohSheaf)
+    id(X::CohSheafCategoryObject)
 
 Return the identity on ```X```.
 """
-id(X::CohSheaf) = CohSheafCategoryMorphism(X,X,[id(s) for s ∈ stalks(X)])
+id(X::CohSheafCategoryObject) = CohSheafCategoryMorphism(X,X,[id(s) for s ∈ stalks(X)])
 
 """
-    associator(X::CohSheaf, Y::CohSheaf, Z::CohSheaf)
+    associator(X::CohSheafCategoryObject, Y::CohSheafCategoryObject, Z::CohSheafCategoryObject)
 
 Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 """
-associator(X::CohSheaf, Y::CohSheaf, Z::CohSheaf) = id(X⊗Y⊗Z)
+associator(X::CohSheafCategoryObject, Y::CohSheafCategoryObject, Z::CohSheafCategoryObject) = id(X⊗Y⊗Z)
 
 """
-    dual(X::CohSheaf)
+    dual(X::CohSheafCategoryObject)
 
 Return the dual object of ```X```.
 """
-dual(X::CohSheaf) = CohSheaf(parent(X),[dual(s) for s ∈ stalks(X)])
+dual(X::CohSheafCategoryObject) = CohSheafCategoryObject(parent(X),[dual(s) for s ∈ stalks(X)])
 
 """
-    ev(X::CohSheaf)
+    ev(X::CohSheafCategoryObject)
 
 Return the evaluation morphism ```X∗⊗X → 1```.
 """
-function ev(X::CohSheaf)
+function ev(X::CohSheafCategoryObject)
     dom = dual(X)⊗X
     cod = one(parent(X))
     return CohSheafCategoryMorphism(dom,cod, [ev(s) for s ∈ stalks(X)])
 end
 
 """
-    coev(X::CohSheaf)
+    coev(X::CohSheafCategoryObject)
 
 Return the coevaluation morphism ```1 → X⊗X∗```.
 """
-function coev(X::CohSheaf)
+function coev(X::CohSheafCategoryObject)
     dom = one(parent(X))
     cod = X ⊗ dual(X)
     return CohSheafCategoryMorphism(dom,cod, [coev(s) for s ∈ stalks(X)])
 end
 
 """
-    spherical(X::CohSheaf)
+    spherical(X::CohSheafCategoryObject)
 
 Return the spherical structure isomorphism ```X → X∗∗```.
 """
-spherical(X::CohSheaf) = Morphism(X,X,[spherical(s) for s ∈ stalks(X)])
+spherical(X::CohSheafCategoryObject) = Morphism(X,X,[spherical(s) for s ∈ stalks(X)])
 
 """
-    braiding(X::cohSheaf, Y::CohSheaf)
+    braiding(X::cohSheaf, Y::CohSheafCategoryObject)
 
 Return the braiding isomoephism ```X⊗Y → Y⊗X```.
 """
-braiding(X::CohSheaf, Y::CohSheaf) = Morphism(X⊗Y, Y⊗X, [braiding(x,y) for (x,y) ∈ zip(stalks(X),stalks(Y))])
+braiding(X::CohSheafCategoryObject, Y::CohSheafCategoryObject) = Morphism(X⊗Y, Y⊗X, [braiding(x,y) for (x,y) ∈ zip(stalks(X),stalks(Y))])
 
-dim(X::CohSheaf) = sum(dim.(stalks(X)))
+dim(X::CohSheafCategoryObject) = sum(dim.(stalks(X)))
 
 function (F::Field)(f::CohSheafCategoryMorphism) 
     @assert is_simple(domain(f)) && domain(f) == codomain(f)
     return sum([F(m) for m ∈ f.m if m != zero_morphism(domain(m),codomain(m))])
 end
 
-function is_simple(X::CohSheaf)
+function is_simple(X::CohSheafCategoryObject)
     non_zero = [s for s ∈ stalks(X) if s != zero(parent(s))]
     if length(non_zero) != 1
         return false
@@ -195,16 +195,13 @@ end
 #-----------------------------------------------------------------
 
 """
-    direct_sum(X::CohSheaf, Y::CohSheaf, morphisms::Bool = false)
+    direct_sum(X::CohSheafCategoryObject, Y::CohSheafCategoryObject)
 
-Return the direct sum of sheaves. Return also the inclusion and projection if
-morphisms = true.
+Return the direct sum of sheaves. Return also the inclusion and projection.
 """
-function direct_sum(X::CohSheaf, Y::CohSheaf, morphisms::Bool = false)
-    sums = [direct_sum(x,y,true) for (x,y) ∈ zip(stalks(X), stalks(Y))]
-    Z = CohSheaf(parent(X), [s[1] for s ∈ sums])
-
-    if !morphisms return Z end
+function direct_sum(X::CohSheafCategoryObject, Y::CohSheafCategoryObject)
+    sums = [direct_sum(x,y) for (x,y) ∈ zip(stalks(X), stalks(Y))]
+    Z = CohSheafCategoryObject(parent(X), [s[1] for s ∈ sums])
 
     ix = [CohSheafCategoryMorphism(x,Z,[s[2][i] for s ∈ sums]) for (x,i) ∈ zip([X,Y],1:2)]
     px = [CohSheafCategoryMorphism(Z,x,[s[3][i] for s ∈ sums]) for (x,i) ∈ zip([X,Y],1:2)]
@@ -217,14 +214,12 @@ end
 Return the direct sum of morphisms of sheaves.
 """
 function direct_sum(f::CohSheafCategoryMorphism, g::CohSheafCategoryMorphism)
-    dom = direct_sum(domain(f), domain(g))
-    codom = direct_sum(codomain(f), codomain(g))
+    dom = direct_sum(domain(f), domain(g))[1]
+    codom = direct_sum(codomain(f), codomain(g))[2]
     mors = [direct_sum(m,n) for (m,n) ∈ zip(f.m,g.m)]
     return CohSheafCategoryMorphism(dom,codom, mors)
 end
 
-product(X::CohSheaf,Y::CohSheaf,projections = false) = projections ? direct_sum(X,Y,projections)[[1,3]] : direct_sum(X,Y)
-coproduct(X::CohSheaf,Y::CohSheaf,projections = false) = projections ? direct_sum(X,Y,projections)[[1,2]] : direct_sum(X,Y)
 
 #-----------------------------------------------------------------
 #   Functionality: (Co)Kernel
@@ -237,7 +232,7 @@ Return a tuple ```(K,k)``` where ```K``` is the kernel object and ```k``` is the
 """
 function kernel(f::CohSheafCategoryMorphism)
     kernels = [kernel(g) for g ∈ f.m]
-    K = CohSheaf(parent(domain(f)), [k for (k,_) ∈ kernels])
+    K = CohSheafCategoryObject(parent(domain(f)), [k for (k,_) ∈ kernels])
     return K, Morphism(K, domain(f), [m for (_,m) ∈ kernels])
 end
 
@@ -248,7 +243,7 @@ Return a tuple ```(C,c)``` where ```C``` is the kernel object and ```c``` is the
 """
 function cokernel(f::CohSheafCategoryMorphism)
     cokernels = [cokernel(g) for g ∈ f.m]
-    C = CohSheaf(parent(domain(f)), [c for (c,_) ∈ cokernels])
+    C = CohSheafCategoryObject(parent(domain(f)), [c for (c,_) ∈ cokernels])
     return C, Morphism(codomain(f), C, [m for (_,m) ∈ cokernels])
 end
 
@@ -257,13 +252,13 @@ end
 #-----------------------------------------------------------------
 
 """
-    tensor_product(X::CohSheaf, Y::CohSheaf)
+    tensor_product(X::CohSheafCategoryObject, Y::CohSheafCategoryObject)
 
 Return the tensor product of equivariant coherent sheaves.
 """
-function tensor_product(X::CohSheaf, Y::CohSheaf)
+function tensor_product(X::CohSheafCategoryObject, Y::CohSheafCategoryObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
-    return CohSheaf(parent(X), [x⊗y for (x,y) ∈ zip(stalks(X), stalks(Y))])
+    return CohSheafCategoryObject(parent(X), [x⊗y for (x,y) ∈ zip(stalks(X), stalks(Y))])
 end
 
 """
@@ -285,7 +280,7 @@ end
 Return the one object in ``C``.
 """
 function one(C::CohSheaves)
-    return CohSheaf(C,[one(RepresentationCategory(H,base_ring(C))) for H ∈ C.orbit_stabilizers])
+    return CohSheafCategoryObject(C,[one(RepresentationCategory(H,base_ring(C))) for H ∈ C.orbit_stabilizers])
 end
 
 #-----------------------------------------------------------------
@@ -342,7 +337,7 @@ Return the simple objects of ``C``.
 """
 function simples(C::CohSheaves)
 
-    simple_objects = CohSheaf[]
+    simple_objects = CohSheafCategoryObject[]
 
     #zero modules
     zero_mods = [zero(RepresentationCategory(H,C.base_ring)) for H ∈ C.orbit_stabilizers]
@@ -354,7 +349,7 @@ function simples(C::CohSheaves)
 
         RepH_simples = simples(RepH)
         for i ∈ 1:length(RepH_simples)
-            Hsimple_sheaves = [CohSheaf(C,[k == j ? RepH_simples[i] : zero_mods[j] for j ∈ 1:length(C.orbit_stabilizers)])]
+            Hsimple_sheaves = [CohSheafCategoryObject(C,[k == j ? RepH_simples[i] : zero_mods[j] for j ∈ 1:length(C.orbit_stabilizers)])]
             simple_objects = [simple_objects; Hsimple_sheaves]
         end
     end
@@ -362,11 +357,11 @@ function simples(C::CohSheaves)
 end
 
 """
-    decompose(X::CohSheaf)
+    decompose(X::CohSheafCategoryObject)
 
 Decompose ``X`` into a direct sum of simple objects with multiplicity.
 """
-function decompose(X::CohSheaf)
+function decompose(X::CohSheafCategoryObject)
     ret = []
     C = parent(X)
     zero_mods = [zero(RepresentationCategory(H,C.base_ring)) for H ∈ C.orbit_stabilizers]
@@ -374,7 +369,7 @@ function decompose(X::CohSheaf)
     for k ∈ 1:length(C.orbit_reps)
         X_H_facs = decompose(stalks(X)[k])
 
-        ret = [ret; [(CohSheaf(C,[k == j ? Y : zero_mods[j] for j ∈ 1:length(C.orbit_reps)]),d) for (Y,d) ∈ X_H_facs]]
+        ret = [ret; [(CohSheafCategoryObject(C,[k == j ? Y : zero_mods[j] for j ∈ 1:length(C.orbit_reps)]),d) for (Y,d) ∈ X_H_facs]]
     end
     return ret
 end
@@ -383,18 +378,18 @@ end
 #-----------------------------------------------------------------
 
 struct CohSfCategoryHomSpace <: AbstractCategoryHomSpace
-    X::CohSheaf
-    Y::CohSheaf
+    X::CohSheafCategoryObject
+    Y::CohSheafCategoryObject
     basis::Vector{CohSheafCategoryMorphism}
     parent::VectorSpaces
 end
 
 """
-    Hom(X::CohSheaf, Y::CohSheaf)
+    Hom(X::CohSheafCategoryObject, Y::CohSheafCategoryObject)
 
 Return Hom(``X,Y``) as a vector space.
 """
-function Hom(X::CohSheaf, Y::CohSheaf)
+function Hom(X::CohSheafCategoryObject, Y::CohSheafCategoryObject)
     @assert parent(X) == parent(Y) "Missmatching parents"
 
     b = CohSheafCategoryMorphism[]
@@ -420,7 +415,7 @@ function show(io::IO, C::CohSheaves)
     print(io, "Category of equivariant coherent sheaves on $(C.GSet.seeds) over $(C.base_ring)")
 end
 
-function show(io::IO, X::CohSheaf)
+function show(io::IO, X::CohSheafCategoryObject)
     print(io, "Equivariant choherent sheaf on $(X.parent.GSet.seeds) over $(base_ring(X))")
 end
 
@@ -440,7 +435,7 @@ struct PullbackFunctor <: AbstractFunctor
     mor_map
 end
 
-pullb_obj_map(CY,CX,X,f) = CohSheaf(CX, [restriction(stalk(X,f(x)), H) for (x,H) ∈ zip(CX.orbit_reps, CX.orbit_stabilizers)])
+pullb_obj_map(CY,CX,X,f) = CohSheafCategoryObject(CX, [restriction(stalk(X,f(x)), H) for (x,H) ∈ zip(CX.orbit_reps, CX.orbit_stabilizers)])
 
 function pullb_mor_map(CY,CX,m,f)
     dom = pullb_obj_map(CY,CX,domain(m),f)
@@ -482,10 +477,10 @@ function pushf_obj_map(CX,CY,X,f)
         orbit_reps = [O.seeds[1] for O ∈ orbits(fiber)]
 
         for j ∈ 1:length(orbit_reps)
-            stlks[i] = direct_sum(stlks[i], induction(stalk(X,orbit_reps[j]), CY.orbit_stabilizers[i]))
+            stlks[i] = direct_sum(stlks[i], induction(stalk(X,orbit_reps[j]), CY.orbit_stabilizers[i]))[1]
         end
     end
-    return CohSheaf(CY, stlks)
+    return CohSheafCategoryObject(CY, stlks)
 end
 
 function pushf_mor_map(CX,CY,m,f)

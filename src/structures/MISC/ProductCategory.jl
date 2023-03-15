@@ -62,8 +62,8 @@ function direct_sum(X::ProductCategoryObject, Y::ProductCategoryObject)
     return ProductCategoryObject(parent(X),Tuple([direct_sum(x,y) for (x,y) ∈ zip(X.factors, Y.factors)]))
 end
 
-function direct_sum_with_morphisms(X::ProductCategoryObject, Y::ProductCategoryObject)
-    sums = [direct_sum_with_morphisms(x,y) for (x,y) ∈ zip(X.factors,Y.factors)]
+function direct_sum(X::ProductCategoryObject, Y::ProductCategoryObject)
+    sums = [direct_sum(x,y) for (x,y) ∈ zip(X.factors,Y.factors)]
     Z = ProductCategoryObject(parent(X), Tuple(s[1] for s ∈ sums))
     ix = ProductMorphism(X,Z, Tuple(s[2][1] for s ∈ sums))
     iy = ProductMorphism(Y,Z, Tuple(s[2][2] for s ∈ sums))

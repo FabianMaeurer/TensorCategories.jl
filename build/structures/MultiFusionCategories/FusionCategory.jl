@@ -547,11 +547,11 @@ end
 
 function direct_sum(X::RingCategoryObject, Y::RingCategoryObject, morphisms::Bool = false)
     @assert parent(X) == parent(Y) "Mismatching parents"
-    if morphisms return direct_sum_with_morphisms(X,Y) end
+    if morphisms return direct_sum(X,Y) end
     return RingCategoryObject(parent(X), X.components .+ Y.components)
 end
 
-function direct_sum_with_morphisms(X::RingCategoryObject, Y::RingCategoryObject)
+function direct_sum(X::RingCategoryObject, Y::RingCategoryObject)
     S = direct_sum(X,Y)
     ix_mats = matrices(zero_morphism(X,S))
     iy_mats = matrices(zero_morphism(Y,S))
@@ -657,7 +657,7 @@ end
 #   Hom Spaces
 #-------------------------------------------------------------------------------
 
-struct RingCatCategoryHomSpace<: AbstractCategoryHomSpace
+struct RingCategoryHomSpace<: AbstractCategoryHomSpace
     X::RingCategoryObject
     Y::RingCategoryObject
     basis::Vector{RingCategoryMorphism}
@@ -671,7 +671,7 @@ function Hom(X::RingCategoryObject, Y::RingCategoryObject)
 
     d = sum([x*y for (x,y) ∈ zip(Xi,Yi)])
 
-    if d == 0 return RingCatCategoryHomSpace(X,Y,RingCategoryMorphism[], VectorSpaces(F)) end
+    if d == 0 return RingCategoryHomSpace(X,Y,RingCategoryMorphism[], VectorSpaces(F)) end
 
     basis = [zero_morphism(X,Y).m for i ∈ 1:d]
     next = 1
@@ -683,7 +683,7 @@ function Hom(X::RingCategoryObject, Y::RingCategoryObject)
         end
     end
     basis_mors = [RingCategoryMorphism(X,Y,m) for m ∈ basis]
-    return RingCatCategoryHomSpace(X,Y,basis_mors, VectorSpaces(F))
+    return RingCategoryHomSpace(X,Y,basis_mors, VectorSpaces(F))
 end
 
 function express_in_basis(f::RingCategoryMorphism, base::Vector{RingCategoryMorphism})

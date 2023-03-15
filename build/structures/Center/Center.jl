@@ -122,9 +122,9 @@ spherical(X::CenterCategoryObject) = Morphism(X,dual(dual(X)), spherical(X.objec
 #-------------------------------------------------------------------------------
 
 
-function direct_sum_with_morphisms(X::CenterCategoryObject, Y::CenterCategoryObject)
+function direct_sum(X::CenterCategoryObject, Y::CenterCategoryObject)
     S = simples(parent(X.object))
-    Z,(ix,iy),(px,py) = direct_sum_with_morphisms(X.object, Y.object)
+    Z,(ix,iy),(px,py) = direct_sum(X.object, Y.object)
 
     γZ = [(id(S[i])⊗ix)∘(X.γ[i])∘(px⊗id(S[i])) + (id(S[i])⊗iy)∘(Y.γ[i])∘(py⊗id(S[i])) for i ∈ 1:length(S)]
 
@@ -141,7 +141,7 @@ Return the direct sum object of ```X``` and ```Y```.
 """
 function direct_sum(X::CenterCategoryObject, Y::CenterCategoryObject)
     S = simples(parent(X.object))
-    Z,(ix,iy),(px,py) = direct_sum_with_morphisms(X.object, Y.object)
+    Z,(ix,iy),(px,py) = direct_sum(X.object, Y.object)
 
     γZ = [(id(S[i])⊗ix)∘(X.γ[i])∘(px⊗id(S[i])) + (id(S[i])⊗iy)∘(Y.γ[i])∘(py⊗id(S[i])) for i ∈ 1:length(S)]
     return CenterCategoryObject(parent(X), Z, γZ)

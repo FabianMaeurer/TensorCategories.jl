@@ -73,29 +73,23 @@ base_group(X::CategoryObject) = parent(X).base_group
 #   Direct Sums, Products, Coproducts
 #---------------------------------------------------------
 
+function ⊕(X::T,Y::T) where {T <: CategoryObject}
+    return direct_sum(X,Y)[1]
+end
+
+
 function ⊕(T::Tuple{S,Vector{R},Vector{R2}},X::S1) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism, R2 <: CategoryMorphism}
-    Z,ix,px = direct_sum_with_CategoryMorphisms(T[1],X)
+    Z,ix,px = direct_sum(T[1],X)
     incl = vcat([ix[1] ∘ t for t in T[2]], ix[2:2])
     proj = vcat([t ∘ px[1] for t in T[3]], px[2:2])
     return Z, incl, proj
 end
 
-⊕(X::S1,T::Tuple{S,Vector{R}, Vector{R2}}) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism, R2 <: CategoryMorphism} = ⊕(T,X)
-
 function direct_sum(X::CategoryObject...)
-    if length(X) == 0 return nothing end
-    Z = X[1]
-    for Y ∈ X[2:end]
-        Z = direct_sum(Z,Y)
-    end
-    return Z
-end
-
-function direct_sum_with_morphisms(X::CategoryObject...)
     if length(X) == 1
         return X[1], [id(X[1])],[id(X[1])]
     end
-    Z,ix,px = direct_sum_with_morphisms(X[1],X[2])
+    Z,ix,px = direct_sum(X[1],X[2])
     for Y in X[3:end]
         Z,ix,px = ⊕((Z,ix,px),Y)
     end
@@ -111,32 +105,29 @@ function direct_sum(f::CategoryMorphism...)
     return g
 end
 
+function ×(X::T,Y::T) where {T <: CategoryObject}
+    return product(X,Y)[1] 
+end
+
 function ×(T::Tuple{S,Vector{R}},X::S1) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism}
     Z,px = product(T[1],X)
     m = vcat([t ∘ px[1] for t in T[2]], px[2])
     return Z, m
 end
 
-×(X::S1,T::Tuple{S,Vector{R}}) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism} = ×(T,X)
-
 function product(X::CategoryObject...)
-    if length(X) == 0 return nothing end
-    Z = X[1]
-    for Y ∈ X[2:end]
-        Z = product(Z,Y)
-    end
-    return Z
-end
-
-function product_with_morphisms(X::CategoryObject...)
     if length(X) == 1
         return X[1], [id(X[1])]
     end
-    Z,px = product(X[1],X[2], true)
+    Z,px = product(X[1],X[2])
     for Y in X[3:end]
         Z,px = ×((Z,px),Y)
     end
     return Z,px
+end
+
+function ∐(X::T,Y::T) where {T <: CategoryObject}
+    return coproduct(T[1],X)[1]
 end
 
 function ∐(T::Tuple{S,Vector{R}},X::S1) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism}
@@ -144,19 +135,7 @@ function ∐(T::Tuple{S,Vector{R}},X::S1) where {S <: CategoryObject,S1 <: Categ
     m = vcat([px[1] ∘ t for t in T[2]], px[2])
     return Z, m
 end
-
-∐(X::S1,T::Tuple{S,Vector{R}}) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism} = ∐(T,X)
-
 function coproduct(X::CategoryObject...)
-    if length(X) == 0 return nothing end
-    Z = X[1]
-    for Y in X[2:end]
-        Z = coproduct(Z,Y)
-    end
-    return Z
-end
-
-function coproduct_with_morphisms(X::CategoryObject...)
     if length(X) == 1
         return X[1], [id(X[1])]
     end
@@ -172,14 +151,14 @@ end
 
 Return the product CategoryObject and an array containing the projection morphisms.
 """
-×(X::CategoryObject...) = product(X...)
+×(X::CategoryObject...) = product(X...)[1]
 
 """
     ∐(X::CategoryObject...)
 
 Return the coproduct CategoryObject and an array containing the injection morphisms.
 """
-∐(X::CategoryObject...) = coproduct(X...)
+∐(X::CategoryObject...) = coproduct(X...)[1]
 
 """
     ⊕(X::CategoryObject...)
@@ -188,7 +167,7 @@ Return the direct sum CategoryObject and arrays containing the injection and pro
 morphisms.
 """
 
-⊕(X::CategoryObject...) = direct_sum(X...)
+⊕(X::CategoryObject...) = direct_sum(X...)[1]
 
 ⊕(X::CategoryMorphism...) = direct_sum(X...)
 
@@ -204,7 +183,7 @@ Return the tensor product object.
 
 Return the n-fold product object ```X^n```.
 """
-^(X::CategoryObject,n::Integer) = n == 0 ? zero(parent(X)) : product([X for i in 1:n]...)
+^(X::CategoryObject,n::Integer) = n == 0 ? zero(parent(X)) : product([X for i in 1:n]...)[1]
 
 ^(X::CategoryMorphism,n::Integer) = n == 0 ? zero_morphism(zero(parent(domain(X))), zero(parent(domain(X)))) : direct_sum([X for i in 1:n]...)
 """
@@ -219,9 +198,17 @@ direct_sum(X::T) where T <: Union{Vector,Tuple} = direct_sum(X...)
 product(X::T) where T <: Union{Vector,Tuple} = product(X...)
 coproduct(X::T) where T <: Union{Vector,Tuple} = coproduct(X...)
 
-product(X::CategoryObject,Y::CategoryObject) = direct_sum(X,Y)
-coproduct(X::CategoryObject, Y::CategoryObject) = direct_sum(X,Y)
+product(X::CategoryObject,Y::CategoryObject) = direct_sum(X,Y)[[1,3]]
+coproduct(X::CategoryObject, Y::CategoryObject) = direct_sum(X,Y)[[1,2]]
 
+function zero_morphism(X::CategoryObject, Y::CategoryObject) 
+    if is_additive(C)
+        return basis(Hom(zero(parent(X)), Y))[1] ∘ basis(Hom(X, zero(parent(X))))
+    elseif is_linear(C) 
+        return zero(base_ring(X)) * basis(Hom(X,Y))[1]
+    end
+    @error "There might be no zero morphism"
+end
 #---------------------------------------------------------
 #   Horizontal and Vertical direct sums
 #---------------------------------------------------------
@@ -234,14 +221,14 @@ Return the sum of ``f:X → Z``, ``g:Y → Z`` as ``f+g:X⊕Y → Z.
 function horizontal_direct_sum(f::CategoryMorphism, g::CategoryMorphism)
     #@assert codomain(f) == codomain(g) "Codomains do not coincide"
     sum = f ⊕ g
-    _,_,(p1,p2) = direct_sum_with_morphisms(codomain(f),codomain(g))
+    _,_,(p1,p2) = direct_sum(codomain(f),codomain(g))
     return p1∘sum + p2∘sum
 end
 
 function horizontal_direct_sum(f::Vector{M}) where M <: CategoryMorphism
     #@assert codomain(f) == codomain(g) "Codomains do not coincide"
     f_sum = direct_sum(f...)
-    _,_,p = direct_sum_with_morphisms([codomain(fi) for fi ∈ f]...)
+    _,_,p = direct_sum([codomain(fi) for fi ∈ f]...)
     return sum([p1∘f_sum for p1 ∈ p])
 end
 
@@ -254,13 +241,13 @@ function vertical_direct_sum(f::CategoryMorphism, g::CategoryMorphism)
     #@assert domain(f) == domain(g) "Domains do not coincide"
 
     sum = f ⊕ g
-    _,(i1,i2),_ = direct_sum_with_morphisms(domain(f), domain(g))
+    _,(i1,i2),_ = direct_sum(domain(f), domain(g))
     return sum∘i1 + sum∘i2
 end
 
 function vertical_direct_sum(f::Vector{M}) where M <: CategoryMorphism
     f_sum = direct_sum(f...)
-    _,i,_ = direct_sum_with_morphisms([domain(fi) for fi ∈ f]...)
+    _,i,_ = direct_sum([domain(fi) for fi ∈ f]...)
     return sum([f_sum∘ix for ix ∈ i])
 
 end
@@ -285,12 +272,12 @@ tensor_product(X::T) where T <: Union{Vector,Tuple} = tensor_product(X...)
 
 
 """
-    distribute_left(X::RingCatCategoryObject, Y::RingCatCategoryObject, Z::RingCatCategoryObject)
+    distribute_left(X::RingCategoryObject, Y::RingCategoryObject, Z::RingCategoryObject)
 
 Return the canonical isomorphism ```(X⊕Y)⊗Z → (X⊗Z)⊕(Y⊗Z)```.
 """
 function distribute_left(X::CategoryObject, Y::CategoryObject, Z::CategoryObject)
-    XY,(ix,iy),(px,py) = direct_sum_with_morphisms(X,Y)
+    XY,(ix,iy),(px,py) = direct_sum(X,Y)
     return  vertical_direct_sum(px⊗id(Z), py⊗id(Z))
 end
 
@@ -300,18 +287,18 @@ end
 Return the canonical isomorphism ```(⨁Xi)⊗Z → ⨁(Xi⊗Z)```.
 """
 function distribute_left(X::Vector{O}, Z::O) where O <: CategoryObject
-    XY,ix,px = direct_sum_with_morphisms(X...)
+    XY,ix,px = direct_sum(X...)
     return vertical_direct_sum([pi⊗id(Z) for pi ∈ px])
 end
 
 
 """
-    distribute_right(X::RingCatCategoryObject, Y::RingCatCategoryObject, Z::RingCatCategoryObject)
+    distribute_right(X::RingCategoryObject, Y::RingCategoryObject, Z::RingCategoryObject)
 
 Return the canonical isomorphism ```X⊗(Y⊕Z) → (X⊗Y)⊕(X⊗Z)````
 """
 function distribute_right(X::CategoryObject, Y::CategoryObject, Z::CategoryObject)
-    XY,(iy,iz),(py,pz) = direct_sum_with_morphisms(Y,Z)
+    XY,(iy,iz),(py,pz) = direct_sum(Y,Z)
     return  vertical_direct_sum(id(X)⊗py, id(X)⊗pz)
 end
 
@@ -321,21 +308,21 @@ end
 Return the canonical isomorphism ```Z⊗(⨁Xi) → ⨁(Z⊗Xi)```.
 """
 function distribute_right(X::O, Z::Vector{O}) where O <: CategoryObject
-    XY,ix,px = direct_sum_with_morphisms(Z...)
+    XY,ix,px = direct_sum(Z...)
     return vertical_direct_sum([id(X)⊗pi for pi ∈ px])
 end
 
 function distribute_left_to_right(X::Vector{T}, Y::Vector{T}) where T <: CategoryObject
-    X_sum,ix,px = direct_sum_with_morphisms(X...)
-    Y_sum,iy,py = direct_sum_with_morphisms(Y...)
-    Z_sum,iz,pz = direct_sum_with_morphisms(Z...)
+    X_sum,ix,px = direct_sum(X...)
+    Y_sum,iy,py = direct_sum(Y...)
+    Z_sum,iz,pz = direct_sum(Z...)
     direct_sum([(pxk ⊗ pyj ⊗ pzi) ∘ (ixk ⊗ iyj ⊗ izi) for (izi, pzi) ∈ zip(iz,pz), (iyj,pyj) ∈ zip(iy,py), (ixk,pxk) ∈ zip(ix,px)][:]...)
 end
 
 function distribute_right_to_left(X::Vector{T}, Y::Vector{T}, Z::Vector{T}) where T <: CategoryObject
-    X_sum,ix,px = direct_sum_with_morphisms(X...)
-    Y_sum,iy,py = direct_sum_with_morphisms(Y...)
-    Z_sum,iz,pz = direct_sum_with_morphisms(Z...)
+    X_sum,ix,px = direct_sum(X...)
+    Y_sum,iy,py = direct_sum(Y...)
+    Z_sum,iz,pz = direct_sum(Z...)
     direct_sum([(pxk ⊗ (pyj ⊗ pzi)) ∘ (ixk ⊗ (iyj ⊗ izi)) for (izi, pzi) ∈ zip(iz,pz), (iyj,pyj) ∈ zip(iy,py), (ixk,pxk) ∈ zip(ix,px)][:]...)
 end
 
@@ -550,7 +537,7 @@ function decompose_morphism(X::CategoryObject, S = simples(parent(X)))
     if X == zero(C) return id(X), [], [] end
 
     components = decompose(X,S)
-    Z, incl, proj = direct_sum_with_morphisms(vcat([[s for _ ∈ 1:d] for (s,d) ∈ components]...)...)
+    Z, incl, proj = direct_sum(vcat([[s for _ ∈ 1:d] for (s,d) ∈ components]...)...)
 
     # temporary solution!
     iso = is_isomorphic(X,Z)[2]

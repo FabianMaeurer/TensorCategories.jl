@@ -1,6 +1,9 @@
-using Documenter, TensorCategories, Oscar
+using Documenter, TensorCategories, Oscar, DocumenterCitations
+
+bib = CitationBibliography("MyBib.bib")
 
 makedocs(
+    bib,
     sitename = "TensorCategories.jl",
     modules = [TensorCategories],
     format = Documenter.HTML(

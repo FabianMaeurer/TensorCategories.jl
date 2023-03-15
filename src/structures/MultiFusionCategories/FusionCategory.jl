@@ -360,7 +360,7 @@ function dual(X::RingCategoryObject)
     end
 
     # Build dual from simple objects
-    return direct_sum([dual(Y)^(X.components[i]) for (Y,i) ∈ zip(simples(C), 1:C.simples)])
+    return direct_sum([dual(Y)^(X.components[i]) for (Y,i) ∈ zip(simples(C), 1:C.simples)])[1]
 end
 
 function coev(X::RingCategoryObject)
@@ -468,8 +468,7 @@ function matrices(f::RingCategoryMorphism)
 end
 
 function matrix(f::RingCategoryMorphism)
-    M = direct_sum([Morphism(m) for m ∈ f.m])
-    return M.m
+    diagonal_matrix(f.m)
 end
 
 # function (F::Field)(f::RingCategoryMorphism)
@@ -523,7 +522,7 @@ function tensor_product(f::RingCategoryMorphism, g::RingCategoryMorphism)
             if (c = table[i,j,k]) > 0
                 m = zero_morphism(simpl[k]^(c*d1),simpl[k]^(c*d2)).m
                 m[k] = kronecker_product(identity_matrix(base_ring(C),c), A)
-                
+
                 h = h ⊕ RingCategoryMorphism(simpl[k]^(c*d1),simpl[k]^(c*d2), m)
                 
             end
@@ -545,14 +544,8 @@ end
 #   Direct sum
 #-------------------------------------------------------------------------------
 
-function direct_sum(X::RingCategoryObject, Y::RingCategoryObject, morphisms::Bool = false)
-    @assert parent(X) == parent(Y) "Mismatching parents"
-    if morphisms return direct_sum_with_morphisms(X,Y) end
-    return RingCategoryObject(parent(X), X.components .+ Y.components)
-end
-
-function direct_sum_with_morphisms(X::RingCategoryObject, Y::RingCategoryObject)
-    S = direct_sum(X,Y)
+function direct_sum(X::RingCategoryObject, Y::RingCategoryObject)
+    S = RingCategoryObject(parent(X), X.components .+ Y.components)
     ix_mats = matrices(zero_morphism(X,S))
     iy_mats = matrices(zero_morphism(Y,S))
     px_mats = matrices(zero_morphism(S,X))
@@ -590,6 +583,7 @@ function direct_sum(f::RingCategoryMorphism, g::RingCategoryMorphism)
         z2 = zero(MatrixSpace(F,mg,nf))
         m[i] = [f.m[i] z1; z2 g.m[i]]
     end
+
     return RingCategoryMorphism(dom,cod, m)
 end
 

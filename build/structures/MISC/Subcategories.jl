@@ -50,9 +50,9 @@ function direct_sum(f::SubcategoryMorphism, g::SubcategoryMorphism)
     return SubcategoryMorphism(domain(f)⊕domain(g), codomain(f)⊕codomain(g), mor)
 end
 
-function direct_sum_with_morphisms(X::SubcategoryCategoryObject, Y::SubcategoryCategoryObject)
+function direct_sum(X::SubcategoryCategoryObject, Y::SubcategoryCategoryObject)
     @assert parent(X) == parent(Y)
-    obj,ix,px = direct_sum_with_morphisms(object(X), object(Y))
+    obj,ix,px = direct_sum(object(X), object(Y))
     sub_obj = SubcategoryCategoryObject(parent(X), obj)
     sub_ix = [SubcategoryMorphism(x,sub_obj,i) for (i,x) ∈ zip(ix,[X,Y])]
     sub_px = [SubcategoryMorphism(sub_obj,y,p) for (p,y) ∈ zip(px,[X,Y])]

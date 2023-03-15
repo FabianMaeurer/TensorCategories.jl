@@ -26,7 +26,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
 
 using Memoization, InteractiveUtils
 
-export Category, TensorCategory, CategoryMorphism, CategoryObject, VectorSpaces, base_ring, hom,
+export Category, TensorCategory, CategoryMorphism, CategoryObject, VectorSpaces, base_ring, hom, Morphism,
         GradedVectorSpaces, VectorSpaceCategoryObject, simples,
         VectorSpaceCategoryMorphism, parent, direct_sum,⊕, domain, codomain, compose, ∘, ^, ⊗,
         tensor_product,==, associator, basis, id, getindex, one, zero, Forgetful,
@@ -41,10 +41,10 @@ export Category, TensorCategory, CategoryMorphism, CategoryObject, VectorSpaces,
         GroupRepresentationCategory,
         isinvertible, Representation, isequivariant, matrix, GRCategoryHomSpace,
         OppositeCategory, OppositeCategoryMorphism, OppositeCategoryObject, ProductCategory,
-        ProductCategoryObject, ProductCategoryMorphism, CohSheaves, CohSheaf, CohSheafCategoryMorphism,
+        ProductCategoryObject, ProductCategoryMorphism, CohSheaves, CohSheafCategoryObject, CohSheafCategoryMorphism,
         stalks, PullbackFunctor, Pullback, PushforwardFunctor, Pushforward,
         CohSfCategoryHomSpace, ConvolutionCategory, ConvolutionCategoryObject, ConvolutionCategoryMorphism,
-        ConvCategoryHomSpace,stalk, induction, restriction, orbit_index, direct_sum_with_morphisms,
+        ConvCategoryHomSpace,stalk, induction, restriction, orbit_index, direct_sum,
         decompose, multiplication_table, print_multiplication_table, grothendieck_ring,
         dual, left_dual, right_dual, ev, coev, left_trace, right_trace, tr, braiding,
         drinfeld_morphism, smatrix, tmatrix, End, CenterCategory, CenterCategoryObject, CenterCategoryMorphism,
@@ -52,7 +52,7 @@ export Category, TensorCategory, CategoryMorphism, CategoryObject, VectorSpaces,
         set_braiding!, set_one!, Ising, zero_morphism, express_in_basis, solve_groebner,
         Center, CenterCategory, CenterCategoryObject, CenterCategoryMorphism, ev_coev, matrices,
         orbit_stabilizers, GRepRestriction, GRepInduction, Restriction, Induction,
-        print_multiplication_table, RingCatCategoryObject, RingCatMorphism, kernel, cokernel,
+        print_multiplication_table, RingCategoryObject, RingCatMorphism, kernel, cokernel,
         image, isgraded, cyclic_group_3cocycle, decompose_morphism,
         central_objects, half_braiding, half_braidings, left_inverse, right_inverse,
         add_simple!, pentagon_axiom, set_associator!, dual_basis, pairing,
@@ -60,8 +60,8 @@ export Category, TensorCategory, CategoryMorphism, CategoryObject, VectorSpaces,
         DeligneProdCategoryMorphism, DeligneProdCategoryObject, DeligneProduct, ⊠, op, AbstractCategoryHomSpace,
         is_half_braiding, object, distribute_right, distribute_left, is_simple,
         decompose_morphism, TambaraYamagami, RingSubcategory, SubcategoryMorphism,
-        SubcategoryCategoryObject,load,save, cat_fr_8122, E6subfactor, fpdim, set_cannonical_spherical!,
-        normalized_smatrix, sort_simples_by_dimension!, set_spherical!, inv_associator,
+        SubcategoryCategoryObject,load,save, cat_fr_8122, E6subfactor, fpdim, set_cannonical_spherical!, cat_fr_9143,
+        normalized_smatrix, sort_simples_by_dimension!, set_spherical!, inv_associator, 
         is_modular, is_spherical, TwistedGradedVectorSpaces, six_j_symbols, simples_names, HaagerupH3, factor, roots, is_subobject, rational_lift, Fibonacci, object_type
 
 
@@ -95,7 +95,8 @@ include("structures/Center/Induction.jl")
 include("structures/Center/CenterChecks.jl")
 include("structures/Examples/I2-fusion.jl")
 include("structures/Examples/TambaraYamagami.jl")
-include("structures/Examples/VercleyenSingerland/vercleyen_singerland.jl")
+include("structures/Examples/VercleyenSingerland/FR_8211/fr_8211.jl")
+include("structures/Examples/VercleyenSingerland/FR_9143/fr_9143.jl")
 include("structures/Examples/E6subfactor.jl")
 include("structures/Examples/Haagerup/Haagerup.jl")
 

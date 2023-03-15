@@ -8,8 +8,8 @@ a,b,c = simples(I)
 @testset "Ising: CategoryObjects" begin
     X = a^2 ⊕ b ⊕ c^2
     Y = a ⊕ c^2
-    @test X == RingCatCategoryObject(I, [2,1,2])
-    @test X⊗Y == RingCatCategoryObject(I, [6,5,8])
+    @test X == RingCategoryObject(I, [2,1,2])
+    @test X⊗Y == RingCategoryObject(I, [6,5,8])
 end
 
 @testset "Associator" begin

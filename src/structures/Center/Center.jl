@@ -121,10 +121,14 @@ spherical(X::CenterCategoryObject) = Morphism(X,dual(dual(X)), spherical(X.objec
 #   Direct Sum & Tensor Product
 #-------------------------------------------------------------------------------
 
+"""
+    direct_sum(X::CenterCategoryObject, Y::CenterCategoryObject)
 
-function direct_sum_with_morphisms(X::CenterCategoryObject, Y::CenterCategoryObject)
+Return the direct sum object of ```X``` and ```Y```.
+"""
+function direct_sum(X::CenterCategoryObject, Y::CenterCategoryObject)
     S = simples(parent(X.object))
-    Z,(ix,iy),(px,py) = direct_sum_with_morphisms(X.object, Y.object)
+    Z,(ix,iy),(px,py) = direct_sum(X.object, Y.object)
 
     γZ = [(id(S[i])⊗ix)∘(X.γ[i])∘(px⊗id(S[i])) + (id(S[i])⊗iy)∘(Y.γ[i])∘(py⊗id(S[i])) for i ∈ 1:length(S)]
 
@@ -134,18 +138,7 @@ function direct_sum_with_morphisms(X::CenterCategoryObject, Y::CenterCategoryObj
     return CZ,[ix,iy],[px,py]
 end
 
-"""
-    direct_sum(X::CenterCategoryObject, Y::CenterCategoryObject)
 
-Return the direct sum object of ```X``` and ```Y```.
-"""
-function direct_sum(X::CenterCategoryObject, Y::CenterCategoryObject)
-    S = simples(parent(X.object))
-    Z,(ix,iy),(px,py) = direct_sum_with_morphisms(X.object, Y.object)
-
-    γZ = [(id(S[i])⊗ix)∘(X.γ[i])∘(px⊗id(S[i])) + (id(S[i])⊗iy)∘(Y.γ[i])∘(py⊗id(S[i])) for i ∈ 1:length(S)]
-    return CenterCategoryObject(parent(X), Z, γZ)
-end
 
 """
     direct_sum(f::CenterCategoryMorphism, g::CenterCategoryMorphism)
@@ -368,7 +361,7 @@ function center_simples(C::CenterCategory, simples = simples(C.category))
 
         if simples_covered(c,simples_indices) continue end
 
-        X = direct_sum([simples[j]^c[j] for j ∈ 1:k])
+        X = direct_sum([simples[j]^c[j] for j ∈ 1:k])[1]
 
         ic = is_central(X)
 
@@ -786,7 +779,7 @@ function simples_by_induction!(C::CenterCategory)
     for (s, Is) ∈ zip(ordered_simples, FI_simples)
         contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
         if length(contained_simples) > 0
-            if is_isomorphic(Is, direct_sum(object.(contained_simples)))[1]
+            if is_isomorphic(Is, direct_sum(object.(contained_simples))[1])[1]
                 continue
             end
         end

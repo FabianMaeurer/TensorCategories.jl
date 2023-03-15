@@ -46,7 +46,7 @@ function six_j_symbols(C::Category, S = simples(C))
 
         summands = vcat([[x for _ ∈ 1:k] for (x,k) ∈ decompose(X, S)]...)
 
-        Z, incl, proj = direct_sum_with_morphisms(summands...)
+        Z, incl, proj = direct_sum(summands...)
 
         if X ∈ objects
             before = isos[findfirst(e -> e == X, objects)]
@@ -99,7 +99,7 @@ function SkeletizationFunctor(C::Category)
 end
 
 function (F::SkeletizationFunctor)(X::CategoryObject)
-    return RingCatCategoryObject(codomain(F), [int_dim(Hom(X,s)) for s ∈ simples(C)])
+    return RingCategoryObject(codomain(F), [int_dim(Hom(X,s)) for s ∈ simples(C)])
 end
 
 function (F::SkeletizationFunctor)(f::CategoryMorphism)

@@ -218,7 +218,7 @@ function direct_sum(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject, 
     return V,[ix,iy], [px,py]
 end
 
-direct_sum_with_morphisms(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject) = direct_sum(X,Y,true)
+direct_sum(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject) = direct_sum(X,Y,true)
 
 product(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject, projections::Bool = false) = projections ? direct_sum(X,Y, projections)[[1,3]] : direct_sum(X,Y)
 coproduct(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject, injections::Bool = false) = injections ? direct_sum(X,Y, injections)[[1,2]] : direct_sum(X,Y)

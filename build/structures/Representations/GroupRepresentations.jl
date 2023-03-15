@@ -404,7 +404,7 @@ function direct_sum(ρ::GroupRepresentation, τ::GroupRepresentation, morphisms:
     return S, [incl_ρ, incl_τ], [proj_ρ, proj_τ]
 end
 
-direct_sum_with_morphisms(σ::GroupRepresentation, τ::GroupRepresentation) = direct_sum(σ,τ,true)
+direct_sum(σ::GroupRepresentation, τ::GroupRepresentation) = direct_sum(σ,τ,true)
 
 """
     direct_sum(f::GroupRepresentationCategoryMorphism, g::GroupRepresentationCategoryMorphism)

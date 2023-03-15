@@ -36,7 +36,7 @@ end
 TBW
 """
 function VectorSpaceCategoryObject(V::Pair{<:GroupElem, <:VectorSpaceCategoryObject}...)
-    W = direct_sum([v for (_,v) ∈ V])
+    W,_,_ = direct_sum([v for (_,v) ∈ V])
     G = parent(V[1][1])
     grading = vcat([[g for _ ∈ 1:int_dim(v)] for (g,v) ∈ V]...)
     C = GradedVectorSpaces(base_ring(W), G)
@@ -123,8 +123,8 @@ end
 
 Return the direct sum object ``V⊕W``.
 """
-function direct_sum(X::GVSCategoryObject, Y::GVSCategoryObject, morphisms::Bool = false)
-    W,(ix,iy),(px,py) = direct_sum(X.V, Y.V, true)
+function direct_sum(X::GVSCategoryObject, Y::GVSCategoryObject)
+    W,(ix,iy),(px,py) = direct_sum(X.V, Y.V)
     m,n = int_dim(X), int_dim(Y)
     F = base_ring(X)
     grading = [X.grading; Y.grading]
@@ -132,17 +132,13 @@ function direct_sum(X::GVSCategoryObject, Y::GVSCategoryObject, morphisms::Bool 
 
     Z = GVSCategoryObject(parent(X), W, grading)
 
-    if morphisms
-        ix = Morphism(X,Z,matrix(ix))
-        iy = Morphism(Y,Z,matrix(iy))
+    ix = Morphism(X,Z,matrix(ix))
+    iy = Morphism(Y,Z,matrix(iy))
 
-        px = Morphism(Z,X,matrix(px))
-        py = Morphism(Z,Y,matrix(py))
+    px = Morphism(Z,X,matrix(px))
+    py = Morphism(Z,Y,matrix(py))
 
-        return Z, [ix,iy], [px,py]
-    end
-
-    return Z
+    return Z, [ix,iy], [px,py]
 end
 
 # function direct_sum(f::GVSCategoryMorphism, g::GVSCategoryMorphism)

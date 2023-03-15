@@ -75,6 +75,7 @@ function cat_fr_8122(n::Int) #n gives the number of associator
     set_tensor_product!(C,M)
 
     ζ = root_of_unity(QQBar, 24)
+    
     function modifier(x::Expr)
         replace!(x, :ζ, ζ)
         return x

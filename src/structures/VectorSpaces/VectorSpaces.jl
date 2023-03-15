@@ -190,24 +190,22 @@ int_dim(V::VectorSpaceCategoryObject) = length(basis(V))
 #-----------------------------------------------------------------
 
 """
-    direct_sum(X::VectorSpaceCategoryObject{T}, Y::VectorSpaceCategoryObject{T}, morphisms = false) where {T}
+    direct_sum(X::VectorSpaceCategoryObject{T}, Y::VectorSpaceCategoryObject{T}) where {T}
 
-Direct sum of vector spaces together with the embedding morphisms if morphisms = true.
+Direct sum of vector spaces together with the embedding morphisms.
 """
-function direct_sum(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject, morphisms::Bool = false)
+function direct_sum(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject,)
     if parent(X) != parent(Y)
         throw(ErrorException("Mismatching parents."))
     end
 
-    if dim(X) == 0 return morphisms ? (Y,[zero_morphism(X,Y), id(Y)], [zero_morphism(Y,X), id(Y)]) : Y end
-    if dim(Y) == 0 return morphisms ? (X,[id(X), zero_morphism(Y,X)], [id(X), zero_morphism(X,Y), ]) : X end
+    if dim(X) == 0 return (Y,[zero_morphism(X,Y), id(Y)], [zero_morphism(Y,X), id(Y)])  end
+    if dim(Y) == 0 return (X,[id(X), zero_morphism(Y,X)], [id(X), zero_morphism(X,Y), ]) end
 
     F = base_ring(X)
     b = [(1,x) for x in basis(X)] ∪ [(2,y) for y in basis(Y)]
 
     V = VectorSpaceCategoryObject(parent(X),b)
-
-    if !morphisms return V end
 
     ix = Morphism(X,V, matrix(F,[i == j ? 1 : 0 for i ∈ 1:int_dim(X), j ∈ 1:int_dim(V)]))
     iy = Morphism(Y,V, matrix(F,[i == j - int_dim(X) for i ∈ 1:int_dim(Y), j ∈ 1:int_dim(V)]))
@@ -218,10 +216,9 @@ function direct_sum(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject, 
     return V,[ix,iy], [px,py]
 end
 
-direct_sum_with_morphisms(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject) = direct_sum(X,Y,true)
 
-product(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject, projections::Bool = false) = projections ? direct_sum(X,Y, projections)[[1,3]] : direct_sum(X,Y)
-coproduct(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject, injections::Bool = false) = injections ? direct_sum(X,Y, injections)[[1,2]] : direct_sum(X,Y)
+product(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject) = direct_sum(X,Y, projections)[[1,3]]
+coproduct(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject) = direct_sum(X,Y, injections)[[1,2]]
 
 """
     direct_sum(f::VectorSpaceCategoryMorphism{T},g::VectorSpaceCategoryMorphism{T}) where T
@@ -235,7 +232,7 @@ function direct_sum(f::VectorSpaceCategoryMorphism,g::VectorSpaceCategoryMorphis
     z1 = zero(MatrixSpace(F,mf,ng))
     z2 = zero(MatrixSpace(F,mg,nf))
     m = vcat(hcat(f.m,z1), hcat(z2,g.m))
-    return VSCategoryMorphism(m,direct_sum(domain(f),domain(g)),direct_sum(codomain(f),codomain(g)))
+    return VSCategoryMorphism(m,direct_sum(domain(f),domain(g))[1],direct_sum(codomain(f),codomain(g))[1])
 end
 
 #-----------------------------------------------------------------
