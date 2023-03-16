@@ -698,7 +698,7 @@ function fpdim(X::CategoryObject)
         K = QQBar
         λ = eigenvalues(matrix(QQ,A),K)
         filter!(e -> isreal(e), λ)
-        return findmax(e -> abs(e), λ)
+        return findmax(e -> abs(e), λ)[1]
     end
 
 

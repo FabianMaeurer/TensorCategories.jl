@@ -8,7 +8,7 @@ We provide a structure `RingCategory` for finite semisimple skeletal (multi)ring
 
 They are constructed by setting the multiplication table for the monoidal product and associativity for the simple objects. CategoryObjects in finite semisimple ring categories are just vectors with multiplicities of the simple objects in the decomposition. Thus morphism are vectors of matrices of according size.
 
-As an example we will construct the Ising fusion category. This is a fusion category with three simple objects ``1``, ``\chi`` and ``X``. The multiplication is given by ``\chi \otimes \chi = 1``, ``\chi \otimes X = X \otimes \chi`` and ``X \otimes X = 1 \oplus \chi``. There are precisely 3 non-trivial 6j-symbols ``\Phi_X^{\chi\,X\,\chi} = -1``, ``\Phi_{\chi}^{X\,\chi\,X} = -1`` und ``\Phi_X^{X\,X\,X} = \frac{1}{\sqrt 2}\begin{pmatrix} 1 & 1 \\ 1 & -1\end{pmatrix}``.
+As an example we will construct the Ising fusion category. This is a fusion category with three simple objects ``1``, ``\chi`` and ``X``. The multiplication is given by ``\chi \otimes \chi = 1``, ``\chi \otimes X = X \otimes \chi = X`` and ``X \otimes X = 1 \oplus \chi``. There are precisely 3 non-trivial 6j-symbols ``\Phi_X^{\chi\,X\,\chi} = -1``, ``\Phi_{\chi}^{X\,\chi\,X} = -1`` und ``\Phi_X^{X\,X\,X} = \frac{1}{\sqrt 2}\begin{pmatrix} 1 & 1 \\ 1 & -1\end{pmatrix}``.
 
 ```@example FC
 F = QQBar
@@ -33,7 +33,7 @@ set_associator!(I, 3,2,3,2, [-1])
 set_associator!(I, 3,3,3,3, inv(sqrt(F(2))).*[1 1; 1 -1])
 ```
 
-At the current state of development the unit object has to be set manually. Other structure like spherical structures are set as identities, which might or might not be correct. It is also possible to set a braiding.
+At the current state of development the unit object has to be set manually. Other structure like spherical structures are set as identities, which might or might not be correct. If you know your category to be spherical you can set the canonical spherical structure such that ``\dim X_i = \mathrm{fpdim}\,X_i`` by applying ``set_canonical_spherical(::RingCategory)`` to it. It is also possible to set a braiding.
 
 ```@example FC
 set_one!(I, [1,0,0])
