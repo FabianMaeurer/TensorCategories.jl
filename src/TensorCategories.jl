@@ -60,9 +60,9 @@ export Category, TensorCategory, CategoryMorphism, CategoryObject, VectorSpaces,
         DeligneProdCategoryMorphism, DeligneProdCategoryObject, DeligneProduct, ⊠, op, AbstractCategoryHomSpace,
         is_half_braiding, object, distribute_right, distribute_left, is_simple,
         decompose_morphism, TambaraYamagami, RingSubcategory, SubcategoryMorphism,
-        SubcategoryCategoryObject,load,save, cat_fr_8122, E6subfactor, fpdim, set_cannonical_spherical!, cat_fr_9143,
+        SubcategoryCategoryObject,load,save, cat_fr_8122, E6subfactor, fpdim, set_canonical_spherical!, cat_fr_9143,
         normalized_smatrix, sort_simples_by_dimension!, set_spherical!, inv_associator, 
-        is_modular, is_spherical, TwistedGradedVectorSpaces, six_j_symbols, simples_names, HaagerupH3, factor, roots, is_subobject, rational_lift, Fibonacci, object_type
+        is_modular, is_spherical, TwistedGradedVectorSpaces, six_j_symbols, simples_names, HaagerupH3, factor, roots, is_subobject, rational_lift, Fibonacci, object_type, dim, int_dim
 
 
 
@@ -95,6 +95,7 @@ include("structures/Center/Induction.jl")
 include("structures/Center/CenterChecks.jl")
 include("structures/Examples/I2-fusion.jl")
 include("structures/Examples/TambaraYamagami.jl")
+include("structures/Examples/FibonacciCategory.jl")
 include("structures/Examples/VercleyenSingerland/FR_8211/fr_8211.jl")
 include("structures/Examples/VercleyenSingerland/FR_9143/fr_9143.jl")
 include("structures/Examples/E6subfactor.jl")

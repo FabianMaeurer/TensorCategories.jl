@@ -99,7 +99,7 @@ function set_spherical!(F::RingCategory, sp::Vector)
     F.spherical = sp
 end
 
-function set_cannonical_spherical!(C::RingCategory)
+function set_canonical_spherical!(C::RingCategory)
     @assert is_fusion(C)
     set_spherical!(C, [fpdim(s)*inv(dim(s)) for s ∈ simples(C)])
 end
