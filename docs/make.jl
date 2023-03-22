@@ -21,6 +21,10 @@ makedocs(
             "Idea" => "RingCategory.md",
             "Examples" => "RingCatExamples.md"
         ],
+        "ℤ₊-Rings" => [
+            "ℤ₊-Rings" => "ZPlusRings.md",
+            "Grothendieck Ring" => "GrothendieckRing.md"
+        ],
        #"Multitensor Category Interface" => "Multitensor.md",
         "The Center Construction" => "Center.md",
     ],

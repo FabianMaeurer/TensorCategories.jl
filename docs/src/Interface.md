@@ -8,9 +8,7 @@ For basic functionality of `YourCategory <: Category` together with objects
 `YourCategoryObject <: CategoryObject` and morphisms `YourMorphism <: CategoryMorphism` you have to minimally build
 
 ```julia
-struct YourCategory <: Category
-  base_ring::Field
-end
+struct YourCategory <: Category end
 
 struct YourCategoryObject <: CategoryObject
   parent::YourCategory
@@ -42,7 +40,8 @@ At the current state TensorCategories.jl knows about the following kinds of cate
   - additive
   - abelian
   - monoidal
-  - rigid
+  - rigid monoidal
+  - braided monoidal
   - spherical
   - Krull-Schmidt
   - (multi)ring
@@ -58,6 +57,7 @@ For the precise definitions take a look at [EGNO](@ref), which we use as a gener
 | Abelian            | Additive                       | `kernel(::YourMorphism)::Tuple{YourObject, YourMorphism}`  `cokernel(::YourMorphism)::Tuple{YourObject,YourMorphism}`| `indecomposables(::YourCategory)::Vector{YourObject}`  `simples(::YourCategory)::Vector{YourObject}`| 
 | Monoidal           |                                | `tensor_product(::YourObject,::YourObject)::YourObject`  `tensor_product(::YourMorphism,::YourMorphism)::YourMorphism`  `one(::YourCategory)::YourObject` | | 
 | Rigid              | Monoidal                       | `left_dual(X::YourObject)::YourObject`  `right_dual(X::YourObject)::YourObject`  or, if the dual is two sided  `dual(::YourObject)::YourObject`  `ev(::YourObject)::YourMorphism`  `coev(::YourObject)::YourMorphism` | |
+| Braided            | Monoidal                       | `braiding(X::YourObject, Y::YourObject)::YourMorphism          | |
 | Spherical          | Monoidal, Rigid                | `spherical(X::YourObject)::YourMorphism` |
 | Krull-Schmidt      | Additive, Linear               | **Coming Soon** ||
 | (Multi)Ring        | Abelian, Monoidal, linear      | | |

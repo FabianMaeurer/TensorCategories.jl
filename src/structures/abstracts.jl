@@ -34,6 +34,27 @@ struct CategoryHomSpace <: AbstractCategoryHomSpace
     parent
 end
 
+
+#=----------------------------------------------------------
+    Endomorphism Ring
+----------------------------------------------------------=#
+
+""" 
+
+endomorphism_ring(X::CategoryObject)
+
+Return the endomorphism ring of ``X`` as a matrix algebra.
+"""
+function endomorphism_ring(X::CategoryObject)
+    @assert is_abelian(parent(X))
+    mats = matrix.(basis(End(X)))
+    matrix_algebra(base_ring(X), mats, isbasis = true)
+end
+
+#=----------------------------------------------------------
+    Comment 
+----------------------------------------------------------=#
+
 domain(m::CategoryMorphism) = m.domain
 codomain(m::CategoryMorphism) = m.codomain
 
