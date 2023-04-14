@@ -127,6 +127,8 @@ export I2
 export I2subcategory 
 export id 
 export image 
+export indecomposable_subobjects
+export indecomposables
 export induction 
 export Induction 
 export int_dim 

@@ -11,11 +11,16 @@ ZPlusRing
 ZPlusRingElem
 ```
 
-## Partial ``\mathbb Z_+``-Rings
-
-*Coming Soon*: Define ``\mathbb Z_+``-rings by only partial data.
+which extend the structures `Oscar.Ring` and `Oscar.RingElem`respectively. 
 
 ```@autodocs
 Modules = [TensorCategories]
-Pages = ["MISC/Fusionrings.jl"]
+Pages = ["FusionRings.jl"]
+````
+## Grothendieck Rings
+
+One way to generate ``\mathbb Z_+``-rings is by computing the Grothendieck ring of a multitensor category.
+
+```@docs
+grothendieck_ring
 ```

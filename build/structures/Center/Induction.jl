@@ -5,13 +5,13 @@
 
 function induction(X::CategoryObject, simples::Vector = simples(parent(X)); parent_category::CenterCategory = Center(parent(X)))
     @assert is_semisimple(parent(X)) "Requires semisimplicity"
-    Z = direct_sum([s⊗X⊗dual(s) for s ∈ simples])
+    Z = direct_sum([s⊗X⊗dual(s) for s ∈ simples])[1]
     a = associator
     γ = Vector{CategoryMorphism}(undef, length(simples))
     C = parent(X)
     for i ∈ 1:length(simples)
         W = simples[i]
-        γ[i] = zero_morphism(zero(parent(X)), direct_sum([W⊗((s⊗X)⊗dual(s)) for s ∈ simples]))
+        γ[i] = zero_morphism(zero(parent(X)), direct_sum([W⊗((s⊗X)⊗dual(s)) for s ∈ simples])[1])
   
         for S ∈ simples
             dom_i = ((S⊗X)⊗dual(S))⊗simples[i]
@@ -58,7 +58,7 @@ function partial_induction(X::CategoryObject, ind_simples::Vector, simples::Vect
     C = parent(X)
     for i ∈ 1:length(simples)
         W = simples[i]
-        γ[i] = zero_morphism(zero(parent(X)), direct_sum([W⊗((s⊗X)⊗dual(s)) for s ∈ ind_simples]))
+        γ[i] = zero_morphism(zero(parent(X)), direct_sum([W⊗((s⊗X)⊗dual(s)) for s ∈ ind_simples])[1])
   
         for S ∈ ind_simples
             dom_i = ((S⊗X)⊗dual(S))⊗simples[i]
@@ -99,7 +99,7 @@ end
 
 function induction_restriction(X::CategoryObject, simples::Vector = simples(parent(X)))
     @assert is_semisimple(parent(X)) "Requires semisimplicity"
-    Z = direct_sum([s⊗X⊗dual(s) for s ∈ simples])
+    Z = direct_sum([s⊗X⊗dual(s) for s ∈ simples])[1]
 end
 # function induction(X::CategoryObject, simples::Vector = simples(parent(X)))
 #     @assert is_semisimple(parent(X)) "Requires semisimplicity"

@@ -195,16 +195,13 @@ end
 #-----------------------------------------------------------------
 
 """
-    direct_sum(X::CohSheafCategoryObject, Y::CohSheafCategoryObject, morphisms::Bool = false)
+    direct_sum(X::CohSheafCategoryObject, Y::CohSheafCategoryObject)
 
-Return the direct sum of sheaves. Return also the inclusion and projection if
-morphisms = true.
+Return the direct sum of sheaves. Return also the inclusion and projection.
 """
-function direct_sum(X::CohSheafCategoryObject, Y::CohSheafCategoryObject, morphisms::Bool = false)
-    sums = [direct_sum(x,y,true) for (x,y) ∈ zip(stalks(X), stalks(Y))]
+function direct_sum(X::CohSheafCategoryObject, Y::CohSheafCategoryObject)
+    sums = [direct_sum(x,y) for (x,y) ∈ zip(stalks(X), stalks(Y))]
     Z = CohSheafCategoryObject(parent(X), [s[1] for s ∈ sums])
-
-    if !morphisms return Z end
 
     ix = [CohSheafCategoryMorphism(x,Z,[s[2][i] for s ∈ sums]) for (x,i) ∈ zip([X,Y],1:2)]
     px = [CohSheafCategoryMorphism(Z,x,[s[3][i] for s ∈ sums]) for (x,i) ∈ zip([X,Y],1:2)]
@@ -217,14 +214,12 @@ end
 Return the direct sum of morphisms of sheaves.
 """
 function direct_sum(f::CohSheafCategoryMorphism, g::CohSheafCategoryMorphism)
-    dom = direct_sum(domain(f), domain(g))
-    codom = direct_sum(codomain(f), codomain(g))
+    dom = direct_sum(domain(f), domain(g))[1]
+    codom = direct_sum(codomain(f), codomain(g))[2]
     mors = [direct_sum(m,n) for (m,n) ∈ zip(f.m,g.m)]
     return CohSheafCategoryMorphism(dom,codom, mors)
 end
 
-product(X::CohSheafCategoryObject,Y::CohSheafCategoryObject,projections = false) = projections ? direct_sum(X,Y,projections)[[1,3]] : direct_sum(X,Y)
-coproduct(X::CohSheafCategoryObject,Y::CohSheafCategoryObject,projections = false) = projections ? direct_sum(X,Y,projections)[[1,2]] : direct_sum(X,Y)
 
 #-----------------------------------------------------------------
 #   Functionality: (Co)Kernel
@@ -482,7 +477,7 @@ function pushf_obj_map(CX,CY,X,f)
         orbit_reps = [O.seeds[1] for O ∈ orbits(fiber)]
 
         for j ∈ 1:length(orbit_reps)
-            stlks[i] = direct_sum(stlks[i], induction(stalk(X,orbit_reps[j]), CY.orbit_stabilizers[i]))
+            stlks[i] = direct_sum(stlks[i], induction(stalk(X,orbit_reps[j]), CY.orbit_stabilizers[i]))[1]
         end
     end
     return CohSheafCategoryObject(CY, stlks)

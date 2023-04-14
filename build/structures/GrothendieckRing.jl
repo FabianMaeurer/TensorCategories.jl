@@ -1,4 +1,8 @@
 
+#=----------------------------------------------------------
+    Grothendieck Ring 
+----------------------------------------------------------=#
+
 """
     grothendieck_ring(C::Category)
 
@@ -9,16 +13,29 @@ function grothendieck_ring(C::Category, simples = simples(C))
 
     m = multiplication_table(C,simples)
 
-    #Z = Integers{Int64}()
-    Z = ZZ
-
-    A = AlgAss(Z, Z.(m), Z.(coefficients(one(C),simples)))
-    function to_gd(X)
-        coeffs = coefficients(X,simples)
-        #z = AlgAssElem{Int64, AlgAss{Int64}}(A)
-        z = A(coeffs)
-        #z.coeffs = coeffs
-        return z
+    A = ℕRing(ZZ.(m), ZZ.(coefficients(one(C),simples)))
+    try 
+        names = simples_names(C)
+        A.basis_names = names
+    catch
     end
-    return A,to_gd
+
+    return A, Decategorification(C,A,simples)
+end
+
+# TODO: Needs Refinement
+mutable struct Decategorification 
+    domain::Category
+    codomain::ℕRing
+    simples::Vector{CategoryObject}
+end
+
+function (D::Decategorification)(X::CategoryObject)
+    @assert D.domain = parent(X)
+    coeffs = coefficients(X,simples)
+    D.codomain(coeffs)
+end
+
+function show(io::IO, D::Decategorification)
+    print(io, "Decategorification of $(D.domain)")
 end

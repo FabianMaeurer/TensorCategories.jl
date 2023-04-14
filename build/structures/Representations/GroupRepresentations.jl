@@ -368,10 +368,9 @@ spherical(X::GroupRepresentation) = id(X)
 """
     direct_sum(ρ::GroupRepresentation, τ::GroupRepresentation, morphisms::Bool = false)
 
-Return the direct sum of representations. If morphisms is set true inclusion and
-projection morphisms are also returned.
+Return the direct sum of representations with the corresponding injections und projections.
 """
-function direct_sum(ρ::GroupRepresentation, τ::GroupRepresentation, morphisms::Bool = false)
+function direct_sum(ρ::GroupRepresentation, τ::GroupRepresentation)
     @assert ρ.group == τ.group "Mismatching groups"
 
     grp = ρ.group
@@ -394,7 +393,6 @@ function direct_sum(ρ::GroupRepresentation, τ::GroupRepresentation, morphisms:
 
     S = Representation(grp, generators, [[matrix(ρ(g)) zero(M2); zero(M3) matrix(τ(g))] for g ∈ generators])
 
-    if !morphisms return S end
 
     incl_ρ = Morphism(ρ, S, [one(M1) zero(M2)])
     incl_τ = Morphism(τ, S, [zero(M3) one(M4)])
@@ -404,7 +402,6 @@ function direct_sum(ρ::GroupRepresentation, τ::GroupRepresentation, morphisms:
     return S, [incl_ρ, incl_τ], [proj_ρ, proj_τ]
 end
 
-direct_sum(σ::GroupRepresentation, τ::GroupRepresentation) = direct_sum(σ,τ,true)
 
 """
     direct_sum(f::GroupRepresentationCategoryMorphism, g::GroupRepresentationCategoryMorphism)

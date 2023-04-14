@@ -68,4 +68,4 @@ For the precise definitions take a look at [EGNO](@ref), which we use as a gener
     If any of the above functions are implemented only partially it might be useful to manually specify the according label to be false. Otherwise there might be unwanted behavior. 
 
 !!! note "Direct sums"
-    Direct sums return always the object and the corresponding inclusions and projections.
+    Direct sums always return the object and the corresponding inclusions and projections.

@@ -594,7 +594,7 @@ function eigenspaces(f::CategoryMorphism)
     return Dict(λ => kernel(f-λ*id(domain(f)))[1] for λ ∈ values)
 end
 
-function simple_subobjects(X::CategoryObject)
+function indecomposable_subobjects(X::CategoryObject)
     B = basis(End(X))
 
     if length(B) == 1 return [X] end
@@ -613,6 +613,15 @@ function simple_subobjects(X::CategoryObject)
     return [X]
 end
 
+function simple_subobjects(X::CategoryObject)
+    indecomposables = indecomposable_subobjects(X)
+    if is_semisimple(parent(X))
+        return indecomposables
+    else
+        return indecomposables[is_simple.(indecomposables)]
+    end
+end
+
 function unique_simples(simples::Vector{<:CategoryObject})
     unique_simples = simples[1:1]
     for s ∈ simples[2:end]
@@ -628,6 +637,12 @@ function simples_names(C::Category)
     return ["X$i" for i ∈ 1:length(simples(C))]
 end
 
+function indecomposables(C::Category)
+    if is_semisimple(C)
+        return simples(C)
+    end
+    error("Cannot compute indecomposables")
+end
 #=-------------------------------------------------
     Duals in Fusion Categories
 -------------------------------------------------=#

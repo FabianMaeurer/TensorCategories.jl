@@ -681,13 +681,6 @@ function quotient(Y::CenterCategoryObject, X::CategoryObject)
     @assert parent(X) == parent(Y).Category
 end
 
-
-function quotient(Y::CenterCategoryObject, X::CategoryObject)
-    # TODO: Compute quotient
-    @assert parent(X) == parent(Y).Category
-end
-
-
 #-------------------------------------------------------------------------------
 #   Hom Spaces
 #-------------------------------------------------------------------------------

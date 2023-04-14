@@ -65,6 +65,16 @@ function is_spherical(C::Category)
     end
 end
 
+function is_rigid(C::Category)
+    T = object_type(C)
+    is_monoidal(C) && hasmethod(dual, Tuple{T}) && hasmethod(ev, Tuple{T}) && hasmethod(coev, Tuple{T})
+end
+
+function is_braided(C::Category)
+    T = object_type(C)
+    is_monoidal(C) && hasmethod(braiding, Tuple{T,T})
+end
+
 function is_krull_schmidt(C::Category)
     # TODO: Set up
     false

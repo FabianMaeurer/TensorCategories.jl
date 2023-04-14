@@ -1,3 +1,7 @@
+#=----------------------------------------------------------
+    https://web.math.ucsb.edu/~zhenghwa/data/research/pub/exotic-08.pdf 
+----------------------------------------------------------=#
+
 function E6subfactor()
     #K,ξ = CyclotomicField(24,"ξ₂₄") 
     K = QQBar

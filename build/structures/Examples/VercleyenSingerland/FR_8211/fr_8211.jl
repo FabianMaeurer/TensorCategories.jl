@@ -75,6 +75,7 @@ function cat_fr_8122(n::Int) #n gives the number of associator
     set_tensor_product!(C,M)
 
     ζ = root_of_unity(QQBar, 24)
+
     function modifier(x::Expr)
         replace!(x, :ζ, ζ)
         return x
@@ -111,7 +112,7 @@ function cat_fr_8122(n::Int) #n gives the number of associator
 
     set_one!(C,[1,0,0,0,0,0,0,0])
 
-    TensorCategories.set_spherical!(C, [K(1) for s ∈ simples(C)])
+    set_caninical_spherical!(C)
 
     return C
 end

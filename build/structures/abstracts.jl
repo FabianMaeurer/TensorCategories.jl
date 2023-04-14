@@ -34,6 +34,27 @@ struct CategoryHomSpace <: AbstractCategoryHomSpace
     parent
 end
 
+
+#=----------------------------------------------------------
+    Endomorphism Ring
+----------------------------------------------------------=#
+
+""" 
+
+endomorphism_ring(X::CategoryObject)
+
+Return the endomorphism ring of ``X`` as a matrix algebra.
+"""
+function endomorphism_ring(X::CategoryObject)
+    @assert is_abelian(parent(X))
+    mats = matrix.(basis(End(X)))
+    matrix_algebra(base_ring(X), mats, isbasis = true)
+end
+
+#=----------------------------------------------------------
+    Comment 
+----------------------------------------------------------=#
+
 domain(m::CategoryMorphism) = m.domain
 codomain(m::CategoryMorphism) = m.codomain
 
@@ -73,22 +94,16 @@ base_group(X::CategoryObject) = parent(X).base_group
 #   Direct Sums, Products, Coproducts
 #---------------------------------------------------------
 
+function ⊕(X::T,Y::T) where {T <: CategoryObject}
+    return direct_sum(X,Y)[1]
+end
+
+
 function ⊕(T::Tuple{S,Vector{R},Vector{R2}},X::S1) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism, R2 <: CategoryMorphism}
     Z,ix,px = direct_sum(T[1],X)
     incl = vcat([ix[1] ∘ t for t in T[2]], ix[2:2])
     proj = vcat([t ∘ px[1] for t in T[3]], px[2:2])
     return Z, incl, proj
-end
-
-⊕(X::S1,T::Tuple{S,Vector{R}, Vector{R2}}) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism, R2 <: CategoryMorphism} = ⊕(T,X)
-
-function direct_sum(X::CategoryObject...)
-    if length(X) == 0 return nothing end
-    Z = X[1]
-    for Y ∈ X[2:end]
-        Z = direct_sum(Z,Y)
-    end
-    return Z
 end
 
 function direct_sum(X::CategoryObject...)
@@ -111,32 +126,29 @@ function direct_sum(f::CategoryMorphism...)
     return g
 end
 
+function ×(X::T,Y::T) where {T <: CategoryObject}
+    return product(X,Y)[1] 
+end
+
 function ×(T::Tuple{S,Vector{R}},X::S1) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism}
     Z,px = product(T[1],X)
     m = vcat([t ∘ px[1] for t in T[2]], px[2])
     return Z, m
 end
 
-×(X::S1,T::Tuple{S,Vector{R}}) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism} = ×(T,X)
-
-function product(X::CategoryObject...)
-    if length(X) == 0 return nothing end
-    Z = X[1]
-    for Y ∈ X[2:end]
-        Z = product(Z,Y)
-    end
-    return Z
-end
-
 function product(X::CategoryObject...)
     if length(X) == 1
         return X[1], [id(X[1])]
     end
-    Z,px = product(X[1],X[2], true)
+    Z,px = product(X[1],X[2])
     for Y in X[3:end]
         Z,px = ×((Z,px),Y)
     end
     return Z,px
+end
+
+function ∐(X::T,Y::T) where {T <: CategoryObject}
+    return coproduct(T[1],X)[1]
 end
 
 function ∐(T::Tuple{S,Vector{R}},X::S1) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism}
@@ -144,18 +156,6 @@ function ∐(T::Tuple{S,Vector{R}},X::S1) where {S <: CategoryObject,S1 <: Categ
     m = vcat([px[1] ∘ t for t in T[2]], px[2])
     return Z, m
 end
-
-∐(X::S1,T::Tuple{S,Vector{R}}) where {S <: CategoryObject,S1 <: CategoryObject, R <: CategoryMorphism} = ∐(T,X)
-
-function coproduct(X::CategoryObject...)
-    if length(X) == 0 return nothing end
-    Z = X[1]
-    for Y in X[2:end]
-        Z = coproduct(Z,Y)
-    end
-    return Z
-end
-
 function coproduct(X::CategoryObject...)
     if length(X) == 1
         return X[1], [id(X[1])]
@@ -172,14 +172,14 @@ end
 
 Return the product CategoryObject and an array containing the projection morphisms.
 """
-×(X::CategoryObject...) = product(X...)
+×(X::CategoryObject...) = product(X...)[1]
 
 """
     ∐(X::CategoryObject...)
 
 Return the coproduct CategoryObject and an array containing the injection morphisms.
 """
-∐(X::CategoryObject...) = coproduct(X...)
+∐(X::CategoryObject...) = coproduct(X...)[1]
 
 """
     ⊕(X::CategoryObject...)
@@ -188,7 +188,7 @@ Return the direct sum CategoryObject and arrays containing the injection and pro
 morphisms.
 """
 
-⊕(X::CategoryObject...) = direct_sum(X...)
+⊕(X::CategoryObject...) = direct_sum(X...)[1]
 
 ⊕(X::CategoryMorphism...) = direct_sum(X...)
 
@@ -204,7 +204,7 @@ Return the tensor product object.
 
 Return the n-fold product object ```X^n```.
 """
-^(X::CategoryObject,n::Integer) = n == 0 ? zero(parent(X)) : product([X for i in 1:n]...)
+^(X::CategoryObject,n::Integer) = n == 0 ? zero(parent(X)) : product([X for i in 1:n]...)[1]
 
 ^(X::CategoryMorphism,n::Integer) = n == 0 ? zero_morphism(zero(parent(domain(X))), zero(parent(domain(X)))) : direct_sum([X for i in 1:n]...)
 """
@@ -219,9 +219,17 @@ direct_sum(X::T) where T <: Union{Vector,Tuple} = direct_sum(X...)
 product(X::T) where T <: Union{Vector,Tuple} = product(X...)
 coproduct(X::T) where T <: Union{Vector,Tuple} = coproduct(X...)
 
-product(X::CategoryObject,Y::CategoryObject) = direct_sum(X,Y)
-coproduct(X::CategoryObject, Y::CategoryObject) = direct_sum(X,Y)
+product(X::CategoryObject,Y::CategoryObject) = direct_sum(X,Y)[[1,3]]
+coproduct(X::CategoryObject, Y::CategoryObject) = direct_sum(X,Y)[[1,2]]
 
+function zero_morphism(X::CategoryObject, Y::CategoryObject) 
+    if is_additive(C)
+        return basis(Hom(zero(parent(X)), Y))[1] ∘ basis(Hom(X, zero(parent(X))))
+    elseif is_linear(C) 
+        return zero(base_ring(X)) * basis(Hom(X,Y))[1]
+    end
+    @error "There might be no zero morphism"
+end
 #---------------------------------------------------------
 #   Horizontal and Vertical direct sums
 #---------------------------------------------------------
@@ -711,7 +719,7 @@ function fpdim(X::CategoryObject)
         K = QQBar
         λ = eigenvalues(matrix(QQ,A),K)
         filter!(e -> isreal(e), λ)
-        return findmax(e -> abs(e), λ)
+        return findmax(e -> abs(e), λ)[1]
     end
 
 
