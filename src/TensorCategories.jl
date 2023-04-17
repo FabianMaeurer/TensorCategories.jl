@@ -110,6 +110,7 @@ export GRCategoryHomSpace
 export GRepInduction 
 export GRepRestriction 
 export grothendieck_ring 
+export GrothendieckRing
 export GroupRepresentation 
 export GroupRepresentationCategory 
 export GroupRepresentationCategory 

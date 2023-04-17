@@ -1,4 +1,6 @@
-function Base.hash(C::T, h::UInt) where T <: Union{CategoryMorphism, Category, CategoryObject}
+const HashTypes = Union{CategoryMorphism, Category, CategoryObject, GrothendieckRing, GrothendieckRingObject}
+
+function Base.hash(C::T, h::UInt) where T <: HashTypes
     content = (getfield(C, s) for s ∈ fieldnames(typeof(C)) if isdefined(C, s))
     hash(content, h)
 end

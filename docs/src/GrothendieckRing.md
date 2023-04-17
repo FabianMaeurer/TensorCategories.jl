@@ -1,6 +1,6 @@
 # The Grothendieck Group 
 
-The Grothendieck group of an abelian category can be compouted with 
+The Grothendieck group of an abelian category can be computed with 
 
 ```@docs
 grothendieck_ring
