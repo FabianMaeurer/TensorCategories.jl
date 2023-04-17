@@ -250,7 +250,6 @@ export ZPlusRingElem, ℕRingElem, ℤ₊RingElem
 
 include("structures/abstracts.jl")
 include("structures/FrameworkChecks.jl")
-include("Utility/Technicallities.jl")
 include("Utility/QQBar_Polynomials.jl")
 include("Utility/SolveGroebner.jl")
 include("structures/VectorSpaces/VectorSpaces.jl")
@@ -283,6 +282,7 @@ include("structures/Examples/VercleyenSingerland/FR_8211/fr_8211.jl")
 include("structures/Examples/VercleyenSingerland/FR_9143/fr_9143.jl")
 include("structures/Examples/E6subfactor.jl")
 include("structures/Examples/Haagerup/Haagerup.jl")
+include("Utility/Technicallities.jl")
 
 #include("Utility/Serialization.jl")
 

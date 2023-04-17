@@ -45,14 +45,14 @@ end
     Generic Grothendieck Group 
 ----------------------------------------------------------=#
 
-@attributes mutable struct GrothendieckGroup 
+mutable struct GrothendieckGroup 
     category::Category
     is_ring::Bool
     base_ring::Ring
-    objects::Vector{GrothendieckGroupElem}
+    objects::Vector{CategoryObject}
 end
 
-@attributes mutable struct GrothendieckGroupElem
+mutable struct GrothendieckGroupElem
     parent::GrothendieckGroup
     class::Vector{CategoryObject}
 end
