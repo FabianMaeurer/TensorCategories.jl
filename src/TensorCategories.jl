@@ -21,7 +21,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem
     abelian_group, PcGroup, is_modular, subgroup, nullspace, factor, qqbar,
     leading_coefficient, roots, is_rational, fmpq_mpoly, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
     height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
-    @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute
+    @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power
 
 
 
@@ -47,6 +47,7 @@ export braiding
 export cat_fr_8122 
 export cat_fr_9143 
 export Category 
+export category
 export CategoryHomSet 
 export CategoryHomSpace 
 export CategoryMorphism 
@@ -231,7 +232,10 @@ export SubcategoryCategoryObject
 export SubcategoryMorphism 
 export TambaraYamagami 
 export tensor_product 
-export TensorCategory 
+export tensor_power
+export TensorPowerCategory
+export TensorPowerCategoryMorphism
+export TensorPowerCategoryObject
 export tmatrix 
 export tr 
 export trivial_3_cocylce 
@@ -271,6 +275,7 @@ include("structures/MISC/multiplication_table.jl")
 include("structures/MISC/PentagonAxiom.jl")
 include("structures/MISC/Subcategories.jl")
 include("structures/MISC/Fusionrings.jl")
+include("structures/MISC/TensorPowerCategory.jl")
 include("structures/GrothendieckRing.jl")
 include("structures/Center/Center.jl")
 include("structures/Center/Induction.jl")

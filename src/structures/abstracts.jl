@@ -90,6 +90,9 @@ base_ring(C::Category) = C.base_ring
 base_group(C::Category) = C.base_group
 base_group(X::CategoryObject) = parent(X).base_group
 
+category(C::Category) = C.category
+object(X::CategoryObject) = X.object
+morphism(f::CategoryMorphism) = f.morphism
 #---------------------------------------------------------
 #   Direct Sums, Products, Coproducts
 #---------------------------------------------------------
@@ -273,7 +276,7 @@ function vertical_direct_sum(f::Vector{M}) where M <: CategoryMorphism
 
 end
 
-is_simple(X::CategoryObject) = sum([dim(Hom(X,s)) for s ∈ simples(parent(X))]) == 1
+
 #---------------------------------------------------------
 #   tensor_product
 #---------------------------------------------------------
@@ -606,7 +609,7 @@ function indecomposable_subobjects(X::CategoryObject)
             continue
         end
 
-        simple_subs = vcat([simple_subobjects(K) for (_,K) ∈ eig_spaces]...)
+        simple_subs = vcat([indecomposable_subobjects(K) for (_,K) ∈ eig_spaces]...)
 
         return unique_simples(simple_subs)
     end
@@ -642,6 +645,28 @@ function indecomposables(C::Category)
         return simples(C)
     end
     error("Cannot compute indecomposables")
+end
+
+function simples(C::Category)
+    simpls = indecomposables(C)
+    if is_semisimple(C)
+        return simpls
+    end
+    return [s for s ∈ simpls if is_simple(s)]
+end
+
+function is_simple(X::CategoryObject, S = simples(parent(X)))
+    for s ∈ S
+        if int_dim(Hom(s,X)) != 0 
+            return is_isomorphic(s,X)[1]
+        end
+    end
+    error("You might miss some simples")
+end
+
+function is_subobject(X::CategoryObject, Y::CategoryObject)
+    @assert is_additive(parent(X))
+    # TODO:
 end
 #=-------------------------------------------------
     Duals in Fusion Categories

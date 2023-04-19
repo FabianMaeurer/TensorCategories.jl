@@ -477,9 +477,7 @@ function decompose(σ::GroupRepresentation)
     ret
 end
 
-function is_simple(σ::GroupRepresentation)
-    sum([k for (_,k) ∈ decompose(σ)]) == 1
-end
+
 #-------------------------------------------------------------------------
 #   Hom Spaces
 #-------------------------------------------------------------------------
