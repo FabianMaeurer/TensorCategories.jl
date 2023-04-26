@@ -16,7 +16,7 @@ for the orbits.
 We provide the datatype
 
 ```
-CoherentSheaf <: CategoryObject
+CoherentSheafCategoryObject <: CategoryObject
 ```
 
 The category of equivariant coherent sheafes has type
