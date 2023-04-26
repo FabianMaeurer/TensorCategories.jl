@@ -62,7 +62,7 @@ end
 """
     function one(C::GradedVectorSpaces)
 
-Return ´´k´´ as the one dimensional graded vector space.
+Return ``k`` as the one dimensional graded vector space.
 """
 one(C::GradedVectorSpaces) = GVSCategoryObject(C,VectorSpaceCategoryObject(base_ring(C),1), [one(base_group(C))])
 

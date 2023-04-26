@@ -27,7 +27,7 @@ function roots(p::PolyElem{qqbar})
     
     # Set the nessecary prescision to find roots
     prec = 8*(max_height*max_deg)
-    CC = ComplexField(prec)
+    CC = AcbField(prec)
 
     cp = change_base_ring(CC,p)
 

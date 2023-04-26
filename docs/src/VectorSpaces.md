@@ -8,14 +8,14 @@ using TensorCategories, Oscar
 Vector spaces in TensorCategories are of the abstract type
 
 ```
-abstract type VectorSpaceCategoryObject{T} <: CategoryObject end
+abstract type VectorSpaceCategoryObject <: CategoryObject end
 ```
 
 All objects with vector space structure like hom-spaces are and should be implemented as a
 subtype of this type. They always need the following fields:
 
 ```
-basis::Vector{Any}
+basis::Vector
 parent::Category
 ```
 
@@ -32,7 +32,7 @@ and can be constructed like so:
 
 ```@example VS
 F,a = FiniteField(5,2)
-Vec = VectorSpaces(F)
+Vec = VectorSpaces()
 ```
 
 CategoryObjects of this category are of the type
@@ -74,24 +74,13 @@ and they are constructed in straightforward manner
 
 ```@example VS
 G = symmetric_group(6)
-F,a = FiniteField(2,3)
-VecG = GradedVectorSpaces(F,G)
+VecG = GradedVectorSpaces(G)
 ```
 
-To add a nontrivial associator (twist) construct a Cocycle{3} object coding a 3-cocycle
-of the group ``G``. By now no checking of this condition happens.
+To add a non-trivial associator (twist) there is another constructor. 
 
-```@example VS
-function cyclic_group_3cocycle(G, F, ξ)
-	g = G[1]
-	n = order(G)
-	D = Dict((g^i,g^j,g^k) => ξ^(div(i*(j+k - rem(j+k,n)),n)) for i ∈ 0:n-1, j ∈ 0:n-1, k ∈ 0:n-1)
-	return Cocycle(G,D)
-end
-
-F,ξ = CyclotomicField(5, "ξ")
-c = cyclic_group_3cocycle(G,F,ξ)
-VecG = GradedVectorSpaces(F,G,c)
+```@docs
+TwistedGradedVectorSpaces
 ```
 
 Graded vector spaces decompose into direct sums of vector spaces for each element in
@@ -118,7 +107,7 @@ GVSCategoryMorphism <: CategoryMorphism
 The constructor is given by 
 
 ```@docs
-CategoryMorphism(::GVSCategoryObject, ::GVSCategoryObject,::MatElem) where {G, S <: VectorSpaceCategoryMorphism}
+Morphism(::GVSCategoryObject, ::GVSCategoryObject,::MatElem) where {G, S <: VectorSpaceCategoryMorphism}
 ```
 
 

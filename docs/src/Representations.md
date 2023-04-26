@@ -42,8 +42,8 @@ GroupRepresentationCategoryObject <: RepresentationCategoryObject
 They are constructed in one of two ways, either by images of generators or by a function
 
 ```@docs
-RepresentationCategoryObject(::GAPGroup,::Vector,::Vector)
-RepresentationCategoryObject(::GAPGroup,::Function)
+Representation(::GAPGroup,::Vector,::Vector)
+Representation(::GAPGroup,::Function)
 ```
 
 where in both cases the images are required to be fitting MatrixElem objects.

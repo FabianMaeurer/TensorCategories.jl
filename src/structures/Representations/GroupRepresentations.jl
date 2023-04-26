@@ -33,7 +33,7 @@ end
 """
     RepresentationCategory(G::GAPGroup, F::Field)
 
-Category of finite dimensonal group representations of \\G\\.
+Category of finite dimensonal group representations of ``G``.
 """
 function RepresentationCategory(G::GAPGroup, F::Field)
     return GroupRepresentationCategory(G,F)

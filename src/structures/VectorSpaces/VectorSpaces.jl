@@ -217,8 +217,6 @@ function direct_sum(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject,)
 end
 
 
-product(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject) = direct_sum(X,Y, projections)[[1,3]]
-coproduct(X::VectorSpaceCategoryObject, Y::VectorSpaceCategoryObject) = direct_sum(X,Y, injections)[[1,2]]
 
 """
     direct_sum(f::VectorSpaceCategoryMorphism{T},g::VectorSpaceCategoryMorphism{T}) where T

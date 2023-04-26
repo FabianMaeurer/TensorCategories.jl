@@ -635,6 +635,16 @@ function unique_simples(simples::Vector{<:CategoryObject})
     return unique_simples
 end
 
+function unique_indecomposables(simples::Vector{<:CategoryObject})
+    unique_simples = simples[1:1]
+    for s ∈ simples[2:end]
+        if *([!is_isomorphic(s,u)[1] for u ∈ unique_simples]...)
+            unique_simples = [unique_simples; s]
+        end
+    end
+    return unique_simples
+end
+
 function simples_names(C::Category) 
     @assert is_semisimple(C)
     return ["X$i" for i ∈ 1:length(simples(C))]

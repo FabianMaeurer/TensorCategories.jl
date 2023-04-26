@@ -44,6 +44,12 @@ function unitary_3_cocycle(G,n,ρ,i)
 	return Cocycle(G,D)
 end
 
+""" 
+
+	TwistedGradedVectorSpaces(G::GAPGroup, i::Int)
+
+Construct the category of twisted graded vectorspaces with the i-th 3-cocycle.
+"""
 function TwistedGradedVectorSpaces(G::GAPGroup,i::Int = 2) #Inputs finite group G and the number of Cocycle we want in the twisted_graded_vector_spaces
 	GAP.Packages.install("HAP")
 	GAP.Packages.load("HAP") 

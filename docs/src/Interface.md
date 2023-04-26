@@ -1,8 +1,16 @@
 # A Framework for Categories 
 
-The main idea of TensorCategories is to provide abstract methods for categorical computations. TensorCategories.jl provides many generic types and methods which will work fine on custom categories implementing the interface
+The main incentive of TensorCategories.jl is to provide abstract methods for categorical computations. TensorCategories.jl provides many generic types and methods which will work fine on custom categories implementing the interface.
 
 # The Basics
+
+We provide the following abstract types to identify categories, objects and morphisms:
+
+```julia
+abstract type Category end
+abstract type CategoryObject end
+abstract type CategoryMorphism end
+```
 
 For basic functionality of `YourCategory <: Category` together with objects
 `YourCategoryObject <: CategoryObject` and morphisms `YourMorphism <: CategoryMorphism` you have to minimally build
@@ -57,7 +65,7 @@ For the precise definitions take a look at [EGNO](@ref), which we use as a gener
 | Abelian            | Additive                       | `kernel(::YourMorphism)::Tuple{YourObject, YourMorphism}`  `cokernel(::YourMorphism)::Tuple{YourObject,YourMorphism}`| `indecomposables(::YourCategory)::Vector{YourObject}`  `simples(::YourCategory)::Vector{YourObject}`| 
 | Monoidal           |                                | `tensor_product(::YourObject,::YourObject)::YourObject`  `tensor_product(::YourMorphism,::YourMorphism)::YourMorphism`  `one(::YourCategory)::YourObject` | | 
 | Rigid              | Monoidal                       | `left_dual(X::YourObject)::YourObject`  `right_dual(X::YourObject)::YourObject`  or, if the dual is two sided  `dual(::YourObject)::YourObject`  `ev(::YourObject)::YourMorphism`  `coev(::YourObject)::YourMorphism` | |
-| Braided            | Monoidal                       | `braiding(X::YourObject, Y::YourObject)::YourMorphism          | |
+| Braided            | Monoidal                       | `braiding(X::YourObject, Y::YourObject)::YourMorphism`          | |
 | Spherical          | Monoidal, Rigid                | `spherical(X::YourObject)::YourMorphism` |
 | Krull-Schmidt      | Additive, Linear               | **Coming Soon** ||
 | (Multi)Ring        | Abelian, Monoidal, linear      | | |

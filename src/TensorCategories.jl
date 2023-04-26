@@ -2,7 +2,7 @@ module TensorCategories
 
 import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show,div
 
-import Oscar: +, AbstractSet, AlgAss, AlgAssElem, ComplexField, Field, FieldElem, FinField, GroupsCore,
+import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, FinField, GroupsCore,
     FiniteField, GAP, GAPGroup, GAPGroupHomomorphism, GL, GSet, GroupElem, Ideal, MPolyQuo,
     Map, MatElem, MatrixElem, MatrixGroup, MatrixSpace, ModuleIsomorphism, NumberField,
     PolynomialRing, QQ, Ring, RingElem, ZZ, abelian_closure, action, base_field, base_ring,

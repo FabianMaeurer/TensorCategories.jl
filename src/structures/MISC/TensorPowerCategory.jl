@@ -77,7 +77,6 @@ function tensor_product(X::TensorPowerCategoryMorphism, Y::TensorPowerCategoryMo
     tensor_product(morphism(X), morphism(Y))
 end
 
-*(k,f::TensorPowerCategoryMorphism) = TensorPowerCategoryMorphism(domain(f),codomain(f), k*morphism(f))
 
 one(C::TensorPowerCategory) = TensorPowerCategoryObject(C, one(category(C)))
 
@@ -118,13 +117,17 @@ end
 
 
 function indecomposables(C::TensorPowerCategory, k = Inf)
-    simpls = object_type(category(C))[]
-    n1 = 0
-    j = 0
     X = C.generator
     Y = one(category(C))
-    while j ≤ k+1
-        simpls = unique_simples([simpls; indecomposable_subobjects(Y)])
+    indecs_in_X = indecomposable_subobjects(X)
+    simpls = indecs_in_X
+    n1 = 0
+    j = 2
+    
+    while j ≤ k
+        for V ∈ indecs_in_X, W ∈ simpls
+            simpls = unique_indecomposables([simpls; indecomposable_subobjects(W ⊗ V)])
+        end
         if length(simpls) == n1
             simpls = [TensorPowerCategoryObject(C,s) for s ∈ simpls]
             C.simples = simpls
@@ -152,5 +155,19 @@ function show(io::IO, X::TensorPowerCategoryObject)
 end
 
 function show(io::IO, f::TensorPowerCategoryMorphism)
-    print(io, "Tensor power category morphism:  $morphism(f)")
+    print(io, "Tensor power category morphism:  $(morphism(f))")
 end
+
+
+#=----------------------------------------------------------
+    Functionality 
+----------------------------------------------------------=#
+
+compose(f::TensorPowerCategoryMorphism, g::TensorPowerCategoryMorphism) = TensorPowerCategoryMorphism(domain(f), codomain(g), compose(morphism(f),morphism(g)))
+
+
+*(k,f::TensorPowerCategoryMorphism) = TensorPowerCategoryMorphism(domain(f),codomain(f), k*morphism(f))
+
++(f::TensorPowerCategoryMorphism, g::TensorPowerCategoryMorphism) = TensorPowerCategoryMorphism(domain(f),codomain(f), morphism(f) + morphism(g))
+
+matrix(f::TensorPowerCategoryMorphism) = matrix(morphism(f))
