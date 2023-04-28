@@ -58,9 +58,6 @@ inv(f::ProductMorphism) = ProductMorphism(codomain(f),domain(f), Tuple(inv(fi) f
 #   Functionality
 #-----------------------------------------------------------------
 
-function direct_sum(X::ProductCategoryObject, Y::ProductCategoryObject)
-    return ProductCategoryObject(parent(X),Tuple([direct_sum(x,y) for (x,y) ∈ zip(X.factors, Y.factors)]))
-end
 
 function direct_sum(X::ProductCategoryObject, Y::ProductCategoryObject)
     sums = [direct_sum(x,y) for (x,y) ∈ zip(X.factors,Y.factors)]

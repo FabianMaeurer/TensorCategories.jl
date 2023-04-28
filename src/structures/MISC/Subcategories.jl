@@ -38,11 +38,7 @@ RingSubcategory(C::Category,i::Vector{Int}) = RingSubcategory(C,i...)
 #=-------------------------------------------------
     Functionality 
 -------------------------------------------------=#
-function direct_sum(X::SubcategoryCategoryObject, Y::SubcategoryCategoryObject)
-    @assert parent(X) == parent(Y)
-    obj = direct_sum(object(X), object(Y))
-    return SubcategoryCategoryObject(parent(X), obj)
-end
+
 
 function direct_sum(f::SubcategoryMorphism, g::SubcategoryMorphism)
     @assert parent(f) == parent(g)
