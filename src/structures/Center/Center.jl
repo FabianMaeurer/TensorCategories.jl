@@ -764,13 +764,17 @@ end
 function simples_by_induction!(C::CenterCategory)
     S = CenterCategoryObject[]
     d = dim(C.category)^2
-    
-    ordered_simples = sort(simples(C.category), by = fpdim)
+
+    if characteristic(base_ring(C)) == 0 
+        ordered_simples = sort(simples(C.category), by = fpdim)
+    else 
+        ordered_simples = simples(C.category)
+    end
 
     FI_simples = induction_restriction.(ordered_simples)
 
     for (s, Is) ∈ zip(ordered_simples, FI_simples)
-        contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
+       contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
         if length(contained_simples) > 0
             if is_isomorphic(Is, direct_sum(object.(contained_simples))[1])[1]
                 continue
@@ -787,7 +791,7 @@ function simples_by_induction!(C::CenterCategory)
     C.simples = S
 end
 
-function sort_simples_by_dimension!(C::CenterCategory)
+function sort_simples_by_dimension!(C::CenterCategory)  
     fp_dims = [fpdim(s) for s ∈ simples(C)]
     K = base_ring(C)
     f = complex_embeddings(K)[1]

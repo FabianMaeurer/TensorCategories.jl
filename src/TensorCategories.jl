@@ -133,6 +133,7 @@ export indecomposable_subobjects
 export indecomposables
 export induction 
 export Induction 
+export induction_restriction
 export int_dim 
 export inv 
 export inv_associator 

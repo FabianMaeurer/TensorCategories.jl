@@ -377,10 +377,8 @@ function direct_sum(ρ::GroupRepresentation, τ::GroupRepresentation)
     F = base_ring(ρ)
 
     if ρ.m == 0
-        if !morphisms return τ end
         return τ,[GroupRepresentationCategoryMorphism(ρ,τ,zero(MatrixSpace(F,0,intdim(τ)))), id(τ)], [GroupRepresentationCategoryMorphism(τ,ρ,zero(MatrixSpace(F,intdim(τ),0))), id(τ)]
     elseif τ.m == 0
-        if !morphisms return ρ end
         return ρ,[id(ρ), GroupRepresentationCategoryMorphism(τ,ρ,zero(MatrixSpace(F,0,intdim(ρ)))), id(τ)], [id(ρ), GroupRepresentationCategoryMorphism(ρ,τ,zero(MatrixSpace(F,intdim(ρ),0)))]
     end
 

@@ -4,7 +4,7 @@ CurrentModule = TensorCategories
 
 # Coherent sheaves on Finite Sets
 
-Coherent sheaves on a finite set ``X`` are characterised by the stalks of the
+Coherent sheaves on a finite set ``X`` are characterized by the stalks of the
 the elements ``x \in X``. I.e. a coherent sheaf on ``X`` is a collection of
 vector spaces ``V_x`` for each ``x\in X``. More generally for a group ``G`` and
 a G-set ``X`` we can define consider ``G``-equivariant sheaves on ``X``. In this
@@ -19,7 +19,7 @@ We provide the datatype
 CoherentSheafCategoryObject <: CategoryObject
 ```
 
-The category of equivariant coherent sheafes has type
+The category of equivariant coherent sheaves has type
 
 ```
 CohSheaves <: MultiTensorCategory
