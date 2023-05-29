@@ -692,25 +692,8 @@ struct CenterCategoryHomSpace <: AbstractCategoryHomSpace
     parent::VectorSpaces
 end
 
-# function Hom(X::CenterCategoryObject, Y::CenterCategoryObject)
-#     b = basis(Hom(X.object, Y.object))
 
-#     projs = [central_projection(X,Y,f) for f in b]
-
-#     proj_exprs = [express_in_basis(p,b) for p ∈ projs]
-
-#     M = zero(MatrixSpace(base_ring(X), length(b),length(b)))
-#     for i ∈ 1:length(proj_exprs)
-#         M[i,:] = proj_exprs[i]
-#     end
-#     r, M = rref(M)
-#     H_basis = CenterCategoryMorphism[]
-#     for i ∈ 1:r
-#         f = Morphism(X,Y,sum([m*bi for (m,bi) ∈ zip(M[i,:], b)]))
-#         H_basis = [H_basis; f]
-#     end
-#     return CenterCategoryHomSpace(X,Y,H_basis, VectorSpaces(base_ring(X)))
-# end
+Hom(X::CenterCategoryObject, Y::CenterCategoryObject) = hom_by_linear_equations(X,Y)
 
 function central_projection(dom::CenterCategoryObject, cod::CenterCategoryObject, f::CategoryMorphism, simpls = simples(parent(domain(f))))
     X = domain(f)
@@ -782,11 +765,11 @@ function simples_by_induction!(C::CenterCategory)
         end
 
         Z = induction(s)
-        for x ∈ contained_simples
-            f = horizontal_direct_sum(basis(Hom(x,Z)))
-            Z = cokernel(f)[1]
-        end
-        S = [S; simple_subobjects(Z)]
+        # for x ∈ contained_simples
+        #     f = horizontal_direct_sum(basis(Hom(x,Z)))
+        #     Z = cokernel(f)[1]
+        # end
+        S = [S; simple_subobjects(Z, end_of_induction(s,Z))]
     end
     C.simples = S
 end
@@ -804,7 +787,7 @@ end
     Hom Spaces 2.0 
 ----------------------------------------------------------=#
 
-function Hom(X::CenterCategoryObject, Y::CenterCategoryObject)
+function hom_by_linear_equations(X::CenterCategoryObject, Y::CenterCategoryObject)
     @assert parent(X) == parent(Y)
 
     H = Hom(object(X), object(Y))
@@ -849,3 +832,31 @@ function Hom(X::CenterCategoryObject, Y::CenterCategoryObject)
     return CategoryHomSpace(X,Y,center_basis, VectorSpaces(F))
 end
 
+function hom_by_projection(X::CenterCategoryObject, Y::CenterCategoryObject)
+    b = basis(Hom(X.object, Y.object))
+
+    projs = [central_projection(X,Y,f) for f in b]
+
+    proj_exprs = [express_in_basis(p,b) for p ∈ projs]
+
+    M = zero(MatrixSpace(base_ring(X), length(b),length(b)))
+    for i ∈ 1:length(proj_exprs)
+        M[i,:] = proj_exprs[i]
+    end
+    r, M = rref(M)
+    H_basis = CenterCategoryMorphism[]
+    for i ∈ 1:r
+        f = Morphism(X,Y,sum([m*bi for (m,bi) ∈ zip(M[i,:], b)]))
+        H_basis = [H_basis; f]
+    end
+    return CenterCategoryHomSpace(X,Y,H_basis, VectorSpaces(base_ring(X)))
+end
+
+
+function end_of_induction(X::CategoryObject, IX = induction(X))
+    B = basis(Hom(object(IX), X))
+
+    ind_B = [Morphism(IX,IX,vertical_direct_sum([((id(xi)⊗f)⊗id(dual(xi)))∘(half_braiding(IX,xi)⊗id(dual(xi)))∘inv_associator(object(IX),xi,dual(xi))∘(id(domain(f))⊗coev(xi)) for xi in simples(parent(X))])) for f ∈ B]
+
+    return CenterCategoryHomSpace(IX,IX,ind_B, VectorSpaces(base_ring(X)))
+end

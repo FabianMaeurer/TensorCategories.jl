@@ -8,10 +8,10 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     PolynomialRing, QQ, Ring, RingElem, ZZ, abelian_closure, action, base_field, base_ring,
     basis, change_base_ring, characteristic, codomain, coeff, coefficients, cokernel,
     compose, cyclotomic_field, decompose, degree, diagonal_matrix, dim, domain, dual,
-    eigenspace, eigenspaces, elem_type, elements, fmpq, fmpz, gap_to_julia, gcd, gen, gens,
+    eigenspace, eigenspaces, elem_type, elements, fmpq, fmpz, gcd, gen, gens,
     groebner_basis, gset, hom, id, ideal, image, index, inv, irreducible_modules, is_abelian,
     is_central, iscommutative, isconstant, isindependent, isinvertible, is_isomorphic,
-    is_semisimple, issubgroup, jordan_normal_form, julia_to_gap, kernel, kronecker_product,
+    is_semisimple, issubgroup, jordan_normal_form, kernel, kronecker_product,
     leading_monomial, left_transversal, matrix, minpoly, real_solutions, multiplication_table,
     nf_elem, one, orbit, orbits, order, parent, permutation_matrix, primary_decomposition,
     product, rank, roots, rref, size, solve, solve_left, splitting_field, stabilizer,
@@ -95,6 +95,7 @@ export E6subfactor
 export eigenspace 
 export eigenspaces 
 export End 
+export end_of_induction
 export endomorphism_ring 
 export ev 
 export ev_coev 
