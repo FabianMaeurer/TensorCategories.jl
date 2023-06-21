@@ -101,6 +101,15 @@ function induction_restriction(X::CategoryObject, simples::Vector = simples(pare
     @assert is_semisimple(parent(X)) "Requires semisimplicity"
     Z = direct_sum([s⊗X⊗dual(s) for s ∈ simples])[1]
 end
+
+
+function end_of_induction(X::CategoryObject, IX = induction(X))
+    B = basis(Hom(X,object(IX)))
+
+    ind_B = [Morphism(IX,IX,horizontal_direct_sum([sqrt(dim(xi))*((ev(dual(xi)) ∘(spherical(xi)⊗id(dual(xi))))⊗id(object(IX))) ∘ (id(xi)⊗half_braiding(IX,dual(xi))) ∘ associator(xi,object(IX),dual(xi)) ∘ ((id(xi)⊗f)⊗id(dual(xi))) for xi in simples(parent(X))])) for f ∈ B]
+
+    return CenterCategoryHomSpace(IX,IX,ind_B, VectorSpaces(base_ring(X)))
+end
 # function induction(X::CategoryObject, simples::Vector = simples(parent(X)))
 #     @assert is_semisimple(parent(X)) "Requires semisimplicity"
 #     Z = direct_sum([s⊗X⊗dual(s) for s ∈ simples])

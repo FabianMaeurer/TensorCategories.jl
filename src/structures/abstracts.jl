@@ -584,14 +584,14 @@ end
 # Semisimple: Subobjects
 #-------------------------------------------------------
 
-function eigenspaces(f::CategoryMorphism)
+function eigenvalues(f::CategoryMorphism)
     @assert domain(f) == codomain(f) "Not an endomorphism"
 
     #@show factor(minpoly(matrix(f)))
     if base_ring(f) == QQBar
         values = eigenvalues(matrix(f))
     else
-        values = collect(keys(eigenspaces(matrix(f))))
+        values = spectrum(matrix(f))
     end
 
     return Dict(λ => kernel(f-λ*id(domain(f)))[1] for λ ∈ values)
@@ -603,7 +603,7 @@ function indecomposable_subobjects(X::CategoryObject, E = End(X))
     if length(B) == 1 return [X] end
 
     for f ∈ B
-        eig_spaces = eigenspaces(f)
+        eig_spaces = eigenvalues(f)
 
         if length(eig_spaces) == 1 && collect(values(eig_spaces))[1] == X
             continue
@@ -674,6 +674,38 @@ function is_simple(X::CategoryObject, S = simples(parent(X)))
     error("You might miss some simples")
 end
 
+
+function left_inverse(f::CategoryMorphism)
+    X = domain(f)
+    Y = codomain(f)
+
+    HomYX = basis(Hom(Y,X))
+    base = basis(End(X))
+
+    K = base_ring(f)
+    Kx,x = PolynomialRing(K, length(HomYX))
+    eqs = [zero(Kx) for _ ∈ length(base)]
+
+    for (g,y) ∈ zip(HomYX,x)
+        eqs = eqs .+ (y.*express_in_basis(g∘f, base))
+    end
+
+    one_coeffs = express_in_basis(id(X), base)
+    eqs = eqs .- one_coeffs
+
+    M = zero_matrix(K,length(eqs),length(x))
+    for (i,e) ∈ zip(1:length(eqs), eqs)
+        M[i,:] = [coeff(e,y) for y ∈ x]
+    end
+
+    r,N = nullspace(M)
+
+    if r == 0
+        error("Morphism does not have a left inverse")
+    end
+
+    return sum(HomYX .* N[1,:])
+end
 #=-------------------------------------------------
     Duals in Fusion Categories
 -------------------------------------------------=#

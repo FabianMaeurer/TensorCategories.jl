@@ -3,7 +3,7 @@ abstract type RepresentationCategory <: Category end
 
 abstract type RepresentationCategoryObject <: CategoryObject end
 
-abstract type RepresentationCategoryMorphism <: VectorSpaceCategoryMorphism end
+abstract type RepresentationCategoryMorphism <: CategoryMorphism end
 
 
 intdim(ρ::RepresentationCategoryObject) = ρ.intdim

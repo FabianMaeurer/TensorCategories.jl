@@ -357,6 +357,7 @@ end
 
 is_simple(V::VectorSpaceCategoryObject) = dim(V) == 1
 
+
 # """
 #     function id(V::GVSCategoryObject)
 

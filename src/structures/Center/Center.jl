@@ -672,7 +672,7 @@ end
 function left_inverse(f::CenterCategoryMorphism)
     X = domain(f)
     Y = codomain(f)
-    l_inv = central_projection(Y,X,left_inverse(morphism(f)))
+    l_inv = central_projection(Y,X,left_inverse(morphsm(f)))
     return Morphism(Y,X,l_inv)
 end
 
@@ -755,7 +755,7 @@ function simples_by_induction!(C::CenterCategory)
     end
 
     FI_simples = induction_restriction.(ordered_simples)
-
+    center_dim = 0
     for (s, Is) ∈ zip(ordered_simples, FI_simples)
        contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
         if length(contained_simples) > 0
@@ -769,7 +769,12 @@ function simples_by_induction!(C::CenterCategory)
         #     f = horizontal_direct_sum(basis(Hom(x,Z)))
         #     Z = cokernel(f)[1]
         # end
-        S = [S; simple_subobjects(Z, end_of_induction(s,Z))]
+        new_simples = indecomposable_subobjects(Z, end_of_induction(s,Z))
+        S = [S; new_simples]
+        center_dim += sum(dim.(new_simples).^2)
+        if d == center_dim
+            break
+        end
     end
     C.simples = S
 end
@@ -852,11 +857,3 @@ function hom_by_projection(X::CenterCategoryObject, Y::CenterCategoryObject)
     return CenterCategoryHomSpace(X,Y,H_basis, VectorSpaces(base_ring(X)))
 end
 
-
-function end_of_induction(X::CategoryObject, IX = induction(X))
-    B = basis(Hom(object(IX), X))
-
-    ind_B = [Morphism(IX,IX,vertical_direct_sum([((id(xi)⊗f)⊗id(dual(xi)))∘(half_braiding(IX,xi)⊗id(dual(xi)))∘inv_associator(object(IX),xi,dual(xi))∘(id(domain(f))⊗coev(xi)) for xi in simples(parent(X))])) for f ∈ B]
-
-    return CenterCategoryHomSpace(IX,IX,ind_B, VectorSpaces(base_ring(X)))
-end

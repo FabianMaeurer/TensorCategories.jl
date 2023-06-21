@@ -112,7 +112,7 @@ function cat_fr_8122(n::Int) #n gives the number of associator
 
     set_one!(C,[1,0,0,0,0,0,0,0])
 
-    set_caninical_spherical!(C)
+    set_canonical_spherical!(C)
 
     return C
 end

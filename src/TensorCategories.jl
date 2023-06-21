@@ -21,7 +21,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     abelian_group, PcGroup, is_modular, subgroup, nullspace, factor, qqbar,
     leading_coefficient, roots, is_rational, fmpq_mpoly, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
     height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
-    @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power
+    @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum
 
 
 
@@ -93,7 +93,7 @@ export dual
 export dual_basis 
 export E6subfactor 
 export eigenspace 
-export eigenspaces 
+export eigenvalues 
 export End 
 export end_of_induction
 export endomorphism_ring 
@@ -171,7 +171,7 @@ export left_trace
 export load 
 export matrices 
 export matrix 
-export Morphism 
+export Morphism, morphism 
 export multiplication_table 
 export normalized_smatrix 
 export object 
