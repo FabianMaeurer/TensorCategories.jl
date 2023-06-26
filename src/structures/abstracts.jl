@@ -637,11 +637,7 @@ function _indecomposable_subobjects(X::CategoryObject, E = End(X))
 end
 
 function indecomposable_subobjects(X::CategoryObject, E = End(X))
-    if is_semisimple(parent(X))
-        return indecomposable_subobjects_by_matrix_algebra(X,E)
-    else
-        return _indecomposable_subobjects(X,E)
-    end
+    _indecomposable_subobjects(X,E)
 end
 
 function simple_subobjects(X::CategoryObject, E = End(X))
