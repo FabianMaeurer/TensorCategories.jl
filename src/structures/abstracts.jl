@@ -609,7 +609,6 @@ function indecomposable_subobjects_by_matrix_algebra(X::CategoryObject, E = End(
     b = sum(coefficients(image(f,basis(s)[1])) .* basis(E))
 
     eig_spaces = eigenvalues(b)
-    @show sum([dim(v) for (_,v) in eig_spaces]) == dim(X)
 
     subs = vcat([_indecomposable_subobjects(K) for (_,K) ∈ eig_spaces]...)
 
