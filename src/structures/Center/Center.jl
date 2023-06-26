@@ -776,7 +776,7 @@ function simples_by_induction!(C::CenterCategory)
             break
         end
     end
-    C.simples = S
+    C.simples = unique_simples(S)
 end
 
 function sort_simples_by_dimension!(C::CenterCategory)  
@@ -799,6 +799,10 @@ function hom_by_linear_equations(X::CenterCategoryObject, Y::CenterCategoryObjec
     B = basis(H)
     F = base_ring(X)
     n = length(basis(H))
+
+    if n == 0 
+        return CategoryHomSpace(X,Y, CenterCategoryMorphism[], VectorSpaces(F))
+    end 
 
     Fx,poly_basis = PolynomialRing(F,n)
     

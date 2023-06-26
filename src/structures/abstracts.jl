@@ -589,31 +589,60 @@ function eigenvalues(f::CategoryMorphism)
 
     #@show factor(minpoly(matrix(f)))
     if base_ring(f) == QQBar
-        values = eigenvalues(matrix(f))
+        vals = eigenvalues(matrix(f))
     else
-        values = spectrum(matrix(f))
+        vals = keys(spectrum(matrix(f)))
     end
 
-    return Dict(λ => kernel(f-λ*id(domain(f)))[1] for λ ∈ values)
+    return Dict(λ => kernel(f-λ*id(domain(f)))[1] for λ ∈ vals)
 end
 
-function indecomposable_subobjects(X::CategoryObject, E = End(X))
+function indecomposable_subobjects_by_matrix_algebra(X::CategoryObject, E = End(X))
+    A = endomorphism_ring(X)
+    dec = decompose(A)
+    if length(dec) == 1
+        return X
+    end
+
+    s,f = dec[1]
+
+    b = sum(coefficients(image(f,basis(s)[1])) .* basis(E))
+
+    eig_spaces = eigenvalues(b)
+    @show sum([dim(v) for (_,v) in eig_spaces]) == dim(X)
+
+    subs = vcat([_indecomposable_subobjects(K) for (_,K) ∈ eig_spaces]...)
+
+    return unique_simples(subs)
+end
+
+
+function _indecomposable_subobjects(X::CategoryObject, E = End(X))
     B = basis(E)
 
     if length(B) == 1 return [X] end
 
     for f ∈ B
         eig_spaces = eigenvalues(f)
-
-        if length(eig_spaces) == 1 && collect(values(eig_spaces))[1] == X
+        if length(eig_spaces) == 0
+            return indecomposable_subobjects_by_matrix_algebra(X,E)
+        elseif length(eig_spaces) == 1 || dim(collect(values(eig_spaces))[1]) == dim(X)
             continue
         end
 
-        simple_subs = vcat([indecomposable_subobjects(K) for (_,K) ∈ eig_spaces]...)
+        simple_subs = vcat([_indecomposable_subobjects(K) for (_,K) ∈ eig_spaces]...)
 
         return unique_simples(simple_subs)
     end
     return [X]
+end
+
+function indecomposable_subobjects(X::CategoryObject, E = End(X))
+    if is_semisimple(parent(X))
+        return indecomposable_subobjects_by_matrix_algebra(X,E)
+    else
+        return _indecomposable_subobjects(X,E)
+    end
 end
 
 function simple_subobjects(X::CategoryObject, E = End(X))
@@ -784,7 +813,7 @@ function fpdim(X::CategoryObject)
     S = simples(parent(X))
     n = length(S)
 
-    K = base_ring(X)
+    K = QQBar
 
  
     A = Array{Int,2}(undef,n,n)
@@ -793,22 +822,20 @@ function fpdim(X::CategoryObject)
         A[:,i] = [length(basis(Hom(X⊗Y,S[j]))) for j ∈ 1:n]
     end
 
-    if characteristic(K) != 0 || K == QQBar
-        K = QQBar
-        λ = eigenvalues(matrix(QQ,A),K)
-        filter!(e -> isreal(e), λ)
-        return findmax(e -> abs(e), λ)[1]
-    end
+    λ = eigenvalues(matrix(QQ,A),K)
+    filter!(e -> isreal(e), λ)
+    return findmax(e -> abs(e), λ)[1]
 
 
-    f = complex_embeddings(K)[1]
 
-    λ = [k for (k,_) ∈ eigenspaces(matrix(K,A))]
+    # f = complex_embeddings(K)[1]
+
+    # λ = [k for (k,_) ∈ eigenspaces(matrix(K,A))]
     
-    filter!(e -> real(f(e)) > 0, λ)
+    # filter!(e -> real(f(e)) > 0, λ)
 
-    _,i = findmax(e -> abs(f(e)), λ)
-    return λ[i]
+    # _,i = findmax(e -> abs(f(e)), λ)
+    # return λ[i]
 end
 
 function fpdim(C::Category)
