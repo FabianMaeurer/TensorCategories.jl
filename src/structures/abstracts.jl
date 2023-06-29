@@ -428,7 +428,6 @@ function (F::Field)(f::CategoryMorphism)
     if size(m) == (1,)
         return F(m[1,1])
     end
-    @show size(m)
     throw(ErrorException("Cannot convert to element of $F"))
 end
 

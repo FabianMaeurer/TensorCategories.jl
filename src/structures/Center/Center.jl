@@ -512,9 +512,6 @@ Return a vector containing the simple objects of ```C```. The list might be inco
 """
 function simples(C::CenterCategory; sort = false)
     if isdefined(C, :simples) 
-        # if dim(RingSubcategory(C.category,1))^2 != sum((dim.(C.simples)).^2)
-        #     @warn "List not complete"
-        # end
         return C.simples 
     end
     simples_by_induction!(C)
@@ -769,7 +766,7 @@ function simples_by_induction!(C::CenterCategory)
         #     f = horizontal_direct_sum(basis(Hom(x,Z)))
         #     Z = cokernel(f)[1]
         # end
-        @show new_simples = indecomposable_subobjects(Z)
+        new_simples = indecomposable_subobjects(Z)
         S = [S; new_simples]
         center_dim += sum(dim.(new_simples).^2)
         if d == center_dim
