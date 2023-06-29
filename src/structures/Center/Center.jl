@@ -512,9 +512,9 @@ Return a vector containing the simple objects of ```C```. The list might be inco
 """
 function simples(C::CenterCategory; sort = false)
     if isdefined(C, :simples) 
-        if dim(RingSubcategory(C.category,1))^2 != sum((dim.(C.simples)).^2)
-            @warn "List not complete"
-        end
+        # if dim(RingSubcategory(C.category,1))^2 != sum((dim.(C.simples)).^2)
+        #     @warn "List not complete"
+        # end
         return C.simples 
     end
     simples_by_induction!(C)

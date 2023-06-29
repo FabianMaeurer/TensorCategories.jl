@@ -609,14 +609,17 @@ function indecomposable_subobjects_by_matrix_algebra(X::CategoryObject, E = End(
     b = sum(coefficients(image(f,basis(s)[1])) .* basis(E))
 
     eig_spaces = eigenvalues(b)
+    λ,_ = collect(eig_spaces)[1]
+    K,i = kernel(f - λ*id(X))
+    C,_ = cokernel(i) 
 
-    subs = vcat([_indecomposable_subobjects(K) for (_,K) ∈ eig_spaces]...)
+    subs = [indecomposable_subobjects(K); indecomposable_subobjects(C)]
 
     return unique_simples(subs)
 end
 
 
-function _indecomposable_subobjects(X::CategoryObject, E = End(X))
+function indecomposable_subobjects(X::CategoryObject, E = End(X))
     B = basis(E)
 
     if length(B) == 1 return [X] end
@@ -625,20 +628,24 @@ function _indecomposable_subobjects(X::CategoryObject, E = End(X))
         eig_spaces = eigenvalues(f)
         if length(eig_spaces) == 0
             return indecomposable_subobjects_by_matrix_algebra(X,E)
-        elseif length(eig_spaces) == 1 || dim(collect(values(eig_spaces))[1]) == dim(X)
+        elseif length(eig_spaces) == 1 && dim(collect(values(eig_spaces))[1]) == dim(X)
             continue
         end
 
-        simple_subs = vcat([_indecomposable_subobjects(K) for (_,K) ∈ eig_spaces]...)
+        λ,_ = collect(eig_spaces)[1]
+        K,i = kernel(f - λ*id(X))
+        C,_ = cokernel(i) 
+        
+        simple_subs = [indecomposable_subobjects(K); indecomposable_subobjects(C)]
 
         return unique_simples(simple_subs)
     end
     return [X]
 end
 
-function indecomposable_subobjects(X::CategoryObject, E = End(X))
-    _indecomposable_subobjects(X,E)
-end
+# function indecomposable_subobjects(X::CategoryObject, E = End(X))
+#     _indecomposable_subobjects(X,E)
+# end
 
 function simple_subobjects(X::CategoryObject, E = End(X))
     indecomposables = indecomposable_subobjects(X, E)
