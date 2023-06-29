@@ -32,6 +32,7 @@ function roots(p::PolyElem{qqbar})
     cp = change_base_ring(CC,p)
 
     rs = roots(cp, initial_prec = prec)
+
     return [guess(QQBar, r, max_deg) for r ∈ rs]
 end
 
