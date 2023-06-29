@@ -601,7 +601,7 @@ function indecomposable_subobjects_by_matrix_algebra(X::CategoryObject, E = End(
     A = endomorphism_ring(X)
     dec = decompose(A)
     if length(dec) == 1
-        return X
+        return [X]
     end
 
     s,f = dec[1]
@@ -635,7 +635,7 @@ function indecomposable_subobjects(X::CategoryObject, E = End(X))
         λ,_ = collect(eig_spaces)[1]
         K,i = kernel(f - λ*id(X))
         C,_ = cokernel(i) 
-        
+
         simple_subs = [indecomposable_subobjects(K); indecomposable_subobjects(C)]
 
         return unique_simples(simple_subs)

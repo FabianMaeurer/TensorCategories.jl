@@ -769,7 +769,7 @@ function simples_by_induction!(C::CenterCategory)
         #     f = horizontal_direct_sum(basis(Hom(x,Z)))
         #     Z = cokernel(f)[1]
         # end
-        new_simples = indecomposable_subobjects(Z)
+        @show new_simples = indecomposable_subobjects(Z)
         S = [S; new_simples]
         center_dim += sum(dim.(new_simples).^2)
         if d == center_dim
