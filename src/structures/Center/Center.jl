@@ -790,7 +790,7 @@ end
 ----------------------------------------------------------=#
 
 function hom_by_linear_equations(X::CenterCategoryObject, Y::CenterCategoryObject)
-    @assert parent(X) == parent(Y)
+    #@assert parent(X) == parent(Y)
 
     H = Hom(object(X), object(Y))
     B = basis(H)
