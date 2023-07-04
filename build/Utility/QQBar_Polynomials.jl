@@ -67,7 +67,6 @@ function rational_lift(p::T) where T <: Union{PolyElem, MPolyElem}
             l = l+1
             polys = [polys; w]
         else
-            typeof(m(y...))
             q = q + roots(minpoly(p_coeffs[i]))[1]*m(y...)
         end
     end

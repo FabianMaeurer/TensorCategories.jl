@@ -1,6 +1,6 @@
 
 mutable struct RingCategory <: Category
-    base_ring::Field
+    base_ring::Ring
     simples::Int64
     simples_names::Vector{String}
     ass::Array{MatElem,4}
@@ -11,7 +11,7 @@ mutable struct RingCategory <: Category
     one::Vector{Int}
     name::String
 
-    function RingCategory(F::Field, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1,1,:])])
+    function RingCategory(F::Ring, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1,1,:])])
         C = new(F, length(mult[1,1,:]), names)
         set_tensor_product!(C,mult)
         set_spherical!(C, [F(1) for _ ∈ names])
@@ -21,7 +21,7 @@ mutable struct RingCategory <: Category
         return C
     end
 
-    function RingCategory(F::Field, names::Vector{String})
+    function RingCategory(F::Ring, names::Vector{String})
         C = new(F,length(names), names)
         #C.dims = [1 for i ∈ 1:length(names)]
         set_spherical!(C, [F(1) for _ ∈ names])

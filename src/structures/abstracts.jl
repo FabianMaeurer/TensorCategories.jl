@@ -801,6 +801,24 @@ function simple_objects_ev(X::CategoryObject)
     return inv(factor) * unscaled_ev
 end
 
+function exponent(X::CategoryObject, bound = Inf)
+    m = 1
+    𝟙 = one(parent(X))
+    Y = X
+    while m < bound 
+        if int_dim(Hom(𝟙,Y)) > 0
+            return m
+        end
+        m = m+1
+        Y = Y⊗X
+    end
+end
+
+function exponent(C::Category)
+    @assert is_multiring(C)
+    lcm([exponent(x) for x ∈ indecomposables(C)])
+end
+
 #=-------------------------------------------------
     Frobenius Perron dimension 
 -------------------------------------------------=#

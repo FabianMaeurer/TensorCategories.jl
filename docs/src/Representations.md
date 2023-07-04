@@ -39,7 +39,7 @@ finite dimensional vector space ``k^n``. These objects are of type
 GroupRepresentationCategoryObject <: RepresentationCategoryObject
 ```
 
-They are constructed in one of two ways, either by images of generators or by a function
+They are constructed in one of two ways, either by imag"es of generators or by a function
 
 ```@docs
 Representation(::GAPGroup,::Vector,::Vector)

@@ -25,8 +25,8 @@ function E6subfactor()
     set_associator!(E6,3,2,3,[zero_matrix(K,0,0), matrix(K,1,1,[-1]), zero_matrix(K,0,0)])
     set_associator!(E6,2,2,3,[matrix(K,1,1,[1]), matrix(K,[0 i; -i 0]), matrix(K,1,1,[1])])
     set_associator!(E6,3,2,2,[matrix(K,1,1,[1]), matrix(K,[0 1; 1 0]), matrix(K,1,1,[1])])
-    F1 = inv(r2)*ξ^7*matrix(K,[1 i; 1 -i])
-    Fy = inv(r2)*ξ^7*matrix(K,[i 1; -i 1])
+    F1 = inv(r2)*ξ^7*matrix(K,[1 1; i -i])
+    Fy = inv(r2)*ξ^7*matrix(K,[i -i; 1 1])
 
     d = (-1 + r3)//2
     k = inv(r2*sqrt(d))
@@ -38,6 +38,12 @@ function E6subfactor()
            -1 1 inv(K(2))*ξ^4 -inv(K(2))*(ξ^(-3) + i) inv(K(2))*ξ^10 -inv(K(2))*(ξ^2 - 1)])
     a = inv(K(4))*(1-r3)
 
+    Fx = matrix(K,[0 0 0 0 0 0;
+                0 0 0 0 0 0;
+                0 0 0 0 0 0;
+                0 0 0 0 0 0;
+                0 0 inv(K(2))*i 0 inv(K(2)) 0;
+                0 0 0 0 0 0;])
 
     # Fx = matrix(K, [-2*a -2*a a*ξ^2 a*ξ^8 a*ξ^8 a*ξ^2;
     #                 -2*a 2*a a*ξ^2 a*ξ^8 -a*ξ^8 -a*ξ^2;

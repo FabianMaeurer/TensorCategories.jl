@@ -12,7 +12,12 @@
         A.basis_names = ["x$i" for i ∈ 1:size(mult_table)[1]]
         return A
     end
-
+    function ZPlusRing(mult_table::Array{fmpz,3}, one::Vector{fmpz}) 
+        A = new()
+        A.algebra = AlgAss(ZZ, mult_table,one)
+        A.basis_names = ["x$i" for i ∈ 1:size(mult_table)[1]]
+        return A
+    end
     function ZPlusRing(A::AbsAlgAss)
         @assert base_ring(A) == ZZ
         B = new()
@@ -22,11 +27,6 @@
     end
 end
 
-function ZPlusRing(mult_table::Array{fmpz,3}, one::Vector{fmpz})
-    A = ZPlusRing(mult_table)
-    A.algebra.one = one
-    return A
-end
 
 function ZPlusRing(names::Vector{String}, mult_table::Array{fmpz,3}, one::Vector{fmpz})
     A = ZPlusRing(mult_table, one)
@@ -99,6 +99,12 @@ end
 
 @alias τ tau
 
+
+function extension_of_scalars(A::ℕRing, K::Field)
+    AlgAss(K,K.(A.algebra.mult_table), K.(A.algebra.one))
+end
+
+⊗(A::ℕRing, K::Field) = extension_of_scalars(A,K)
 
 #=----------------------------------------------------------
     Pretty Printing 
