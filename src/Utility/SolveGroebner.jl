@@ -4,10 +4,12 @@ function recover_solutions(p::Tuple, K::Field)
     g = p.denom
     v = length(p.lf_cfs) == length(p.param) ? p.lf_cfs .* p.param : p.param
 
-    rs = roots(f)
+    rs = roots(f,K)
     solutions = []
+
+    c = sortperm(p.vars)
     for r ∈ rs
-        solutions = [solutions; Tuple([[vi(r)*inv(g(r)) for vi ∈ v]; [r]])]
+        solutions = [solutions; Tuple([[vi(r)*inv(g(r)) for vi ∈ v]; [r]])[c]]
     end
     return solutions
 end

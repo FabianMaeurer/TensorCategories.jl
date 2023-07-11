@@ -59,7 +59,7 @@ function rational_lift(p::T) where T <: Union{PolyElem, MPolyElem}
     q = zero(Qx)
     l = 1
     y = x[end-n+1:end]
-    polys = fmpq_mpoly[]
+    polys = QQMPolyRingElem[]
     for (i,m) in zip(1:lastindex(p_coeffs), monomials(p))
         if non_rational[i]
             w = minpoly(p_coeffs[i])(x[l])
@@ -87,7 +87,7 @@ function rational_lift(I::MPolyIdeal)
     ideal(rational_lift.(gens(I)))
 end
 
-function *(k::qqbar, p::T) where T <: Union{fmpq_poly, fmpq_mpoly}
+function *(k::qqbar, p::T) where T <: Union{fmpq_poly, QQMPolyRingElem}
     if is_rational(k) 
         return roots(minpoly(k))[1]*p
     else
@@ -95,7 +95,7 @@ function *(k::qqbar, p::T) where T <: Union{fmpq_poly, fmpq_mpoly}
     end
 end
 
-function +(k::qqbar, p::T) where T <: Union{fmpq_poly, fmpq_mpoly}
+function +(k::qqbar, p::T) where T <: Union{fmpq_poly, QQMPolyRingElem}
     if is_rational(k) 
         return roots(minpoly(k))[1] + p
     else

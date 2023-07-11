@@ -19,9 +19,9 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det, load,save,
     factor, zero_matrix, identity_matrix, complex_embeddings, QQBar, eigenvalues, @alias,
     abelian_group, PcGroup, is_modular, subgroup, nullspace, factor, qqbar,
-    leading_coefficient, roots, is_rational, fmpq_mpoly, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
+    leading_coefficient, roots, is_rational, QQMPolyRingElem, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
     height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
-    @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix
+    @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix, exponents
 
 
 
@@ -273,6 +273,7 @@ include("structures/Functors.jl")
 include("structures/ConvolutionCategory/CoherentSheaves.jl")
 include("structures/ConvolutionCategory/ConvolutionCategory.jl")
 include("structures/MultiFusionCategories/FusionCategory.jl")
+include("structures/MultiFusionCategories/6j-Solver.jl")
 include("structures/MultiFusionCategories/Skeletization.jl")
 include("structures/MISC/multiplication_table.jl")
 include("structures/MISC/PentagonAxiom.jl")
