@@ -6,7 +6,6 @@ version = "0.1.0"
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 DocumenterCitations = "daee34ce-89f3-4625-b898-19384cb65244"
-HomotopyContinuation = "f213a82b-91d6-5c5d-acf7-10f1c761b327"
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 Memoization = "6fafb56a-5788-4b4e-91ca-c0cea6611c73"
 Oscar = "f1435218-dba5-11e9-1e4d-f1a5fab5fc13"

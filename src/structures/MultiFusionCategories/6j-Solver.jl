@@ -34,13 +34,9 @@ function pentagon_equations(mult::Array{Int,3}, one::Vector{Int})
             continue
         end
         (r,t) = size(poly_C.ass[i,j,k,o])
-        for p ∈ 1:r, q ∈ 1:t
-            if i == duals[j] == k && p == q == 1
-                eqs = [eqs; minpoly(inv(fpdims[i]))(y[end])]
-            end
             
-            poly_C.ass[i,j,k,o][p,q] = pop!(y)
-        end
+        poly_C.ass[i,j,k,o] = matrix(R,r,t,[pop!(y) for _ ∈ 1:r, _ ∈ 1:t])
+
     end
 
 
@@ -66,4 +62,48 @@ function (f::QQMPolyRingElem)(x...)
     exps = exponents(f)
 
     return sum([Rational(c)* *((x.^e)...) for (c,e) ∈ zip(coeffs, exps)])
+end
+
+function split_ideal(I::MPolyIdeal)
+    polys = filter(e -> e != 0, unique!(gens(I)))
+    R = base_ring(I)
+    vars = gens(R)
+    n = length(vars)
+    var_names = symbols(R)
+
+   
+    A = [polys[1]]
+    not_taken = deepcopy(polys)[2:end]
+    contained = [degree(polys[1],i) > 0 for i ∈ 1:n]
+    i = 1
+    while true
+        f = not_taken[i]
+        if sum(contained .* [degree(f,j) for j ∈ 1:n]) > 0
+            A = [A;f]
+            deleteat!(not_taken, i)
+            i = 1
+            contained[[degree(f,i) > 0 for i ∈ 1:n]] .= true
+        else
+            i = i+1
+        end
+        if i == length(not_taken) + 1
+            break
+        end
+    end
+
+    if length(not_taken) == 0
+        return [ideal(A)]
+    end
+    
+    var_names_in_A = var_names[contained]
+
+    R2,y = PolynomialRing(base_ring(R), var_names_in_A)
+    x = [c ? popfirst!(y) : 0 for c ∈ contained]
+
+    var_names_in_rest = var_names[contained .⊻ true]
+
+    R3,y = PolynomialRing(base_ring(R), var_names_in_rest)
+    x2 = [!c ? popfirst!(y) : 0 for c ∈ contained]
+
+    return [ideal([f(x...) for f ∈ A]); split_ideal(ideal([f(x2...) for f ∈ not_taken]))]
 end
