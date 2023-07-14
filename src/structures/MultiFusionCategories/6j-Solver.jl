@@ -47,7 +47,17 @@ function pentagon_equations(mult::Array{Int,3}, one::Vector{Int})
         eqs = [eqs; collect(matrix(f-g))[:]]
     end
 
-    return poly_C, filter(e -> e != 0, unique(eqs))
+    eq2 = []
+
+    for X ∈ simples(poly_C)
+        Y = Z = W = X
+        f = (id(X)⊗associator(Y,Z,W)) ∘ associator(X,Y⊗Z,W) ∘ (associator(X,Y,Z)⊗id(W))
+        g = associator(X,Y,Z⊗W) ∘ associator(X⊗Y,Z,W)
+
+        eq2 = [eq2; collect(matrix(f-g))[:]]
+    end
+
+    return poly_C, filter(e -> e != 0, unique(eqs)), filter(e -> e!= 0, unique(eq2))
 end
 
 function _number_of_variables_in_pentagon_equations(C::RingCategory)
