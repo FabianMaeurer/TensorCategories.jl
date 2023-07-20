@@ -21,9 +21,10 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     abelian_group, PcGroup, is_modular, subgroup, nullspace, factor, qqbar,
     leading_coefficient, roots, is_rational, QQMPolyRingElem, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
     height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
-    @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix, exponents, symbols
+    @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix, exponents, symbols,
+    nvars, resultant,QQFieldElem
 
-
+import Oscar.AbstractAlgebra.Generic: Poly
 
 using Memoization, InteractiveUtils
 

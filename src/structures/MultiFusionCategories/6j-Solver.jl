@@ -117,3 +117,49 @@ function split_ideal(I::MPolyIdeal)
 
     return [ideal([f(x...) for f ∈ A]); split_ideal(ideal([f(x2...) for f ∈ not_taken]))]
 end
+
+
+solve_fewnomial_system(I::Ideal) = _solve_fewnomial_system(I,1)
+
+function _solve_fewnomial_system(I::Ideal, i::Int = 1)
+    B = gens(I)
+    n = nvars(base_ring(I))
+    y = gens(base_ring(I))
+
+    if n == i 
+        if length(B) == 0 
+            return [(1,)]
+        end
+        R,x = PolynomialRing(QQ,:x)
+        C = [f([ones(Int,n-1);x]...) for f ∈ B]
+        @show rs = roots(gcd(C))
+        return [(r,) for r ∈ rs]
+    end
+
+    Bi = B[degree.(B,i) .> 0]
+    Ci = filter(r -> r ∉ Bi, B)
+    f = popfirst!(Bi)
+    Bi = resultant.(f,Bi,i)
+    unique!(Bi)
+    filter!(r -> r ≠ 0, Bi)
+
+    sols = _solve_fewnomial_system(ideal([Bi;Ci]), i+1)
+
+    S = []
+    R,x = QQBar[:x]
+    for s ∈ sols
+        B = [change_base_ring(QQBar, f) for f ∈ B]
+        D = [f([R(1) for _ ∈ 1:i-1]...,x,R.(s)...) for f ∈ B]
+        filter!(r -> r ≠ 0 ,D)
+        unique!(D)
+        @show D
+        if length(D) == 0 
+            S = [S;(QQBar(1),s...)]
+        else
+            @show rs = roots(gcd(D))
+            S = [S;[(r,s...) for r ∈ rs]]
+        end
+    end
+    return S
+end
+

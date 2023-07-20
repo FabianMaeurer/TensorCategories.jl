@@ -436,7 +436,7 @@ end
 """
     simples(Rep::GroupRepresentationCategory)
 
-Return a list of the simple objects in Rep.
+Return a list of the simples objects in Rep.
 """
 @memoize Dict function simples(Rep::GroupRepresentationCategory)
     grp = base_group(Rep)
@@ -455,6 +455,7 @@ Return a list of the simple objects in Rep.
 
     return reps
 end
+
 
 """
     decompose(σ::GroupRepresentation)
