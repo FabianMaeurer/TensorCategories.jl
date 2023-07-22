@@ -47,17 +47,7 @@ function pentagon_equations(mult::Array{Int,3}, one::Vector{Int})
         eqs = [eqs; collect(matrix(f-g))[:]]
     end
 
-    eq2 = []
-
-    for X ∈ simples(poly_C)
-        Y = Z = W = X
-        f = (id(X)⊗associator(Y,Z,W)) ∘ associator(X,Y⊗Z,W) ∘ (associator(X,Y,Z)⊗id(W))
-        g = associator(X,Y,Z⊗W) ∘ associator(X⊗Y,Z,W)
-
-        eq2 = [eq2; collect(matrix(f-g))[:]]
-    end
-
-    return poly_C, filter(e -> e != 0, unique(eqs)), filter(e -> e!= 0, unique(eq2))
+    return poly_C, filter(e -> e != 0, unique(eqs))
 end
 
 function _number_of_variables_in_pentagon_equations(C::RingCategory)
@@ -132,7 +122,7 @@ function _solve_fewnomial_system(I::Ideal, i::Int = 1)
         end
         R,x = PolynomialRing(QQ,:x)
         C = [f([ones(Int,n-1);x]...) for f ∈ B]
-        @show rs = roots(gcd(C))
+        rs = roots(gcd(C))
         return [(r,) for r ∈ rs]
     end
 
@@ -147,16 +137,17 @@ function _solve_fewnomial_system(I::Ideal, i::Int = 1)
 
     S = []
     R,x = QQBar[:x]
+    B = [change_base_ring(QQBar, f) for f ∈ B]
     for s ∈ sols
-        B = [change_base_ring(QQBar, f) for f ∈ B]
+
         D = [f([R(1) for _ ∈ 1:i-1]...,x,R.(s)...) for f ∈ B]
         filter!(r -> r ≠ 0 ,D)
         unique!(D)
-        @show D
+    
         if length(D) == 0 
             S = [S;(QQBar(1),s...)]
         else
-            @show rs = roots(gcd(D))
+            rs = roots(gcd(D))
             S = [S;[(r,s...) for r ∈ rs]]
         end
     end

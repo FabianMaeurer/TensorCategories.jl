@@ -35,6 +35,8 @@ morphism(f::TensorPowerCategoryMorphism) = f.m
 category(C::TensorPowerCategory) = parent(C.generator)
 Morphism(X::TensorPowerCategoryObject, Y::TensorPowerCategoryObject, f::TensorPowerCategoryMorphism) = TensorPowerCategoryMorphism(X,Y,f)
 
+base_ring(C::TensorPowerCategory) = base_ring(category(C))
+
 """ 
 
     tensor_power(X::CategoryObject, k::Int) -> CategoryObject
@@ -171,3 +173,9 @@ compose(f::TensorPowerCategoryMorphism, g::TensorPowerCategoryMorphism) = Tensor
 +(f::TensorPowerCategoryMorphism, g::TensorPowerCategoryMorphism) = TensorPowerCategoryMorphism(domain(f),codomain(f), morphism(f) + morphism(g))
 
 matrix(f::TensorPowerCategoryMorphism) = matrix(morphism(f))
+
+function Hom(X::TensorPowerCategoryObject, Y::TensorPowerCategoryObject)
+    H = Hom(object(X), object(Y))
+    B = [TensorPowerCategoryMorphism(X,Y,f) for f ∈ basis(H)]
+    CategoryHomSpace(X,Y,B,VectorSpaces(base_ring(X)))
+end
