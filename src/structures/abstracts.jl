@@ -609,7 +609,7 @@ function indecomposable_subobjects_by_matrix_algebra(X::CategoryObject, E = End(
 
     eig_spaces = eigenvalues(b)
     λ,_ = collect(eig_spaces)[1]
-    K,i = kernel(f - λ*id(X))
+    K,i = kernel(b - λ*id(X))
     C,_ = cokernel(i) 
 
     return unique_simples([indecomposable_subobjects(K); indecomposable_subobjects(C)])

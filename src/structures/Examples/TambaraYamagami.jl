@@ -18,17 +18,22 @@ end
     ToDO: Centers of graded fusion categories (2009). Gelaki, Naidu, Nikhshych
             https://msp.org/ant/2009/3-8/ant-v3-n8-p05-s.pdf
 -------------------------------------------------=#
-function TambaraYamagami(A::GAPGroup, χ = nothing)
+TambaraYamagami(A::GAPGroup, χ = nothing) = TambaraYamagami(QQBar, A, χ)
+
+function TambaraYamagami(K::Field, A::GAPGroup, χ = nothing)
     n = Int(order(A))
     @assert is_abelian(A)
     
     m = Int(exponent(A))
 
     #K,ξ = CyclotomicField(8*m, "ξ($(8*m))")
-    K = QQBar
-
+    
+    try 
+        a = sqrt(K(n))
+    catch
+        error("Base field needs to contain a square root of ord(A)")
+    end
     a = sqrt(K(n))
-
     if χ === nothing
         χ = nondegenerate_bilinear_form(A, root_of_unity(K,m))
     end
@@ -97,9 +102,8 @@ end
 #   Examples
 #-------------------------------------------------------------------------------
 
-function Ising()
+function Ising(F::Field = QQBar)
     #F,ξ = CyclotomicField(16, "ξ₁₆")
-    F = QQBar
     a = sqrt(F(2))
     C = RingCategory(F,["𝟙", "χ", "X"])
     M = zeros(Int,3,3,3)
@@ -136,22 +140,41 @@ function Ising()
 
     # set one of the four possible braidings 
     # http://arxiv.org/abs/2010.00847v1 (Ex. 4.13)
-    ξ = root_of_unity(F,16)
+    
+    try 
+        ξ = root_of_unity(F,4)
 
-    α = root_of_unity(F,8)
+        α = root_of_unity(F,8)
 
-    braid = Array{MatElem,3}(undef, 3,3,3)
-    a,b = elements(G)
-    braid[1,1,:] = χ(a,a).*matrices(id(C[1]))
-    braid[1,2,:] = braid[2,1,:] = χ(a,b).*matrices(id(C[2]))
-    braid[2,2,:] = χ(b,b).*matrices(id(C[1]))
+        braid = Array{MatElem,3}(undef, 3,3,3)
+        a,b = elements(G)
+        braid[1,1,:] = χ(a,a).*matrices(id(C[1]))
+        braid[1,2,:] = braid[2,1,:] = χ(a,b).*matrices(id(C[2]))
+        braid[2,2,:] = χ(b,b).*matrices(id(C[1]))
 
-    braid[1,3,:] = braid[3,1,:] = matrices(id(C[3]))
-    braid[2,3,:] = braid[3,2,:] = ξ^4 .* matrices(id(C[3]))
+        braid[1,3,:] = braid[3,1,:] = matrices(id(C[3]))
+        braid[2,3,:] = braid[3,2,:] = ξ .* matrices(id(C[3]))
 
-    braid[3,3,:] = α .* matrices((id(C[1]) ⊕ (inv(ξ^4) * id(C[2]))))
+        braid[3,3,:] = α .* matrices((id(C[1]) ⊕ (inv(ξ) * id(C[2]))))
 
-    set_braiding!(C,braid)
+        set_braiding!(C,braid)
+    catch
+    end
     return C
 end
 
+
+function root_of_unity(K::Field, n::Int)
+    Kx, x = K[:x]
+    rs = roots(x^n - 1)
+    divs = filter(e -> e != n, divisors(n))
+
+    for r ∈ rs
+        if K(1) ∈ r.^divs
+            continue
+        else
+            return r
+        end
+    end
+    error("There is no $n-th root of unity in the field")
+end

@@ -22,7 +22,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     leading_coefficient, roots, is_rational, QQMPolyRingElem, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
     height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
     @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix, exponents, symbols,
-    nvars, resultant,QQFieldElem
+    nvars, resultant,QQFieldElem, ZZRingElem, divisors
 
 import Oscar.AbstractAlgebra.Generic: Poly
 
@@ -199,6 +199,9 @@ export Pullback
 export PullbackFunctor 
 export Pushforward 
 export PushforwardFunctor 
+export QuantumZZRing
+export QuantumZZRingElem
+export QZZ
 export rational_lift 
 export Representation 
 export RepresentationCategory 
@@ -261,6 +264,7 @@ include("structures/abstracts.jl")
 include("structures/FrameworkChecks.jl")
 include("Utility/QQBar_Polynomials.jl")
 include("Utility/SolveGroebner.jl")
+include("Utility/QuantumIntegers.jl")
 include("structures/VectorSpaces/VectorSpaces.jl")
 include("structures/MISC/ProductCategory.jl")
 include("structures/MISC/OppositeCategory.jl")

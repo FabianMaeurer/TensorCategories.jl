@@ -3,6 +3,7 @@ using Documenter, TensorCategories, Oscar, DocumenterCitations
 bib = CitationBibliography("MyBib.bib")
 
 makedocs(
+    prettyurls = !("local" in ARGS),
     bib,
     sitename = "TensorCategories.jl",
     modules = [TensorCategories],
