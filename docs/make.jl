@@ -19,7 +19,7 @@ makedocs(
             "Coherent Sheaves" => "CoherentSheaves.md"
         ],
         "Fusion Categories from 6j Symbols" => [
-            "Idea" => "RingCategory.md",
+            "Idea" => "SixJCategory.md",
             "Examples" => "RingCatExamples.md"
         ],
         "ℤ₊-Rings" => [

@@ -2,7 +2,7 @@
 
     HaagerupH3([p1 = 1, p2 = 2])
 
-Build the Haagerup ℋ₃ subfactor category. The category is build as RingCategory. The associators are taken from the paper 
+Build the Haagerup ℋ₃ subfactor category. The category is build as SixJCategory. The associators are taken from the paper 
 
 https://arxiv.org/pdf/1906.01322
 
@@ -17,7 +17,7 @@ function HaagerupH3(K::Field = QQBar; p1 = 1, p2 = 1)
 
     r13 = sqrt(K(13))
 
-    H = RingCategory(K,["𝟙", "α", "α∗", "ρ", "αρ", "α∗ρ"])
+    H = SixJCategory(K,["𝟙", "α", "α∗", "ρ", "αρ", "α∗ρ"])
 
     mult = Array{Int,3}(undef,6,6,6)
 

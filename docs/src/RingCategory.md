@@ -4,7 +4,7 @@ using TensorCategories, Oscar
 
 # Semisimple Ring Categories from 6j-Symbols
 
-We provide a structure `RingCategory` for finite semisimple skeletal (multi)ring categories. 
+We provide a structure `SixJCategory` for finite semisimple skeletal (multi)ring categories. 
 
 They are constructed by setting the multiplication table for the monoidal product and associativity for the simple objects. CategoryObjects in finite semisimple ring categories are just vectors with multiplicities of the simple objects in the decomposition. Thus morphism are vectors of matrices of according size.
 
@@ -12,7 +12,7 @@ As an example we will construct the Ising fusion category. This is a fusion cate
 
 ```@example FC
 F = QQBar
-I = RingCategory(F,["𝟙", "χ", "X"])
+I = SixJCategory(F,["𝟙", "χ", "X"])
 
 M = zeros(Int,3,3,3)
 
@@ -33,7 +33,7 @@ set_associator!(I, 3,2,3,2, [-1])
 set_associator!(I, 3,3,3,3, inv(sqrt(F(2))).*[1 1; 1 -1])
 ```
 
-At the current state of development the unit object has to be set manually. Other structure like spherical structures are set as identities, which might or might not be correct. If you know your category to be spherical you can set the canonical spherical structure such that ``\dim X_i = \mathrm{fpdim}\,X_i`` by applying ``set_canonical_spherical(::RingCategory)`` to it. It is also possible to set a braiding.
+At the current state of development the unit object has to be set manually. Other structure like spherical structures are set as identities, which might or might not be correct. If you know your category to be spherical you can set the canonical spherical structure such that ``\dim X_i = \mathrm{fpdim}\,X_i`` by applying ``set_canonical_spherical(::SixJCategory)`` to it. It is also possible to set a braiding.
 
 ```@example FC
 set_one!(I, [1,0,0])

@@ -1,4 +1,4 @@
-function RingCategory(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:length(simples(C))])
+function SixJCategory(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:length(simples(C))])
     @assert is_multifusion(C)
 
     S = simples(C)
@@ -11,8 +11,8 @@ function RingCategory(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:le
         mult[i,j,:] = [int_dim(Hom(S[k],S[i]⊗S[j])) for k ∈ 1:n]
     end
 
-    # Define RingCategory
-    skel_C = RingCategory(F,names)
+    # Define SixJCategory
+    skel_C = SixJCategory(F,names)
 
     set_tensor_product!(skel_C,mult)
 
@@ -95,11 +95,11 @@ struct SkeletizationFunctor <: AbstractFunctor
 end
 
 function SkeletizationFunctor(C::Category)
-    SkeletizationFunctor(C,RingCategory(C))
+    SkeletizationFunctor(C,SixJCategory(C))
 end
 
 function (F::SkeletizationFunctor)(X::CategoryObject)
-    return RingCategoryObject(codomain(F), [int_dim(Hom(X,s)) for s ∈ simples(C)])
+    return SixJCategoryObject(codomain(F), [int_dim(Hom(X,s)) for s ∈ simples(C)])
 end
 
 function (F::SkeletizationFunctor)(f::CategoryMorphism)

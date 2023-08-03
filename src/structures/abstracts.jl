@@ -296,7 +296,7 @@ tensor_product(X::T) where T <: Union{Vector,Tuple} = tensor_product(X...)
 
 
 """
-    distribute_left(X::RingCategoryObject, Y::RingCategoryObject, Z::RingCategoryObject)
+    distribute_left(X::SixJCategoryObject, Y::SixJCategoryObject, Z::SixJCategoryObject)
 
 Return the canonical isomorphism ```(X⊕Y)⊗Z → (X⊗Z)⊕(Y⊗Z)```.
 """
@@ -317,7 +317,7 @@ end
 
 
 """
-    distribute_right(X::RingCategoryObject, Y::RingCategoryObject, Z::RingCategoryObject)
+    distribute_right(X::SixJCategoryObject, Y::SixJCategoryObject, Z::SixJCategoryObject)
 
 Return the canonical isomorphism ```X⊗(Y⊕Z) → (X⊗Y)⊕(X⊗Z)````
 """

@@ -21,8 +21,8 @@ function tensor_product(C::Category, D::Category, names1::Vector{String} = Strin
     catch
     end
 
-    skel_C,_ = length(names1) == 0 ? RingCategory(C) : RingCategory(C, names1)
-    skel_D,_ = length(names2) == 0 ? RingCategory(D) : RingCategory(D, names2)
+    skel_C,_ = length(names1) == 0 ? SixJCategory(C) : SixJCategory(C, names1)
+    skel_D,_ = length(names2) == 0 ? SixJCategory(D) : SixJCategory(D, names2)
 
     S = simples(skel_C)
     T = simples(skel_D)
@@ -49,7 +49,7 @@ function tensor_product(C::Category, D::Category, names1::Vector{String} = Strin
         end
     end
 
-    CD = RingCategory(F, mult, ["$s⊠$t" for t ∈ T, s ∈ S][:])
+    CD = SixJCategory(F, mult, ["$s⊠$t" for t ∈ T, s ∈ S][:])
 
     set_tensor_product!(CD, mult)
     set_associator!(CD, ass)

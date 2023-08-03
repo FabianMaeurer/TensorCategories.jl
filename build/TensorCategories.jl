@@ -198,8 +198,8 @@ export Restriction
 export right_dual 
 export right_inverse 
 export right_trace 
-export RingCategory 
-export RingCategoryObject 
+export SixJCategory 
+export SixJCategoryObject 
 export RingCatMorphism 
 export RingSubcategory 
 export roots 

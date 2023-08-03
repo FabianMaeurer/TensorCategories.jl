@@ -49,7 +49,7 @@ function TambaraYamagami(A::GAPGroup, χ = nothing)
 
     mult[n+1,n+1,:] = [[1 for i ∈ 1:n]; 0]
 
-    TY = RingCategory(K, mult, [["a$i" for i ∈ 1:n]; "m"])
+    TY = SixJCategory(K, mult, [["a$i" for i ∈ 1:n]; "m"])
 
     zero_mat = matrix(K,0,0,[])
     for i ∈ 1:n
@@ -101,7 +101,7 @@ function Ising()
     #F,ξ = CyclotomicField(16, "ξ₁₆")
     F = QQBar
     a = sqrt(F(2))
-    C = RingCategory(F,["𝟙", "χ", "X"])
+    C = SixJCategory(F,["𝟙", "χ", "X"])
     M = zeros(Int,3,3,3)
 
     M[1,1,:] = [1,0,0]

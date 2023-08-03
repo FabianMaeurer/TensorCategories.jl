@@ -50,7 +50,7 @@ function Tet(q,A,B,C,D,E,F)
 end
 
 #Gives the 6j-Symbols for TL-Algebra. Also called Recoupling in KL
-function SixJ(q,a,b,c,d,i,j)
+function SixJCategory(q,a,b,c,d,i,j)
        res=one(parent(q[1]))
        m1=div(a+d-i,2)
        n1=div(a-d+i,2)
@@ -118,13 +118,13 @@ function I2(m)
 	#println(q)
 
 	M=multifusionmultmatrix(m)
-	C=RingCategory(F,vcat([rem(i,2)==1 ? join(["Bs",repeat("ts",div(i,2))]) : join(["B",repeat("st",div(i,2))]) for i in 1:n],[if rem(i,2)==1 join(["Bt",repeat("st",div(i,2))]) else join(["B",repeat("ts",div(i,2))]) end for i in 1:n]))
+	C=SixJCategory(F,vcat([rem(i,2)==1 ? join(["Bs",repeat("ts",div(i,2))]) : join(["B",repeat("st",div(i,2))]) for i in 1:n],[if rem(i,2)==1 join(["Bt",repeat("st",div(i,2))]) else join(["B",repeat("ts",div(i,2))]) end for i in 1:n]))
 	set_tensor_product!(C,M)
 
-	#Now set associators using SixJ symbols above
+	#Now set associators using SixJCategory symbols above
 	#Note, that Bs, Bt always have trivial associators (prove this)
 	#Further note, that the order of elements is different. 
-	#The associator of (XY)Z-W over J and I cooresponds to SixJ(Y,X,W,Z,J,I)
+	#The associator of (XY)Z-W over J and I cooresponds to SixJCategory(Y,X,W,Z,J,I)
 
 	for lx in 1:n-1, ly in 1:n-1, lz in 1:n-1, lw in 1:n-1
 		li=intersect(m_admissible(n,lx,ly),m_admissible(n,lz,lw))
@@ -132,17 +132,17 @@ function I2(m)
 		gr=length(li)
 		#println(lx,ly,lz,lw,li,lj)
 		if rem(lx,2)==1 && rem(ly,2)==1
-	 		C.ass[lx+1,ly+1+n,lz+1,lw+1]=matrix(F,gr,gr,[SixJ(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
-			C.ass[lx+1+n,ly+1,lz+1+n,lw+1+n]=matrix(F,gr,gr,[SixJ(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
+	 		C.ass[lx+1,ly+1+n,lz+1,lw+1]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
+			C.ass[lx+1+n,ly+1,lz+1+n,lw+1+n]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
 		elseif rem(lx,2)==1 && rem(ly,2)==0
-			C.ass[lx+1,ly+1+n,lz+1+n,lw+1]=matrix(F,gr,gr,[SixJ(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
-			C.ass[lx+1+n,ly+1,lz+1,lw+1+n]=matrix(F,gr,gr,[SixJ(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
+			C.ass[lx+1,ly+1+n,lz+1+n,lw+1]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
+			C.ass[lx+1+n,ly+1,lz+1,lw+1+n]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
 		elseif rem(lx,2)==0 && rem(ly,2)==1
-			C.ass[lx+1,ly+1,lz+1+n,lw+1]=matrix(F,gr,gr,[SixJ(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
-			C.ass[lx+1+n,ly+1+n,lz+1,lw+1+n]=matrix(F,gr,gr,[SixJ(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
+			C.ass[lx+1,ly+1,lz+1+n,lw+1]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
+			C.ass[lx+1+n,ly+1+n,lz+1,lw+1+n]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
 		else
-			C.ass[lx+1,ly+1,lz+1,lw+1]=matrix(F,gr,gr,[SixJ(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
-			C.ass[lx+1+n,ly+1+n,lz+1+n,lw+1+n]=matrix(F,gr,gr,[SixJ(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
+			C.ass[lx+1,ly+1,lz+1,lw+1]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
+			C.ass[lx+1+n,ly+1+n,lz+1+n,lw+1+n]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
 		end
 	end
 	set_one!(C, [mod(i,n) == 1 ? 1 : 0 for i ∈ 1:2*n])
@@ -157,19 +157,19 @@ function I2subcategory(m)
 	q=quantum(z+z^-1,2*m-2)
 
 	M=fusionmultmatrix(m)
-	C=RingCategory(F,[join(["Bs",repeat("ts",i)]) for i in 0:n-1])
+	C=SixJCategory(F,[join(["Bs",repeat("ts",i)]) for i in 0:n-1])
 	set_tensor_product!(C,M)
 
-	#Now set associators using SixJ symbols above
+	#Now set associators using SixJCategory symbols above
 	#Note, that Bs, Bt always have trivial associators (prove this)
 	#Further note, that the order of elements is different. 
-	#The associator of (XY)Z-W over J and I cooresponds to SixJ(Y,X,W,Z,J,I)
+	#The associator of (XY)Z-W over J and I cooresponds to SixJCategory(Y,X,W,Z,J,I)
 
 	for lx in 1:n-1, ly in 1:n-1, lz in 1:n-1, lw in 1:n-1
 		li=intersect(m_admissible(m-1,2*lx,2*ly),m_admissible(m-1,2*lz,2*lw))
 		lj=intersect(m_admissible(m-1,2*lx,2*lw),m_admissible(m-1,2*ly,2*lz))
 		gr=length(li)
-		C.ass[lx+1,ly+1,lz+1,lw+1]=matrix(F,gr,gr,[SixJ(q,2*ly,2*lx,2*lw,2*lz,j,i) for i in li, j in lj])	
+		C.ass[lx+1,ly+1,lz+1,lw+1]=matrix(F,gr,gr,[SixJCategory(q,2*ly,2*lx,2*lw,2*lz,j,i) for i in li, j in lj])	
 	end
 	
 	A=[0 for s in simples(C)]::Vector{Int64}
