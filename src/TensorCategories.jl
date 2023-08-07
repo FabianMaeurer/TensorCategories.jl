@@ -128,6 +128,7 @@ export half_braidings
 export hom 
 export Hom 
 export HomFunctor 
+export horizontal_direct_sum
 export I2 
 export I2subcategory 
 export id 
@@ -251,6 +252,8 @@ export TwistedGradedVectorSpaces
 export VectorSpaceCategoryMorphism 
 export VectorSpaceCategoryObject 
 export VectorSpaces 
+export Verlinde
+export vertical_direct_sum
 export VSCategoryHomSpace 
 export VSCategoryObject 
 export zero 
@@ -302,5 +305,6 @@ include("Utility/Technicallities.jl")
 #include("Utility/Serialization.jl")
 
 @alias Centre Center
+
 
 end

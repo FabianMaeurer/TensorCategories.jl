@@ -1,12 +1,10 @@
 
-abstract type SixJCategory <: Category end
-abstract type SixJCategoryObject <: CategoryObject end
-abstract type SixJCategoryMorphism <: CategoryMorphism end
+
 #=----------------------------------------------------------
     Category defined by 6j-Symbols with finitely many
     simple objects 
 ----------------------------------------------------------=#
-mutable struct FinSixJCategory <: SixJCategory
+mutable struct SixJCategory <: Category
     base_ring::Ring
     simples::Int64
     simples_names::Vector{String}
@@ -17,21 +15,23 @@ mutable struct FinSixJCategory <: SixJCategory
     twist::Vector
     one::Vector{Int}
     name::String
+    dims::Vector
 
-    function FinSixJCategory(F::Ring, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1,1,:])])
+    function SixJCategory(F::Ring, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1,1,:])])
         C = new(F, length(mult[1,1,:]), names)
         set_tensor_product!(C,mult)
         set_spherical!(C, [F(1) for _ ∈ names])
-    
+        C.dims = elem_type(F)[0 for _ ∈ names]
         #C.ass = [id(⊗(X,Y,Z)) for X ∈ simples(C), Y ∈ simples(C), Z ∈ simples(C)]
         #C.dims = [1 for i ∈ 1:length(names)]
         return C
     end
 
-    function FinSixJCategory(F::Ring, names::Vector{String})
+    function SixJCategory(F::Ring, names::Vector{String})
         C = new(F,length(names), names)
         #C.dims = [1 for i ∈ 1:length(names)]
         set_spherical!(C, [F(1) for _ ∈ names])
+        C.dims = [F(0) for _ ∈ names]
         (C)
         return C
     end
@@ -42,72 +42,18 @@ mutable struct FinSixJCategory <: SixJCategory
 
 end
 
-SixJCategory(F::Ring, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1,1,:])]) = FinSixJCategory(F,mult,names)
-
-SixJCategory(F::Ring, names::Vector{String}) = FinSixJCategory(F,names)
-
-struct FinSixJCategoryObject <: SixJCategoryObject
+struct SixJCategoryObject <: CategoryObject
     parent::SixJCategory
     components::Vector{Int}
 end
 
-SixJCategoryObject(C::FinSixJCategory, c::Vector) = FinSixJCategoryObject(C,c)
-
-struct FinSixJCategoryMorphism <: SixJCategoryMorphism
+struct SixJCategoryMorphism <: CategoryMorphism
     domain::SixJCategoryObject
     codomain::SixJCategoryObject
     m::Vector{<:MatElem}
 end
 
-SixJCategoryMorphism(domain::SixJCategoryObject,
-    codomain::SixJCategoryObject,
-    m::Vector{<:MatElem}) = FinSixJCategoryMorphism(domain,codomain,m)
 
-#=----------------------------------------------------------
-    Category from 6j-Symbols with countably many simple
-    objects 
-----------------------------------------------------------=#
-
-mutable struct InfSixJCategory <: SixJCategory
-    base_ring::Ring
-    simples_names::Function
-    ass::Function
-    dual::Function
-    braiding::Function
-    tensor_product::Function
-    spherical::Function
-    twist::Vector
-    one::Vector
-    name::String
-
-    function SixJCategory(F::Ring, mult::Function, names::Function = n::ZZRingElem -> "X$n")
-        C = new(F,names)
-        set_tensor_product!(C,mult)
-        return C
-    end
-
-    function SixJCategory(F::Ring, mult::Function)
-        C = new(F,mult)
-    end
-
-end
-
-struct InfSixJCategoryObject <: SixJCategoryObject
-    parent::SixJCategory
-    components::Dict{ZZRingElem,ZZRingElem}
-end
-
-SixJCategoryObject(C::InfSixJCategory, c::Dict) = FinSixJCategoryObject(C,c)
-
-struct InfSixJCategoryMorphism <: SixJCategoryMorphism
-    domain::SixJCategoryObject
-    codomain::SixJCategoryObject
-    m::Dict{ZZRingElem, <:MatElem}
-end
-
-SixJCategoryMorphism(domain::InfSixJCategoryObject,
-codomain::InfSixJCategoryObject,
-m::Dict{ZZRingElem, <:MatElem}) = InfSixJCategoryMorphism(domain,codomain,m)
 
 #-------------------------------------------------------------------------------
 #   Constructors
@@ -124,13 +70,13 @@ Morphism(X::SixJCategoryObject, Y::SixJCategoryObject, m) = SixJCategoryMorphism
 function set_tensor_product!(F::SixJCategory, tensor)
     F.tensor_product = tensor
     n = size(tensor,1)
-    if typeof(F) == FinSixJCategory
-        ass = Array{MatElem,4}(undef,n,n,n,n)
-        for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n
-            ass[i,j,k,:] = matrices(id(F[i]⊗F[j]⊗F[k]))
-        end
-        F.ass = ass
+
+    ass = Array{MatElem,4}(undef,n,n,n,n)
+    for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n
+        ass[i,j,k,:] = matrices(id(F[i]⊗F[j]⊗F[k]))
     end
+    F.ass = ass
+
 end
 
 function set_braiding!(F::SixJCategory, braiding)
@@ -138,21 +84,18 @@ function set_braiding!(F::SixJCategory, braiding)
 end
 
 set_associator!(F::SixJCategory, ass) = F.ass = ass
-function set_associator!(F::FinSixJCategory, i::Int, j::Int, k::Int, ass::Vector{<:MatElem})
+function set_associator!(F::SixJCategory, i::Int, j::Int, k::Int, ass::Vector{<:MatElem})
     F.ass[i,j,k,:] = ass
 end
 
-function set_associator!(F::FinSixJCategory, i::Int, j::Int, k::Int, l::Int, ass::MatElem)
+function set_associator!(F::SixJCategory, i::Int, j::Int, k::Int, l::Int, ass::MatElem)
     F.ass[i,j,k,l] = ass
 end
 
-function set_associator!(F::FinSixJCategory, i::Int, j::Int, k::Int, l::Int, ass::Array{T,N}) where {T,N}
+function set_associator!(F::SixJCategory, i::Int, j::Int, k::Int, l::Int, ass::Array{T,N}) where {T,N}
     F.ass[i,j,k,l] = matrix(base_ring(F), (N > 1 ? size(ass) : (1,1))..., ass)
 end
 
-function set_dual!(C::InfSixJCategory, dual::Function)
-    C.dual = dual
-end
 
 function set_spherical!(F::SixJCategory, sp)
     F.spherical = sp
@@ -185,11 +128,9 @@ end
 
 simples_names(C::SixJCategory) = C.simples_names
 
-dim(X::SixJCategoryObject) = base_ring(X)(tr(id(X)))
-
 #(::Type{Int})(x::fmpq) = Int(numerator(x))
 
-function braiding(X::FinSixJCategoryObject, Y::FinSixJCategoryObject) 
+function braiding(X::SixJCategoryObject, Y::SixJCategoryObject) 
     if is_simple(X) && is_simple(Y)
         i = findfirst(e -> e != 0, X.components)
         j = findfirst(e -> e != 0, Y.components)
@@ -235,14 +176,11 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     # associators on simple objects
     #---------------------------------
     if is_simple(X) && is_simple(Y) && is_simple(Z)
-        if C isa FinSixJCategory
-            i = findfirst(e -> e ≠ 0, X.components)
-            j = findfirst(e -> e ≠ 0, Y.components)
-            k = findfirst(e -> e ≠ 0, Z.components)
-            return Morphism(dom,dom, C_associator[i,j,k,:])
-        elseif C isa InfSixJCategory
-            return Morphism(dom,dom, C_associator(i,j,k))
-        end
+        i = findfirst(e -> e ≠ 0, X.components)
+        j = findfirst(e -> e ≠ 0, Y.components)
+        k = findfirst(e -> e ≠ 0, Z.components)
+        return Morphism(dom,dom, C_associator[i,j,k,:])
+
     end
 
     #---------------------------------
@@ -300,14 +238,12 @@ end
     # associators on simple objects
     #---------------------------------
     if is_simple(X) && is_simple(Y) && is_simple(Z)
-        if C isa FinSixJCategory
-            i = findfirst(e -> e ≠ 0, X.components)
-            j = findfirst(e -> e ≠ 0, Y.components)
-            k = findfirst(e -> e ≠ 0, Z.components)
-            return inv(Morphism(dom,dom, C_associator[i,j,k,:]))
-        elseif C isa InfSixJCategory
-            return inv(Morphism(dom,dom, C_associator(i,j,k)))
-        end
+
+        i = findfirst(e -> e ≠ 0, X.components)
+        j = findfirst(e -> e ≠ 0, Y.components)
+        k = findfirst(e -> e ≠ 0, Z.components)
+        return inv(Morphism(dom,dom, C_associator[i,j,k,:]))
+
     end
 
     #---------------------------------
@@ -379,52 +315,47 @@ end
 
 
 
-is_simple(X::FinSixJCategoryObject) = sum(X.components) == 1
-is_simple(X::InfSixJCategoryObject) = sum(values(X.components)) == 1
+is_simple(X::SixJCategoryObject) = sum(X.components) == 1
 
 ==(X::SixJCategoryObject, Y::SixJCategoryObject) = parent(X) == parent(Y) && X.components == Y.components
 ==(f::SixJCategoryMorphism, g::SixJCategoryMorphism) = domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
 
 
-decompose(X::FinSixJCategoryObject) = [(x,k) for (x,k) ∈ zip(simples(parent(X)), X.components) if k != 0]
-decompose(X::InfSixJCategoryObject) = [(parent(X)[k],v) for (k,v) ∈ X.components]
+decompose(X::SixJCategoryObject) = [(x,k) for (x,k) ∈ zip(simples(parent(X)), X.components) if k != 0]
 
-inv(f::FinSixJCategoryMorphism) = SixJCategoryMorphism(codomain(f),domain(f), inv.(f.m))
 
-inv(f::InfSixJCategoryMorphism) = Morphism(codomain(f), domain(f), Dict(k => inv(m) for (k,m) ∈ f.m))
+inv(f::SixJCategoryMorphism) = SixJCategoryMorphism(codomain(f),domain(f), inv.(f.m))
 
-id(X::FinSixJCategoryObject) = SixJCategoryMorphism(X,X, [one(MatrixSpace(base_ring(X),d,d)) for d ∈ X.components])
 
-id(X::InfSixJCategoryObject) = Morphism(X,X, Dict(k => one(MatrixSpace(base_ring(X),d,d)) for (k,d) ∈ X.components))
+id(X::SixJCategoryObject) = SixJCategoryMorphism(X,X, [one(MatrixSpace(base_ring(X),d,d)) for d ∈ X.components])
 
-function compose(f::FinSixJCategoryMorphism, g::FinSixJCategoryMorphism)
+
+function compose(f::SixJCategoryMorphism, g::SixJCategoryMorphism)
     @assert codomain(f) == domain(g) "Morphisms not compatible"
 
     return SixJCategoryMorphism(domain(f), codomain(g), [m*n for (m,n) ∈ zip(f.m,g.m)])
 end
 
-function compose(f::InfSixJCategoryMorphism, g::InfSixJCategoryMorphism)
-    @assert codomain(f) == domain(g) "Morphisms not compatible"
+#function vertical_direct_sum(f::SixJCategoryMorphism, g::SixJCategoryMorphism)
 
-    return Morphism(domain(f), codomain(g), Dict(k => m*n for (k,m,n) ∈ zip(keys(f.m),values(f.m), values(g.m))))
-end
-
-
-function +(f::FinSixJCategoryMorphism, g::FinSixJCategoryMorphism)
+function +(f::SixJCategoryMorphism, g::SixJCategoryMorphism)
     @assert domain(f) == domain(g) && codomain(f) == codomain(g) "Not compatible"
     SixJCategoryMorphism(domain(f), codomain(f), [m + n for (m,n) ∈ zip(f.m,g.m)])
 end
 
-function +(f::InfSixJCategoryMorphism, g::InfSixJCategoryMorphism)
-    @assert domain(f) == domain(g) && codomain(f) == codomain(g) "Not compatible"
-    SixJCategoryMorphism(domain(f), codomain(f), merge(+, f.m, g.m))
+function tr(f::SixJCategoryMorphism)
+    # Make use of the fact that the trace is invariant under basis transformation.
+
+    return sum([left_trace(f[i]) for i ∈ 1:parent(f).simples])
+
 end
+
 """
     dual(X::SixJCategoryObject)
 
 Return the dual object of ``X``. An error is thrown if ``X`` is not rigid.
 """
-function dual(X::FinSixJCategoryObject)
+function dual(X::SixJCategoryObject)
     C = parent(X)
 
     # Dual of simple CategoryObject
@@ -447,29 +378,29 @@ function dual(X::FinSixJCategoryObject)
     return direct_sum([dual(Y)^(X.components[i]) for (Y,i) ∈ zip(simples(C), 1:C.simples)])[1]
 end
 
-function dual(X::InfSixJCategoryObject)
-    C = parent(C)
 
-    if is_simple(X) 
-        return simple_dual(X)
-    end
-
-    return direct_sum([dual(C[Y])^(i) for (Y,i) ∈ X.components])[1]
-end
 
 function coev(X::SixJCategoryObject)
     if X == zero(parent(X))
         return zero_morphism(one(parent(X)),X)
     end
+    𝟙 = one(parent(X))
+    ks = findall(e -> e > 0, X.components)
+    if length(ks) == 1
+        c = matrices(simple_objects_coev(X))[1][1,1]
+        k = X.components[ks[1]]
+        m = matrix(coev(VectorSpaceCategoryObject(base_ring(X),k)))
 
-    if is_simple(X)
-        return simple_objects_coev(X)
+        cod = X ⊗ dual(X)
+        n = matrices(zero_morphism(𝟙, cod))
+        n[1] = m
+        return Morphism(𝟙, cod, n)
     end
 
     C = parent(X)
-    𝟙 = one(C)
 
-    summands = vcat([[x for _ ∈ 1:k] for (x,k) ∈ decompose(X)]...)
+
+    summands = [x^k for (x,k) ∈ decompose(X)]
     dual_summands = dual.(summands)
     d = length(summands)
 
@@ -481,16 +412,24 @@ function coev(X::SixJCategoryObject)
 end
 
 function ev(X::SixJCategoryObject)
-    if X == zero(parent(X))
-        return zero_morphism(X,one(parent(X)))
-    end
-    if is_simple(X)
-        return simple_objects_ev(X)
-    end
     C = parent(X)
-    𝟙 = one(C)
+    if X == zero(C)
+        return zero_morphism(X,one(C))
+    end
+    𝟙 = one(parent(X))
+    ks = findall(e -> e > 0, X.components)
+    if length(ks) == 1
+        e = matrices(simple_objects_ev(C[ks[1]]))[1][1,1]
+        k = X.components[ks[1]]
+        m = e * matrix(ev(VectorSpaceCategoryObject(base_ring(X),k)))
 
-    summands = vcat([[x for _ ∈ 1:k] for (x,k) ∈ decompose(X)]...)
+        dom = dual(X) ⊗ X
+        n = matrices(zero_morphism(dom, 𝟙))
+        n[1] = m
+        return Morphism(dom, 𝟙, n)
+    end
+
+    summands = [x^k for (x,k) ∈ decompose(X)]
     dual_summands = dual.(summands)
     d = length(summands)
 
@@ -546,7 +485,7 @@ end
 *(λ,f::SixJCategoryMorphism) = SixJCategoryMorphism(domain(f), codomain(f), λ .*f.m)
 
 
-function getindex(f::FinSixJCategoryMorphism, i)
+function getindex(f::SixJCategoryMorphism, i)
     simple = simples(parent(domain(f)))
     dom = simple[i]^domain(f).components[i]
     cod = simple[i]^codomain(f).components[i]
@@ -555,39 +494,20 @@ function getindex(f::FinSixJCategoryMorphism, i)
     return SixJCategoryMorphism(dom,cod,m)
 end
 
-function getindex(f::InfSixJCategoryMorphism, i)
-    X = domain(f)
-    Y = codomain(f)
-    C = parent(X)
-    if ZZ(i) ∈ keys(f.m)
-        return Morphism(X[i], Y[i], f.m[i])
-    else
-        return zero_morphism(X[i],Y[i])
-    end
-end
 
-getindex(X::FinSixJCategoryObject, i::Int64) = X.components[i]
 
-getindex(X::InfSixJCategoryObject, i::Int64) = ZZ(i) ∈ keys(X.components) ? X.components[i] : zero(parent(X))
+getindex(X::SixJCategoryObject, i::Int64) = X.components[i]
 
-getindex(C::InfSixJCategory, i) = SixJCategoryObject(C,Dict(ZZ(i),ZZ(1)))
 
-function matrices(f::FinSixJCategoryMorphism)
+function matrices(f::SixJCategoryMorphism)
     f.m
 end
 
-function matrices(f::InfSixJCategoryMorphism)
-    collect(values(f.m))
-end
 
-
-function matrix(f::FinSixJCategoryMorphism)
+function matrix(f::SixJCategoryMorphism)
     diagonal_matrix(f.m)
 end
 
-function matrix(f::InfSixJCategoryMorphism)
-    diagonal_matrix(collect(values(f.m)))
-end
 
 # function (F::Field)(f::SixJCategoryMorphism)
 #     if !(domain(f) == codomain(f) && is_simple(domain(f)))
@@ -597,13 +517,28 @@ end
 #     return F(f.m[i][1,1])
 # end
 
+function dim(X::SixJCategoryObject)
+    C = parent(X)
+    K = base_ring(X)
+    if is_simple(X)
+        k = findfirst(e -> e != 0, X.components)
+        if C.dims[k] == 0
+            C.dims[k] = K(tr(id(X)))
+        end
+        return C.dims[k]
+    end
+    return sum([X[i]*dim(C[i]) for i ∈ 1:C.simples if X[i] != 0])
+end
+
+        
+
 #-------------------------------------------------------------------------------
 #   Tensor Product
 #-------------------------------------------------------------------------------
 
 
 
-function tensor_product(X::FinSixJCategoryObject, Y::FinSixJCategoryObject)
+function tensor_product(X::SixJCategoryObject, Y::SixJCategoryObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
     C = parent(X)
     n = C.simples
@@ -622,21 +557,8 @@ function tensor_product(X::FinSixJCategoryObject, Y::FinSixJCategoryObject)
     return SixJCategoryObject(C,T)
 end
 
-function tensor_product(X::InfSixJCategoryObject, Y::InfSixJCategoryObject)
-    @assert parent(X) == parent(Y) "Mismatching parents"
-    C = parent(X)
-    
-    Z = zero(C)
-    T = C.tensor_product
 
-    for (x,k) ∈ X.components, (y,j) ∈ Y.components
-        Z = Z ⊕ SixJCategoryObject(C, Dict(ZZ(z) => k*j*ZZ(l) for (z,l) ∈ T(x,y)))
-    end
-
-    return SixJCategoryObject(C,Z)
-end
-
-function tensor_product(f::FinSixJCategoryMorphism, g::FinSixJCategoryMorphism)
+function tensor_product(f::SixJCategoryMorphism, g::SixJCategoryMorphism)
     dom = domain(f) ⊗ domain(g)
     cod = codomain(f) ⊗ codomain(g)
     C = parent(dom)
@@ -665,35 +587,6 @@ function tensor_product(f::FinSixJCategoryMorphism, g::FinSixJCategoryMorphism)
     return h #⊕ zero_morphism(SixJCategoryObject(C,dom_left), SixJCategoryObject(C,cod_left))
 end
 
-function tensor_product(f::InfSixJCategoryMorphism, g::InfSixJCategoryMorphism)
-    dom = domain(f) ⊗ domain(g)
-    cod = codomain(f) ⊗ codomain(g)
-    C = parent(dom)
-
-    h = zero_morphism(zero(C), zero(C))
-
-    table = C.tensor_product
-
-
-    for i ∈ keys(f.m), j ∈ keys(g.m)
-        A = kronecker_product(f.m[i],g.m[j])
-        d1,d2 = size(A)
-        #if d1*d2 == 0 continue end
-        Ks = keys(table(i,j))
-        for k ∈ Ks
-            if (c = Ks[k]) > 0
-                m = zero_morphism(C[k]^(c*d1),C[k]^(c*d2)).m
-                m[k] = kronecker_product(identity_matrix(base_ring(C),c), A)
-
-                h = h ⊕ SixJCategoryMorphism(C[k]^(c*d1),C[k]^(c*d2), m)
-                
-            end
-        end
-    end
-    #dom_left = dom.components - domain(h).components
-    #cod_left = cod.components - codomain(h).components
-    return h #⊕ zero_morphism(SixJCategoryObject(C,dom_left), SixJCategoryObject(C,cod_left))
-end
 
 
 function one(C::SixJCategory) 
@@ -703,71 +596,72 @@ function one(C::SixJCategory)
     SixJCategoryObject(C,C.one)
 end
 
-function one(C::InfSixJCategory)
-    if !isdefined(C, :one) 
-        throw(ErrorException("There is no unit object defined"))
-    end
-    SixJCategoryObject(C,Dict(ZZ(v) => ZZ(1) for v ∈ C.one))
-end
+
 #-------------------------------------------------------------------------------
 #   Direct sum
 #-------------------------------------------------------------------------------
 
-function direct_sum(X::SixJCategoryObject, Y::SixJCategoryObject)
-    S = SixJCategoryObject(parent(X), X.components .+ Y.components)
-    ix_mats = matrices(zero_morphism(X,S))
-    iy_mats = matrices(zero_morphism(Y,S))
-    px_mats = matrices(zero_morphism(S,X))
-    py_mats = matrices(zero_morphism(S,Y))
+# function direct_sum(X::SixJCategoryObject, Y::SixJCategoryObject)
+#     S = SixJCategoryObject(parent(X), X.components .+ Y.components)
+#     ix_mats = matrices(zero_morphism(X,S))
+#     iy_mats = matrices(zero_morphism(Y,S))
+#     px_mats = matrices(zero_morphism(S,X))
+#     py_mats = matrices(zero_morphism(S,Y))
 
-    for i ∈ 1:parent(X).simples
-        (x,y) = X.components[i], Y.components[i]
-        for j ∈ 1:x 
-            ix_mats[i][j,j] = 1
-            px_mats[i][j,j] = 1
-        end
-        for j ∈ 1:y 
-            iy_mats[i][j,j+x] = 1
-            py_mats[i][j+x,j] = 1
-        end
+#     for i ∈ 1:parent(X).simples
+#         (x,y) = X.components[i], Y.components[i]
+#         for j ∈ 1:x 
+#             ix_mats[i][j,j] = 1
+#             px_mats[i][j,j] = 1
+#         end
+#         for j ∈ 1:y 
+#             iy_mats[i][j,j+x] = 1
+#             py_mats[i][j+x,j] = 1
+#         end
+#     end
+
+#     ix = Morphism(X,S, ix_mats)
+#     px = Morphism(S,X, px_mats)
+#     iy = Morphism(Y,S, iy_mats)
+#     py = Morphism(S,Y, py_mats)
+
+#     return S,[ix,iy],[px,py]
+# end
+
+function direct_sum(X::SixJCategoryObject...)
+    if length(X) == 1
+        return X...,[id(X...)], [id(X...)]
     end
 
-    ix = Morphism(X,S, ix_mats)
-    px = Morphism(S,X, px_mats)
-    iy = Morphism(Y,S, iy_mats)
-    py = Morphism(S,Y, py_mats)
+    S = SixJCategoryObject(parent(X[1]), vec(sum(hcat([x.components for x in X]...), dims = 2)))
 
-    return S,[ix,iy],[px,py]
-end
+    inc = [matrices(zero_morphism(x,S)) for x ∈ X]
+    proj = [matrices(zero_morphism(S,x)) for x ∈ X]
 
-function direct_sum(X::InfSixJCategoryObject, Y::InfSixJCategoryObject)
-    S = SixJCategoryObject(parent(X), sort(merge(+, X.components, Y.components)))
-    ix_mats = matrices(zero_morphism(X,S))
-    iy_mats = matrices(zero_morphism(Y,S))
-    px_mats = matrices(zero_morphism(S,X))
-    py_mats = matrices(zero_morphism(S,Y))
-
-    for i ∈ keys(S.components)
-        x = X.components[i]
-        y = Y.components[i]
-        for j ∈ 1:x 
-            ix_mats[i][j,j] = 1
-            px_mats[i][j,j] = 1
-        end
-        for j ∈ 1:y 
-            iy_mats[i][j,j+x] = 1
-            py_mats[i][j+x,j] = 1
+    for i ∈ 1:parent(X[1]).simples
+        k = [x[i] for x ∈ X]
+        for j ∈ 1:length(k)
+            for l ∈ 1:k[j]
+                shift = sum(k[1:j-1])
+                inc[j][i][l, shift + l] = 1
+                proj[j][i][shift + l, l] = 1
+            end
         end
     end
+    inc = [Morphism(x,S,i) for (x,i) ∈ zip(X,inc)]
+    proj = [Morphism(S,x,p) for (x,p) ∈ zip(X,proj)]
 
-    ix = Morphism(X,S, ix_mats)
-    px = Morphism(S,X, px_mats)
-    iy = Morphism(Y,S, iy_mats)
-    py = Morphism(S,Y, py_mats)
-
-    return S,[ix,iy],[px,py]
+    return S, inc, proj
 end
 
+
+function ⊕(X::SixJCategoryObject...) 
+    SixJCategoryObject(parent(X[1]), vec(sum(hcat([x.components for x in X]...), dims = 2)))
+end
+
+function ^(X::SixJCategoryObject, k::Int)
+    SixJCategoryObject(parent(X), k.*(X.components))
+end
 
 function direct_sum(f::SixJCategoryMorphism, g::SixJCategoryMorphism)
     dom = domain(f) ⊕ domain(g)
@@ -782,7 +676,30 @@ function direct_sum(f::SixJCategoryMorphism, g::SixJCategoryMorphism)
         m[i] = [f.m[i] z1; z2 g.m[i]]
     end
 
-    return SixJCategoryMorphism(dom,cod, m)
+    return Morphism(dom,cod, m)
+end
+
+function vertical_direct_sum(f::SixJCategoryMorphism...)
+    if length(f) == 1
+        return f
+    end
+    
+    #@assert length(unique!([domain.(f)...])) == 1 "Not compatible"
+
+    ms = matrices.(f)
+    m = [hcat([n[i] for n ∈ ms]...) for i ∈ 1:parent(f[1]).simples]
+    return Morphism(domain(f[1]), ⊕(codomain.(f)...), m)
+end
+
+function horizontal_direct_sum(f::SixJCategoryMorphism...)
+    if length(f) == 1
+        return f
+    end
+    # @assert length(unique!([codomain.(f)...])) == 1 "Not compatible"
+
+    ms = matrices.(f)
+    m = [vcat([n[i] for n ∈ ms]...) for i ∈ 1:parent(f[1]).simples]
+    return Morphism(⊕(domain.(f)...), codomain(f[1]), m)
 end
 
 

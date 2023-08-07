@@ -482,7 +482,7 @@ function left_trace(f::CategoryMorphism)
     W = codomain(f)
     C = parent(V)
     if V == zero(C) || W == zero(C) return zero_morphism(one(C),one(C)) end
-
+    
     if V == W
         return ev(left_dual(V)) ∘ ((spherical(V)∘f) ⊗ id(left_dual(V))) ∘ coev(V)
     end

@@ -490,6 +490,7 @@ function half_braiding(X::CenterCategoryObject, Y::CategoryObject)
 
         braid = braid + (i⊗id(X.object))∘X.γ[k]∘(id(X.object)⊗p)
     end
+
     return braid
 end
 
@@ -762,16 +763,16 @@ function simples_by_induction!(C::CenterCategory)
         end
 
         Z = induction(s)
-        # for x ∈ contained_simples
-        #     f = horizontal_direct_sum(basis(Hom(x,Z)))
-        #     Z = cokernel(f)[1]
-        # end
+        for x ∈ contained_simples
+            f = horizontal_direct_sum(basis(Hom(x,Z)))
+            Z = cokernel(f)[1]
+        end
         new_simples = indecomposable_subobjects(Z)
         S = [S; new_simples]
         center_dim += sum(dim.(new_simples).^2)
-        if d == center_dim
-            break
-        end
+        # if d == center_dim
+        #     break
+        # end
     end
     C.simples = unique_simples(S)
 end
@@ -858,3 +859,25 @@ function hom_by_projection(X::CenterCategoryObject, Y::CenterCategoryObject)
     return CenterCategoryHomSpace(X,Y,H_basis, VectorSpaces(base_ring(X)))
 end
 
+
+#=----------------------------------------------------------
+    Modular Stuff 
+----------------------------------------------------------=#    
+
+function smatrix(C::CenterCategory)
+    simpls = simples(C)
+    n = length(simpls)
+    K = base_ring(C)
+    S = [zero_morphism(category(C)) for _ ∈ 1:n, _ ∈ 1:n]
+    for i ∈ 1:n
+        for j ∈ i:n
+            S[i,j] = S[j,i] = tr(half_braiding(simpls[i], object(simpls[j])))
+        end
+    end
+
+    try
+        return matrix(K, n, n, [K(s) for s ∈ S])
+    catch
+        return S
+    end
+end
