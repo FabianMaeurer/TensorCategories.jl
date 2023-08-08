@@ -12,39 +12,31 @@ makedocs(
     ),
     pages = [
         "Home" => "index.md",
-        "Introduction" => "Interface.md",
-        "Concrete Examples" => [
-            "Vector Spaces" => "VectorSpaces.md",
-            "Representations" => "Representations.md",
-            "Coherent Sheaves" => "CoherentSheaves.md"
+        "Category Interface" => [
+            "Philosophy" => "Interface/Philosophy.md",
+            "Categories" => "Interface/BasicInterface.md",
+            "Abelian Categories" => "Interface/Abelian Categories.md",
+            "Monoidal Categories" => "Interface/MonoidalCategories.md",
+            "Tensor Categories" => "Interface/TensorCategories.md",
+            "Optimisations" => "Interface/AdvancedInterface.md"
         ],
-        "Fusion Categories from 6j Symbols" => [
-            "Idea" => "SixJCategory.md",
-            "Examples" => "RingCatExamples.md"
-        ],
-        "ℤ₊-Rings" => [
-            "ℤ₊-Rings" => "ZPlusRings.md"
-        ],
+        # "Concrete Examples" => [
+        #     "Vector Spaces" => "VectorSpaces.md",
+        #     "Representations" => "Representations.md",
+        #     "Coherent Sheaves" => "CoherentSheaves.md"
+        # ],
+        # "Fusion Categories from 6j Symbols" => [
+        #     "Idea" => "SixJCategory.md",
+        #     "Examples" => "RingCatExamples.md"
+        # ],
+        # "ℤ₊-Rings" => [
+        #     "ℤ₊-Rings" => "ZPlusRings.md"
+        # ],
        #"Multitensor Category Interface" => "Multitensor.md",
         "The Center Construction" => "Center.md",
     ],
 )
 
-# makedocs(
-#     sitename = "JuCat.jl",
-#     modules = [JuCat],
-#     format = LaTeX(platform = "none"),
-#     pages = [
-#             "Home" => "index.md",
-#             "Exampes" => [
-#                 "Vector Spaces" => "VectorSpaces.md",
-#                 "Representations" => "Representations.md",
-#                 "Coherent Sheaves" => "CoherentSheaves.md"
-#             ],
-#             "Multitensor Categories" => "Multitensor.md",
-#             "showcase.md"
-#         ],
-# )
 
 deploydocs(
     repo   = "github.com/FabianMaeurer/TensorCategories.jl.git",

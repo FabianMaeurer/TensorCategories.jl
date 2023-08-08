@@ -5,13 +5,13 @@ if provided with methods
 
 ```
 # Return the simple objects
-simples(C::YourCategory) ::Vector{YourCategoryObject}
+simples(C::YourCategory) ::Vector{YourObject}
 
 # Decompose into simple summands with multiplicity
-decompose(X::YourCategoryObject) ::Vector{Tuple{YourCategoryObject, Int}}
+decompose(X::YourObject) ::Vector{Tuple{YourObject, Int}}
 
 # Check for isomorphy
-is_isomorphic(X::YourCategoryObject, Y::YourCategoryObject) ::Tuple{Bool, Union{YourMorphism, Nothing}}
+is_isomorphic(X::YourObject, Y::YourObject) ::Tuple{Bool, Union{YourMorphism, Nothing}}
 ```
 
 Provided these methods exist you can call the function `grothendieck_ring` on your
@@ -56,7 +56,7 @@ the ``S``-matrix is defined as
 Hence you see you need to provide a trace function and a braiding. The braiding
 
 ```
-braiding(X::YourCategoryObject, Y::YourCategoryObject) ::YourMorphism
+braiding(X::YourObject, Y::YourObject) ::YourMorphism
 ```
 
 There are two ways to archive the trace: either you provide the trace by yourself
@@ -68,10 +68,10 @@ tr(f::YourMorphism) ::YourMorphism
 or you provide a spherical structure, duals, evaluation and coevaluation
 
 ```
-spherical(X::YourCategoryObject) ::YourMorphism
-dual(X::YourCategoryObject) ::YourCategoryObject
-ev(X::YourCategoryObject) ::YourMorphism
-coev(X::YourCategoryObject) ::YourMorphism
+spherical(X::YourObject) ::YourMorphism
+dual(X::YourObject) ::YourObject
+ev(X::YourObject) ::YourMorphism
+coev(X::YourObject) ::YourMorphism
 ```
 
 with which the generic left categorical trace will be computed.

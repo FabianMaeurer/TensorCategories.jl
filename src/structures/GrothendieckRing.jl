@@ -27,10 +27,10 @@ end
 mutable struct Decategorification 
     domain::Category
     codomain::ℕRing
-    simples::Vector{CategoryObject}
+    simples::Vector{Object}
 end
 
-function (D::Decategorification)(X::CategoryObject)
+function (D::Decategorification)(X::Object)
     @assert D.domain = parent(X)
     coeffs = coefficients(X,simples)
     D.codomain(coeffs)
@@ -49,19 +49,19 @@ mutable struct GrothendieckGroup
     category::Category
     is_ring::Bool
     base_ring::Ring
-    objects::Vector{CategoryObject}
+    objects::Vector{Object}
 end
 
 mutable struct GrothendieckGroupElem
     parent::GrothendieckGroup
-    class::Vector{CategoryObject}
+    class::Vector{Object}
 end
 
 parent(x::GrothendieckGroupElem) = x.parent
 equivalence_class(x::GrothendieckGroupElem) = x.class
 representative(x::GrothendieckGroupElem) = equivalence_class(x)[1]
 
-function set_class!(x::GrothendieckGroupElem, v::Vector{CategoryObject}) 
+function set_class!(x::GrothendieckGroupElem, v::Vector{Object}) 
     x.class = v
 end
 

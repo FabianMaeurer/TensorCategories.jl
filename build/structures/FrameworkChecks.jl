@@ -98,7 +98,7 @@ end
 
 
 function object_type(C::Category)
-    object_types = all_subtypes(CategoryObject)
+    object_types = all_subtypes(Object)
 
     for T ∈ object_types
         if hasfield(T, :parent)
@@ -110,7 +110,7 @@ function object_type(C::Category)
 end 
 
 function morphism_type(C::Category)
-    morphism_types = all_subtypes(CategoryMorphism)
+    morphism_types = all_subtypes(Morphism)
 
     for T ∈ morphism_types
         if hasfield(T, :domain)

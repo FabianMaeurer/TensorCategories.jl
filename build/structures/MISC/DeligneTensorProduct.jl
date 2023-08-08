@@ -84,25 +84,25 @@ end
 #     base_ring::Field
 # end
 
-# abstract type DeligneProdCategoryObject <: CategoryObject end
+# abstract type DeligneProdObject <: Object end
 
-# struct SimpleDeligneProdCategoryObject <: DeligneProdCategoryObject
-#     X::CategoryObject 
-#     Y::CategoryObject 
+# struct SimpleDeligneProdObject <: DeligneProdObject
+#     X::Object 
+#     Y::Object 
 #     parent::DeligneProduct 
 # end
 
-# struct CompositeDeligneProdCategoryObject <: DeligneProdCategoryObject
-#     summands::Vector{SimpleDeligneProdCategoryObject}
+# struct CompositeDeligneProdObject <: DeligneProdObject
+#     summands::Vector{SimpleDeligneProdObject}
 #     parent::DeligneProduct
 # end
 
-# abstract type DeligneProdMorphism <: CategoryMorphism end
+# abstract type DeligneProdMorphism <: Morphism end
 
 # struct SimpleDeligneProdMorphism <: DeligneProdMorphism 
-#     domain::SimpleDeligneProdCategoryObject 
-#     codomain::SimpleDeligneProdCategoryObject 
-#     m::Tuple{CategoryMorphism,CategoryMorphism}
+#     domain::SimpleDeligneProdObject 
+#     codomain::SimpleDeligneProdObject 
+#     m::Tuple{Morphism,Morphism}
 # end
 
 # struct CompositeDeligneProdMorphism <: DeligneProdMorphism
@@ -123,19 +123,19 @@ end
 
 # ⊠(C::Category, D::Category) = DeligneProduct(C,D)
 
-# function DeligneProdMorphism(f::CategoryMorphism, g::CategoryMorphism)
+# function DeligneProdMorphism(f::Morphism, g::Morphism)
 #     dom = domain(f) ⊠ domain(g)
 #     cod = codomain(f) ⊠ codomain(g)
 #     SimpleDeligneProdMorphism(dom, cod, (f,g))
 # end
 
-# ⊠(f::CategoryMorphism, g::CategoryMorphism) = DeligneProdMorphism(f,g)
+# ⊠(f::Morphism, g::Morphism) = DeligneProdMorphism(f,g)
 
-# function DeligneProdCategoryObject(X::CategoryObject, Y::CategoryObject)
-#     SimpleDeligneProdCategoryObject(X,Y,parent(X) ⊠ parent(Y))
+# function DeligneProdObject(X::Object, Y::Object)
+#     SimpleDeligneProdObject(X,Y,parent(X) ⊠ parent(Y))
 # end
 
-# ⊠(X::CategoryObject, Y::CategoryObject) = DeligneProdCategoryObject(X,Y)
+# ⊠(X::Object, Y::Object) = DeligneProdObject(X,Y)
 
 # #=------------------------------------------------
 #     simple objects
@@ -144,7 +144,7 @@ end
 # function simples(C::DeligneProduct) 
 #     C_simples = simples(C.C)
 #     D_simples = simples(C.D)
-#     [DeligneProdCategoryObject(x,y) for x ∈ C_simples, y ∈ D_simples][:]
+#     [DeligneProdObject(x,y) for x ∈ C_simples, y ∈ D_simples][:]
 # end
 
 # #=------------------------------------------------
@@ -175,7 +175,7 @@ end
 #     Homspaces
 # ------------------------------------------------=#
 
-# function Hom(X::SimpleDeligneProdCategoryObject, Y::SimpleDeligneProdCategoryObject)
+# function Hom(X::SimpleDeligneProdObject, Y::SimpleDeligneProdObject)
 #     hom_X1_Y1 = basis(Hom(X.X,Y.X))
 #     hom_X2_Y2 = basis(Hom(X.Y,Y.Y))
     

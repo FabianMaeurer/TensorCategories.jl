@@ -8,7 +8,7 @@ using TensorCategories, Oscar
 Vector spaces in TensorCategories are of the abstract type
 
 ```
-abstract type VectorSpaceCategoryObject <: CategoryObject end
+abstract type VectorSpaceObject <: Object end
 ```
 
 All objects with vector space structure like hom-spaces are and should be implemented as a
@@ -35,31 +35,31 @@ F,a = FiniteField(5,2)
 Vec = VectorSpaces()
 ```
 
-CategoryObjects of this category are of the type
+Objects of this category are of the type
 
 ```
-VSCategoryObject <: VectorSpaceCategoryObject
+VSObject <: VectorSpaceObject
 ```
 
 Every vector space object is defined by a basis and a base field provided by the
 parent category.
 
 ```@docs
-VectorSpaceCategoryObject
-VectorSpaceCategoryObject(::VectorSpaces,::Int)
+VectorSpaceObject
+VectorSpaceObject(::VectorSpaces,::Int)
 ```
 
 Morphisms in this Category are defined only by matrices of matching dimensions.
 They are typed as
 
 ```julia
-VSCategoryMorphism <: CategoryMorphism
+VSMorphism <: Morphism
 ```
 
 and constructed giving a domain, codomain and matrix element.
 
 ```@docs VS
-CategoryMorphism(::VectorSpaceCategoryObject, ::VectorSpaceCategoryObject, ::MatElem)
+Morphism(::VectorSpaceObject, ::VectorSpaceObject, ::MatElem)
 ```
 
 ## Graded Vector Spaces
@@ -87,27 +87,27 @@ Graded vector spaces decompose into direct sums of vector spaces for each elemen
 ``G``.
 
 ```
-GVSCategoryObject <: VectorSpaceCategoryObject
+GVSObject <: VectorSpaceObject
 ```
 
 ```@example VS
 G = symmetric_group(5)
 g,s = gens(G)
-V1 = VectorSpaceCategoryObject(QQ,5)
-V2 = VectorSpaceCategoryObject(QQ, [:v, :w])
-W = VectorSpaceCategoryObject(g => V1, s => V2, g*s => V1⊗V2)
+V1 = VectorSpaceObject(QQ,5)
+V2 = VectorSpaceObject(QQ, [:v, :w])
+W = VectorSpaceObject(g => V1, s => V2, g*s => V1⊗V2)
 ```
 
 Morphisms are implemented analogously by pairs of group elements and vector space objects.
 
 ```
-GVSCategoryMorphism <: CategoryMorphism
+GVSMorphism <: Morphism
 ```
 
 The constructor is given by 
 
 ```@docs
-Morphism(::GVSCategoryObject, ::GVSCategoryObject,::MatElem) where {G, S <: VectorSpaceCategoryMorphism}
+Morphism(::GVSObject, ::GVSObject,::MatElem) where {G, S <: VectorSpaceMorphism}
 ```
 
 

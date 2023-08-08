@@ -98,11 +98,11 @@ function SkeletizationFunctor(C::Category)
     SkeletizationFunctor(C,SixJCategory(C))
 end
 
-function (F::SkeletizationFunctor)(X::CategoryObject)
-    return SixJCategoryObject(codomain(F), [int_dim(Hom(X,s)) for s ∈ simples(C)])
+function (F::SkeletizationFunctor)(X::Object)
+    return SixJObject(codomain(F), [int_dim(Hom(X,s)) for s ∈ simples(C)])
 end
 
-function (F::SkeletizationFunctor)(f::CategoryMorphism)
+function (F::SkeletizationFunctor)(f::Morphism)
     X = domain(F)
     Y = codomain(F)
 

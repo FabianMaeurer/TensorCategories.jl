@@ -8,30 +8,31 @@ We provide the following abstract types to identify categories, objects and morp
 
 ```julia
 abstract type Category end
-abstract type CategoryObject end
-abstract type CategoryMorphism end
+abstract type Object end
+abstract type Morphism end
 ```
 
+
 For basic functionality of `YourCategory <: Category` together with objects
-`YourCategoryObject <: CategoryObject` and morphisms `YourMorphism <: CategoryMorphism` you have to minimally build
+`YourObject <: Object` and morphisms `YourMorphism <: Morphism` you have to minimally build
 
 ```julia
 struct YourCategory <: Category end
 
-struct YourCategoryObject <: CategoryObject
+struct YourObject <: Object
   parent::YourCategory
 end
 
-struct YourMorphism <: CategoryMorphism
-  domain::YourCategoryObject
-  codomain::YourCategoryObject
+struct YourMorphism <: Morphism
+  domain::YourObject
+  codomain::YourObject
 end
 ```
 
 For objects you need to provide the following methods:
 
 ```
-id(X::YourCategoryObject) ::YourMorphism
+id(X::YourObject) ::YourMorphism
 ```
 
 For morphisms you need

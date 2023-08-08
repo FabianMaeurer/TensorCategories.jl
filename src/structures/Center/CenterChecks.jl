@@ -1,9 +1,9 @@
 """
-    is_half_braiding(X::CategoryObject, half_braiding::Vector{<:CategoryMorphism})
+    is_half_braiding(X::Object, half_braiding::Vector{<:Morphism})
 
 TBW
 """
-function is_half_braiding(Z::CategoryObject, half_braiding::Vector{<:CategoryMorphism})
+function is_half_braiding(Z::Object, half_braiding::Vector{<:Morphism})
     simple_objects = simples(parent(Z))
     n = length(simple_objects)
     flag = false
@@ -25,4 +25,4 @@ function is_half_braiding(Z::CategoryObject, half_braiding::Vector{<:CategoryMor
     return !flag 
 end
 
-is_central(X::CenterCategoryObject) = is_half_braiding(object(X), half_braiding(X))
+is_central(X::CenterObject) = is_half_braiding(object(X), half_braiding(X))

@@ -2,46 +2,46 @@ struct OppositeCategory <: Category
     C::Category
 end
 
-struct OppositeCategoryObject <: CategoryObject
+struct OppositeObject <: Object
     parent::OppositeCategory
-    X::CategoryObject
+    X::Object
 end
 
 
-struct OppositeMorphism <: CategoryMorphism 
-    domain::OppositeCategoryObject
-    codomain::OppositeCategoryObject
-    m::CategoryMorphism
+struct OppositeMorphism <: Morphism 
+    domain::OppositeObject
+    codomain::OppositeObject
+    m::Morphism
 end
 
 op(C::Category) = OppositeCategory(C)
-op(X::CategoryObject) = OppositeCategoryObject(op(parent(X)),X)
-op(f::CategoryMorphism) = OppositeMorphism(op(codomain(f)),op(domain(f)), f)
+op(X::Object) = OppositeObject(op(parent(X)),X)
+op(f::Morphism) = OppositeMorphism(op(codomain(f)),op(domain(f)), f)
 
 base_ring(C::OppositeCategory) = base_ring(C.C)
-base_ring(X::OppositeCategoryObject) = base_ring(X.X)
-parent(X::OppositeCategoryObject) = OppositeCategory(parent(X.X))
+base_ring(X::OppositeObject) = base_ring(X.X)
+parent(X::OppositeObject) = OppositeCategory(parent(X.X))
 
 compose(f::OppositeMorphism, g::OppositeMorphism) = OppositeMorphism(compose(g.m,f.m))
 
-function product(X::OppositeCategoryObject, Y::OppositeCategoryObject)
+function product(X::OppositeObject, Y::OppositeObject)
     Z,px = product(X.X,Y.X)
-    return OppositeCategoryObject(Z), OppositeMorphism.(px)
+    return OppositeObject(Z), OppositeMorphism.(px)
 end
 
-function coproduct(X::OppositeCategoryObject, Y::OppositeCategoryObject)
+function coproduct(X::OppositeObject, Y::OppositeObject)
     Z,ix = coproduct(X.X,Y.X)
-    return OppositeCategoryObject(Z), OppositeMorphism.(ix)
+    return OppositeObject(Z), OppositeMorphism.(ix)
 end
 
-function direct_sum(X::OppositeCategoryObject, Y::OppositeCategoryObject)
+function direct_sum(X::OppositeObject, Y::OppositeObject)
     Z,ix,px = coproduct(X.X,Y.X)
-    return OppositeCategoryObject(Z), OppositeMorphism.(ix), OppositeMorphism.(px)
+    return OppositeObject(Z), OppositeMorphism.(ix), OppositeMorphism.(px)
 end
 
-tensor_product(X::OppositeCategoryObject, Y::OppositeCategoryObject) = OppositeCategoryObject(tensor_product(X.X,Y.X))
+tensor_product(X::OppositeObject, Y::OppositeObject) = OppositeObject(tensor_product(X.X,Y.X))
 
-one(C::OppositeCategory) = OppositeCategoryObject(one(C.C))
+one(C::OppositeCategory) = OppositeObject(one(C.C))
 
 simples(C::OppositeCategory) = op.(simples(C.C))
 
@@ -52,7 +52,7 @@ zero(C::OppositeCategory) = op(zero(C.C))
 #-------------------------------------------------------------------------------
 
 OppositeCategory(C::OppositeCategory) = C.C
-OppositeCategoryObject(X::OppositeCategoryObject) = X.X
+OppositeObject(X::OppositeObject) = X.X
 OppositeMorphism(f::OppositeMorphism) = f.m
 
 #=------------------------------------------------
@@ -73,7 +73,7 @@ is_multifusion(C::OppositeCategory) = is_multifusion(C.C)
     Hom-Spaces
 ------------------------------------------------=#
 
-function Hom(X::OppositeCategoryObject, Y::OppositeCategoryObject)
+function Hom(X::OppositeObject, Y::OppositeObject)
     opposite_basis = op.(basis(Hom(X.X,Y.X)))
     CategoryHomSpace(X,Y,opposite_basis, VectorSpaces(base_ring(X)))
 end

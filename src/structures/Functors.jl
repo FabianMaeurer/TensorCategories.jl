@@ -27,8 +27,8 @@ function Forgetful(C::GradedVectorSpaces, D::VectorSpaces)
     return Forgetful(C,D,obj_map, mor_map)
 end
 
-(F::AbstractFunctor)(x::T) where {T <: CategoryObject} = F.obj_map(x)
-(F::AbstractFunctor)(x::T) where {T <: CategoryMorphism} = F.mor_map(x)
+(F::AbstractFunctor)(x::T) where {T <: Object} = F.obj_map(x)
+(F::AbstractFunctor)(x::T) where {T <: Morphism} = F.mor_map(x)
 
 function show(io::IO, F::Forgetful)
     print(io, "Forgetful functor from $(domain(F)) to $(codomain(F))")
@@ -44,7 +44,7 @@ struct HomFunctor <: AbstractFunctor
     mor_map
 end
 
-function Hom(X::CategoryObject,::Colon)
+function Hom(X::Object,::Colon)
     K = base_ring(parent(X))
     C = VectorSpaces(K)
     obj_map = Y -> Hom(X,Y)
@@ -52,7 +52,7 @@ function Hom(X::CategoryObject,::Colon)
     return HomFunctor(parent(X),C,obj_map,mor_map)
 end
 
-function Hom(::Colon,X::CategoryObject)
+function Hom(::Colon,X::Object)
     K = base_ring(parent(X))
     C = VectorSpaces(K)
     obj_map = Y -> Hom(Y,X)
@@ -60,13 +60,13 @@ function Hom(::Colon,X::CategoryObject)
     return HomFunctor(OppositeCategory(parent(X)),C,obj_map,mor_map)
 end
 
-function Hom(X::SetCategoryObject,::Colon)
+function Hom(X::SetObject,::Colon)
     obj_map = Y -> Hom(X,Y)
     mor_map = f -> g -> g ∘ f
     return HomFunctor(parent(X),Sets(),obj_map,mor_map)
 end
 
-function Hom(::Colon,X::SetCategoryObject)
+function Hom(::Colon,X::SetObject)
     obj_map = Y -> Hom(Y,X)
     mor_map = g -> f -> g ∘ f
     return HomFunctor(parent(X),Sets(),obj_map,mor_map)
@@ -157,15 +157,15 @@ end
 #     return DualFunctor(C,C,obj_map,mor_map)
 # end
 
-@memoize Dict function dual_monoidal_structure(X::CategoryObject, Y::CategoryObject)
+@memoize Dict function dual_monoidal_structure(X::Object, Y::Object)
     (ev(X⊗Y)⊗id(dual(Y)⊗dual(X))) ∘ inv(associator(dual(X⊗Y),X⊗Y,dual(Y)⊗dual(X))) ∘ (id(dual(X⊗Y))⊗product_coev(X,Y))
 end
 
-function product_coev(X::CategoryObject, Y::CategoryObject)
+function product_coev(X::Object, Y::Object)
     associator(X⊗Y,dual(Y),dual(X)) ∘ (inv(associator(X,Y,dual(Y)))⊗id(dual(X))) ∘ (id(X)⊗coev(Y)⊗id(dual(X))) ∘ coev(X)
 end
 
-function product_ev(X::CategoryObject, Y::CategoryObject)
+function product_ev(X::Object, Y::Object)
     ev(Y) ∘ (id(dual(Y))⊗ev(X)⊗id(Y)) ∘ (associator(dual(Y),dual(X),X)⊗id(Y)) ∘ inv(associator(dual(Y)⊗dual(X),X,Y))
 end
 
@@ -203,7 +203,7 @@ function Induction(C::Category)
     return InductionFunctor(C,Center(C),obj_map,mor_map)
 end
 
-function induction_mor_map(f::CategoryMorphism)
+function induction_mor_map(f::Morphism)
     S = simples(parent(domain(f)))
 
     return direct_sum([id(s)⊗f⊗id(dual(s)) for s ∈ S])

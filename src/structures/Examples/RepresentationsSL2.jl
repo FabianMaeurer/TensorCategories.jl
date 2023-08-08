@@ -7,12 +7,12 @@ struct UqSl2Representations <: category
     q::RingElem
 end
 
-struct UqSl2rep <: CategoryObject
+struct UqSl2rep <: Object
     parent::UqSl2Representations
     components::Dict{ZZRingElem, ZZRingElem}
 end
 
-struct UqSl2repMorphism <: CategoryMorphism
+struct UqSl2repMorphism <: Morphism
     domain::UqSl2rep
     codomain::UqSl2rep
     m::Dict{ZZRingElem, <:MatElem}

@@ -9,15 +9,15 @@ struct ConvolutionCategory <: Category
     projectors::Vector
 end
 
-struct ConvolutionCategoryObject <: CategoryObject
-    sheaf::CohSheafCategoryObject
+struct ConvolutionObject <: Object
+    sheaf::CohSheafObject
     parent::ConvolutionCategory
 end
 
-struct ConvolutionCategoryMorphism <: CategoryMorphism
-    domain::ConvolutionCategoryObject
-    codomain::ConvolutionCategoryObject
-    m::CohSheafCategoryMorphism
+struct ConvolutionMorphism <: Morphism
+    domain::ConvolutionObject
+    codomain::ConvolutionObject
+    m::CohSheafMorphism
 end
 is_tensor(::ConvolutionCategory) = true
 is_fusion(C::ConvolutionCategory) = mod(order(C.group),characteristic(base_ring(C))) != 0
@@ -53,14 +53,14 @@ function ConvolutionCategory(X, K::Field)
     return ConvolutionCategory(gset(G,X), K)
 end
 
-Morphism(D::ConvolutionCategoryObject, C::ConvolutionCategoryObject, m:: CohSheafCategoryMorphism) = ConvolutionCategoryMorphism(D,C,m)
+Morphism(D::ConvolutionObject, C::ConvolutionObject, m:: CohSheafMorphism) = ConvolutionMorphism(D,C,m)
 
 function Base.hash(C::ConvolutionCategory, h::UInt)
     hash((getfield(C, s) for s ∈ fieldnames(ConvolutionCategory)), h)
 end
 
-function Base.hash(X::ConvolutionCategoryObject, h::UInt)
-    hash((getfield(σ, s) for s ∈ fieldnames(ConvolutionCategoryObject)), h)
+function Base.hash(X::ConvolutionObject, h::UInt)
+    hash((getfield(σ, s) for s ∈ fieldnames(ConvolutionObject)), h)
 end
 
 #-----------------------------------------------------------------
@@ -80,35 +80,35 @@ is_semisimple(C::ConvolutionCategory) = gcd(order(C.group), characteristic(base_
 Return the stabilizers of representatives of the orbits.
 """
 orbit_stabilizers(C::ConvolutionCategory) = C.squaredCoh.orbit_stabilizers
-orbit_index(X::ConvolutionCategoryObject, y) = orbit_index(X.sheaf, y)
+orbit_index(X::ConvolutionObject, y) = orbit_index(X.sheaf, y)
 orbit_index(X::ConvolutionCategory, y) = orbit_index(X.squaredCoh, y)
 
 """
-    stalks(X::ConvolutionCategoryObject)
+    stalks(X::ConvolutionObject)
 
 Return the stalks of the sheaf ``X``.
 """
-stalks(X::ConvolutionCategoryObject) = stalks(X.sheaf)
-stalk(X::ConvolutionCategoryObject, x) = stalk(X.sheaf,x)
+stalks(X::ConvolutionObject) = stalks(X.sheaf)
+stalk(X::ConvolutionObject, x) = stalk(X.sheaf,x)
 
-==(X::ConvolutionCategoryObject,Y::ConvolutionCategoryObject) = X.sheaf == Y.sheaf
+==(X::ConvolutionObject,Y::ConvolutionObject) = X.sheaf == Y.sheaf
 
-==(f::ConvolutionCategoryMorphism, g::ConvolutionCategoryMorphism) = f.m == f.m
+==(f::ConvolutionMorphism, g::ConvolutionMorphism) = f.m == f.m
 
 """
-    is_isomorphic(X::ConvolutionCategoryObject, Y::ConvolutionCategoryObject)
+    is_isomorphic(X::ConvolutionObject, Y::ConvolutionObject)
 
 Check whether ``X``and ``Y``are isomorphic. Return the isomorphism if true.
 """
-function is_isomorphic(X::ConvolutionCategoryObject, Y::ConvolutionCategoryObject)
+function is_isomorphic(X::ConvolutionObject, Y::ConvolutionObject)
     b, iso = is_isomorphic(X.sheaf, Y.sheaf)
     if !b return false, nothing end
-    return true, ConvolutionCategoryMorphism(X,Y,iso)
+    return true, ConvolutionMorphism(X,Y,iso)
 end
 
-id(X::ConvolutionCategoryObject) = ConvolutionCategoryMorphism(X,X,id(X.sheaf))
+id(X::ConvolutionObject) = ConvolutionMorphism(X,X,id(X.sheaf))
 
-function associator(X::ConvolutionCategoryObject, Y::ConvolutionCategoryObject, Z::ConvolutionCategoryObject)
+function associator(X::ConvolutionObject, Y::ConvolutionObject, Z::ConvolutionObject)
     dom = (X⊗Y)⊗Z
     cod = X⊗(Y⊗Z)
     S = simples(parent(X))
@@ -120,32 +120,32 @@ end
 #-----------------------------------------------------------------
 
 """
-    direct_sum(X::ConvolutionCategoryObject, Y::ConvolutionCategoryObject, morphisms::Bool = false)
+    direct_sum(X::ConvolutionObject, Y::ConvolutionObject, morphisms::Bool = false)
 
 documentation
 """
-function direct_sum(X::ConvolutionCategoryObject, Y::ConvolutionCategoryObject, morphisms::Bool = false)
+function direct_sum(X::ConvolutionObject, Y::ConvolutionObject, morphisms::Bool = false)
     @assert parent(X) == parent(Y) "Mismatching parents"
     Z,ix,px = direct_sum(X.sheaf,Y.sheaf)
-    Z = ConvolutionCategoryObject(Z,parent(X))
+    Z = ConvolutionObject(Z,parent(X))
 
     if !morphisms return Z end
 
-    ix = [ConvolutionCategoryMorphism(x,Z,i) for (x,i) ∈ zip([X,Y],ix)]
-    px = [ConvolutionCategoryMorphism(Z,x,p) for (x,p) ∈ zip([X,Y],px)]
+    ix = [ConvolutionMorphism(x,Z,i) for (x,i) ∈ zip([X,Y],ix)]
+    px = [ConvolutionMorphism(Z,x,p) for (x,p) ∈ zip([X,Y],px)]
     return Z, ix, px
 end
 
 """
-    direct_sum(f::ConvolutionCategoryMorphism, g::ConvolutionCategoryMorphism)
+    direct_sum(f::ConvolutionMorphism, g::ConvolutionMorphism)
 
 Return the direct sum of morphisms of coherent sheaves (with convolution product).
 """
-function direct_sum(f::ConvolutionCategoryMorphism, g::ConvolutionCategoryMorphism)
+function direct_sum(f::ConvolutionMorphism, g::ConvolutionMorphism)
     dom = direct_sum(domain(f), domain(g))
     codom = direct_sum(codomain(f), codomain(g))
     m = direct_sum(f.m,g.m)
-    return ConvolutionCategoryMorphism(dom,codom,m)
+    return ConvolutionMorphism(dom,codom,m)
 end
 
 
@@ -154,23 +154,23 @@ end
 
 Return the zero object in Conv(``X``).
 """
-zero(C::ConvolutionCategory) = ConvolutionCategoryObject(zero(C.squaredCoh),C)
+zero(C::ConvolutionCategory) = ConvolutionObject(zero(C.squaredCoh),C)
 
 
 #-----------------------------------------------------------------
 #   Functionality: (Co)Kernel
 #-----------------------------------------------------------------
 
-function kernel(f::ConvolutionCategoryMorphism)
+function kernel(f::ConvolutionMorphism)
     K,k = kernel(f.m)
-    Conv_K = ConvolutionCategoryObject(K,parent(f))
-    return ConvolutionCategoryObject(K,parent(domain(f))), Morphism(Conv_K, domain(f), k)
+    Conv_K = ConvolutionObject(K,parent(f))
+    return ConvolutionObject(K,parent(domain(f))), Morphism(Conv_K, domain(f), k)
 end
 
-function cokernel(f::ConvolutionCategoryMorphism)
+function cokernel(f::ConvolutionMorphism)
     C,c = cokernel(f.m)
-    Conv_C = ConvolutionCategoryObject(C,parent(f))
-    return ConvolutionCategoryObject(C, parent(domain(f))), Morphism(codomain(f), Conv_C, c)
+    Conv_C = ConvolutionObject(C,parent(f))
+    return ConvolutionObject(C, parent(domain(f))), Morphism(codomain(f), Conv_C, c)
 end
 
 #-----------------------------------------------------------------
@@ -178,28 +178,28 @@ end
 #-----------------------------------------------------------------
 
 """
-    tensor_product(X::ConvolutionCategoryObject, Y::ConvolutionCategoryObject)
+    tensor_product(X::ConvolutionObject, Y::ConvolutionObject)
 
 Return the convolution product of coherent sheaves.
 """
-function tensor_product(X::ConvolutionCategoryObject, Y::ConvolutionCategoryObject)
+function tensor_product(X::ConvolutionObject, Y::ConvolutionObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
     p12,p13,p23 = parent(X).projectors
 
-    return ConvolutionCategoryObject(p13(p12(X.sheaf)⊗p23(Y.sheaf)),parent(X))
+    return ConvolutionObject(p13(p12(X.sheaf)⊗p23(Y.sheaf)),parent(X))
 end
 
 """
-    tensor_product(f::ConvolutionCategoryMorphism, g::ConvolutionCategoryMorphism)
+    tensor_product(f::ConvolutionMorphism, g::ConvolutionMorphism)
 
 Return the convolution product of morphisms of coherent sheaves.
 """
-function tensor_product(f::ConvolutionCategoryMorphism, g::ConvolutionCategoryMorphism)
+function tensor_product(f::ConvolutionMorphism, g::ConvolutionMorphism)
     dom = domain(f)⊗domain(g)
     codom = codomain(f)⊗codomain(g)
 
     p12,p13,p23 = parent(domain(f)).projectors
-    return ConvolutionCategoryMorphism(dom,codom, p13(p12(f.m)⊗p23(g.m)))
+    return ConvolutionMorphism(dom,codom, p13(p12(f.m)⊗p23(g.m)))
 end
 
 """
@@ -216,51 +216,51 @@ function one(C::ConvolutionCategory)
     for i ∈ [orbit_index(C,d) for d ∈ diag]
         stlks[i] = one(RepresentationCategory(orbit_stabilizers(C)[i], F))
     end
-    return ConvolutionCategoryObject(CohSheafCategoryObject(C.squaredCoh, stlks), C)
+    return ConvolutionObject(CohSheafObject(C.squaredCoh, stlks), C)
 end
 
-function dual(X::ConvolutionCategoryObject)
+function dual(X::ConvolutionObject)
     orbit_reps = parent(X).squaredCoh.orbit_reps
     GSet = parent(X).squaredCoh.GSet
     perm = [findfirst(e -> e ∈ orbit(GSet, (y,x)), orbit_reps) for (x,y) ∈ orbit_reps]
     reps = [dual(ρ) for ρ ∈ stalks(X)][perm]
-    return ConvolutionCategoryObject(CohSheafCategoryObject(parent(X.sheaf), reps), parent(X))
+    return ConvolutionObject(CohSheafObject(parent(X.sheaf), reps), parent(X))
 end
 
-spherical(X::ConvolutionCategoryObject) = id(X)
+spherical(X::ConvolutionObject) = id(X)
 #-----------------------------------------------------------------
 #   Functionality: Morphisms
 #-----------------------------------------------------------------
 
-function compose(f::ConvolutionCategoryMorphism,g::ConvolutionCategoryMorphism)
-    return ConvolutionCategoryMorphism(domain(f),codomain(g),compose(f.m,g.m))
+function compose(f::ConvolutionMorphism,g::ConvolutionMorphism)
+    return ConvolutionMorphism(domain(f),codomain(g),compose(f.m,g.m))
 end
 
-function zero_morphism(X::ConvolutionCategoryObject, Y::ConvolutionCategoryObject)
-    return ConvolutionCategoryMorphism(X,Y,zero_morphism(X.sheaf,Y.sheaf))
+function zero_morphism(X::ConvolutionObject, Y::ConvolutionObject)
+    return ConvolutionMorphism(X,Y,zero_morphism(X.sheaf,Y.sheaf))
 end
 
-function +(f::ConvolutionCategoryMorphism, g::ConvolutionCategoryMorphism)
+function +(f::ConvolutionMorphism, g::ConvolutionMorphism)
     Morphism(domain(f),codomain(f), f.m + g.m)
 end
 
-function *(x, f::ConvolutionCategoryMorphism)
+function *(x, f::ConvolutionMorphism)
     Morphism(domain(f), codomain(f), x * f.m)
 end
 
-function matrices(f::ConvolutionCategoryMorphism)
+function matrices(f::ConvolutionMorphism)
     matrices(f.m)
 end
 
-matrix(f::ConvolutionCategoryMorphism) = matrix(f.m)
+matrix(f::ConvolutionMorphism) = matrix(f.m)
 
-function inv(f::ConvolutionCategoryMorphism)
+function inv(f::ConvolutionMorphism)
     return Morphism(codomain(f), domain(f), inv(f.m))
 end
 
-left_inverse(f::ConvolutionCategoryMorphism) = Morphism(codomain(f),domain(f), left_inverse(f.m))
+left_inverse(f::ConvolutionMorphism) = Morphism(codomain(f),domain(f), left_inverse(f.m))
 #-----------------------------------------------------------------
-#   Simple CategoryObjects
+#   Simple Objects
 #-----------------------------------------------------------------
 
 """
@@ -269,20 +269,20 @@ left_inverse(f::ConvolutionCategoryMorphism) = Morphism(codomain(f),domain(f), l
 Return a list of simple objects in Conv(``X``).
 """
 @memoize Dict function simples(C::ConvolutionCategory)
-    return [ConvolutionCategoryObject(sh,C) for sh ∈ simples(C.squaredCoh)]
+    return [ConvolutionObject(sh,C) for sh ∈ simples(C.squaredCoh)]
 end
 
 """
-    decompose(X::ConvolutionCategoryObject)
+    decompose(X::ConvolutionObject)
 
 Decompose ``X`` into a direct sum of simple objects with multiplicities.
 """
-function decompose(X::ConvolutionCategoryObject)
+function decompose(X::ConvolutionObject)
     facs = decompose(X.sheaf)
-    return [(ConvolutionCategoryObject(sh,parent(X)),d) for (sh,d) ∈ facs]
+    return [(ConvolutionObject(sh,parent(X)),d) for (sh,d) ∈ facs]
 end
 
-function is_simple(X::ConvolutionCategoryObject)
+function is_simple(X::ConvolutionObject)
     non_zero_stalks = [s for s ∈ stalks(X) if s != zero(parent(s))]
     if length(non_zero_stalks) != 1
         return false
@@ -295,21 +295,21 @@ end
 #-----------------------------------------------------------------
 
 struct ConvCategoryHomSpace <: AbstractCategoryHomSpace
-    X::ConvolutionCategoryObject
-    Y::ConvolutionCategoryObject
-    basis::Vector{ConvolutionCategoryMorphism}
+    X::ConvolutionObject
+    Y::ConvolutionObject
+    basis::Vector{ConvolutionMorphism}
     parent::VectorSpaces
 end
 
 """
-    Hom(X::ConvolutionCategoryObject, Y::ConvolutionCategoryObject)
+    Hom(X::ConvolutionObject, Y::ConvolutionObject)
 
 Return Hom(``X,Y``) as a vector space.
 """
-function Hom(X::ConvolutionCategoryObject, Y::ConvolutionCategoryObject)
+function Hom(X::ConvolutionObject, Y::ConvolutionObject)
     @assert parent(X) == parent(Y) "Missmatching parents"
     b = basis(Hom(X.sheaf,Y.sheaf))
-    conv_b = [ConvolutionCategoryMorphism(X,Y,m) for m ∈ b]
+    conv_b = [ConvolutionMorphism(X,Y,m) for m ∈ b]
 
     return ConvCategoryHomSpace(X,Y,conv_b, VectorSpaces(base_ring(X)))
 end
@@ -325,10 +325,10 @@ function show(io::IO, C::ConvolutionCategory)
     print(io, """Convolution category over G-set with $(length(C.GSet)) elements.""")
 end
 
-function show(io::IO, X::ConvolutionCategoryObject)
-    print(io, "CategoryObject in $(parent(X))")
+function show(io::IO, X::ConvolutionObject)
+    print(io, "Object in $(parent(X))")
 end
 
-function show(io::IO, f::ConvolutionCategoryMorphism)
+function show(io::IO, f::ConvolutionMorphism)
     print(io, "Morphism in $(parent(domain(f)))")
 end

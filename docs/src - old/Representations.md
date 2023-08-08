@@ -36,7 +36,7 @@ A group representation is defined by a group homomorphism from ``G`` into a
 finite dimensional vector space ``k^n``. These objects are of type
 
 ```
-GroupRepresentationCategoryObject <: RepresentationCategoryObject
+GroupRepresentationObject <: RepresentationObject
 ```
 
 They are constructed in one of two ways, either by imag"es of generators or by a function

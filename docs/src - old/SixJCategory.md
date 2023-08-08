@@ -6,7 +6,7 @@ using TensorCategories, Oscar
 
 We provide a structure `SixJCategory` for finite semisimple skeletal (multi)ring categories. 
 
-They are constructed by setting the multiplication table for the monoidal product and associativity for the simple objects. CategoryObjects in finite semisimple ring categories are just vectors with multiplicities of the simple objects in the decomposition. Thus morphism are vectors of matrices of according size.
+They are constructed by setting the multiplication table for the monoidal product and associativity for the simple objects. Objects in finite semisimple ring categories are just vectors with multiplicities of the simple objects in the decomposition. Thus morphism are vectors of matrices of according size.
 
 As an example we will construct the Ising fusion category. This is a fusion category with three simple objects ``1``, ``\chi`` and ``X``. The multiplication is given by ``\chi \otimes \chi = 1``, ``\chi \otimes X = X \otimes \chi = X`` and ``X \otimes X = 1 \oplus \chi``. There are precisely 3 non-trivial 6j-symbols ``\Phi_X^{\chi\,X\,\chi} = -1``, ``\Phi_{\chi}^{X\,\chi\,X} = -1`` und ``\Phi_X^{X\,X\,X} = \frac{1}{\sqrt 2}\begin{pmatrix} 1 & 1 \\ 1 & -1\end{pmatrix}``.
 

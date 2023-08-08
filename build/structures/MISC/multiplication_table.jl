@@ -1,17 +1,17 @@
-function multiplication_table(C::Category, simples::Vector{<:CategoryObject} = simples(C))
+function multiplication_table(C::Category, simples::Vector{<:Object} = simples(C))
     @assert is_semisimple(C) "Category needs to be semi-simple"
     m = [s⊗t for s ∈ simples, t ∈ simples]
     coeffs = [coefficients(m,simples) for m ∈ m]
     return [c[k] for c ∈ coeffs, k ∈ 1:length(simples)]
 end
 
-function multiplication_table(simples::Vector{<:CategoryObject})
+function multiplication_table(simples::Vector{<:Object})
     @assert is_semisimple(parent(simples[1])) "Category needs to be semi-simple"
 
     return multiplication_table(parent(simples[1]), simples)
 end
 
-function print_multiplication_table(simples::Vector{<:CategoryObject}, names::Vector{String} = ["v$i" for i ∈ 1:length(simples)])
+function print_multiplication_table(simples::Vector{<:Object}, names::Vector{String} = ["v$i" for i ∈ 1:length(simples)])
     @assert length(simples) == length(names) "Invalid input"
     mult_table = multiplication_table(parent(simples[1]), simples)
 
@@ -20,7 +20,7 @@ end
 
 print_multiplication_table(C::Category) = print_multiplication_table(simples(C), simples_names(C))
 
-function pretty_print_semisimple(m::CategoryObject,simples::Vector{<:CategoryObject},names::Vector{String})
+function pretty_print_semisimple(m::Object,simples::Vector{<:Object},names::Vector{String})
     facs = decompose(m, simples)
 
     if length(facs) == 0 return "0" end
@@ -36,7 +36,7 @@ function pretty_print_semisimple(m::CategoryObject,simples::Vector{<:CategoryObj
 end
 
 
-function coefficients(X::T, simples::Vector{T} = simples(parent(X))) where {T <: CategoryObject}
+function coefficients(X::T, simples::Vector{T} = simples(parent(X))) where {T <: Object}
     facs = decompose(X)
     coeffs = [0 for i ∈ 1:length(simples)]
     for (x,k) ∈ facs

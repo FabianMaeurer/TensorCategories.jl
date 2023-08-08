@@ -1,56 +1,56 @@
 
 struct Sets <: Category end
 
-struct SetCategoryObject <: CategoryObject
+struct SetObject <: Object
     set::T where T <: AbstractSet
 end
 
-struct SetCategoryMorphism <: CategoryMorphism
+struct SetMorphism <: Morphism
     m::Dict
-    domain::SetCategoryObject
-    codomain::SetCategoryObject
+    domain::SetObject
+    codomain::SetObject
 end
 
 #--------------------------------------------------
 #   Constructors
 #--------------------------------------------------
 
-SetCategoryObject(S::Array) = SetCategoryObject(Set(S))
+SetObject(S::Array) = SetObject(Set(S))
 
-function SetCategoryMorphism(D::SetCategoryObject, C::SetCategoryObject, m::Dict)
+function SetMorphism(D::SetObject, C::SetObject, m::Dict)
     if keys(m) ⊆ D && values(m) ⊆ C
-        return SetCategoryMorphism(m,D,C)
+        return SetMorphism(m,D,C)
     else
         throw(ErrorException("Mismatching (co)domain"))
     end
 end
 
-SetCategoryMorphism(D::SetCategoryObject, C::SetCategoryObject, m::Function) = SetCategoryMorphism(D,C, Dict(x => m(x) for x ∈ D))
+SetMorphism(D::SetObject, C::SetObject, m::Function) = SetMorphism(D,C, Dict(x => m(x) for x ∈ D))
 
 #--------------------------------------------------
 #   Functionality
 #--------------------------------------------------
 
-in(item,S::SetCategoryObject) = in(item,S.set)
+in(item,S::SetObject) = in(item,S.set)
 
-issubset(item, S::SetCategoryObject) = issubset(item, S.set)
+issubset(item, S::SetObject) = issubset(item, S.set)
 
-iterate(X::SetCategoryObject) = iterate(X.set)
-iterate(X::SetCategoryObject,state) = iterate(X.set,state)
+iterate(X::SetObject) = iterate(X.set)
+iterate(X::SetObject,state) = iterate(X.set,state)
 
-length(X::SetCategoryObject) = length(X.set)
+length(X::SetObject) = length(X.set)
 
-(f::SetCategoryMorphism)(item) = f.m[item]
+(f::SetMorphism)(item) = f.m[item]
 
-==(X::SetCategoryObject,Y::SetCategoryObject) = X.set == X.set
+==(X::SetObject,Y::SetObject) = X.set == X.set
 
-parent(X::SetCategoryObject) = Sets()
+parent(X::SetObject) = Sets()
 
 #--------------------------------------------------
-#   Functionality: CategoryMorphisms
+#   Functionality: Morphisms
 #--------------------------------------------------
 
-function compose(f::SetCategoryMorphism...)
+function compose(f::SetMorphism...)
     if length(f) == 1 return f[1] end
     if [domain(f[i]) == codomain(f[i-1]) for i ∈ 2:length(f)] != trues(length(f)-1)
         throw(ErrorException("Morphisms not compatible"))
@@ -59,41 +59,41 @@ function compose(f::SetCategoryMorphism...)
     for g in f[2:end]
         m = Dict(x => g(m(x)) for x ∈ keys(m.m))
     end
-    return SetCategoryMorphism(domain(f[1]), codomain(f[end]),m)
+    return SetMorphism(domain(f[1]), codomain(f[end]),m)
 end
 
 
-function inv(f::SetCategoryMorphism)
+function inv(f::SetMorphism)
     if length(values(f.m)) == length(keys(f.m))
-        SetCategoryMorphism( codomain(f),domain(f), Dict(v => k for (k,v) ∈ f.m))
+        SetMorphism( codomain(f),domain(f), Dict(v => k for (k,v) ∈ f.m))
     else
         throw(ErrorException("Not invertible"))
     end
 end
 
-id(X::SetCategoryObject) = SetCategoryMorphism(X,X, x->x)
-==(f::SetCategoryMorphism, g::SetCategoryMorphism) = f.m == g.m
+id(X::SetObject) = SetMorphism(X,X, x->x)
+==(f::SetMorphism, g::SetMorphism) = f.m == g.m
 
 #--------------------------------------------------
 #   Product
 #--------------------------------------------------
 
-function product(X::SetCategoryObject, Y::SetCategoryObject, projections = false)
-    Z = SetCategoryObject(Set([(x,y) for x ∈ X, y ∈ Y]))
-    pX = SetCategoryMorphism(Z,X, x -> x[1])
-    pY = SetCategoryMorphism(Z,Y, x -> x[2])
+function product(X::SetObject, Y::SetObject, projections = false)
+    Z = SetObject(Set([(x,y) for x ∈ X, y ∈ Y]))
+    pX = SetMorphism(Z,X, x -> x[1])
+    pY = SetMorphism(Z,Y, x -> x[2])
     return projections ? (Z,[pX,pY]) : Z
 end
 
-function coproduct(X::SetCategoryObject, Y::SetCategoryObject, injections = false)
+function coproduct(X::SetObject, Y::SetObject, injections = false)
     if length(X.set ∩ Y.set) != 0
-        Z = SetCategoryObject(union([(x,0) for x ∈ X],[(y,1) for y ∈ Y]))
-        ix = SetCategoryMorphism(X,Z, x -> (x,0))
-        iy = SetCategoryMorphism(Y,Z, y -> (y,1))
+        Z = SetObject(union([(x,0) for x ∈ X],[(y,1) for y ∈ Y]))
+        ix = SetMorphism(X,Z, x -> (x,0))
+        iy = SetMorphism(Y,Z, y -> (y,1))
     else
-        Z = SetCategoryObject(union(X.set,Y.set))
-        ix = SetCategoryMorphism(X,Z, x -> x)
-        iy = SetCategoryMorphism(Y,Z, y -> y)
+        Z = SetObject(union(X.set,Y.set))
+        ix = SetMorphism(X,Z, x -> x)
+        iy = SetMorphism(Y,Z, y -> y)
     end
     return injections ? (Z, [ix,iy]) : Z
 end
@@ -103,11 +103,11 @@ end
 #--------------------------------------------------
 
 struct SetCategoryHomSet <: CategoryHomSet
-    X::SetCategoryObject
-    Y::SetCategoryObject
+    X::SetObject
+    Y::SetObject
 end
 
-Hom(X::SetCategoryObject, Y::SetCategoryObject) = SetCategoryHomSet(X,Y)
+Hom(X::SetObject, Y::SetObject) = SetCategoryHomSet(X,Y)
 
 #--------------------------------------------------
 #   Pretty printing
@@ -117,6 +117,6 @@ function show(io::IO, X::Sets)
     print(io,"Category of finte sets")
 end
 
-function show(io::IO, X::SetCategoryObject)
+function show(io::IO, X::SetObject)
     print(X.set)
 end

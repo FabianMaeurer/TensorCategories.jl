@@ -150,7 +150,7 @@ function I2(m)
 	return C
 end
 
-#Creates the fusion subcategory version. CategoryObjects Bs, Bsts, Bststs,...
+#Creates the fusion subcategory version. Objects Bs, Bsts, Bststs,...
 function I2subcategory(m)
 	n=div(m,2)
 	F,z=cyclotomic_field(2*m)

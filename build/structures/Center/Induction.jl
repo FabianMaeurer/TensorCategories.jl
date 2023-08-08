@@ -3,11 +3,11 @@
 #   Induction
 #-------------------------------------------------------------------------------
 
-function induction(X::CategoryObject, simples::Vector = simples(parent(X)); parent_category::CenterCategory = Center(parent(X)))
+function induction(X::Object, simples::Vector = simples(parent(X)); parent_category::CenterCategory = Center(parent(X)))
     @assert is_semisimple(parent(X)) "Requires semisimplicity"
     Z = direct_sum([s⊗X⊗dual(s) for s ∈ simples])[1]
     a = associator
-    γ = Vector{CategoryMorphism}(undef, length(simples))
+    γ = Vector{Morphism}(undef, length(simples))
     C = parent(X)
     for i ∈ 1:length(simples)
         W = simples[i]
@@ -47,14 +47,14 @@ function induction(X::CategoryObject, simples::Vector = simples(parent(X)); pare
         γ[i] = inv(distr_after) ∘ γ[i] ∘ distr_before 
     end
 
-    return CenterCategoryObject(parent_category,Z,γ)
+    return CenterObject(parent_category,Z,γ)
 end
 
-function partial_induction(X::CategoryObject, ind_simples::Vector, simples::Vector = simples(parent(X)); parent_category::CenterCategory = Center(parent(X)))
+function partial_induction(X::Object, ind_simples::Vector, simples::Vector = simples(parent(X)); parent_category::CenterCategory = Center(parent(X)))
     @assert is_semisimple(parent(X)) "Requires semisimplicity"
     Z = direct_sum([s⊗X⊗dual(s) for s ∈ ind_simples])
     a = associator
-    γ = Vector{CategoryMorphism}(undef, length(simples))
+    γ = Vector{Morphism}(undef, length(simples))
     C = parent(X)
     for i ∈ 1:length(simples)
         W = simples[i]
@@ -94,18 +94,18 @@ function partial_induction(X::CategoryObject, ind_simples::Vector, simples::Vect
         γ[i] = inv(distr_after) ∘ γ[i] ∘ distr_before 
     end
 
-    return CenterCategoryObject(parent_category,Z,γ)
+    return CenterObject(parent_category,Z,γ)
 end
 
-function induction_restriction(X::CategoryObject, simples::Vector = simples(parent(X)))
+function induction_restriction(X::Object, simples::Vector = simples(parent(X)))
     @assert is_semisimple(parent(X)) "Requires semisimplicity"
     Z = direct_sum([s⊗X⊗dual(s) for s ∈ simples])[1]
 end
-# function induction(X::CategoryObject, simples::Vector = simples(parent(X)))
+# function induction(X::Object, simples::Vector = simples(parent(X)))
 #     @assert is_semisimple(parent(X)) "Requires semisimplicity"
 #     Z = direct_sum([s⊗X⊗dual(s) for s ∈ simples])
 #     a = associator
-#     γ = Vector{CategoryMorphism}(undef, length(simples))
+#     γ = Vector{Morphism}(undef, length(simples))
 #     C = parent(X)
 #     for i ∈ 1:length(simples)
 #         W = simples[i]
@@ -149,7 +149,7 @@ end
 #         γ[i] = inv(distr_after) ∘ γ[i] ∘ distr_before
 #     end
         
-#     return CenterCategoryObject(CenterCategory(base_ring(X),parent(X)),Z,γ)
+#     return CenterObject(CenterCategory(base_ring(X),parent(X)),Z,γ)
 # end
 
 
@@ -157,16 +157,16 @@ end
 #   Pairing and Dual Basis
 #-------------------------------------------------------------------------------
 
-function pairing(f::CategoryMorphism, g::CategoryMorphism)
+function pairing(f::Morphism, g::Morphism)
     A,B = domain(f), codomain(g)
     return ev(B)∘(f⊗g)∘coev(A)
 end
 
-# function pairing(f::CategoryMorphism, g::CategoryMorphism,S,W,T)
+# function pairing(f::Morphism, g::Morphism,S,W,T)
 #     return (id(W)⊗ev(dual(T))) ∘ (id(W)⊗(spherical(T)⊗id(dual(T)))) ∘ associator(W,T,dual(T)) ∘ (f⊗g) ∘ inv(associator(S,dual(S),W)) ∘ (coev(S)⊗id(W))
 # end
 
-# function dual_basis(S::CategoryObject, W::CategoryObject, T::CategoryObject)
+# function dual_basis(S::Object, W::Object, T::Object)
 #     base = basis(Hom(S,W⊗T))
 #     base2 = basis(Hom(dual(S)⊗W,dual(T)))
 #     dual_base = []

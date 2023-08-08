@@ -26,14 +26,14 @@ mutable struct SixJCategory <: Category
 end
 
 
-struct SixJCategoryObject <: CategoryObject
+struct SixJObject <: Object
     parent::SixJCategory
     components::Vector{Int}
 end
 
 struct RingCatMorphism <: Morphism
-    domain::SixJCategoryObject
-    codomain::SixJCategoryObject
+    domain::SixJObject
+    codomain::SixJObject
     m::MatElem
 end
 
@@ -44,7 +44,7 @@ end
 
 SixJCategory(x...) = SixJCategory(x...)
 
-Morphism(X::SixJCategoryObject, Y::SixJCategoryObject, m::MatElem) = RingCatMorphism(X,Y,m)
+Morphism(X::SixJObject, Y::SixJObject, m::MatElem) = RingCatMorphism(X,Y,m)
 
 
 #-------------------------------------------------------------------------------
@@ -92,22 +92,22 @@ function set_twist!(F::SixJCategory, t::Vector)
     F.twist = t
 end
 
-dim(X::SixJCategoryObject) = base_ring(X)(tr(id(X)))
+dim(X::SixJObject) = base_ring(X)(tr(id(X)))
 
 (::Type{Int})(x::fmpq) = Int(numerator(x))
 
 
-braiding(X::SixJCategoryObject, Y::SixJCategoryObject) = parent(X).braiding(X,Y)
+braiding(X::SixJObject, Y::SixJObject) = parent(X).braiding(X,Y)
 
 
 
-function associator(X::SixJCategoryObject, Y::SixJCategoryObject, Z::SixJCategoryObject)
+function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     C = parent(X)
     if issimple(X) && issimple(Y) && issimple(Z)
         mat = diagonal_matrix(C.ass[X.components[1], Y.components[1], Z.components[1],:])
         dom = (X⊗Y)⊗Z
         cod = X⊗(Y⊗Z)
-        ass = Morphism(SixJCategoryObject(C, sort(dom.components)), SixJCategoryObject(C, sort(cod.components)), mat)
+        ass = Morphism(SixJObject(C, sort(dom.components)), SixJObject(C, sort(cod.components)), mat)
         return id(cod)∘ass∘id(dom)
     end
 
@@ -134,16 +134,16 @@ end
 #-------------------------------------------------------------------------------
 is_semisimple(::SixJCategory) = true
 
-issimple(X::SixJCategoryObject) = length(X.components) == 1
+issimple(X::SixJObject) = length(X.components) == 1
 
-==(X::SixJCategoryObject, Y::SixJCategoryObject) = parent(X) == parent(Y) && X.components == Y.components
+==(X::SixJObject, Y::SixJObject) = parent(X) == parent(Y) && X.components == Y.components
 ==(f::RingCatMorphism, g::RingCatMorphism) = domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
 
-#decompose(X::SixJCategoryObject) = [(x,k) for (x,k) ∈ zip(simples(parent(X)), X.components) if k != 0]
+#decompose(X::SixJObject) = [(x,k) for (x,k) ∈ zip(simples(parent(X)), X.components) if k != 0]
 
 inv(f::RingCatMorphism) = RingCatMorphism(codomain(f),domain(f), inv(f.m))
 
-id(X::SixJCategoryObject) = RingCatMorphism(X,X, one(MatrixSpace(base_ring(X),length(X.components),length(X.components))))
+id(X::SixJObject) = RingCatMorphism(X,X, one(MatrixSpace(base_ring(X),length(X.components),length(X.components))))
 
 function compose(f::RingCatMorphism, g::RingCatMorphism)
     is_iso, iso = is_isomorphic(codomain(f), domain(g))
@@ -162,29 +162,29 @@ function +(f::RingCatMorphism, g::RingCatMorphism)
 end
 
 """
-    dual(X::SixJCategoryObject)
+    dual(X::SixJObject)
 
 Return the dual object of ``X``. An error is thrown if ``X`` is not rigid.
 """
-function dual(X::SixJCategoryObject)
+function dual(X::SixJObject)
     C = parent(X)
 
-    # Dual of simple CategoryObject
+    # Dual of simple Object
     if issimple(X)
         # Check for rigidity
         i = findfirst(e -> e == 1, X.components)
         j = findall(e -> C.tensor_product[i,e,1] >= 1, 1:C.simples)
         if length(j) != 1
-            throw(ErrorException("CategoryObject not rigid."))
+            throw(ErrorException("Object not rigid."))
         end
-        return SixJCategoryObject(C,[i == j[1] ? 1 : 0 for i ∈ 1:C.simples])
+        return SixJObject(C,[i == j[1] ? 1 : 0 for i ∈ 1:C.simples])
     end
 
     # Build dual from simple objects
     return direct_sum([dual(Y)^(X.components[i]) for (Y,i) ∈ zip(simples(C), 1:C.simples)])
 end
 
-function coev(X::SixJCategoryObject) where T
+function coev(X::SixJObject) where T
     DX = dual(X)
     C = parent(X)
     F = base_ring(C)
@@ -210,12 +210,12 @@ function coev(X::SixJCategoryObject) where T
     return Morphism(one(C), X⊗DX, mats)
 end
 
-function ev(X::SixJCategoryObject)
+function ev(X::SixJObject)
     DX = dual(X)
     C = parent(X)
     F = base_ring(C)
 
-    # Simple CategoryObjects
+    # Simple Objects
     if issimple(X)
         # If X is simple
         e = basis(Hom(DX⊗X, one(C)))[1]
@@ -225,7 +225,7 @@ function ev(X::SixJCategoryObject)
     end
 
     m = elem_type(F)[]
-    #Arbitrary CategoryObjects
+    #Arbitrary Objects
     for (x,k) ∈ zip(simples(C),DX.components), y ∈ simples(C)
         if x == dual(y)
             c = F(ev(y)[1]).*([F(a==b) for a ∈ 1:k, b ∈ 1:k][:])
@@ -257,7 +257,7 @@ end
 #     return RingCatMorphism(dom,cod,m)
 # end
 
-getindex(X::SixJCategoryObject, i) = X.components[i]
+getindex(X::SixJObject, i) = X.components[i]
 
 
 function matrix(f::RingCatMorphism)
@@ -286,12 +286,12 @@ function (F::Field)(f::RingCatMorphism)
     return F(f.m[1,1])
 end
 
-spherical(X::SixJCategoryObject) = id(X)
+spherical(X::SixJObject) = id(X)
 #-------------------------------------------------------------------------------
 #   Tensor Product
 #-------------------------------------------------------------------------------
 
-function tensor_product(X::SixJCategoryObject, Y::SixJCategoryObject)
+function tensor_product(X::SixJObject, Y::SixJObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
     C = parent(X)
     n = C.simples
@@ -304,7 +304,7 @@ function tensor_product(X::SixJCategoryObject, Y::SixJCategoryObject)
         end
     end
 
-    return SixJCategoryObject(C,T)
+    return SixJObject(C,T)
 end
 function tensor_product(f::RingCatMorphism, g::RingCatMorphism)
     dom = domain(f) ⊗ domain(g)
@@ -343,12 +343,12 @@ one(C::SixJCategory) = simples(C)[1]
 #   Direct sum
 #-------------------------------------------------------------------------------
 
-function direct_sum(X::SixJCategoryObject, Y::SixJCategoryObject)
+function direct_sum(X::SixJObject, Y::SixJObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
-    return SixJCategoryObject(parent(X), [X.components; Y.components])
+    return SixJObject(parent(X), [X.components; Y.components])
 end
 
-function direct_sum(X::SixJCategoryObject, Y::SixJCategoryObject)
+function direct_sum(X::SixJObject, Y::SixJObject)
     S = direct_sum(X,Y)
     ix_mat = matrix(zero_morphism(X,S))
     iy_mat = matrix(zero_morphism(Y,S))
@@ -381,13 +381,13 @@ function direct_sum(f::RingCatMorphism, g::RingCatMorphism)
 end
 
 
-zero(C::SixJCategory) = SixJCategoryObject(C,[])
+zero(C::SixJCategory) = SixJObject(C,[])
 
-function zero_morphism(X::SixJCategoryObject, Y::SixJCategoryObject)
+function zero_morphism(X::SixJObject, Y::SixJObject)
     return RingCatMorphism(X,Y,zero(MatrixSpace(base_ring(X), length(X.components), length(Y.components))))
 end
 
-function is_isomorphic(X::SixJCategoryObject, Y::SixJCategoryObject)
+function is_isomorphic(X::SixJObject, Y::SixJObject)
     if sort(X.components) != sort(Y.components)
         return false, nothing
     else
@@ -399,16 +399,16 @@ function is_isomorphic(X::SixJCategoryObject, Y::SixJCategoryObject)
     end
 end
 #-------------------------------------------------------------------------------
-#   Simple CategoryObjects
+#   Simple Objects
 #-------------------------------------------------------------------------------
 
 function simples(C::SixJCategory)
     n = C.simples
-    [SixJCategoryObject(C, [i]) for i ∈ 1:n]
+    [SixJObject(C, [i]) for i ∈ 1:n]
 end
 
 function getindex(C::SixJCategory, i)
-    SixJCategoryObject(C,[i])
+    SixJObject(C,[i])
 end
 
 #-------------------------------------------------------------------------------
@@ -419,7 +419,7 @@ function kernel(f::RingCatMorphism)
     C = parent(domain(f))
     kernels = [kernel(Morphism(m)) for m ∈ f.m]
     mats = [matrix(m) for (k,m) ∈ kernels]
-    ker = SixJCategoryObject(C,[dim(k) for (k,m) ∈ kernels])
+    ker = SixJObject(C,[dim(k) for (k,m) ∈ kernels])
 
     return ker, Morphism(ker, domain(f), mats)
 end
@@ -471,13 +471,13 @@ end
 #-------------------------------------------------------------------------------
 
 struct SixJCategoryHomSpace<: CategoryHomSpace
-    X::SixJCategoryObject
-    Y::SixJCategoryObject
+    X::SixJObject
+    Y::SixJObject
     basis::Vector{RingCatMorphism}
     parent::VectorSpaces
 end
 
-function Hom(X::SixJCategoryObject, Y::SixJCategoryObject)
+function Hom(X::SixJObject, Y::SixJObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
     Xi, Yi = X.components, Y.components
     F = base_ring(X)
@@ -526,7 +526,7 @@ function show(io::IO, C::SixJCategory)
     print(io, "Fusion Category with $(C.simples) simple objects")
 end
 
-function show(io::IO, X::SixJCategoryObject)
+function show(io::IO, X::SixJObject)
     x_comps = X.components
     coeffs = [length(x_comps[x_comps .== k]) for k ∈ 1:parent(X).simples]
 

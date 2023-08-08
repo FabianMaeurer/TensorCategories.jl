@@ -1,12 +1,12 @@
 
 abstract type RepresentationCategory <: Category end
 
-abstract type RepresentationCategoryObject <: CategoryObject end
+abstract type RepresentationObject <: Object end
 
-abstract type RepresentationCategoryMorphism <: CategoryMorphism end
+abstract type RepresentationMorphism <: Morphism end
 
 
-intdim(ρ::RepresentationCategoryObject) = ρ.intdim
-dim(ρ::RepresentationCategoryObject) = base_ring(ρ)(intdim(ρ))
-base_ring(ρ::RepresentationCategoryObject) = parent(ρ).base_ring
+intdim(ρ::RepresentationObject) = ρ.intdim
+dim(ρ::RepresentationObject) = base_ring(ρ)(intdim(ρ))
+base_ring(ρ::RepresentationObject) = parent(ρ).base_ring
 base_ring(Rep::RepresentationCategory) = Rep.base_ring

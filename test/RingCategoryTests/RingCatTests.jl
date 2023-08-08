@@ -5,11 +5,11 @@
 I = Ising()
 a,b,c = simples(I)
 
-@testset "Ising: CategoryObjects" begin
+@testset "Ising: Objects" begin
     X = a^2 ⊕ b ⊕ c^2
     Y = a ⊕ c^2
-    @test X == SixJCategoryObject(I, [2,1,2])
-    @test X⊗Y == SixJCategoryObject(I, [6,5,8])
+    @test X == SixJObject(I, [2,1,2])
+    @test X⊗Y == SixJObject(I, [6,5,8])
 end
 
 @testset "Associator" begin

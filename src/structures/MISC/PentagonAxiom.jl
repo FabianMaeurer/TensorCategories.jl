@@ -1,21 +1,21 @@
 """
-    pentagon_axiom(X::T, Y::T, Z::T, W::T) where T <: CategoryObject
+    pentagon_axiom(X::T, Y::T, Z::T, W::T) where T <: Object
 
 Check the pentagon axiom for ```X, Y, Z, W```.
 """
-function pentagon_axiom(X::T, Y::T, Z::T, W::T) where T <: CategoryObject
+function pentagon_axiom(X::T, Y::T, Z::T, W::T) where T <: Object
     f = (id(X)⊗associator(Y,Z,W)) ∘ associator(X,Y⊗Z,W) ∘ (associator(X,Y,Z)⊗id(W))
     g = associator(X,Y,Z⊗W) ∘ associator(X⊗Y,Z,W)
     return f == g
 end
 
 """
-    pentagon_axiom(objects::Vector{<:CategoryObject}, log::Bool = false)
+    pentagon_axiom(objects::Vector{<:Object}, log::Bool = false)
 
 Check the pentagon axiom for all combinations of objects in ```objects```. If
 ```log = true``` an array with the failing combinations is returned
 """
-function pentagon_axiom(objects::Vector{<:CategoryObject}, log::Bool = false)
+function pentagon_axiom(objects::Vector{<:Object}, log::Bool = false)
     failed = []
     for x ∈ objects, y ∈ objects,
         z ∈ objects, w ∈ objects

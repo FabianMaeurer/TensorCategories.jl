@@ -2,30 +2,30 @@ struct ProductCategory{N} <: Category
     factors::Tuple
 end
 
-struct ProductCategoryObject{N} <: CategoryObject
+struct ProductObject{N} <: Object
     parent::ProductCategory{N}
     factors::Tuple
 end
 
-struct ProductMorphism{N} <: CategoryMorphism
-    domain::ProductCategoryObject{N}
-    codomain::ProductCategoryObject{N}
+struct ProductMorphism{N} <: Morphism
+    domain::ProductObject{N}
+    codomain::ProductObject{N}
     factors::Tuple
 end
 
 
 ProductCategory(C::Category...) = ProductCategory{length(C)}(C)
-ProductCategoryObject(X::CategoryObject...) = ProductCategoryObject{length(X)}(ProductCategory(parent.(X)...), X)
+ProductObject(X::Object...) = ProductObject{length(X)}(ProductCategory(parent.(X)...), X)
 
 ×(C::Category, D::Category) = ProductCategory(C,D)
 
-function Morphism(f::CategoryMorphism...)
-    dom = ProductCategoryObject(domain.(f)...)
-    cod = ProductCategoryObject(codomain.(f)...)
+function Morphism(f::Morphism...)
+    dom = ProductObject(domain.(f)...)
+    cod = ProductObject(codomain.(f)...)
     ProductMorphism{length(X)}(dom,cod,f)
 end
 
-function Morphism(X::ProductCategoryObject{N}, Y::ProductCategoryObject{N}, f::NTuple{N,CategoryMorphism}) where N
+function Morphism(X::ProductObject{N}, Y::ProductObject{N}, f::NTuple{N,Morphism}) where N
     ProductMorphism{N}(X,Y,f)
 end
 
@@ -41,7 +41,7 @@ function *(λ, f::ProductMorphism)
     return ProductMorphism(domain(f), codomain(f), Tuple(λ*fi for (fi) ∈ f.factors))
 end
 
-getindex(X::ProductCategoryObject,x) = X.factors[x]
+getindex(X::ProductObject,x) = X.factors[x]
 getindex(f::ProductMorphism,x) = f.factors[x]
 
 base_ring(C::ProductCategory) = parent(*(gen.(base_ring.([c for c ∈ C.factors]))...))
@@ -59,9 +59,9 @@ inv(f::ProductMorphism) = ProductMorphism(codomain(f),domain(f), Tuple(inv(fi) f
 #-----------------------------------------------------------------
 
 
-function direct_sum(X::ProductCategoryObject, Y::ProductCategoryObject)
+function direct_sum(X::ProductObject, Y::ProductObject)
     sums = [direct_sum(x,y) for (x,y) ∈ zip(X.factors,Y.factors)]
-    Z = ProductCategoryObject(parent(X), Tuple(s[1] for s ∈ sums))
+    Z = ProductObject(parent(X), Tuple(s[1] for s ∈ sums))
     ix = ProductMorphism(X,Z, Tuple(s[2][1] for s ∈ sums))
     iy = ProductMorphism(Y,Z, Tuple(s[2][2] for s ∈ sums))
     px = ProductMorphism(Z,X, Tuple(s[3][1] for s ∈ sums))
@@ -70,8 +70,8 @@ function direct_sum(X::ProductCategoryObject, Y::ProductCategoryObject)
 end
 
 
-function tensor_product(X::ProductCategoryObject, Y::ProductCategoryObject)
-    return ProductCategoryObject(parent(X), Tuple([tensor_product(x,y) for (x,y) ∈ zip(X.factors, Y.factors)]))
+function tensor_product(X::ProductObject, Y::ProductObject)
+    return ProductObject(parent(X), Tuple([tensor_product(x,y) for (x,y) ∈ zip(X.factors, Y.factors)]))
 end
 
 function direct_sum(f::ProductMorphism, g::ProductMorphism)
@@ -83,36 +83,36 @@ function tensor_product(f::ProductMorphism, g::ProductMorphism)
 end
 
 function simples(C::ProductCategory{N}) where N
-    simpls = ProductCategoryObject{N}[]
+    simpls = ProductObject{N}[]
     for i ∈ 1:N
         for s ∈ simples(C.factors[i])
             so = [zero(Ci) for Ci ∈ C.factors]
             so[i] = s
-            push!(simpls, ProductCategoryObject(C,Tuple(so)))
+            push!(simpls, ProductObject(C,Tuple(so)))
         end
     end
     return simpls
 end
 
 
-dual(X::ProductCategoryObject) = ProductCategoryObject(parent(X), Tuple(dual(x) for x ∈ X.factors))
+dual(X::ProductObject) = ProductObject(parent(X), Tuple(dual(x) for x ∈ X.factors))
 
-ev(X::ProductCategoryObject) = ProductMorphism(dual(X)⊗X, one(parent(X)), Tuple(ev(x) for x ∈ X.factors))
-coev(X::ProductCategoryObject) = ProductMorphism(one(parent(X)), X⊗dual(X), Tuple(coev(x) for x ∈ X.factors))
+ev(X::ProductObject) = ProductMorphism(dual(X)⊗X, one(parent(X)), Tuple(ev(x) for x ∈ X.factors))
+coev(X::ProductObject) = ProductMorphism(one(parent(X)), X⊗dual(X), Tuple(coev(x) for x ∈ X.factors))
 
-spherical(X::ProductCategoryObject) =  ProductMorphism(X,dual(dual(X)), Tuple(spherical(x) for x ∈ X.factors))
+spherical(X::ProductObject) =  ProductMorphism(X,dual(dual(X)), Tuple(spherical(x) for x ∈ X.factors))
 
-associator(X::ProductCategoryObject, Y::ProductCategoryObject, Z::ProductCategoryObject) = ProductMorphism((X⊗Y)⊗Z, X⊗(Y⊗Z), Tuple(associator(x,y,z) for (x,y,z) ∈ zip(X.factors,Y.factors,Z.factors)))
+associator(X::ProductObject, Y::ProductObject, Z::ProductObject) = ProductMorphism((X⊗Y)⊗Z, X⊗(Y⊗Z), Tuple(associator(x,y,z) for (x,y,z) ∈ zip(X.factors,Y.factors,Z.factors)))
 
-zero(C::ProductCategory) = ProductCategoryObject(C, zero.(C.factors))
-one(C::ProductCategory) = ProductCategoryObject(C, one.(C.factors))
+zero(C::ProductCategory) = ProductObject(C, zero.(C.factors))
+one(C::ProductCategory) = ProductObject(C, one.(C.factors))
 
-zero_morphism(X::ProductCategoryObject, Y::ProductCategoryObject) = ProductMorphism(X,Y, Tuple(zero_morphism(x,y) for (x,y) ∈ zip(X.factors, Y.factors)))
-id(X::ProductCategoryObject) = ProductMorphism(X,X, Tuple(id(x) for x ∈ X.factors))
+zero_morphism(X::ProductObject, Y::ProductObject) = ProductMorphism(X,Y, Tuple(zero_morphism(x,y) for (x,y) ∈ zip(X.factors, Y.factors)))
+id(X::ProductObject) = ProductMorphism(X,X, Tuple(id(x) for x ∈ X.factors))
 
 is_multitensor(C::ProductCategory) = *(is_multitensor.(C.factors)...)
 
-function Hom(X::ProductCategoryObject{N}, Y::ProductCategoryObject{N}) where N
+function Hom(X::ProductObject{N}, Y::ProductObject{N}) where N
     basis = ProductMorphism[]
     for i ∈ 1:N
         for f ∈ Hom(X[i], Y[i])

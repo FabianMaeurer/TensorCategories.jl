@@ -27,10 +27,10 @@ end
 mutable struct Decategorification 
     domain::Category
     codomain::ℕRing
-    simples::Vector{CategoryObject}
+    simples::Vector{Object}
 end
 
-function (D::Decategorification)(X::CategoryObject)
+function (D::Decategorification)(X::Object)
     @assert D.domain = parent(X)
     coeffs = coefficients(X,simples)
     D.codomain(coeffs)
