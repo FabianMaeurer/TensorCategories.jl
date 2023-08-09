@@ -21,7 +21,7 @@ mutable struct SixJCategory <: Category
         C = new(F, length(mult[1,1,:]), names)
         set_tensor_product!(C,mult)
         set_spherical!(C, [F(1) for _ ∈ names])
-        C.dims = elem_type(F)[0 for _ ∈ names]
+        C.dims = [F(0) for _ ∈ names]
         #C.ass = [id(⊗(X,Y,Z)) for X ∈ simples(C), Y ∈ simples(C), Z ∈ simples(C)]
         #C.dims = [1 for i ∈ 1:length(names)]
         return C

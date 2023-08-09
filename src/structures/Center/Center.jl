@@ -160,12 +160,19 @@ Return the tensor product of ```X``` and ```Y```.
 function tensor_product(X::CenterObject, Y::CenterObject)
     Z = X.object ⊗ Y.object
     γ = Morphism[]
-    a = associator
-    inv_a = inv_associator
-    s = simples(parent(X.object))
+    simple_objects = simples(parent(X.object))
+
     x,y = X.object, Y.object
-    for (S, yX, yY) ∈ zip(s, X.γ, Y.γ)
-        push!(γ, a(S,x,y)∘(yX⊗id(y))∘inv_a(x,S,y)∘(id(x)⊗yY)∘a(x,y,S))
+
+    for (S, yX, yY) ∈ zip(simple_objects, half_braiding(X), half_braiding(Y))
+
+        half_braiding_with_S = associator(S,x,y) ∘ 
+                                (yX⊗id(y)) ∘
+                                inv_aassociator(x,S,y) ∘ 
+                                (id(x)⊗yY) ∘ 
+                                associator(x,y,S)
+                                
+        push!(γ, half_braiding_with_S)
     end
     return CenterObject(parent(X), Z, γ)
 end

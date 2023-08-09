@@ -106,7 +106,7 @@ end
 function end_of_induction(X::Object, IX = induction(X))
     B = basis(Hom(X,object(IX)))
 
-    ind_B = [Morphism(IX,IX,horizontal_direct_sum([sqrt(dim(xi))*((ev(dual(xi)) ∘(spherical(xi)⊗id(dual(xi))))⊗id(object(IX))) ∘ (id(xi)⊗half_braiding(IX,dual(xi))) ∘ associator(xi,object(IX),dual(xi)) ∘ ((id(xi)⊗f)⊗id(dual(xi))) for xi in simples(parent(X))])) for f ∈ B]
+    ind_B = [Morphism(IX,IX,horizontal_direct_sum([(dim(xi))*((ev(dual(xi)) ∘(spherical(xi)⊗id(dual(xi))))⊗id(object(IX))) ∘ (id(xi)⊗half_braiding(IX,dual(xi))) ∘ associator(xi,object(IX),dual(xi)) ∘ ((id(xi)⊗f)⊗id(dual(xi))) for xi in simples(parent(X))])) for f ∈ B]
 
     return CenterCategoryHomSpace(IX,IX,ind_B, VectorSpaces(base_ring(X)))
 end
