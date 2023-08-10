@@ -233,6 +233,28 @@ function zero_morphism(X::Object, Y::Object)
     end
     @error "There might be no zero morphism"
 end
+
+""" 
+
+    initial_object(C::Category)
+
+Return the initial object of `C`.
+"""
+function initial_object(C::Category)
+    @assert is_additive(C) "No initial object known"
+    return zero(C)
+end
+
+""" 
+
+    terminal_object(C::Category)
+
+Return the terminal object of C.
+"""
+function terminal_object(C::Category)
+    @assert is_additive(C) "No terminal object known"
+    return zero(C)
+end
 #---------------------------------------------------------
 #   Horizontal and Vertical direct sums
 #---------------------------------------------------------

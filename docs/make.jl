@@ -1,25 +1,27 @@
 using Documenter, TensorCategories, Oscar, DocumenterCitations
 
-bib = CitationBibliography("MyBib.bib")
+bib = CitationBibliography(joinpath(@__DIR__, "src", "MyBib.bib"))
 
 makedocs(
-    prettyurls = !("local" in ARGS),
     bib,
     sitename = "TensorCategories.jl",
     modules = [TensorCategories],
     format = Documenter.HTML(
         canonical = "https://juliadocs.github.io/Documenter.jl/stable/",
+        prettyurls = !("local" in ARGS)
     ),
     pages = [
         "Home" => "index.md",
         "Category Interface" => [
             "Philosophy" => "Interface/Philosophy.md",
-            "Categories" => "Interface/BasicInterface.md",
-            "Abelian Categories" => "Interface/Abelian Categories.md",
+            "Categories" => "Interface/Categories.md",
+            "Abelian Categories" => "Interface/AbelianCategories.md",
             "Monoidal Categories" => "Interface/MonoidalCategories.md",
             "Tensor Categories" => "Interface/TensorCategories.md",
             "Optimisations" => "Interface/AdvancedInterface.md"
         ],
+        "Examples" => [],
+        "6j-Symbols" => "SixJCategories/SixJCategories.md",
         # "Concrete Examples" => [
         #     "Vector Spaces" => "VectorSpaces.md",
         #     "Representations" => "Representations.md",
@@ -34,6 +36,7 @@ makedocs(
         # ],
        #"Multitensor Category Interface" => "Multitensor.md",
         "The Center Construction" => "Center.md",
+        "References" => "References.md"
     ],
 )
 
