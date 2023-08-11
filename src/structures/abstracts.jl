@@ -487,6 +487,12 @@ right_dual(X::Object) = dual(X)
 
 dual(f::Morphism) = left_dual(f)
 
+""" 
+
+    left_dual(f::Morphism)
+
+Return the left dual of a morphism ``f``.
+"""
 function left_dual(f::Morphism)
     X = domain(f)
     Y = codomain(f)
@@ -497,8 +503,23 @@ function left_dual(f::Morphism)
     (a)∘(b)∘(c)∘(d)
 end
 
+
+""" 
+
+    tr(f::Morphism)
+
+Compute the left trace of a morphism ``X → X∗∗`` or if the category is
+spherical of a morphism ``X → X``.
+"""
 tr(f::Morphism) = left_trace(f)
 
+""" 
+
+    left_trace(f::Morphism)
+
+Compute the left trace of a morphism ``X → X∗∗`` or if the category is
+spherical of a morphism ``X → X``.
+"""
 function left_trace(f::Morphism)
     V = domain(f)
     W = codomain(f)
@@ -511,6 +532,13 @@ function left_trace(f::Morphism)
     return ev(left_dual(V)) ∘ (f ⊗ id(left_dual(V))) ∘ coev(V)
 end
 
+""" 
+
+    right_trace(f::Morphism)
+
+Compute the right trace of a morphism ``X → ∗∗X`` or if the category is
+spherical of a morphism ``X → X``.
+"""
 function right_trace(f::Morphism)
     V = domain(f)
     W = codomain(f)
@@ -535,6 +563,12 @@ dim(C::Category) = sum(dim(s)^2 for s ∈ simples(C))
 # S-Matrix
 #-------------------------------------------------------
 
+""" 
+
+    smatrix(C::Category)
+
+Compute the S-matrix as defined in [EGNO](https://math.mit.edu/~etingof/egnobookfinal.pdf).
+"""
 function smatrix(C::Category, simples = simples(C))
     @assert is_semisimple(C) "Category has to be semisimple"
     F = base_ring(C)
@@ -546,6 +580,12 @@ function smatrix(C::Category, simples = simples(C))
     return matrix(F,m)
 end
 
+""" 
+
+    normalized_smatrix(C::Category)
+
+Compute the S-matrix normalized by the factor 1/√dim(𝒞).
+"""
 function normalized_smatrix(C::Category, simples = simples(C))
     d = inv(sqrt(dim(C)))
     K = base_ring(C)

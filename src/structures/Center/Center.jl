@@ -168,7 +168,7 @@ function tensor_product(X::CenterObject, Y::CenterObject)
 
         half_braiding_with_S = associator(S,x,y) ∘ 
                                 (yX⊗id(y)) ∘
-                                inv_aassociator(x,S,y) ∘ 
+                                inv_associator(x,S,y) ∘ 
                                 (id(x)⊗yY) ∘ 
                                 associator(x,y,S)
                                 
@@ -878,7 +878,7 @@ function smatrix(C::CenterCategory)
     S = [zero_morphism(category(C)) for _ ∈ 1:n, _ ∈ 1:n]
     for i ∈ 1:n
         for j ∈ i:n
-            S[i,j] = S[j,i] = tr(half_braiding(simpls[i], object(simpls[j])))
+            S[i,j] = S[j,i] = tr(half_braiding(simpls[i], object(simpls[j])) ∘ half_braiding(simpls[j], object(simpls[i])))
         end
     end
 

@@ -20,7 +20,7 @@ makedocs(
             "Tensor Categories" => "Interface/TensorCategories.md",
             "Optimisations" => "Interface/AdvancedInterface.md"
         ],
-        "Examples" => [],
+        "Examples" => ["Tambara Yamagami Categories" => "Examples/TambaraYamagami.md"],
         "6j-Symbols" => "SixJCategories/SixJCategories.md",
         # "Concrete Examples" => [
         #     "Vector Spaces" => "VectorSpaces.md",
