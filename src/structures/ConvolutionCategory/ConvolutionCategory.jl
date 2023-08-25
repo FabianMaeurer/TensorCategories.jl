@@ -113,7 +113,7 @@ function associator(X::ConvolutionObject, Y::ConvolutionObject, Z::ConvolutionOb
     cod = X⊗(Y⊗Z)
     S = simples(parent(X))
     #@show codomain(decompose_morphism(cod,S)[1]) == codomain(decompose_morphism(dom,S)[1])
-    return inv(decompose_morphism(cod,S)[1])∘decompose_morphism(dom,S)[1]
+    return inv(direct_sum_decomposition(cod,S)[2]) ∘ direct_sum_decomposition(dom,S)[2]
 end
 #-----------------------------------------------------------------
 #   Functionality: Direct Sum

@@ -83,6 +83,7 @@ function set_braiding!(F::SixJCategory, braiding)
     F.braiding = braiding
 end
 
+
 set_associator!(F::SixJCategory, ass) = F.ass = ass
 function set_associator!(F::SixJCategory, i::Int, j::Int, k::Int, ass::Vector{<:MatElem})
     F.ass[i,j,k,:] = ass
@@ -387,14 +388,15 @@ function coev(X::SixJObject)
     𝟙 = one(parent(X))
     ks = findall(e -> e > 0, X.components)
     if length(ks) == 1
-        c = matrices(simple_objects_coev(X))[1][1,1]
+        c = simple_objects_coev(X)
         k = X.components[ks[1]]
-        m = matrix(coev(VectorSpaceObject(base_ring(X),k)))
+        m = collect(matrix(coev(VectorSpaceObject(base_ring(X),k))))[:]
 
-        cod = X ⊗ dual(X)
-        n = matrices(zero_morphism(𝟙, cod))
-        n[1] = m
-        return Morphism(𝟙, cod, n)
+        return vertical_direct_sum([i * c for i ∈ m]...)
+        # cod = X ⊗ dual(X)
+        # n = matrices(zero_morphism(𝟙, cod))
+        # n[1] = m
+        # return Morphism(𝟙, cod, n)
     end
 
     C = parent(X)
@@ -419,14 +421,15 @@ function ev(X::SixJObject)
     𝟙 = one(parent(X))
     ks = findall(e -> e > 0, X.components)
     if length(ks) == 1
-        e = matrices(simple_objects_ev(C[ks[1]]))[1][1,1]
+        e = simple_objects_ev(C[ks[1]])
         k = X.components[ks[1]]
-        m = e * matrix(ev(VectorSpaceObject(base_ring(X),k)))
+        m = collect(matrix(ev(VectorSpaceObject(base_ring(X),k))))[:]
 
-        dom = dual(X) ⊗ X
-        n = matrices(zero_morphism(dom, 𝟙))
-        n[1] = m
-        return Morphism(dom, 𝟙, n)
+        return horizontal_direct_sum([i * e for i ∈ m]...)
+        # dom = dual(X) ⊗ X
+        # n = matrices(zero_morphism(dom, 𝟙))
+        # n[1] = m
+        # return Morphism(dom, 𝟙, n)
     end
 
     summands = [x^k for (x,k) ∈ decompose(X)]
@@ -449,9 +452,9 @@ function simple_objects_coev(X::SixJObject)
 
     if sum(X.components) == 0 return zero_morphism(one(C), X) end
 
-    mats = [diagonal_matrix(F(1),n,m) for (n,m) ∈ zip(C.one, cod.components)]
-
-    return Morphism(one(C), cod, mats)
+    return basis(Hom(one(C), cod))[1]
+    #mats = [diagonal_matrix(F(1),n,m) for (n,m) ∈ zip(C.one, cod.components)]
+    #return Morphism(one(C), cod, mats)
 end
 
 function simple_objects_ev(X::SixJObject)
@@ -463,9 +466,9 @@ function simple_objects_ev(X::SixJObject)
 
     if sum(X.components) == 0 return zero_morphism(X,one(C)) end
 
-    mats = [diagonal_matrix(F(1),n,m) for (n,m) ∈ zip(dom.components, C.one)]
-
-    unscaled_ev = Morphism(dom, one(C), mats)
+    #mats = [diagonal_matrix(F(1),n,m) for (n,m) ∈ zip(dom.components, C.one)]
+    #unscaled_ev = Morphism(dom, one(C), mats)
+    unscaled_ev = basis(Hom(dom, one(C)))[1]
 
     factor = F((id(X)⊗unscaled_ev)∘associator(X,DX,X)∘(coev(X)⊗id(X)))
 
@@ -518,15 +521,23 @@ end
 # end
 
 function dim(X::SixJObject)
+    if X == zero(parent(X))
+        return base_ring(X)(0)
+    end
     C = parent(X)
     K = base_ring(X)
     if is_simple(X)
         k = findfirst(e -> e != 0, X.components)
         if C.dims[k] == 0
-            C.dims[k] = K(tr(id(X)))
+            if sum(C.one) == 1
+                C.dims[k] = K(tr(id(X)))
+            else
+                C.dims[k] = sum([K(id(C[i]) ⊗ tr(id(X)) ⊗ id(C[i])) for i ∈ findall(e -> e > 0, C.one)])
+            end
         end
         return C.dims[k]
     end
+
     return sum([X[i]*dim(C[i]) for i ∈ 1:C.simples if X[i] != 0])
 end
 
@@ -681,7 +692,7 @@ end
 
 function vertical_direct_sum(f::SixJMorphism...)
     if length(f) == 1
-        return f
+        return f[1]
     end
     
     #@assert length(unique!([domain.(f)...])) == 1 "Not compatible"
@@ -693,7 +704,7 @@ end
 
 function horizontal_direct_sum(f::SixJMorphism...)
     if length(f) == 1
-        return f
+        return f[1]
     end
     # @assert length(unique!([codomain.(f)...])) == 1 "Not compatible"
 
@@ -857,3 +868,75 @@ end
 #-------------------------------------------------------------------------------
 #   Utility
 #-------------------------------------------------------------------------------
+
+""" 
+
+    extension_of_scalars(C::SixJCategory, K::Field)
+
+Return the category ``C⊗K``.
+"""
+function extension_of_scalars(C::SixJCategory, L::Field)
+    K = base_ring(C)
+    if K != QQ && characteristic(K) == 0
+        _,f = is_subfield(K,L)
+    else
+        f = K
+    end
+
+    try
+        D = SixJCategory(L, C.tensor_product, simples_names(C))
+
+        if isdefined(C, :ass)
+            D.ass = [matrix(L, size(a)..., f.(a)) for a ∈ C.ass]
+        end
+        if isdefined(C, :one)
+            D.one = C.one
+        end
+        if isdefined(C, :spherical)
+            D.spherical = f.(C.spherical)
+        end
+        if  isdefined(C, :braiding)
+            D.braiding = [matrix(L, size(a)..., f.(a)) for a ∈ C.braiding]
+        end
+        if isdefined(C, :twist) 
+            D.twist = f.(C.twist)
+        end
+        return D
+    catch
+        error("Extension of scalars not possible")
+    end
+end
+
+""" 
+
+    extension_of_scalars(X::SixJObject, K::Field)
+
+Return the object ``X`` as an object of the category ``C⊗K``.
+"""
+function extension_of_scalars(X::SixJObject, L::Field, CL = parent(X) ⊗ L)
+    SixJObject(CL, X.components)
+end
+
+""" 
+
+    extension_of_scalars(f::SixJmorphism, K::Field)
+
+Return the category ``C⊗K``.
+"""
+function extension_of_scalars(f::SixJMorphism, L::Field)
+    K = base_ring(f)
+    if K != QQ && characteristic(K) == 0
+        _,incl = is_subfield(K,L)
+    else
+        incl = K
+    end
+
+    try
+        mats = [matrix(L, size(m)..., incl.(m)) for m ∈ matrices(f)] 
+        g = Morphism(domain(f) ⊗ L, codomain(f) ⊗ L, mats)
+
+        return g
+    catch
+        error("Extension of scalars not possible")
+    end
+end

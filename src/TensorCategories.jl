@@ -22,7 +22,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     leading_coefficient, roots, is_rational, QQMPolyRingElem, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
     height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
     @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix, exponents, symbols,
-    nvars, resultant,QQFieldElem, ZZRingElem, divisors
+    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield
 
 import Oscar.AbstractAlgebra.Generic: Poly
 
@@ -78,8 +78,7 @@ export ConvolutionObject
 export coproduct 
 export cyclic_group_3cocycle 
 export decompose 
-export decompose_morphism 
-export decompose_morphism 
+export direct_sum_decomposition
 export DeligneProdMorphism 
 export DeligneProdObject 
 export DeligneProduct 
@@ -102,6 +101,7 @@ export ev
 export ev_coev 
 export exponent
 export express_in_basis 
+export extension_of_scalars
 export factor 
 export Fibonacci 
 export Forgetful 
@@ -146,7 +146,8 @@ export is_abelian
 export is_abelian 
 export is_additive 
 export is_braided
-export is_central 
+export is_central
+export is_finite 
 export is_fusion 
 export is_half_braiding 
 export is_linear 
@@ -166,7 +167,8 @@ export is_tensor
 export isequivariant 
 export isgraded 
 export Ising 
-export isinvertible 
+export isinvertible
+export karoubian_envelope 
 export kernel 
 export left_dual 
 export left_inverse 

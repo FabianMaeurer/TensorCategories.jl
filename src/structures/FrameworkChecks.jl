@@ -14,6 +14,12 @@ is_ring(C::Category) = is_multiring(C) && int_dim(End(one(C))) == 1
 
 is_multiring(C::Category) = is_abelian(C) && is_linear(C) && is_monoidal(C)
 
+is_finite(C::Category) = try 
+    return length(simples(C)) ≥ 0 
+catch
+    return false
+end
+
 function is_monoidal(C::Category) 
     T = object_type(C)
     hasmethod(one, Tuple{typeof(C)}) &&

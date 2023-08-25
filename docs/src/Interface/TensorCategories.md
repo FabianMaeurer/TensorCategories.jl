@@ -1,10 +1,6 @@
 # Tensor Categories
 
-We call a category $\mathcal C$ $k$-linear for a commutative ring $k$ if all Hom-spaces are $k$-modules and composition is $k$-bilinear. This implies need for a method 
-
-- `*(λ, f::YourMorphism)::YourMorphism` returning the multiplication if a scalar λ.
-
-Now let $k$ be a field. Then a __multitensor category__ is a category $\mathcal C$ which is
+Let $k$ be a field. Then a __multitensor category__ is a category $\mathcal C$ which is
 
 - locally finite
 - k-linear
@@ -35,7 +31,7 @@ This basically implies that morphisms are merely matrices allowing us to efficie
 
 ```math
 F \colon \mathcal C \to \mathrm{Vec}_k
-``````
+```
 
 to provide a method
 
@@ -49,4 +45,4 @@ simple_subobjects
 express_in_basis
 left_inverse
 right_inverse
-``````
+```

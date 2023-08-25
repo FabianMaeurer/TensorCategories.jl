@@ -41,32 +41,43 @@ function six_j_symbols(C::Category, S = simples(C))
     isos = []
 
     for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n
-        X = S[i] ⊗ S[j] ⊗ S[k]
+        X = (S[i] ⊗ S[j]) ⊗ S[k]
         Y = S[i] ⊗ (S[j] ⊗ S[k])
+
+        _, ij_decomposition_morphism, ij_incl, ij_proj = direct_sum_decomposition(S[i] ⊗ S[j], S)
+        _, jk_decomposition_morphism, jk_incl, jk_proj =  direct_sum_decomposition(S[j] ⊗ S[k], S)
+
+        distribute_before = (inv(ij_decomposition_morphism) ⊗ id(S[k])) ∘ inv(distribute_left([domain(i) for i ∈ ij_incl], S[k]))
+
+        distribute_after = distribute_right(S[i], [domain(i) for i ∈ jk_incl]) ∘ (id(S[i]) ⊗ jk_decomposition_morphism)
+
+        # @show codomain(distribute_after) == domain(distribute_before)
 
         summands = vcat([[x for _ ∈ 1:k] for (x,k) ∈ decompose(X, S)]...)
 
-        Z, incl, proj = direct_sum(summands...)
+        Z, before, incl, _ = direct_sum_decomposition(X,S)
+        Z2, after, _, proj = direct_sum_decomposition(Y,S)
+        
+        before = inv(before) ∘ distribute_before ∘ before
+        after = after ∘ distribute_after ∘ inv(after)
+        # if X ∈ objects
+        #     before = isos[findfirst(e -> e == X, objects)]
+        # else
+        #     _,before = is_isomorphic(Z,X)
+        #     isos = [isos; before]
+        #     objects = [objects; X]
+        # end
 
-        if X ∈ objects
-            before = isos[findfirst(e -> e == X, objects)]
-        else
-            _,before = is_isomorphic(Z,X)
-            isos = [isos; before]
-            objects = [objects; X]
-        end
-
-        if Y ∈ objects
-            after = isos[findfirst(e -> e == Y, objects)]
-        else
-            _,after = is_isomorphic(Z,Y)
-            isos = [isos; after]
-            objects = [objects; Y]
-        end
+        # if Y ∈ objects
+        #     after = isos[findfirst(e -> e == Y, objects)]
+        # else
+        #     _,after = is_isomorphic(Z2,Y)
+        #     isos = [isos; after]
+        #     objects = [objects; Y]
+        # end
 
     
-
-        ass_mor = inv(after) ∘ associator(S[i],S[j],S[k]) ∘ before
+        ass_mor =  after ∘ associator(S[i],S[j],S[k]) ∘ before 
 
         for l ∈ 1:n
             before_incl_l = filter(f -> domain(f) == S[l], incl)
@@ -109,8 +120,8 @@ function (F::SkeletizationFunctor)(f::Morphism)
     S = simples(domain(f))
     n = length(S)
 
-    before, before_incl, before_proj = decompose_morphism(X, S)
-    after,  after_incl,  after_proj  = decompose_morphism(Y, S)
+    _, before, before_incl, before_proj = direct_sum_decomposition(X, S)
+    _, after,  after_incl,  after_proj  = direct_sum_decomposition(Y, S)
 
     m = Vector{MatElem}(undef,n)
 

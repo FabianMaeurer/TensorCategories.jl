@@ -202,6 +202,10 @@ Return the tensor product object.
 """
 ⊗(X::Object...) = tensor_product(X...)
 
+⊗(C::Category, K::Field) = extension_of_scalars(C,K)
+⊗(X::Object, K::Field) = extension_of_scalars(X,K)
+⊗(f::Morphism, K::Field) = extension_of_scalars(f,K)
+
 """
     ^(X::Object, n::Integer)
 
@@ -438,18 +442,29 @@ Base.length(H::AbstractCategoryHomSpace) = int_dim(H)
 Base.eltype(::Type{T}) where T <: AbstractCategoryHomSpace = Morphism 
 
 function (F::Field)(f::Morphism)
-    m = matrix(f)
-    if m == zero(parent(m))
-        return zero(F)
+    B = basis(Hom(domain(f), codomain(f)))
+    if length(B) == 0 
+        return 0
+    elseif length(B) == 1
+        if domain(f) == codomain(f)
+            return express_in_basis(f,[id(domain(f))])[1]
+        else
+            return express_in_basis(f,B)[1]
+        end
     end
-    b,c = is_scalar_multiple(m, matrix(id(domain(f))))
-    if b 
-        return c
-    end
-    m = collect(m)[m .!= 0]
-    if size(m) == (1,)
-        return F(m[1,1])
-    end
+
+    # m = matrix(f)
+    # if m == zero(parent(m))
+    #     return zero(F)
+    # end
+    # b,c = is_scalar_multiple(m, matrix(id(domain(f))))
+    # if b 
+    #     return c
+    # end
+    # m = collect(m)[m .!= 0]
+    # if size(m) == (1,)
+    #     return F(m[1,1])
+    # end
     throw(ErrorException("Cannot convert to element of $F"))
 end
 
@@ -615,7 +630,7 @@ function decompose(X::Object, S = simples(parent(X)))
     return [(s,d) for (s,d) ∈ zip(S,dimensions) if d > 0]
 end
 
-function decompose_morphism(X::Object, S = simples(parent(X)))
+function direct_sum_decomposition(X::Object, S = simples(parent(X)))
     C = parent(X)
     @assert is_semisimple(C) "Semisimplicity required"
     
@@ -626,7 +641,7 @@ function decompose_morphism(X::Object, S = simples(parent(X)))
 
     # temporary solution!
     iso = is_isomorphic(X,Z)[2]
-    return iso, [inv(iso)∘i for i ∈ incl], [p∘iso for p ∈ proj]
+    return Z, iso, [inv(iso)∘i for i ∈ incl], [p∘iso for p ∈ proj]
 
     #----------------------------------
     f = zero_morphism(X,Z)
@@ -635,9 +650,8 @@ function decompose_morphism(X::Object, S = simples(parent(X)))
         g = i∘p
         f = f + g
     end
-    return f, incl, proj
+    return Z, f, incl, proj
 end
-
 
 
 
@@ -886,7 +900,7 @@ end
 -------------------------------------------------=#
 
 function fpdim(X::Object)
-    @assert is_fusion(parent(X))
+    @assert is_multifusion(parent(X))
     S = simples(parent(X))
     n = length(S)
 

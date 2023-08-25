@@ -88,9 +88,9 @@ Add the simple object ```S``` to the vector of simple objects.
 function add_simple!(C::CenterCategory, S::CenterObject)
     @assert dim(End(S)) == 1 "Not simple"
     if isdefined(C, :simples)
-        C.simples = unique_simples([simples(C); S])
+        C.simples = filter(e -> e != zero(C), unique_simples([simples(C); S]))
     else
-        C.simples = unique_simples([S])
+        C.simples = filter(e -> e != zero(C), unique_simples([S]))
     end
 end
 
@@ -485,7 +485,7 @@ function half_braiding(X::CenterObject, Y::Object)
     braid = zero_morphism(dom, cod)
    
   
-    iso, incl, proj = decompose_morphism(Y)
+    _,iso, incl, proj = direct_sum_decomposition(Y)
 
     for (p,i) ∈ zip(proj, incl)
         k = findfirst(e -> is_isomorphic(e, domain(i))[1], simpls)
@@ -887,4 +887,31 @@ function smatrix(C::CenterCategory)
     catch
         return S
     end
+end
+
+#=----------------------------------------------------------
+    extension_of_scalars 
+----------------------------------------------------------=#    
+
+function extension_of_scalars(C::CenterCategory, L::Field)
+    CL = _extension_of_scalars(C,L, category(C)⊗L)
+    
+    CL.simples = [extension_of_scalars(s, L, CL) for s ∈ simples(C)]
+
+    return CL
+end
+
+function _extension_of_scalars(C::CenterCategory, L::Field, cL = category(C)⊗L)
+    CenterCategory(L,cL)
+end
+
+function extension_of_scalars(X::CenterObject, L::Field, CL = _extension_of_scalars(parent(X),L))
+    CenterObject(CL, extension_of_scalars(object(X), L, category(CL)), [f ⊗ L for f ∈ half_braiding(X)])
+end
+
+function karoubian_envelope(C::CenterCategory)
+    KC = CenterCategory(base_ring(C), category(C))
+    simpls = unique_simples(vcat([simple_subobjects(s) for s ∈ simples(C)]...))
+    KC.simples = [CenterObject(KC, object(s), half_braiding(s)) for s ∈ simpls]
+    return KC
 end

@@ -18,9 +18,62 @@ end
     ToDO: Centers of graded fusion categories (2009). Gelaki, Naidu, Nikhshych
             https://msp.org/ant/2009/3-8/ant-v3-n8-p05-s.pdf
 -------------------------------------------------=#
-TambaraYamagami(A::GAPGroup, χ = nothing) = TambaraYamagami(QQBar, A, χ)
 
-function TambaraYamagami(K::Field, A::GAPGroup, χ = nothing)
+""" 
+
+    TambaraYamagami(A::GAPGroup)
+
+Construct ``TY(A,τ,χ)`` over ``ℚ̅`` where ``τ = √|A|`` and ``χ`` is a generic non-degenerate bilinear form.  
+"""
+function TambaraYamagami(A::GAPGroup) 
+    TambaraYamagami(QQBar, A)
+end
+
+""" 
+
+    TambaraYamagami(K::ring, A::GAPGroup)
+
+Construct ``TY(A,τ,χ)`` over ``K`` where ``τ = √|A|`` and ``χ`` is a generic non-degenerate bilinear form.  
+"""
+function TambaraYamagami(K::Ring, A::GAPGroup) 
+    n = Int(order(A))     
+    m = Int(exponent(A))
+    sqrt_n = sqrt(K(Int(order(A))))
+    χ = nondegenerate_bilinear_form(A, root_of_unity(K,m))
+    TambaraYamagami(K,A,sqrt_n,χ)
+end
+
+""" 
+
+    TambaraYamagami(K::Ring, A::GAPGroup, τ::RingElem)
+
+Construct ``TY(A,τ,χ)`` over ``K`` where ``χ`` is a generic non-degenerate bilinear form.  
+"""
+function TambaraYamagami(K::Ring, A::GAPGroup, sqrt_n::RingElem) 
+    χ = nondegenerate_bilinear_form(A, root_of_unity(K,m))
+    TambaraYamagami(K,A,sqrt_n,χ)
+end
+
+""" 
+
+    TambaraYamagami(K::Ring, A::GAPGroup, τ::RingElem)
+
+Construct ``TY(A,τ,χ)`` over ``K`` where ``τ = √|A|``.  
+"""
+function TambaraYamagami(K::Ring, A::GAPGroup, χ::BilinearForm)
+    n = Int(order(A))     
+    m = Int(exponent(A))
+    sqrt_n = sqrt(K(Int(order(A))))
+    TambaraYamagami(K,A,sqrt_n,χ)
+end
+
+""" 
+
+    TambaraYamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
+
+Construct the Category ``TY(A,τ,χ)``. 
+"""
+function TambaraYamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
     n = Int(order(A))
     @assert is_abelian(A)
     
@@ -33,7 +86,7 @@ function TambaraYamagami(K::Field, A::GAPGroup, χ = nothing)
     catch
         error("Base field needs to contain a square root of ord(A)")
     end
-    a = sqrt(K(n))
+    a = τ 
     if χ === nothing
         χ = nondegenerate_bilinear_form(A, root_of_unity(K,m))
     end
@@ -102,9 +155,56 @@ end
 #   Examples
 #-------------------------------------------------------------------------------
 
-function Ising(F::Field = QQBar)
+""" 
+
+    Ising()
+
+Construct the Ising category over ``ℚ̅``.
+"""
+function Ising()
+    Ising(QQBar, sqrt(QQBar(2)), 1)
+end
+
+""" 
+
+    Ising(F::Ring)
+
+Construct the Ising category over ``F``.
+"""
+function Ising(F::Ring)
+    Ising(F, sqrt(F(2)))
+end
+
+""" 
+
+    Ising(F::Ring, τ::RingElem)
+
+Construct the Ising category with specific ``τ = √2``.
+"""
+function Ising(F::Ring, τ::RingElem)
+    Ising(F,τ,1)
+end
+
+""" 
+
+    Ising(F::Ring, q::Int)
+
+Construct the braided Ising category over ``F`` where q = ±1 defined the braiding defined by ±i. 
+"""
+function Ising(F::Ring, q::Int)
+    Ising(F,sqrt(F(2)),q)
+end
+
+""" 
+
+    Ising(F::Ring, τ::RingElem, q::Int)
+
+Construct the Ising fusion category where ``τ = √2`` a root and `q ∈ {1,-1}` specifies the braiding if it exists.
+"""
+function Ising(F::Ring, sqrt_2::RingElem, q::Int)
     #F,ξ = CyclotomicField(16, "ξ₁₆")
-    a = sqrt(F(2))
+
+    a = sqrt_2 
     C = SixJCategory(F,["𝟙", "χ", "X"])
     M = zeros(Int,3,3,3)
 
@@ -142,7 +242,7 @@ function Ising(F::Field = QQBar)
     # http://arxiv.org/abs/2010.00847v1 (Ex. 4.13)
     
     try 
-        ξ = root_of_unity(F,4)
+        ξ = q * root_of_unity(F,4)
 
         α = root_of_unity(F,8)
 
