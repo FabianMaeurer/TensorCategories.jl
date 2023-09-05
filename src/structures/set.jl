@@ -99,15 +99,15 @@ function coproduct(X::SetObject, Y::SetObject, injections = false)
 end
 
 #--------------------------------------------------
-#   CategoryHomSets
+#   HomSets
 #--------------------------------------------------
 
-struct SetCategoryHomSet <: CategoryHomSet
+struct SetHomSet <: HomSet
     X::SetObject
     Y::SetObject
 end
 
-Hom(X::SetObject, Y::SetObject) = SetCategoryHomSet(X,Y)
+Hom(X::SetObject, Y::SetObject) = SetHomSet(X,Y)
 
 #--------------------------------------------------
 #   Pretty printing

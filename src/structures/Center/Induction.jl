@@ -108,7 +108,7 @@ function end_of_induction(X::Object, IX = induction(X))
 
     ind_B = [Morphism(IX,IX,horizontal_direct_sum([(dim(xi))*((ev(dual(xi)) ∘(spherical(xi)⊗id(dual(xi))))⊗id(object(IX))) ∘ (id(xi)⊗half_braiding(IX,dual(xi))) ∘ associator(xi,object(IX),dual(xi)) ∘ ((id(xi)⊗f)⊗id(dual(xi))) for xi in simples(parent(X))])) for f ∈ B]
 
-    return CenterCategoryHomSpace(IX,IX,ind_B, VectorSpaces(base_ring(X)))
+    return CenterHomSpace(IX,IX,ind_B, VectorSpaces(base_ring(X)))
 end
 # function induction(X::Object, simples::Vector = simples(parent(X)))
 #     @assert is_semisimple(parent(X)) "Requires semisimplicity"
@@ -190,7 +190,7 @@ end
 #     @show  M = matrix(F, n,n, [pairing(base[j], dual_base[k], S,W,T) for j ∈ 1:n, k ∈ 1:n])
 #     return base, dual_base
 # end
-function dual_basis(V::AbstractCategoryHomSpace, W::AbstractCategoryHomSpace)
+function dual_basis(V::AbstractHomSpace, W::AbstractHomSpace)
     dual_basis = []
     F = base_ring(V)
     n = length(basis(V))

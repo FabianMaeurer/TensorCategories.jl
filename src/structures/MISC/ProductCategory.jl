@@ -121,6 +121,6 @@ function Hom(X::ProductObject{N}, Y::ProductObject{N}) where N
             basis = [basis; Morphism(X,Y,Tuple(m_tuple))]
         end
     end
-    return CategoryHomSpace(X,Y,basis, VectorSpaces(base_ring(X)))
+    return HomSpace(X,Y,basis, VectorSpaces(base_ring(X)))
 end
         

@@ -39,7 +39,6 @@ The fusion categories stemming from the Haagerup subfactor are a well known and 
 In the Morita equivalence class of the Haagerup subfactor lie three categories. We call them ``\mathcal H_1,\mathcal H_2`` and ``\mathcal H_3``. The first two have multiplicity larger then 1 and are up to now not included. The third has multiplicity 1 and is also known as the Haagerup-Izumi category for ``\mathbb Z_3``. It has six simple objects and fusion rules
 
 ```math
-\renewcommand*{\arraystretch}{1.5}
 \begin{array}{c||c|c|c|c|c|c}
         & \mathbb 1 & \alpha & \alpha^\ast & \rho & {}_{\alpha}\rho & {}_{\alpha^\ast}\rho \\ \hline \hline
         \mathbb 1 & \mathbb 1 & \alpha & \alpha^\ast & \rho & {}_{\alpha}\rho & {}_{\alpha^\ast}\rho \\ \hline
@@ -49,7 +48,7 @@ In the Morita equivalence class of the Haagerup subfactor lie three categories. 
         {}_\alpha\rho & {}_\alpha\rho & {}_{\alpha^\ast}\rho & \rho & \alpha \oplus \rho \oplus {}_\alpha\rho \oplus {}_{\alpha^\ast}\rho & \mathbb 1 \oplus \rho \oplus {}_\alpha\rho \oplus {}_{\alpha^\ast}\rho & \alpha^\ast  \oplus \rho \oplus {}_\alpha\rho \oplus {}_{\alpha^\ast}\rho \\ \hline
         {}_{\alpha^\ast}\rho & {}_{\alpha^\ast}\rho & \rho & {}_\alpha\rho & \alpha^\ast \oplus \rho \oplus {}_\alpha\rho \oplus {}_{\alpha^\ast}\rho & \alpha \oplus \rho \oplus {}_\alpha\rho \oplus {}_{\alpha^\ast}\rho & \mathbb 1 \oplus  \rho \oplus {}_\alpha\rho \oplus {}_{\alpha^\ast}\rho 
     \end{array}
-´´´
+```
 
 We implement the category ``\mathcal H_3`` as an instance of `SixJCategory`. The other two will follow as soon as we know the proper ``6j``-symbols.
 
@@ -72,7 +71,7 @@ Here are some more examples to play around.
 
 ## Categorifications by Vercleyen and Singerland
 
-In [vercleyen2023low](@cite) they found a huge number of fusion rings and some explicit categorifications of two categories that are neither Tambara-Yamagami nor Haagerup-Izumi categories. 
+In [vercleyen2023low](@cite) they found a huge number of fusion rings and some explicit categorifications that are neither Tambara-Yamagami nor Haagerup-Izumi categories. 
 
 ### FR``{}_2^{82}``
 

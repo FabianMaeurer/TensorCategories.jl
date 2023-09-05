@@ -22,11 +22,11 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     leading_coefficient, roots, is_rational, QQMPolyRingElem, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
     height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
     @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix, exponents, symbols,
-    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield
+    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity
 
 import Oscar.AbstractAlgebra.Generic: Poly
 
-using Memoization, InteractiveUtils
+using Memoization, InteractiveUtils, SparseArrays
 
 export - 
 export * 
@@ -39,7 +39,7 @@ export ∘
 export ⊕ 
 export ⊗ 
 export ⊠ 
-export AbstractCategoryHomSpace 
+export AbstractHomSpace 
 export add_simple! 
 export associator 
 export base_ring 
@@ -49,8 +49,8 @@ export cat_fr_8122
 export cat_fr_9143 
 export Category 
 export category
-export CategoryHomSet 
-export CategoryHomSpace 
+export HomSet 
+export HomSpace 
 export Morphism 
 export Object 
 export Center 
@@ -65,13 +65,13 @@ export central_objects
 export Cocycle 
 export codomain 
 export coev 
-export CohSfCategoryHomSpace 
+export CohSfHomSpace 
 export CohSheafMorphism 
 export CohSheafObject 
 export CohSheaves 
 export cokernel 
 export compose 
-export ConvCategoryHomSpace 
+export ConvHomSpace 
 export ConvolutionCategory 
 export ConvolutionMorphism 
 export ConvolutionObject 
@@ -110,7 +110,7 @@ export Functor
 export FusionCategory 
 export getindex 
 export GradedVectorSpaces 
-export GRCategoryHomSpace 
+export GRHomSpace 
 export GRepInduction 
 export GRepRestriction 
 export grothendieck_ring 
@@ -119,7 +119,7 @@ export GroupRepresentation
 export GroupRepresentationCategory 
 export GroupRepresentationCategory 
 export GroupRepresentationMorphism 
-export GVSCategoryHomSpace 
+export GVSHomSpace 
 export GVSMorphism 
 export GVSObject 
 export HaagerupH3 
@@ -178,6 +178,7 @@ export matrices
 export matrix 
 export Morphism, morphism 
 export multiplication_table 
+export multiplicity
 export normalized_smatrix 
 export object 
 export object_type 
@@ -225,7 +226,7 @@ export set_canonical_spherical!
 export set_one! 
 export set_spherical! 
 export set_tensor_product! 
-export SetCategoryHomSet 
+export SetHomSet 
 export SetMorphism 
 export SetObject 
 export Sets 
@@ -256,7 +257,7 @@ export VectorSpaceObject
 export VectorSpaces 
 export Verlinde
 export vertical_direct_sum
-export VSCategoryHomSpace 
+export VSHomSpace 
 export VSObject 
 export zero 
 export zero_morphism 
@@ -284,6 +285,7 @@ include("structures/Functors.jl")
 include("structures/ConvolutionCategory/CoherentSheaves.jl")
 include("structures/ConvolutionCategory/ConvolutionCategory.jl")
 include("structures/MultiFusionCategories/FusionCategory.jl")
+#include("structures/MultiFusionCategories/FusionCategoryExperimental.jl")
 include("structures/MultiFusionCategories/6j-Solver.jl")
 include("structures/MultiFusionCategories/Skeletization.jl")
 include("structures/MISC/multiplication_table.jl")
@@ -296,6 +298,7 @@ include("structures/Center/Center.jl")
 include("structures/Center/Induction.jl")
 include("structures/Center/CenterChecks.jl")
 include("structures/Examples/I2-fusion.jl")
+include("structures/Examples/RepresentationsSL2.jl")
 include("structures/Examples/TambaraYamagami.jl")
 include("structures/Examples/FibonacciCategory.jl")
 include("structures/Examples/VercleyenSingerland/FR_8211/fr_8211.jl")

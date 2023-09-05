@@ -177,6 +177,9 @@ function ==(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
     return domain(f) == domain(g) && codomain(f) == codomain(g) && f.map == g.map
 end
 
+#function regular_representation(C::GroupRepresentationCategory)
+
+
 """
     is_isomorphic(σ::GroupRepresentation, τ::GroupRepresentation)
 
@@ -486,7 +489,7 @@ end
 #   Hom Spaces
 #-------------------------------------------------------------------------
 
-struct GRCategoryHomSpace<: AbstractCategoryHomSpace
+struct GRHomSpace<: AbstractHomSpace
     X::GroupRepresentation
     Y::GroupRepresentation
     basis::Vector{GroupRepresentationMorphism}
@@ -502,7 +505,7 @@ function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
     grp = base_group(σ)
     F = base_ring(σ)
 
-    if intdim(σ)*intdim(τ) == 0 return GRCategoryHomSpace(σ,τ,GroupRepresentationMorphism[],VectorSpaces(F)) end
+    if intdim(σ)*intdim(τ) == 0 return GRHomSpace(σ,τ,GroupRepresentationMorphism[],VectorSpaces(F)) end
 
     gap_to_F = iso_oscar_gap(F)
     gap_F = codomain(gap_to_F)
@@ -523,10 +526,10 @@ function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
 
     rep_homs = [Morphism(σ,τ,m,check = false) for m ∈ mat_homs]
 
-    return GRCategoryHomSpace(σ,τ, rep_homs, VectorSpaces(F))
+    return GRHomSpace(σ,τ, rep_homs, VectorSpaces(F))
 end
 
-function zero(H::GRCategoryHomSpace)
+function zero(H::GRHomSpace)
     dom = H.X
     codom = H.Y
     m = zero(MatrixSpace(base_ring(dom),intdim(dom),intdim(codom)))

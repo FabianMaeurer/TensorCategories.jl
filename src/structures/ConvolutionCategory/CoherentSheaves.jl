@@ -377,7 +377,7 @@ end
 #   Hom Spaces
 #-----------------------------------------------------------------
 
-struct CohSfCategoryHomSpace <: AbstractCategoryHomSpace
+struct CohSfHomSpace <: AbstractHomSpace
     X::CohSheafObject
     Y::CohSheafObject
     basis::Vector{CohSheafMorphism}
@@ -401,10 +401,10 @@ function Hom(X::CohSheafObject, Y::CohSheafObject)
             b = [b; CohSheafMorphism(X,Y,reps)]
         end
     end
-    return CohSfCategoryHomSpace(X,Y,b,VectorSpaces(base_ring(X)))
+    return CohSfHomSpace(X,Y,b,VectorSpaces(base_ring(X)))
 end
 
-zero(H::CohSfCategoryHomSpace) = zero_morphism(H.X,H.Y)
+zero(H::CohSfHomSpace) = zero_morphism(H.X,H.Y)
 
 
 #-----------------------------------------------------------------

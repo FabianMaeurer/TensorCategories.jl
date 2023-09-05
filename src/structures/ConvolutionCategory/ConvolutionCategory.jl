@@ -294,7 +294,7 @@ end
 #   Hom Space
 #-----------------------------------------------------------------
 
-struct ConvCategoryHomSpace <: AbstractCategoryHomSpace
+struct ConvHomSpace <: AbstractHomSpace
     X::ConvolutionObject
     Y::ConvolutionObject
     basis::Vector{ConvolutionMorphism}
@@ -311,10 +311,10 @@ function Hom(X::ConvolutionObject, Y::ConvolutionObject)
     b = basis(Hom(X.sheaf,Y.sheaf))
     conv_b = [ConvolutionMorphism(X,Y,m) for m ∈ b]
 
-    return ConvCategoryHomSpace(X,Y,conv_b, VectorSpaces(base_ring(X)))
+    return ConvHomSpace(X,Y,conv_b, VectorSpaces(base_ring(X)))
 end
 
-zero(H::ConvCategoryHomSpace) = zero_morphism(H.X,H.Y)
+zero(H::ConvHomSpace) = zero_morphism(H.X,H.Y)
 
 
 #-----------------------------------------------------------------

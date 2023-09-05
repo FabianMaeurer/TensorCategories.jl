@@ -132,7 +132,7 @@ function I2(m)
 		gr=length(li)
 		#println(lx,ly,lz,lw,li,lj)
 		if rem(lx,2)==1 && rem(ly,2)==1
-	 		C.ass[lx+1,ly+1+n,lz+1,lw+1]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
+	 		C.ass[lx+1,ly+1+n,lz+1,lw+1]=matrix(F,gr,gr, [SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
 			C.ass[lx+1+n,ly+1,lz+1+n,lw+1+n]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
 		elseif rem(lx,2)==1 && rem(ly,2)==0
 			C.ass[lx+1,ly+1+n,lz+1+n,lw+1]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
@@ -178,4 +178,27 @@ function I2subcategory(m)
 	set_spherical!(C, [F(1) for s ∈ simples(C)])
 	set_name!(C, "Fusion subcategory of I₂($m)")
 	return C
+end
+
+function Verlinde(m)
+	#construct a Verlinde type categorie
+	K=QQBar
+	z=root_of_unity(K,2*m+2)
+   q=quantum(z+z^-1,2*m+2)
+   #println(q)
+
+   M=verlindefusionmultmatrix(m)
+   C=SixJCategory(K,["X$i" for i in 0:m-1])
+   set_tensor_product!(C,M)
+
+   for lx in 0:m-1, ly in 0:m-1, lz in 0:m-1, lw in 0:m-1
+	   #println("$lx, $ly, $lz, $lw")
+	   li=intersect(ver_admissible(m,lx,ly),ver_admissible(m,lw,lz))
+	   lj=intersect(ver_admissible(m,lx,lw),ver_admissible(m,ly,lz))
+	   gr=length(li)
+	   C.ass[lx+1,ly+1,lz+1,lw+1]=matrix(K,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
+   end
+   set_one!(C, [mod(i,m) == 1 ? 1 : 0 for i ∈ 1:m])
+   TensorCategories.set_name!(C, "Verlinde Category $m")
+   return C
 end

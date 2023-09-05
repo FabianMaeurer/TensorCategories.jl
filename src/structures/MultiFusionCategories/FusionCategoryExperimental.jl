@@ -1,15 +1,15 @@
 
-mutable struct SixJCategory <: Category
+mutable struct NonStrictSixJCategory <: Category
     base_ring::Field
     simples::Int64
     simples_names::Vector{String}
     ass::Array{<:MatElem,4}
-    braiding::Function
+    braiding::Array{MatElem,3}
     tensor_product::Array{Int,3}
     spherical::Vector
     twist::Vector
 
-    function SixJCategory(F::Field, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1])])
+    function NonStrictSixJCategory(F::Field, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1])])
         C = New(F, length(mult[1]), names)
         C.tensor_product = mult
         #C.ass = [id(⊗(X,Y,Z)) for X ∈ simples(C), Y ∈ simples(C), Z ∈ simples(C)]
@@ -17,7 +17,7 @@ mutable struct SixJCategory <: Category
         return C
     end
 
-    function SixJCategory(F::Field, names::Vector{String})
+    function NonStrictSixJCategory(F::Field, names::Vector{String})
         C = new(F,length(names), names)
         #C.dims = [1 for i ∈ 1:length(names)]
         return C
@@ -26,14 +26,14 @@ mutable struct SixJCategory <: Category
 end
 
 
-struct SixJObject <: Object
-    parent::SixJCategory
+struct NonStrictSixJObject <: Object
+    parent::NonStrictSixJCategory
     components::Vector{Int}
 end
 
-struct RingCatMorphism <: Morphism
-    domain::SixJObject
-    codomain::SixJObject
+struct NonStrictSixJMorphism <: Morphism
+    domain::NonStrictSixJObject
+    codomain::NonStrictSixJObject
     m::MatElem
 end
 
@@ -42,16 +42,16 @@ end
 #   Constructors
 #-------------------------------------------------------------------------------
 
-SixJCategory(x...) = SixJCategory(x...)
+NonStrictSixJCategory(x...) = NonStrictSixJCategory(x...)
 
-Morphism(X::SixJObject, Y::SixJObject, m::MatElem) = RingCatMorphism(X,Y,m)
+Morphism(X::NonStrictSixJObject, Y::NonStrictSixJObject, m::MatElem) = NonStrictSixJMorphism(X,Y,m)
 
 
 #-------------------------------------------------------------------------------
 #   Setters/Getters
 #-------------------------------------------------------------------------------
 
-function set_tensor_product!(F::SixJCategory, tensor::Array{Int,3})
+function set_tensor_product!(F::NonStrictSixJCategory, tensor::Array{Int,3})
     F.tensor_product = tensor
     n = size(tensor,1)
     F.ass = Array{MatElem,4}(undef,n,n,n,n)
@@ -60,58 +60,53 @@ function set_tensor_product!(F::SixJCategory, tensor::Array{Int,3})
     end
 end
 
-function set_braiding!(F::SixJCategory, braiding::Function)
+function set_braiding!(F::NonStrictSixJCategory, braiding::Function)
     F.braiding = braiding
 end
 
-function set_associator!(F::SixJCategory, i::Int, j::Int, k::Int, ass::Vector{<:MatElem})
+function set_associator!(F::NonStrictSixJCategory, i::Int, j::Int, k::Int, ass::Vector{<:MatElem})
     F.ass[i,j,k,:] = ass
 end
 
-function set_ev!(F::SixJCategory, ev::Vector)
-    F.evals = ev
-end
 
-function set_coev!(F::SixJCategory, coev::Vector)
-    F.coevals = coev
-end
-
-function set_spherical!(F::SixJCategory, sp::Vector)
+function set_spherical!(F::NonStrictSixJCategory, sp::Vector)
     F.spherical = sp
 end
 
-function set_duals!(F::SixJCategory, d::Vector)
-    F.duals = d
-end
 
-function set_ribbon!(F::SixJCategory, r::Vector)
+function set_ribbon!(F::NonStrictSixJCategory, r::Vector)
     F.ribbon = r
 end
 
-function set_twist!(F::SixJCategory, t::Vector)
+function set_twist!(F::NonStrictSixJCategory, t::Vector)
     F.twist = t
 end
 
-dim(X::SixJObject) = base_ring(X)(tr(id(X)))
+dim(X::NonStrictSixJObject) = base_ring(X)(tr(id(X)))
 
 (::Type{Int})(x::fmpq) = Int(numerator(x))
 
 
-braiding(X::SixJObject, Y::SixJObject) = parent(X).braiding(X,Y)
+braiding(X::NonStrictSixJObject, Y::NonStrictSixJObject) = parent(X).braiding(X,Y)
 
 
 
-function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
+function associator(X::NonStrictSixJObject, Y::NonStrictSixJObject, Z::NonStrictSixJObject)
     C = parent(X)
-    if issimple(X) && issimple(Y) && issimple(Z)
-        mat = diagonal_matrix(C.ass[X.components[1], Y.components[1], Z.components[1],:])
+    if is_simple(X) && is_simple(Y) && is_simple(Z)
         dom = (X⊗Y)⊗Z
         cod = X⊗(Y⊗Z)
-        ass = Morphism(SixJObject(C, sort(dom.components)), SixJObject(C, sort(cod.components)), mat)
-        return id(cod)∘ass∘id(dom)
+        mat = matrix(zero_morphism(dom,cod))
+        for i ∈ eachindex(simples(C))
+            dom_index = findall(e -> e == i, dom.components)
+            cod_index = findall(e -> e == i, cod.components)
+            mat[cod_index, dom_index] = C.ass[X.components[1], Y.components[1], Z.components[1], i]
+        end
+        ass = Morphism(NonStrictSixJObject(C, dom.components), NonStrictSixJObject(C, cod.components ), mat)
+        return ass
     end
 
-    return  direct_sum([associator(C[i],C[j],C[k]) for i ∈ X.components, j ∈ Y.components, k ∈ Z.components][:])
+    return  Morphism((X ⊗ Y) ⊗ Z, X ⊗ (Y ⊗ Z), diagonal_matrix([matrix(associator(C[i],C[j],C[k])) for k ∈ Z.components, j ∈ Y.components, i ∈ X.components][:]))
 end
 
 
@@ -132,41 +127,36 @@ end
 #-------------------------------------------------------------------------------
 #   Functionality
 #-------------------------------------------------------------------------------
-is_semisimple(::SixJCategory) = true
+is_semisimple(::NonStrictSixJCategory) = true
 
-issimple(X::SixJObject) = length(X.components) == 1
+is_simple(X::NonStrictSixJObject) = length(X.components) == 1
 
-==(X::SixJObject, Y::SixJObject) = parent(X) == parent(Y) && X.components == Y.components
-==(f::RingCatMorphism, g::RingCatMorphism) = domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
+==(X::NonStrictSixJObject, Y::NonStrictSixJObject) = parent(X) == parent(Y) && X.components == Y.components
+==(f::NonStrictSixJMorphism, g::NonStrictSixJMorphism) = domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
 
-#decompose(X::SixJObject) = [(x,k) for (x,k) ∈ zip(simples(parent(X)), X.components) if k != 0]
+#decompose(X::NonStrictSixJObject) = [(x,k) for (x,k) ∈ zip(simples(parent(X)), X.components) if k != 0]
 
-inv(f::RingCatMorphism) = RingCatMorphism(codomain(f),domain(f), inv(f.m))
+inv(f::NonStrictSixJMorphism) = NonStrictSixJMorphism(codomain(f),domain(f), inv(f.m))
 
-id(X::SixJObject) = RingCatMorphism(X,X, one(MatrixSpace(base_ring(X),length(X.components),length(X.components))))
+id(X::NonStrictSixJObject) = NonStrictSixJMorphism(X,X, one(MatrixSpace(base_ring(X),length(X.components),length(X.components))))
 
-function compose(f::RingCatMorphism, g::RingCatMorphism)
-    is_iso, iso = is_isomorphic(codomain(f), domain(g))
-    @assert  is_iso "Morphisms not compatible"
-
-    if codomain(f) == domain(g) 
-      return RingCatMorphism(domain(f), codomain(g), matrix(f)*matrix(g))
-    end
+function compose(f::NonStrictSixJMorphism, g::NonStrictSixJMorphism)
+    @assert codomain(f) == domain(g) 
     
-    return Morphism(domain(f), codomain(g), matrix(f)*matrix(iso)*matrix(g))
+    NonStrictSixJMorphism(domain(f), codomain(g), matrix(f)*matrix(g))
 end
 
-function +(f::RingCatMorphism, g::RingCatMorphism)
+function +(f::NonStrictSixJMorphism, g::NonStrictSixJMorphism)
     @assert domain(f) == domain(g) && codomain(f) == codomain(g) "Not compatible"
-    RingCatMorphism(domain(f), codomain(f), matrix(f) + matrix(g))
+    NonStrictSixJMorphism(domain(f), codomain(f), matrix(f) + matrix(g))
 end
 
 """
-    dual(X::SixJObject)
+    dual(X::NonStrictSixJObject)
 
 Return the dual object of ``X``. An error is thrown if ``X`` is not rigid.
 """
-function dual(X::SixJObject)
+function dual(X::NonStrictSixJObject)
     C = parent(X)
 
     # Dual of simple Object
@@ -177,14 +167,14 @@ function dual(X::SixJObject)
         if length(j) != 1
             throw(ErrorException("Object not rigid."))
         end
-        return SixJObject(C,[i == j[1] ? 1 : 0 for i ∈ 1:C.simples])
+        return NonStrictSixJObject(C,[i == j[1] ? 1 : 0 for i ∈ 1:C.simples])
     end
 
     # Build dual from simple objects
     return direct_sum([dual(Y)^(X.components[i]) for (Y,i) ∈ zip(simples(C), 1:C.simples)])
 end
 
-function coev(X::SixJObject) where T
+function coev(X::NonStrictSixJObject) where T
     DX = dual(X)
     C = parent(X)
     F = base_ring(C)
@@ -210,7 +200,7 @@ function coev(X::SixJObject) where T
     return Morphism(one(C), X⊗DX, mats)
 end
 
-function ev(X::SixJObject)
+function ev(X::NonStrictSixJObject)
     DX = dual(X)
     C = parent(X)
     F = base_ring(C)
@@ -245,26 +235,25 @@ end
 
 
 
-*(λ,f::RingCatMorphism) = RingCatMorphism(domain(f), codomain(f), λ *f.m)
+*(λ,f::NonStrictSixJMorphism) = NonStrictSixJMorphism(domain(f), codomain(f), λ *f.m)
 
 
-# function getindex(f::RingCatMorphism, i)
+# function getindex(f::NonStrictSixJMorphism, i)
 #     m = zero_morphism(domain(f),codomain(f)).m
 #     m[i] = f.m[i]
 #     simple = simples(parent(domain(f)))
 #     dom = simple[i]^domain(f).components[i]
 #     cod = simple[i]^codomain(f).components[i]
-#     return RingCatMorphism(dom,cod,m)
+#     return NonStrictSixJMorphism(dom,cod,m)
 # end
 
-getindex(X::SixJObject, i) = X.components[i]
+getindex(X::NonStrictSixJObject, i) = X.components[i]
 
-
-function matrix(f::RingCatMorphism)
+function matrix(f::NonStrictSixJMorphism)
     return f.m
 end
 
-function matrices(f::RingCatMorphism)
+function matrices(f::NonStrictSixJMorphism)
     n = parent(domain(f)).simples
     F = base_ring(f)
 
@@ -272,27 +261,27 @@ function matrices(f::RingCatMorphism)
     for i ∈ 1:n
         dom_index = findall(e -> e == i, domain(f).components)
         cod_index = findall(e -> e == i, codomain(f).components)
-        mats = [mats; matrix(f)[dom_index, cod_index]]
+        mats = [mats; matrix(f)[cod_index, dom_index]]
     end
 
     return mats
 end
 
 
-function (F::Field)(f::RingCatMorphism)
+function (F::Field)(f::NonStrictSixJMorphism)
     if !(domain(f) == codomain(f) && issimple(domain(f)))
         throw(ErrorException("Cannot convert Morphism to $F"))
     end
     return F(f.m[1,1])
 end
 
-spherical(X::SixJObject) = id(X)
+spherical(X::NonStrictSixJObject) = id(X)
 #-------------------------------------------------------------------------------
 #   Tensor Product
 #-------------------------------------------------------------------------------
 
-function tensor_product(X::SixJObject, Y::SixJObject)
-    @assert parent(X) == parent(Y) "Mismatching parents"
+function tensor_product(X::NonStrictSixJObject, Y::NonStrictSixJObject)
+    #@assert parent(X) == parent(Y) "Mismatching parents"
     C = parent(X)
     n = C.simples
     T = Int[]
@@ -304,9 +293,9 @@ function tensor_product(X::SixJObject, Y::SixJObject)
         end
     end
 
-    return SixJObject(C,T)
+    return NonStrictSixJObject(C,T)
 end
-function tensor_product(f::RingCatMorphism, g::RingCatMorphism)
+function tensor_product(f::NonStrictSixJMorphism, g::NonStrictSixJMorphism)
     dom = domain(f) ⊗ domain(g)
     cod = codomain(f) ⊗ codomain(g)
     C = parent(dom)
@@ -337,19 +326,14 @@ function tensor_product(f::RingCatMorphism, g::RingCatMorphism)
 end
 
 
-one(C::SixJCategory) = simples(C)[1]
+one(C::NonStrictSixJCategory) = simples(C)[1]
 
 #-------------------------------------------------------------------------------
 #   Direct sum
 #-------------------------------------------------------------------------------
 
-function direct_sum(X::SixJObject, Y::SixJObject)
-    @assert parent(X) == parent(Y) "Mismatching parents"
-    return SixJObject(parent(X), [X.components; Y.components])
-end
-
-function direct_sum(X::SixJObject, Y::SixJObject)
-    S = direct_sum(X,Y)
+function direct_sum(X::NonStrictSixJObject, Y::NonStrictSixJObject)
+    S = NonStrictSixJObject(parent(X), [X.components; Y.components])
     ix_mat = matrix(zero_morphism(X,S))
     iy_mat = matrix(zero_morphism(Y,S))
     px_mat = matrix(zero_morphism(S,X))
@@ -373,21 +357,21 @@ function direct_sum(X::SixJObject, Y::SixJObject)
     return S,[ix,iy],[px,py]
 end
 
-function direct_sum(f::RingCatMorphism, g::RingCatMorphism)
+function direct_sum(f::NonStrictSixJMorphism, g::NonStrictSixJMorphism)
     dom = domain(f) ⊕ domain(g)
     cod = codomain(f) ⊕ codomain(g)
-    m = matrix(Morphism(f.m)⊕Morphism(g.m))
+    m = diagonal_matrix(f.m, g.m)
     return Morphism(dom,cod,m)
 end
 
 
-zero(C::SixJCategory) = SixJObject(C,[])
+zero(C::NonStrictSixJCategory) = NonStrictSixJObject(C,[])
 
-function zero_morphism(X::SixJObject, Y::SixJObject)
-    return RingCatMorphism(X,Y,zero(MatrixSpace(base_ring(X), length(X.components), length(Y.components))))
+function zero_morphism(X::NonStrictSixJObject, Y::NonStrictSixJObject)
+    return NonStrictSixJMorphism(X,Y,zero(MatrixSpace(base_ring(X), length(X.components), length(Y.components))))
 end
 
-function is_isomorphic(X::SixJObject, Y::SixJObject)
+function is_isomorphic(X::NonStrictSixJObject, Y::NonStrictSixJObject)
     if sort(X.components) != sort(Y.components)
         return false, nothing
     else
@@ -402,30 +386,30 @@ end
 #   Simple Objects
 #-------------------------------------------------------------------------------
 
-function simples(C::SixJCategory)
+function simples(C::NonStrictSixJCategory)
     n = C.simples
-    [SixJObject(C, [i]) for i ∈ 1:n]
+    [NonStrictSixJObject(C, [i]) for i ∈ 1:n]
 end
 
-function getindex(C::SixJCategory, i)
-    SixJObject(C,[i])
+function getindex(C::NonStrictSixJCategory, i::Int)
+    NonStrictSixJObject(C,[i])
 end
 
 #-------------------------------------------------------------------------------
 #   Kernel and Cokernel
 #-------------------------------------------------------------------------------
 
-function kernel(f::RingCatMorphism)
+function kernel(f::NonStrictSixJMorphism)
     C = parent(domain(f))
     kernels = [kernel(Morphism(m)) for m ∈ f.m]
     mats = [matrix(m) for (k,m) ∈ kernels]
-    ker = SixJObject(C,[dim(k) for (k,m) ∈ kernels])
+    ker = NonStrictSixJObject(C,[dim(k) for (k,m) ∈ kernels])
 
     return ker, Morphism(ker, domain(f), mats)
 end
 
 
-function left_inverse(f::RingCatMorphism)
+function left_inverse(f::NonStrictSixJMorphism)
     inverses = [left_inverse(Morphism(m)) for m ∈ matrices(f)]
     mats = [matrix(m) for m ∈ inverses]
     return Morphism(codomain(f), domain(f), mats)
@@ -435,10 +419,10 @@ end
 #   Examples
 #-------------------------------------------------------------------------------
 
-function Ising()
+function NonStrictIsing()
     Qx,x = QQ["x"]
     F,a = NumberField(x^2-2, "√2")
-    C = SixJCategory(F,["𝟙", "χ", "X"])
+    C = NonStrictSixJCategory(F,["𝟙", "χ", "X"])
     M = zeros(Int,3,3,3)
 
     M[1,1,:] = [1,0,0]
@@ -459,9 +443,8 @@ function Ising()
     z = zero(MatrixSpace(F,0,0))
     set_associator!(C,3,3,3, [z, z, inv(a)*matrix(F,[1 1; 1 -1])])
 
-    set_spherical!(C, [id(s) for s ∈ simples(C)])
+    set_spherical!(C, [F(1) for s ∈ simples(C)])
 
-    a,b,c = simples(C)
 
     return C
 end
@@ -470,21 +453,21 @@ end
 #   Hom Spaces
 #-------------------------------------------------------------------------------
 
-struct SixJCategoryHomSpace<: CategoryHomSpace
-    X::SixJObject
-    Y::SixJObject
-    basis::Vector{RingCatMorphism}
+struct NonStrictSixJHomSpace<: AbstractHomSpace
+    X::NonStrictSixJObject
+    Y::NonStrictSixJObject
+    basis::Vector{NonStrictSixJMorphism}
     parent::VectorSpaces
 end
 
-function Hom(X::SixJObject, Y::SixJObject)
+function Hom(X::NonStrictSixJObject, Y::NonStrictSixJObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
     Xi, Yi = X.components, Y.components
     F = base_ring(X)
 
     d = sum([x*y for (x,y) ∈ zip(Xi,Yi)])
 
-    if d == 0 return SixJCategoryHomSpace(X,Y,RingCatMorphism[], VectorSpaces(F)) end
+    if d == 0 return SixJHomSpace(X,Y,NonStrictSixJMorphism[], VectorSpaces(F)) end
 
     basis = [zero_morphism(X,Y).m for i ∈ 1:d]
     next = 1
@@ -495,11 +478,11 @@ function Hom(X::SixJObject, Y::SixJObject)
             next = next + 1
         end
     end
-    basis_mors = [RingCatMorphism(X,Y,m) for m ∈ basis]
-    return SixJCategoryHomSpace(X,Y,basis_mors, VectorSpaces(F))
+    basis_mors = [NonStrictSixJMorphism(X,Y,m) for m ∈ basis]
+    return SixJHomSpace(X,Y,basis_mors, VectorSpaces(F))
 end
 
-function express_in_basis(f::RingCatMorphism, base::Vector)
+function express_in_basis(f::NonStrictSixJMorphism, base::Vector)
     F = base_ring(domain(f))
     A = Array{elem_type(F),2}(undef,length(base),0)
     b = []
@@ -522,11 +505,11 @@ end
 #   Pretty Printing
 #-------------------------------------------------------------------------------
 
-function show(io::IO, C::SixJCategory)
+function show(io::IO, C::NonStrictSixJCategory)
     print(io, "Fusion Category with $(C.simples) simple objects")
 end
 
-function show(io::IO, X::SixJObject)
+function show(io::IO, X::NonStrictSixJObject)
     x_comps = X.components
     coeffs = [length(x_comps[x_comps .== k]) for k ∈ 1:parent(X).simples]
 
@@ -547,7 +530,7 @@ function show(io::IO, X::SixJObject)
     print(io,disp)
 end
 
-function show(io::IO, f::RingCatMorphism)
+function show(io::IO, f::NonStrictSixJMorphism)
     print(io, """Morphism with
 Domain: $(domain(f))
 Codomain: $(codomain(f))

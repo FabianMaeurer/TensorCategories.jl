@@ -690,7 +690,7 @@ end
 #   Hom Spaces
 #-------------------------------------------------------------------------------
 
-struct CenterCategoryHomSpace <: AbstractCategoryHomSpace
+struct CenterHomSpace <: AbstractHomSpace
     X::CenterObject
     Y::CenterObject
     basis::Vector{CenterMorphism}
@@ -806,7 +806,7 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject)
     n = length(basis(H))
 
     if n == 0 
-        return CategoryHomSpace(X,Y, CenterMorphism[], VectorSpaces(F))
+        return HomSpace(X,Y, CenterMorphism[], VectorSpaces(F))
     end 
 
     Fx,poly_basis = PolynomialRing(F,n)
@@ -843,7 +843,7 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject)
 
     center_basis = [CenterMorphism(X,Y,sum(b .* B)) for b ∈ basis_coeffs]
 
-    return CategoryHomSpace(X,Y,center_basis, VectorSpaces(F))
+    return HomSpace(X,Y,center_basis, VectorSpaces(F))
 end
 
 function hom_by_projection(X::CenterObject, Y::CenterObject)
@@ -863,7 +863,7 @@ function hom_by_projection(X::CenterObject, Y::CenterObject)
         f = Morphism(X,Y,sum([m*bi for (m,bi) ∈ zip(M[i,:], b)]))
         H_basis = [H_basis; f]
     end
-    return CenterCategoryHomSpace(X,Y,H_basis, VectorSpaces(base_ring(X)))
+    return CenterHomSpace(X,Y,H_basis, VectorSpaces(base_ring(X)))
 end
 
 

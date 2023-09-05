@@ -777,7 +777,7 @@ end
 #   Hom Spaces
 #-------------------------------------------------------------------------------
 
-struct SixJCategoryHomSpace<: AbstractCategoryHomSpace
+struct SixJHomSpace<: AbstractHomSpace
     X::SixJObject
     Y::SixJObject
     basis::Vector{SixJMorphism}
@@ -791,7 +791,7 @@ function Hom(X::SixJObject, Y::SixJObject)
 
     d = sum([x*y for (x,y) ∈ zip(Xi,Yi)])
 
-    if d == 0 return SixJCategoryHomSpace(X,Y,SixJMorphism[], VectorSpaces(F)) end
+    if d == 0 return SixJHomSpace(X,Y,SixJMorphism[], VectorSpaces(F)) end
 
     basis = [zero_morphism(X,Y).m for i ∈ 1:d]
     next = 1
@@ -803,7 +803,7 @@ function Hom(X::SixJObject, Y::SixJObject)
         end
     end
     basis_mors = [SixJMorphism(X,Y,m) for m ∈ basis]
-    return SixJCategoryHomSpace(X,Y,basis_mors, VectorSpaces(F))
+    return SixJHomSpace(X,Y,basis_mors, VectorSpaces(F))
 end
 
 function express_in_basis(f::SixJMorphism, base::Vector{SixJMorphism})

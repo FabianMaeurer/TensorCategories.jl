@@ -309,7 +309,7 @@ end
 #   Functionality: Hom-Spaces
 #-----------------------------------------------------------------
 
-struct GVSCategoryHomSpace <: AbstractCategoryHomSpace
+struct GVSHomSpace <: AbstractHomSpace
     X::GVSObject
     Y::GVSObject
     basis::Vector{VectorSpaceMorphism}
@@ -338,7 +338,7 @@ function Hom(V::GVSObject, W::GVSObject)
             B = [B; GVSMorphism(V,W,m)]
         end
     end
-    return GVSCategoryHomSpace(V,W,B,VectorSpaces(base_ring(V)))
+    return GVSHomSpace(V,W,B,VectorSpaces(base_ring(V)))
 end
 
 function isgraded(X::GVSObject, Y::GVSObject, m::MatElem)

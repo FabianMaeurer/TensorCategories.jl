@@ -23,11 +23,11 @@ A morphism in the category of finite dimensional vector spaces.
 """
 abstract type VectorSpaceMorphism <: Morphism end
 
-abstract type CategoryHomSet end
+abstract type HomSet end
 
-abstract type AbstractCategoryHomSpace <: VectorSpaceObject end
+abstract type AbstractHomSpace <: VectorSpaceObject end
 
-struct CategoryHomSpace <: AbstractCategoryHomSpace
+struct HomSpace <: AbstractHomSpace
     X::Object
     Y::Object
     basis::Vector{<:Morphism}
@@ -427,19 +427,26 @@ function decompose(C::Category)
     return [RingSubcategory(C,c) for c ∈ components]
 end
 
+function multiplicity(C::Category)
+    @assert is_multifusion(C)
+
+    m = multiplication_table(C)
+    return maximum(m[:])
+end
+
 #-------------------------------------------------------
 # Hom Spaces
 #-------------------------------------------------------
 
-dim(V::CategoryHomSpace) = length(basis(V))
+dim(V::HomSpace) = length(basis(V))
 
 End(X::Object) = Hom(X,X)
 
 zero_morphism(C::Category) = zero_morphism(zero(C), zero(C))
 
-Base.iterate(H::AbstractCategoryHomSpace, state = 1) = state > int_dim(H) ? nothing : (basis(H)[state], state + 1)
-Base.length(H::AbstractCategoryHomSpace) = int_dim(H)
-Base.eltype(::Type{T}) where T <: AbstractCategoryHomSpace = Morphism 
+Base.iterate(H::AbstractHomSpace, state = 1) = state > int_dim(H) ? nothing : (basis(H)[state], state + 1)
+Base.length(H::AbstractHomSpace) = int_dim(H)
+Base.eltype(::Type{T}) where T <: AbstractHomSpace = Morphism 
 
 function (F::Field)(f::Morphism)
     B = basis(Hom(domain(f), codomain(f)))

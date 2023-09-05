@@ -102,7 +102,7 @@ end
 
 function Hom(X::SubcategoryObject, Y::SubcategoryObject)
     sub_basis = [SubcategoryMorphism(X,Y,f) for f ∈ Hom(object(X),object(Y))]
-    return CategoryHomSpace(X,Y,sub_basis,VectorSpaces(base_ring(X)))
+    return HomSpace(X,Y,sub_basis,VectorSpaces(base_ring(X)))
 end
 
 function is_isomorphic(X::SubcategoryObject, Y::SubcategoryObject)

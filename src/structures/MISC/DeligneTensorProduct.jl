@@ -181,5 +181,5 @@ end
     
 #     hom_basis = [f⊠g for f ∈ hom_X1_Y1, g ∈ hom_X2_Y2][:]
 
-#     return CategoryHomSpace(X,Y,hom_basis, VectorSpaces(base_ring(X)))
+#     return HomSpace(X,Y,hom_basis, VectorSpaces(base_ring(X)))
 # end

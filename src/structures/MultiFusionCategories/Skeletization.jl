@@ -18,131 +18,209 @@ function SixJCategory(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:le
 
     set_associator!(skel_C, six_j_symbols(C, S))
 
+    if multiplicity(C) > 1
+        if !pentagon_axiom(skel_C) 
+            error("Cannot Skeletize")
+        end
+    end
     # Try to set spherical
     try 
         set_spherical!(skel_C,[F(spherical(s)) for s ∈ S])
     catch
     end
 
+    if is_braided(C)
+        set_braiding!(skel_C, skeletal_braiding(C,S))
+    end
     set_one!(skel_C, [int_dim(Hom(one(C), s)) for s ∈ S])
 
     set_name!(skel_C, "Skeletization of $C")
 
-    return skel_C, SkeletizationFunctor(C, skel_C)
+    return skel_C
 end
 
 function six_j_symbols(C::Category, S = simples(C))
     @assert is_multifusion(C)
 
-    n = length(S)
-    ass = Array{MatElem,4}(undef,n,n,n,n)
+    N = length(S)
+    C_morphism_type = morphism_type(C)
+    F = base_ring(C) 
 
-    objects = []
-    isos = []
+    ass = Array{MatElem}(undef,N,N,N,N)
 
-    for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n
-        X = (S[i] ⊗ S[j]) ⊗ S[k]
-        Y = S[i] ⊗ (S[j] ⊗ S[k])
+    for (i,j,k,l) ∈ Base.product(1:N, 1:N, 1:N, 1:N)
 
-        _, ij_decomposition_morphism, ij_incl, ij_proj = direct_sum_decomposition(S[i] ⊗ S[j], S)
-        _, jk_decomposition_morphism, jk_incl, jk_proj =  direct_sum_decomposition(S[j] ⊗ S[k], S)
+        X,Y,Z,W = S[[i,j,k,l]]
 
-        distribute_before = (inv(ij_decomposition_morphism) ⊗ id(S[k])) ∘ inv(distribute_left([domain(i) for i ∈ ij_incl], S[k]))
+        # Build a basis for Hom((X⊗Y)⊗Z,W)
+        B_XY_Z_W = C_morphism_type[]
+        for n ∈ 1:N
+            V = S[n]
+            H_XY_V = basis(Hom(X ⊗ Y, V))
+            H_VZ_W = basis(Hom(V ⊗ Z, W))
+            B = [f ∘ (g ⊗ id(Z)) for g ∈ H_XY_V, f ∈ H_VZ_W][:]
+            B_XY_Z_W = [B_XY_Z_W; B]
+        end
 
-        distribute_after = distribute_right(S[i], [domain(i) for i ∈ jk_incl]) ∘ (id(S[i]) ⊗ jk_decomposition_morphism)
-
-        # @show codomain(distribute_after) == domain(distribute_before)
-
-        summands = vcat([[x for _ ∈ 1:k] for (x,k) ∈ decompose(X, S)]...)
-
-        Z, before, incl, _ = direct_sum_decomposition(X,S)
-        Z2, after, _, proj = direct_sum_decomposition(Y,S)
+        # Build a basis for Hom(X⊗(Y⊗Z),W)
+        B_X_YZ_W = C_morphism_type[]
+        for n ∈ 1:N
+            V = S[n]
+            H_YZ_V = basis(Hom(Y ⊗ Z, V))
+            H_XV_W = basis(Hom(X ⊗ V, W))
+            B = [f ∘ (id(X) ⊗ g) for g ∈ H_YZ_V, f ∈ H_XV_W][:]
+            B_X_YZ_W = [B_X_YZ_W; B]
+        end
         
-        before = inv(before) ∘ distribute_before ∘ before
-        after = after ∘ distribute_after ∘ inv(after)
-        # if X ∈ objects
-        #     before = isos[findfirst(e -> e == X, objects)]
-        # else
-        #     _,before = is_isomorphic(Z,X)
-        #     isos = [isos; before]
-        #     objects = [objects; X]
-        # end
+        # Express the asociator in the corresponding basis
+        a = associator(X,Y,Z)
 
-        # if Y ∈ objects
-        #     after = isos[findfirst(e -> e == Y, objects)]
-        # else
-        #     _,after = is_isomorphic(Z2,Y)
-        #     isos = [isos; after]
-        #     objects = [objects; Y]
-        # end
+        associator_XYZ_W = hcat([express_in_basis(f ∘ a, B_XY_Z_W) for f ∈ B_X_YZ_W]...)
 
-    
-        ass_mor =  after ∘ associator(S[i],S[j],S[k]) ∘ before 
-
-        for l ∈ 1:n
-            before_incl_l = filter(f -> domain(f) == S[l], incl)
-            after_proj_l = filter(f -> codomain(f) == S[l], proj)
+        ass[i,j,k,l] = matrix(F, length(B_X_YZ_W), length(B_XY_Z_W), associator_XYZ_W)
             
-            if length(before_incl_l) == 0
-                ass[i,j,k,l] = zero_matrix(base_ring(C),0,0)
-                continue
-            end
+    end
 
-            m = length(before_incl_l)
-            F = base_ring(C)
-            ass[i,j,k,l] = zero_matrix(F,m,m)
-            for q ∈ 1:m, p ∈ 1:m
-                ass[i,j,k,l][p,q] = F(after_proj_l[q] ∘ ass_mor ∘ before_incl_l[p])
-            end
+    return ass           
+end
+
+function skeletal_braiding(C::Category, S = simples(C))
+    @assert is_braided(C)
     
-        end
+    N = length(S)
+    C_morphism_type = morphism_type(C)
+    F = base_ring(C) 
+    braid = Array{MatElem}(undef,N,N,N)
+
+    for (i,j,l) ∈ Base.product(1:N,1:N,1:N)
+        X,Y,W = S[[i,j,l]]
+        # Basis for Hom(X⊗Y,W)
+        B_XY_W = basis(Hom(X⊗Y,W))
+
+        # Basis for Hom(Y⊗X,W)
+        B_YX_W = basis(Hom(Y⊗X,W))
+
+        braid_XY_W = hcat([express_in_basis(f ∘ braiding(X,Y), B_XY_W) for f ∈ B_YX_W]...)
+        braid[i,j,l] = matrix(F, length(B_XY_W), length(B_YX_W), braid_XY_W)
     end
-    return ass
+    return braid
 end
+# function six_j_symbols(C::Category, S = simples(C))
+#     @assert is_multifusion(C)
 
-struct SkeletizationFunctor <: AbstractFunctor
-    domain::Category
-    codomain::Category
-end
+#     n = length(S)
+#     ass = Array{MatElem,4}(undef,n,n,n,n)
 
-function SkeletizationFunctor(C::Category)
-    SkeletizationFunctor(C,SixJCategory(C))
-end
+#     objects = []
+#     isos = []
 
-function (F::SkeletizationFunctor)(X::Object)
-    return SixJObject(codomain(F), [int_dim(Hom(X,s)) for s ∈ simples(C)])
-end
+#     for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n
+#         X = (S[i] ⊗ S[j]) ⊗ S[k]
+#         Y = S[i] ⊗ (S[j] ⊗ S[k])
 
-function (F::SkeletizationFunctor)(f::Morphism)
-    X = domain(F)
-    Y = codomain(F)
+#         _, ij_decomposition_morphism, ij_incl, ij_proj = direct_sum_decomposition(S[i] ⊗ S[j], S)
+#         _, jk_decomposition_morphism, jk_incl, jk_proj =  direct_sum_decomposition(S[j] ⊗ S[k], S)
 
-    S = simples(domain(f))
-    n = length(S)
+#         distribute_before = (inv(ij_decomposition_morphism) ⊗ id(S[k])) ∘ inv(distribute_left([domain(i) for i ∈ ij_incl], S[k]))
 
-    _, before, before_incl, before_proj = direct_sum_decomposition(X, S)
-    _, after,  after_incl,  after_proj  = direct_sum_decomposition(Y, S)
+#         distribute_after = distribute_right(S[i], [domain(i) for i ∈ jk_incl]) ∘ (id(S[i]) ⊗ jk_decomposition_morphism)
 
-    m = Vector{MatElem}(undef,n)
+#         # @show codomain(distribute_after) == domain(distribute_before)
 
-    for l ∈ 1:n
-        before_incl_l = filter(f -> domain(f) == S[l], before_incl)
-        before_proj_l = filter(f -> codomain(f) == S[l], before_proj)
-        after_incl_l = filter(f -> domain(f) == S[l], after_incl)
-        after_proj_l = filter(f -> codomain(f) == S[l], after_proj)
+#         summands = vcat([[x for _ ∈ 1:k] for (x,k) ∈ decompose(X, S)]...)
+
+#         Z, before, incl, _ = direct_sum_decomposition(X,S)
+#         Z2, after, _, proj = direct_sum_decomposition(Y,S)
         
-        if length(before_incl_l) == 0
-            m[l] = zero_matrix(base_ring(C),0,0)
-            continue
-        end
-        m[l] = matrix(direct_sum(after_proj_l) ∘ ass_mor ∘ direct_sum(before_incl_l))
-    end
+#         before = inv(before) ∘ distribute_before ∘ before
+#         after = after ∘ distribute_after ∘ inv(after)
+#         # if X ∈ objects
+#         #     before = isos[findfirst(e -> e == X, objects)]
+#         # else
+#         #     _,before = is_isomorphic(Z,X)
+#         #     isos = [isos; before]
+#         #     objects = [objects; X]
+#         # end
 
-    return Morphism(F(X),F(Y),m)
-end
+#         # if Y ∈ objects
+#         #     after = isos[findfirst(e -> e == Y, objects)]
+#         # else
+#         #     _,after = is_isomorphic(Z2,Y)
+#         #     isos = [isos; after]
+#         #     objects = [objects; Y]
+#         # end
 
-function show(io::IO, F::SkeletizationFunctor)
-    print(io,"Skeletal projection of $(domain(F))")
-end
+    
+#         ass_mor =  after ∘ associator(S[i],S[j],S[k]) ∘ before 
 
+#         for l ∈ 1:n
+#             before_incl_l = filter(f -> domain(f) == S[l], incl)
+#             after_proj_l = filter(f -> codomain(f) == S[l], proj)
+            
+#             if length(before_incl_l) == 0
+#                 ass[i,j,k,l] = zero_matrix(base_ring(C),0,0)
+#                 continue
+#             end
+
+#             m = length(before_incl_l)
+#             F = base_ring(C)
+#             ass[i,j,k,l] = zero_matrix(F,m,m)
+#             for q ∈ 1:m, p ∈ 1:m
+#                 ass[i,j,k,l][p,q] = F(after_proj_l[q] ∘ ass_mor ∘ before_incl_l[p])
+#             end
+    
+#         end
+#     end
+#     return ass
+# end
+
+# struct SkeletizationFunctor <: AbstractFunctor
+#     domain::Category
+#     codomain::Category
+# end
+
+# function SkeletizationFunctor(C::Category)
+#     SkeletizationFunctor(C,SixJCategory(C))
+# end
+
+# function (F::SkeletizationFunctor)(X::Object)
+#     return SixJObject(codomain(F), [int_dim(Hom(X,s)) for s ∈ simples(parent(X))])
+# end
+
+# function (F::SkeletizationFunctor)(f::Morphism)
+#     X = domain(f)
+#     Y = codomain(f)
+
+#     S = simples(domain(F))
+#     n = length(S)
+
+#     _, before, before_incl, before_proj = direct_sum_decomposition(X, S)
+#     _, after,  after_incl,  after_proj  = direct_sum_decomposition(Y, S)
+
+#     m = Vector{MatElem}(undef,n)
+
+#     for l ∈ 1:n
+#         before_incl_l = filter(f -> domain(f) == S[l], before_incl)
+#         before_proj_l = filter(f -> codomain(f) == S[l], before_proj)
+#         after_incl_l = filter(f -> domain(f) == S[l], after_incl)
+#         after_proj_l = filter(f -> codomain(f) == S[l], after_proj)
+        
+#         if length(before_incl_l) == 0
+#             m[l] = zero_matrix(base_ring(f),0,0)
+#             continue
+#         end
+#         m[l] = matrix(direct_sum(after_proj_l) ∘ f ∘ direct_sum(before_incl_l))
+#     end
+
+#     return Morphism(F(X),F(Y),m)
+# end
+
+# function show(io::IO, F::SkeletizationFunctor)
+#     print(io,"Skeletal projection of $(domain(F))")
+# end
+
+
+#=----------------------------------------------------------
+    Skeletization Functor 
+----------------------------------------------------------=#
 

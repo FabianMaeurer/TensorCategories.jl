@@ -364,7 +364,7 @@ end
 #   Hom Spaces
 #----------------------------------------------------------------------------
 
-struct VSCategoryHomSpace <: AbstractCategoryHomSpace
+struct VSHomSpace <: AbstractHomSpace
     X::VectorSpaceObject
     Y::VectorSpaceObject
     basis::Vector{VectorSpaceMorphism}
@@ -380,12 +380,12 @@ function Hom(X::VectorSpaceObject, Y::VectorSpaceObject)
     n1,n2 = (length(basis(X)), length(basis(Y)))
     mats = [matrix(base_ring(X), [i==k && j == l ? 1 : 0 for i ∈ 1:n1, j ∈ 1:n2]) for k ∈ 1:n1, l ∈ 1:n2]
     base = [[Morphism(X,Y,m) for m ∈ mats]...]
-    return VSCategoryHomSpace(X,Y,base,VectorSpaces(base_ring(X)))
+    return VSHomSpace(X,Y,base,VectorSpaces(base_ring(X)))
 end
 
-basis(V::VSCategoryHomSpace) = V.basis
+basis(V::VSHomSpace) = V.basis
 
-zero(V::VSCategoryHomSpace) = Morphism(V.X,V.Y,matrix(base_ring(V.X), [0 for i ∈ 1:dim(V.X), j ∈ 1:dim(V.Y)]))
+zero(V::VSHomSpace) = Morphism(V.X,V.Y,matrix(base_ring(V.X), [0 for i ∈ 1:dim(V.X), j ∈ 1:dim(V.Y)]))
 
 zero_morphism(V::VectorSpaceObject,W::VectorSpaceObject) = Morphism(V,W, zero(MatrixSpace(base_ring(V), int_dim(V), int_dim(W))))
 
