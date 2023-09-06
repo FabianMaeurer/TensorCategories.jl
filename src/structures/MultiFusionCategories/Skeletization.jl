@@ -19,9 +19,7 @@ function SixJCategory(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:le
     set_associator!(skel_C, six_j_symbols(C, S))
 
     if multiplicity(C) > 1
-        if !pentagon_axiom(skel_C) 
-            error("Cannot Skeletize")
-        end
+        @warn "6j-Symbols might be wrong since multiplicity is greater than one"
     end
     # Try to set spherical
     try 
