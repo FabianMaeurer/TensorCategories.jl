@@ -11,7 +11,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     eigenspace, eigenspaces, elem_type, elements, fmpq, fmpz, gcd, gen, gens,
     groebner_basis, gset, hom, id, ideal, image, index, inv, irreducible_modules, is_abelian,
     is_central, iscommutative, isconstant, isindependent, isinvertible, is_isomorphic,
-    is_semisimple, issubgroup, jordan_normal_form, kernel, kronecker_product,
+    is_semisimple, is_subgroup, jordan_normal_form, kernel, kronecker_product,
     leading_monomial, left_transversal, matrix, minpoly, real_solutions, multiplication_table,
     nf_elem, one, orbit, orbits, order, parent, permutation_matrix, primary_decomposition,
     product, rank, roots, rref, size, solve, solve_left, splitting_field, stabilizer,
@@ -22,7 +22,9 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     leading_coefficient, roots, is_rational, QQMPolyRingElem, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
     height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
     @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix, exponents, symbols,
-    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity
+    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity, gmodule
+
+import Oscar.GModuleFromGap: home_base
 
 import Oscar.AbstractAlgebra.Generic: Poly
 
@@ -310,6 +312,5 @@ include("Utility/Technicallities.jl")
 #include("Utility/Serialization.jl")
 
 @alias Centre Center
-
 
 end

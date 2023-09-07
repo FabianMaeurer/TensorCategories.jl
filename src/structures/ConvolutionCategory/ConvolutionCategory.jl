@@ -53,6 +53,10 @@ function ConvolutionCategory(X, K::Field)
     return ConvolutionCategory(gset(G,X), K)
 end
 
+function ConvolutionCategory(X, G::GAPGroup, K::Field)
+    ConvolutionCategory(gset(G,X), K)
+end
+
 Morphism(D::ConvolutionObject, C::ConvolutionObject, m:: CohSheafMorphism) = ConvolutionMorphism(D,C,m)
 
 function Base.hash(C::ConvolutionCategory, h::UInt)
@@ -111,6 +115,7 @@ id(X::ConvolutionObject) = ConvolutionMorphism(X,X,id(X.sheaf))
 function associator(X::ConvolutionObject, Y::ConvolutionObject, Z::ConvolutionObject)
     dom = (X⊗Y)⊗Z
     cod = X⊗(Y⊗Z)
+    if dom == zero(parent(X)) return zero_morphism(dom,cod) end
     S = simples(parent(X))
     #@show codomain(decompose_morphism(cod,S)[1]) == codomain(decompose_morphism(dom,S)[1])
     return inv(direct_sum_decomposition(cod,S)[2]) ∘ direct_sum_decomposition(dom,S)[2]
@@ -124,12 +129,11 @@ end
 
 documentation
 """
-function direct_sum(X::ConvolutionObject, Y::ConvolutionObject, morphisms::Bool = false)
+function direct_sum(X::ConvolutionObject, Y::ConvolutionObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
     Z,ix,px = direct_sum(X.sheaf,Y.sheaf)
     Z = ConvolutionObject(Z,parent(X))
 
-    if !morphisms return Z end
 
     ix = [ConvolutionMorphism(x,Z,i) for (x,i) ∈ zip([X,Y],ix)]
     px = [ConvolutionMorphism(Z,x,p) for (x,p) ∈ zip([X,Y],px)]

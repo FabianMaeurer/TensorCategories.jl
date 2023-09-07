@@ -6,8 +6,7 @@ end
 struct GroupRepresentation <: RepresentationObject
     parent::GroupRepresentationCategory
     group::GAPGroup
-    m
-    base_ring::Ring
+    M::Union{GModule, Nothing}
     intdim::Int
 end
 
@@ -48,12 +47,11 @@ end
 
 Group representation defined by the images of generators of G.
 """
-function Representation(G::GAPGroup, pre_img::Vector, img::Vector)
+function Representation(G::GAPGroup, img::Vector)
     F = base_ring(img[1])
     d = size(img[1])[1]
-    H = GL(d, F)
-    m = hom(G,H, pre_img,H.(img))
-    return GroupRepresentation(RepresentationCategory(G,F),G,m,F,d)
+    M = gmodule(G,img)
+    return GroupRepresentation(RepresentationCategory(G,F),G,M,d)
 end
 
 
@@ -63,11 +61,11 @@ end
 Group representation defined by m:G -> Mat_n.
 """
 function Representation(G::GAPGroup, m::Function)
-    F = order(G) == 1 ? base_ring(parent(m(elements(G)[1]))) : base_ring(parent(m(G[1])))
-    d = order(G) == 1 ? size(m(elements(G)[1]))[1] : size(m(G[1]))[1]
-    H = GL(d,F)
-    m = hom(G,H,g -> H(m(g)))
-    return GroupRepresentation(RepresentationCategory(G,F),G,m,F,d)
+    @assert order(G) > 1
+    F = base_ring(parent(m(G[1])))
+    d = size(m(G[1]))[1]
+    M = gmodule(G, [m(g) for g ∈ gens(G)])
+    return GroupRepresentation(RepresentationCategory(G,F),G,M,d)
 end
 
 
@@ -103,14 +101,14 @@ function is_semisimple(C::GroupRepresentationCategory)
     gcd(characteristic(base_ring(C)), order(base_group(C))) == 1
 end
 
-function (ρ::GroupRepresentation)(x)
-    if ρ.m == 0
-        F = base_ring(ρ)
+function get_index(ρ::GroupRepresentation, i)
+    F = base_ring(ρ)
+    if ρ.m === nothing
         return GL(0,F)(zero(MatrixSpace(F,0,0)))
     elseif order(ρ.group) == 1
-        return one(codomain(ρ.m))
+        return zero_matrix(F, int_dim(ρ), int_dim(ρ))
     else
-        return ρ.m(x)
+        return ρ.M.ac[i].matrix
     end
 end
 matrix(f::GroupRepresentationMorphism) = f.map
@@ -133,7 +131,7 @@ Return the zero reprensentation.
 function zero(Rep::GroupRepresentationCategory)
     grp = base_group(Rep)
     F = base_ring(Rep)
-    GroupRepresentation(Rep,grp,0,F,0)
+    GroupRepresentation(Rep,grp,nothing,0)
 end
 
 """
@@ -144,7 +142,8 @@ Return the trivial representation.
 function one(Rep::GroupRepresentationCategory)
     grp = base_group(Rep)
     F = base_ring(Rep)
-    if order(grp) == 1 return Representation(grp,x -> one(MatrixSpace(F,1,1))) end
+    if order(grp) == 1 
+        return Representation(grp,x -> one(MatrixSpace(F,1,1))) end
     Representation(grp, gens(grp), [one(MatrixSpace(F,1,1)) for _ ∈ gens(grp)])
 end
 
@@ -164,9 +163,6 @@ function ==(ρ::GroupRepresentation, τ::GroupRepresentation)
         if order(τ.group) == 1
             return intdim(τ) == intdim(ρ)
         end
-        return false
-    end
-    if base_group(ρ) != base_group(τ)
         return false
     end
     return *([ρ.m(g) == τ.m(g) for g ∈ gens(base_group(ρ))]...)
@@ -504,7 +500,7 @@ end
 
 Return the hom-space of the representations as a vector space.
 """
-@memoize Dict function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
+function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
     grp = base_group(σ)
     F = base_ring(σ)
 
@@ -549,7 +545,7 @@ end
 #-------------------------------------------------------------------------
 
 function restriction(ρ::GroupRepresentation, H::GAPGroup)
-    b,f = is_subgroup(H, ρ.group)
+    b,f = issubgroup(ρ.group, H)
     RepH = RepresentationCategory(H,base_ring(ρ))
     if b == false throw(ErrorException("Not a subgroup")) end
     if ρ.m == 0 return zero(RepH) end
@@ -567,7 +563,7 @@ function induction(ρ::GroupRepresentation, G::GAPGroup)
 
     if H == G return ρ end
 
-    if !is_subgroup(H,G)[1] throw(ErrorException("Not a supergroup")) end
+    if !issubgroup(G, H)[1] throw(ErrorException("Not a supergroup")) end
 
     if ρ.m == 0 return zero(RepresentationCategory(G,base_ring(ρ))) end
 
