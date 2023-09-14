@@ -188,7 +188,7 @@ end
 
 Check whether σ and τ are isomorphic. If true return the isomorphism.
 """
-@memoize Dict function is_isomorphic(σ::GroupRepresentation, τ::GroupRepresentation)
+#= @memoize Dict =# function is_isomorphic(σ::GroupRepresentation, τ::GroupRepresentation)
     @assert parent(σ) == parent(τ) "Mismatching parents"
 
     if intdim(σ) != intdim(τ) return false, nothing end
@@ -444,7 +444,7 @@ end
 
 Return a list of the simples objects in Rep.
 """
-@memoize Dict function simples(Rep::GroupRepresentationCategory)
+#= @memoize Dict =# function simples(Rep::GroupRepresentationCategory)
     grp = base_group(Rep)
     F = base_ring(Rep)
 
@@ -477,12 +477,31 @@ function decompose(σ::GroupRepresentation)
     if order(G) == 1 return [(one(parent(σ)),intdim(σ))] end
 
     M = to_gap_module(σ,F)
+    ret = Object[]
+    facs = GAP.Globals.MTX.Indecomposition(M)
+    d = intdim(σ)
+    for m ∈ facs
+        imgs = [matrix(F,[F(n[i,j]) for i ∈ 1:length(n), j ∈ 1:length(n)]) for n ∈ m[2].generators]
+        ret = [ret; Representation(G,gens(G),imgs)]
+    end
+    uniques = unique_indecomposables(ret)
+    [(s, length(findall(e -> is_isomorphic(e,s)[1], ret))) for s ∈ uniques]
+end
+
+function indecomposable_subobjects(σ::GroupRepresentation)
+    F = base_ring(σ)
+    if intdim(σ) == 0 return [] end
+    G = σ.group
+
+    if order(G) == 1 return [(one(parent(σ)),intdim(σ))] end
+
+    M = to_gap_module(σ,F)
     ret = []
     facs = GAP.Globals.MTX.CollectedFactors(M)
     d = intdim(σ)
     for m ∈ facs
         imgs = [matrix(F,[F(n[i,j]) for i ∈ 1:length(n), j ∈ 1:length(n)]) for n ∈ m[1].generators]
-        ret = [ret;(Representation(G,gens(G),imgs),GAP.gap_to_julia(m[2]))]
+        ret = [ret; Representation(G,gens(G),imgs)]
     end
     ret
 end
@@ -504,7 +523,7 @@ end
 
 Return the hom-space of the representations as a vector space.
 """
-@memoize Dict function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
+#= @memoize Dict =# function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
     grp = base_group(σ)
     F = base_ring(σ)
 

@@ -31,9 +31,10 @@ struct TensorPowerMorphism <: Morphism
 end
 
 object(X::TensorPowerObject) = X.object
-morphism(f::TensorPowerMorphism) = f.m
+morphism(f::TensorPowerMorphism) = f.morphism
 category(C::TensorPowerCategory) = parent(C.generator)
-Morphism(X::TensorPowerObject, Y::TensorPowerObject, f::TensorPowerMorphism) = TensorPowerMorphism(X,Y,f)
+Morphism(X::TensorPowerObject, Y::TensorPowerObject, f::Morphism) = TensorPowerMorphism(X,Y,f)
+matrix(f::TensorPowerObject) = matrix(f.morphism)
 
 base_ring(C::TensorPowerCategory) = base_ring(category(C))
 
@@ -63,24 +64,36 @@ end
 
 ⊗(X::Object,k::Int) = tensor_power(X,k)
 
-function direct_sum(X::TensorPowerObject, Y::TensorPowerObject)
-    direct_sum(object(X), object(Y))
+function direct_sum(X::TensorPowerObject...)
+    S, incl, proj= direct_sum(object.(X))
+    S = TensorPowerObject(parent(X[1]), S)
+    incl = [Morphism(x, S, i) for (i,x) ∈ zip(incl, X)]
+    proj = [Morphism(S, x, p) for (p,x) ∈ zip(proj, X)]
+    S, incl, proj
 end
 
 function tensor_product(X::TensorPowerObject, Y::TensorPowerObject)
-    tensor_product(object(X), object(Y))
+    TensorPowerObject(parent(X), tensor_product(object(X), object(Y)))
 end
 
 function direct_sum(X::TensorPowerMorphism, Y::TensorPowerMorphism)
-    direct_sum(morphism(X), morphism(Y))
+    dom = domain(f) ⊕ domain(g)
+    cod = codomain(f) ⊕ codomain(g)
+    Morphism(dom,cod, direct_sum(morphism(X), morphism(Y)))
 end
 
 function tensor_product(X::TensorPowerMorphism, Y::TensorPowerMorphism)
-    tensor_product(morphism(X), morphism(Y))
+    dom = domain(f) ⊗ domain(g)
+    cod = codomain(f) ⊗ codomain(g)
+    Morphism(dom, cod, tensor_product(morphism(X), morphism(Y)))
 end
 
 
 one(C::TensorPowerCategory) = TensorPowerObject(C, one(category(C)))
+
+function id(X::TensorPowerObject) 
+    Morphism(X,X, id(object(X)))
+end
 
 #=----------------------------------------------------------
     Simples/Indecompodables 
@@ -91,44 +104,45 @@ function indecomposable_subobjects(X::TensorPowerObject)
     return [TensorPowerObject(parent(X), s) for s ∈ subs]
 end
 
+# function simples(C::TensorPowerCategory, k = Inf)
+#     simpls = object_type(category(C))[]
+#     n1 = 0
+#     j = 0
+#     X = C.generator
+#     Y = one(category(C))
+#     while j ≤ k+1
+#         simpls = unique_simples([simpls; simple_subobjects(Y)])
+#         if length(simpls) == n1
+#             simpls = [TensorPowerObject(C,s) for s ∈ simpls]
+#             C.simples = simpls
+#             C.complete = true
+#             C.max_exponent = j-1
+#             return simpls
+#         end
+#         n1 = length(simpls)
+#         Y = Y ⊗ X
+#         j = j+1
+#     end
+#     simpls = [TensorPowerObject(C,s) for s ∈ simpls]
+#     C.simples = simpls
+#     C.complete = false
+#     C.max_exponent = k
+#     return simpls
+# end
+
+
 function simples(C::TensorPowerCategory, k = Inf)
-    simpls = object_type(category(C))[]
-    n1 = 0
-    j = 0
     X = C.generator
     Y = one(category(C))
-    while j ≤ k+1
-        simpls = unique_simples([simpls; simple_subobjects(Y)])
-        if length(simpls) == n1
-            simpls = [TensorPowerObject(C,s) for s ∈ simpls]
-            C.simples = simpls
-            C.complete = true
-            C.max_exponent = j-1
-            return simpls
-        end
-        n1 = length(simpls)
-        Y = Y ⊗ X
-        j = j+1
-    end
-    simpls = [TensorPowerObject(C,s) for s ∈ simpls]
-    C.simpls = simpls
-    C.complete = false
-    C.max_exponent = k
-    return simpls
-end
-
-
-function indecomposables(C::TensorPowerCategory, k = Inf)
-    X = C.generator
-    Y = one(category(C))
-    indecs_in_X = indecomposable_subobjects(X)
+    indecs_in_X = [x for (x,k) ∈ decompose(X)]
     simpls = indecs_in_X
     n1 = 0
     j = 2
     
     while j ≤ k
         for V ∈ indecs_in_X, W ∈ simpls
-            simpls = unique_indecomposables([simpls; indecomposable_subobjects(W ⊗ V)])
+            summands_of_VW = [x for (x,k) ∈ decompose(W ⊗ V)]
+            simpls = unique_indecomposables(Object[simpls; summands_of_VW])
         end
         if length(simpls) == n1
             simpls = [TensorPowerObject(C,s) for s ∈ simpls]
@@ -142,10 +156,34 @@ function indecomposables(C::TensorPowerCategory, k = Inf)
         j = j+1
     end
     simpls = [TensorPowerObject(C,s) for s ∈ simpls]
-    C.simpls = simpls
+    C.simples = simpls
     C.complete = false
     C.max_exponent = k
+
     return simpls
+ 
+end
+
+
+function kernel(f::TensorPowerMorphism)
+    K,incl = kernel(morphism(f))
+    K = TensorPowerObject(parent(f), K)
+    return K, Morphism(K,domain(f), incl)
+end
+
+function cokernel(f::TensorPowerMorphism)
+    C,proj = cokernel(morphism(f))
+    C = TensorPowerObject(parent(f), C)
+    return C, Morphism(codomain(f), C, proj)
+end
+
+function is_isomorphic(X::TensorPowerObject, Y::TensorPowerObject)
+    is_iso, iso = is_isomorphic(object(X), object(Y))
+    if is_iso
+        return true, Morphism(X,Y,iso)
+    else
+        return false, nothing
+    end
 end
 
 function show(io::IO, C::TensorPowerCategory)

@@ -703,6 +703,7 @@ function indecomposable_subobjects(X::Object, E = End(X))
 
     if length(B) == 1 return [X] end
 
+
     for f ∈ B
         eig_spaces = eigenvalues(f)
         if length(eig_spaces) == 0 
@@ -720,6 +721,7 @@ function indecomposable_subobjects(X::Object, E = End(X))
 
     return [X]
 end
+
 
 # function indecomposable_subobjects(X::Object, E = End(X))
 #     _indecomposable_subobjects(X,E)
