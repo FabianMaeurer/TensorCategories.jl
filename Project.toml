@@ -14,7 +14,7 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
-Documenter = "0.26, 0.27"
+Documenter = "0.26, 0.27, 1"
 DocumenterCitations = "0.2"
 Memoization = "0.1, 0.2"
 Oscar = "0.9,0.10,≥0.11"
