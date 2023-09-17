@@ -179,7 +179,7 @@ end
 
 Check whether σ and τ are isomorphic. If true return the isomorphism.
 """
-#= @memoize Dict =# function is_isomorphic(σ::GroupRepresentation, τ::GroupRepresentation)
+@memoize Dict function is_isomorphic(σ::GroupRepresentation, τ::GroupRepresentation)
     @assert parent(σ) == parent(τ) "Mismatching parents"
 
     if intdim(σ) != intdim(τ) return false, nothing end
@@ -435,7 +435,7 @@ end
 
 Return a list of the simple objects in Rep.
 """
-#= @memoize Dict =# function simples(Rep::GroupRepresentationCategory)
+@memoize Dict function simples(Rep::GroupRepresentationCategory)
     grp = base_group(Rep)
     F = base_ring(Rep)
 

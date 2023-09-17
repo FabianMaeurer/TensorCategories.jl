@@ -219,7 +219,7 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     return inv(distr_after) ∘ m ∘ distr_before
 end
 
-#= @memoize Dict =# function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
+@memoize Dict function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)

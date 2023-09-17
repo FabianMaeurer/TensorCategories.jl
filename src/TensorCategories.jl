@@ -28,7 +28,7 @@ import Oscar.GModuleFromGap: home_base
 
 import Oscar.AbstractAlgebra.Generic: Poly
 
-using Memoization, InteractiveUtils, SparseArrays
+using Memoization, InteractiveUtils#, SparseArrays
 
 export - 
 export * 
@@ -301,7 +301,7 @@ include("structures/Center/Induction.jl")
 include("structures/Center/CenterChecks.jl")
 include("structures/Examples/I2-fusion.jl")
 include("structures/Examples/Verlinde.jl")
-include("structures/Examples/RepresentationsSL2.jl")
+#include("structures/Examples/RepresentationsSL2.jl")
 include("structures/Examples/TambaraYamagami.jl")
 include("structures/Examples/FibonacciCategory.jl")
 include("structures/Examples/VercleyenSingerland/FR_8211/fr_8211.jl")

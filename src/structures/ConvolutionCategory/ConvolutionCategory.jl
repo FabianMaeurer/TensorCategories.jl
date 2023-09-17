@@ -272,7 +272,7 @@ left_inverse(f::ConvolutionMorphism) = Morphism(codomain(f),domain(f), left_inve
 
 Return a list of simple objects in Conv(``X``).
 """
-#= @memoize Dict =# function simples(C::ConvolutionCategory)
+@memoize Dict function simples(C::ConvolutionCategory)
     return [ConvolutionObject(sh,C) for sh ∈ simples(C.squaredCoh)]
 end
 

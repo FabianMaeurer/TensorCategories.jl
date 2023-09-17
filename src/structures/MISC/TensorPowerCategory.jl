@@ -30,6 +30,8 @@ struct TensorPowerMorphism <: Morphism
     morphism::Morphism
 end
 
+is_semisimple(T::TensorPowerCategory) = true
+
 object(X::TensorPowerObject) = X.object
 morphism(f::TensorPowerMorphism) = f.morphism
 category(C::TensorPowerCategory) = parent(C.generator)
@@ -82,10 +84,17 @@ function direct_sum(X::TensorPowerMorphism, Y::TensorPowerMorphism)
     Morphism(dom,cod, direct_sum(morphism(X), morphism(Y)))
 end
 
-function tensor_product(X::TensorPowerMorphism, Y::TensorPowerMorphism)
+function tensor_product(f::TensorPowerMorphism, g::TensorPowerMorphism)
     dom = domain(f) ⊗ domain(g)
     cod = codomain(f) ⊗ codomain(g)
-    Morphism(dom, cod, tensor_product(morphism(X), morphism(Y)))
+    Morphism(dom, cod, tensor_product(morphism(f), morphism(g)))
+end
+
+function associator(X::TensorPowerObject, Y::TensorPowerObject, Z::TensorPowerObject)
+    ass = associator(object.([X,Y,Z])...)
+    dom = TensorPowerObject(parent(X), domain(ass))
+    cod = TensorPowerObject(parent(X), codomain(ass))
+    Morphism(dom,cod, ass)
 end
 
 
@@ -130,8 +139,40 @@ end
 #     return simpls
 # end
 
+function braiding(X::TensorPowerObject, Y::TensorPowerObject)
+    b = braiding(object(X), object(Y))
+    Morphism(X,Y,b)
+end
+
+dual(X::TensorPowerObject) = TensorPowerObject(parent(X), dual(object(X)))
+
+function ev(X::TensorPowerMorphism) 
+    evaluation = ev(object(X))
+    dom = TensorPowerObject(parent(X), domain(evaluation))
+    cod = TensorPowerObject(parent(X), codomain(evaluation))
+    Morphism(dom, cod, evaluation)
+end
+
+function coev(X::TensorPowerMorphism) 
+    coevaluation = coev(object(X))
+    dom = TensorPowerObject(parent(X), domain(coevaluation))
+    cod = TensorPowerObject(parent(X), codomain(coevaluation))
+    Morphism(dom, cod, coevaluation)
+end
+
+function spherical(X::TensorPowerObject)
+    sp = spherical(object(X))
+    dom = TensorPowerObject(parent(X), domain(sp))
+    cod = TensorPowerObject(parent(X), codomain(sp))
+    Morphism(dom, cod, sp)
+end
+
+zero(T::TensorPowerCategory) = TensorPowerObject(T, zero(parent(T.generator)))
 
 function simples(C::TensorPowerCategory, k = Inf)
+    if C.complete
+        return C.simples
+    end
     X = C.generator
     Y = one(category(C))
     indecs_in_X = [x for (x,k) ∈ decompose(X)]
@@ -145,11 +186,11 @@ function simples(C::TensorPowerCategory, k = Inf)
             simpls = unique_indecomposables(Object[simpls; summands_of_VW])
         end
         if length(simpls) == n1
-            simpls = [TensorPowerObject(C,s) for s ∈ simpls]
+            simpls = TensorPowerObject[TensorPowerObject(C,s) for s ∈ simpls]
             C.simples = simpls
             C.complete = true
             C.max_exponent = j-1
-            return simpls
+            return [one(C); simpls]
         end
         n1 = length(simpls)
         Y = Y ⊗ X
@@ -160,7 +201,7 @@ function simples(C::TensorPowerCategory, k = Inf)
     C.complete = false
     C.max_exponent = k
 
-    return simpls
+    return [one(C); simpls]
  
 end
 

@@ -188,7 +188,7 @@ end
 
 Check whether σ and τ are isomorphic. If true return the isomorphism.
 """
-#= @memoize Dict =# function is_isomorphic(σ::GroupRepresentation, τ::GroupRepresentation)
+@memoize Dict function is_isomorphic(σ::GroupRepresentation, τ::GroupRepresentation)
     @assert parent(σ) == parent(τ) "Mismatching parents"
 
     if intdim(σ) != intdim(τ) return false, nothing end
@@ -444,7 +444,7 @@ end
 
 Return a list of the simples objects in Rep.
 """
-#= @memoize Dict =# function simples(Rep::GroupRepresentationCategory)
+@memoize Dict function simples(Rep::GroupRepresentationCategory)
     grp = base_group(Rep)
     F = base_ring(Rep)
 
@@ -485,7 +485,7 @@ function decompose(σ::GroupRepresentation)
         ret = [ret; Representation(G,gens(G),imgs)]
     end
     uniques = unique_indecomposables(ret)
-    [(s, length(findall(e -> is_isomorphic(e,s)[1], ret))) for s ∈ uniques]
+    [(s, nothing) for s ∈ uniques]
 end
 
 function indecomposable_subobjects(σ::GroupRepresentation)
@@ -523,7 +523,7 @@ end
 
 Return the hom-space of the representations as a vector space.
 """
-#= @memoize Dict =# function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
+@memoize Dict function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
     grp = base_group(σ)
     F = base_ring(σ)
 

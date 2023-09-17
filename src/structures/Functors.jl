@@ -157,7 +157,7 @@ end
 #     return DualFunctor(C,C,obj_map,mor_map)
 # end
 
-#= @memoize Dict =# function dual_monoidal_structure(X::Object, Y::Object)
+@memoize Dict function dual_monoidal_structure(X::Object, Y::Object)
     (ev(X⊗Y)⊗id(dual(Y)⊗dual(X))) ∘ inv(associator(dual(X⊗Y),X⊗Y,dual(Y)⊗dual(X))) ∘ (id(dual(X⊗Y))⊗product_coev(X,Y))
 end
 
