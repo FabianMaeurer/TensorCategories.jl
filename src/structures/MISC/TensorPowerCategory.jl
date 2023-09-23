@@ -3,12 +3,13 @@ mutable struct TensorPowerCategory <: Category
     simples::Vector
     complete::Bool
     max_exponent::Int
+    #multiplication_table::Dict
 
     function TensorPowerCategory(X::Object) 
         C = new()
         C.generator = X
         C.simples = typeof(X)[]
-
+        
         C.complete = X == zero(parent(X)) ? true : false
         C.max_exponent = 0
         return C
@@ -30,7 +31,6 @@ struct TensorPowerMorphism <: Morphism
     morphism::Morphism
 end
 
-is_semisimple(T::TensorPowerCategory) = true
 
 object(X::TensorPowerObject) = X.object
 morphism(f::TensorPowerMorphism) = f.morphism
@@ -169,28 +169,34 @@ end
 
 zero(T::TensorPowerCategory) = TensorPowerObject(T, zero(parent(T.generator)))
 
-function simples(C::TensorPowerCategory, k = Inf)
+function indecomposables(C::TensorPowerCategory, k = Inf)
     if C.complete
         return C.simples
     end
     X = C.generator
     Y = one(category(C))
-    indecs_in_X = [x for (x,k) ∈ decompose(X)]
-    simpls = indecs_in_X
     n1 = 0
     j = 2
-    
+
+    indecs_in_X = [x for (x,k) ∈ decompose(X)]
+    new_indecs = [x for (x,k) ∈ decompose(Y)]
+    new_indecs = unique_indecomposables([new_indecs; indecs_in_X])
+    simpls = new_indecs
+
     while j ≤ k
-        for V ∈ indecs_in_X, W ∈ simpls
+        new_indecs_temp = []
+        for V ∈ indecs_in_X, W ∈ new_indecs
             summands_of_VW = [x for (x,k) ∈ decompose(W ⊗ V)]
-            simpls = unique_indecomposables(Object[simpls; summands_of_VW])
+            new_indecs_temp = [new_indecs_temp; [x for x ∈ summands_of_VW if findfirst(s -> is_isomorphic(x,s)[1], simpls) === nothing]]
+            simpls = Object[simpls; new_indecs]
         end
+        new_indecs = new_indecs_temp
         if length(simpls) == n1
             simpls = TensorPowerObject[TensorPowerObject(C,s) for s ∈ simpls]
             C.simples = simpls
             C.complete = true
             C.max_exponent = j-1
-            return [one(C); simpls]
+            return simpls
         end
         n1 = length(simpls)
         Y = Y ⊗ X
@@ -201,10 +207,14 @@ function simples(C::TensorPowerCategory, k = Inf)
     C.complete = false
     C.max_exponent = k
 
-    return [one(C); simpls]
+    return simpls
  
 end
 
+function decompose(X::TensorPowerObject)
+    dec = decompose(object(X))
+    [(TensorPowerObject(parent(X), x), k) for (x,k) ∈ dec]
+end
 
 function kernel(f::TensorPowerMorphism)
     K,incl = kernel(morphism(f))

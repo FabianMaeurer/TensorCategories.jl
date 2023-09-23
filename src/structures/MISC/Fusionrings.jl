@@ -45,6 +45,8 @@ end
 @alias ℤ₊RingElem ZPlusRingElem
 @alias ℕRingElem ZPlusRingElem
 
+is_semisimple(R::ℕRing) = is_semisimple(R.algebra)
+
 parent(x::ℕRingElem) = x.parent
 base_ring(::ℕRing) = ZZ
 base_ring(::ℕRingElem) = ZZ

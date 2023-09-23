@@ -45,6 +45,7 @@ export AbstractHomSpace
 export add_simple! 
 export associator 
 export base_ring 
+export base_group
 export basis 
 export braiding 
 export cat_fr_8122 
@@ -115,7 +116,7 @@ export GradedVectorSpaces
 export GRHomSpace 
 export GRepInduction 
 export GRepRestriction 
-export grothendieck_ring 
+export split_grothendieck_ring 
 export GrothendieckRing
 export GroupRepresentation 
 export GroupRepresentationCategory 

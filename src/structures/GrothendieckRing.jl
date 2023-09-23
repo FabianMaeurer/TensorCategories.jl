@@ -8,8 +8,8 @@
 
 Return the grothendieck ring of the multiring category ``C``.
 """
-function grothendieck_ring(C::Category, simples = simples(C))
-    @assert is_multiring(C) "C is required to be tensor"
+function split_grothendieck_ring(C::Category, simples = indecomposables(C))
+    @assert is_multiring(C) "C is required to be multiring"
 
     m = multiplication_table(C,simples)
 
