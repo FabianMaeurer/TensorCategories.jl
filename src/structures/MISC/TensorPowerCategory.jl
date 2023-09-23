@@ -188,7 +188,7 @@ function indecomposables(C::TensorPowerCategory, k = Inf)
         for V ∈ indecs_in_X, W ∈ new_indecs
             summands_of_VW = [x for (x,k) ∈ decompose(W ⊗ V)]
             new_indecs_temp = [new_indecs_temp; [x for x ∈ summands_of_VW if findfirst(s -> is_isomorphic(x,s)[1], simpls) === nothing]]
-            simpls = Object[simpls; new_indecs]
+            simpls = Object[simpls; new_indecs_temp]
         end
         new_indecs = new_indecs_temp
         if length(simpls) == n1

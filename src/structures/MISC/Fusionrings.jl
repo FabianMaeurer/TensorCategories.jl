@@ -59,10 +59,14 @@ one(R::ℕRing) = ℕRingElem(R, one(AlgAss(R)))
 zero(R::ℕRing) = ℕRingElem(R, zero(AlgAss(R)))
 
 basis(R::ℕRing) = [ℕRingElem(R, b) for b ∈ basis(AlgAss(R))]
+getindex(R::ℕRing, k::Int) = basis(R)[k]
 
 coefficients(x::ℕRingElem) = coefficients(AlgAssElem(x))
 
 (A::ℕRing)(c::Vector{fmpz}) = ℕRingElem(A, AlgAss(c))
+
+multiplication_table(R::ℕRing) = R.algebra.mult_table
+print_multiplication_table(R::ℕRing) = print_multiplication_table(multiplication_table(R))
 
 #=----------------------------------------------------------
     ℤ₊RingElem Operations 
@@ -75,6 +79,7 @@ coefficients(x::ℕRingElem) = coefficients(AlgAssElem(x))
 div(x::ℕRingElem, y::ℕRingElem) = ℕRingElem(parent(x), div(AlgAssElem(x) ,AlgAssElem(y)))
 
 *(λ, x::ℕRingElem) = ℕRingElem(parent(x), λ*AlgAssElem(x))
+
 
 
 #=----------------------------------------------------------

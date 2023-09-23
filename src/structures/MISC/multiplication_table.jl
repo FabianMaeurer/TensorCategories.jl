@@ -15,7 +15,7 @@ function print_multiplication_table(indecomposables::Vector{<:Object}, names::Ve
     @assert length(indecomposables) == length(names) "Invalid input"
     mult_table = multiplication_table(parent(indecomposables[1]), indecomposables)
 
-    return [pretty_print_semisimple(s⊗t,indecomposables,names) for s ∈ indecomposables, t ∈ indecomposables]
+    return [pretty_print_decomposable(s⊗t,indecomposables,names) for s ∈ indecomposables, t ∈ indecomposables]
 end
 
 print_multiplication_table(C::Category) = print_multiplication_table(indecomposables(C), indecomposables_names(C))
@@ -47,4 +47,26 @@ function coefficients(X::T, indecomposables::Vector{T} = indecomposables(parent(
         coeffs[i] = k
     end
     return coeffs
+end
+
+
+function print_multiplication_table(A::Array{T,3}, names::Vector{String} =    ["X$i" for i ∈ 1:size(A)[1]]) where T <: Union{Int, RingElem}
+    n = size(A)[1]
+    [print_sum(A[i,j,:], names) for i ∈ 1:n, j ∈ 1:n]
+end
+        
+    
+function print_sum(facs::Vector{T}, names::Vector{String}) where T <: Union{Int, RingElem}
+
+    if length(facs) == 0 return "0" end
+
+    str = ""
+    for (k,name) ∈ zip(facs, names)
+        if k == 0 
+            continue
+        end
+
+        str = length(str) > 0 ? str*" ⊕ "* (k > 1 ? "$(name)^$k" : "$(name)") : (k > 1 ? str*"$(name)^$k" : str*"$(name)")
+    end
+    return str
 end

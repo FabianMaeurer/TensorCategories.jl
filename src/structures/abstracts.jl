@@ -699,6 +699,7 @@ function indecomposable_subobjects_by_matrix_algebra(X::Object, E = End(X))
 end
 
 function indecomposable_subobjects(X::Object, E = End(X))
+    @assert is_semisimple(parent(X)) "Non semisimple categories are not yet supported"
     B = basis(E)
 
     if length(B) == 1 return [X] end
@@ -716,7 +717,7 @@ function indecomposable_subobjects(X::Object, E = End(X))
         K,i = kernel(f - λ*id(X))
         C,_ = cokernel(i)
 
-        return unique_simples([indecomposable_subobjects(K); indecomposable_subobjects(C)])
+        return unique_indecomposables([indecomposable_subobjects(K); indecomposable_subobjects(C)])
     end
 
     return [X]
