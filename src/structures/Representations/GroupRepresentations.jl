@@ -490,7 +490,11 @@ list of tuples with simple objects and multiplicities.
     [(s, length(findall(r -> is_isomorphic(s,r)[1], ret))) for s ∈ uniques]
 end
 
-function indecomposable_subobjects(σ::GroupRepresentation)
+# function indecomposable_subobjects(ρ::GroupRepresentation)
+#     [x for (x,k) ∈ decompose(ρ)]
+# end
+
+function simple_subobjects(σ::GroupRepresentation)
     F = base_ring(σ)
     if int_dim(σ) == 0 return [] end
     G = σ.group

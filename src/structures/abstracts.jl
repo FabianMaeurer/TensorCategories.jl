@@ -230,6 +230,7 @@ product(X::Object,Y::Object) = direct_sum(X,Y)[[1,3]]
 coproduct(X::Object, Y::Object) = direct_sum(X,Y)[[1,2]]
 
 function zero_morphism(X::Object, Y::Object) 
+    C = parent(X)
     if is_additive(C)
         return basis(Hom(zero(parent(X)), Y))[1] ∘ basis(Hom(X, zero(parent(X))))
     elseif is_linear(C) 
@@ -814,6 +815,39 @@ function left_inverse(f::Morphism)
 
     if r == 0
         error("Morphism does not have a left inverse")
+    end
+
+    return sum(HomYX .* N[1,:])
+end
+
+
+function right_inverse(f::Morphism)
+    X = domain(f)
+    Y = codomain(f)
+
+    HomYX = basis(Hom(Y,X))
+    base = basis(End(Y))
+
+    K = base_ring(f)
+    Kx,x = PolynomialRing(K, length(HomYX))
+    eqs = [zero(Kx) for _ ∈ length(base)]
+
+    for (g,y) ∈ zip(HomYX,x)
+        eqs = eqs .+ (y.*express_in_basis(f∘g, base))
+    end
+
+    one_coeffs = express_in_basis(id(Y), base)
+    eqs = eqs .- one_coeffs
+
+    M = zero_matrix(K,length(eqs),length(x))
+    for (i,e) ∈ zip(1:length(eqs), eqs)
+        M[i,:] = [coeff(e,y) for y ∈ x]
+    end
+
+    r,N = nullspace(M)
+
+    if r == 0
+        error("Morphism does not have a right inverse")
     end
 
     return sum(HomYX .* N[1,:])

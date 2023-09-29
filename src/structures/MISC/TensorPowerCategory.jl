@@ -40,6 +40,9 @@ matrix(f::TensorPowerObject) = matrix(f.morphism)
 
 base_ring(C::TensorPowerCategory) = base_ring(category(C))
 
+dim(X::TensorPowerObject) = dim(object(X))
+
+
 """ 
 
     tensor_power(X::Object, k::Int) -> Object
@@ -78,10 +81,10 @@ function tensor_product(X::TensorPowerObject, Y::TensorPowerObject)
     TensorPowerObject(parent(X), tensor_product(object(X), object(Y)))
 end
 
-function direct_sum(X::TensorPowerMorphism, Y::TensorPowerMorphism)
+function direct_sum(f::TensorPowerMorphism, g::TensorPowerMorphism)
     dom = domain(f) ⊕ domain(g)
     cod = codomain(f) ⊕ codomain(g)
-    Morphism(dom,cod, direct_sum(morphism(X), morphism(Y)))
+    Morphism(dom,cod, direct_sum(morphism(f), morphism(g)))
 end
 
 function tensor_product(f::TensorPowerMorphism, g::TensorPowerMorphism)
@@ -97,6 +100,7 @@ function associator(X::TensorPowerObject, Y::TensorPowerObject, Z::TensorPowerOb
     Morphism(dom,cod, ass)
 end
 
+inv(f::TensorPowerMorphism) = Morphism(codomain(f), domain(f), inv(morphism(f)))
 
 one(C::TensorPowerCategory) = TensorPowerObject(C, one(category(C)))
 
@@ -146,14 +150,14 @@ end
 
 dual(X::TensorPowerObject) = TensorPowerObject(parent(X), dual(object(X)))
 
-function ev(X::TensorPowerMorphism) 
+function ev(X::TensorPowerObject) 
     evaluation = ev(object(X))
     dom = TensorPowerObject(parent(X), domain(evaluation))
     cod = TensorPowerObject(parent(X), codomain(evaluation))
     Morphism(dom, cod, evaluation)
 end
 
-function coev(X::TensorPowerMorphism) 
+function coev(X::TensorPowerObject) 
     coevaluation = coev(object(X))
     dom = TensorPowerObject(parent(X), domain(coevaluation))
     cod = TensorPowerObject(parent(X), codomain(coevaluation))
@@ -168,6 +172,10 @@ function spherical(X::TensorPowerObject)
 end
 
 zero(T::TensorPowerCategory) = TensorPowerObject(T, zero(parent(T.generator)))
+
+function zero_morphism(X::TensorPowerObject, Y::TensorPowerObject)
+    Morphism(X,Y, zero_morphism(object(X), object(Y)))
+end
 
 function indecomposables(C::TensorPowerCategory, k = Inf)
     if C.complete

@@ -22,7 +22,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     leading_coefficient, roots, is_rational, QQMPolyRingElem, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
     height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
     @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix, exponents, symbols,
-    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity, gmodule, trivial_subgroup
+    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity, gmodule, trivial_subgroup, hnf
 
 import Oscar.GModuleFromGap: home_base
 
@@ -218,12 +218,16 @@ export Restriction
 export right_dual 
 export right_inverse 
 export right_trace 
-export SixJCategory 
-export SixJObject 
 export RingCatMorphism 
 export RingSubcategory 
 export roots 
 export save 
+export Semisimplification
+export SemisimplifiedObject
+export SemisimplifiedMorphism
+export semisimplify
+export SixJCategory 
+export SixJObject 
 export set_associator! 
 export set_braiding! 
 export set_canonical_spherical! 
@@ -279,6 +283,7 @@ include("structures/VectorSpaces/VectorSpaces.jl")
 include("structures/MISC/ProductCategory.jl")
 include("structures/MISC/OppositeCategory.jl")
 include("structures/MISC/DeligneTensorProduct.jl")
+include("structures/MISC/Semisimplification.jl")
 include("structures/VectorSpaces/Cocycles.jl")
 include("structures/VectorSpaces/GradedVectorSpaces.jl")
 include("structures/VectorSpaces/Unitary-3-cocycle.jl")
