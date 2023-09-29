@@ -28,8 +28,8 @@
 end
 
 
-function ZPlusRing(names::Vector{String}, mult_table::Array{fmpz,3}, one::Vector{fmpz})
-    A = ZPlusRing(mult_table, one)
+function ZPlusRing(names::Vector{String}, mult_table::Array{<:Number,3}, one::Vector{<:Number})
+    A = ZPlusRing(ZZ.(mult_table), ZZ.(one))
     A.basis_names = names
     return A
 end
@@ -118,6 +118,10 @@ end
 ----------------------------------------------------------=#
 
 function show(io::IO, A::ℕRing)
+    if has_attribute(A, :name)
+        print(io, "$(get_attribute(A,:name))")
+        return
+    end
     if has_attribute(A, :is_partial) 
         if get_attribute!(A, :is_partial)
             print(io, "ℤ₊-Ring with of unknown dimension")
