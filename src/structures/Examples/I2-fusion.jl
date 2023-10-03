@@ -50,7 +50,7 @@ function Tet(q,A,B,C,D,E,F)
 end
 
 #Gives the 6j-Symbols for TL-Algebra. Also called Recoupling in KL
-function SixJCategory(q,a,b,c,d,i,j)
+function tl_six_j_symbol(q,a,b,c,d,i,j)
        res=one(parent(q[1]))
        m1=div(a+d-i,2)
        n1=div(a-d+i,2)
@@ -111,9 +111,9 @@ function fusionmultmatrix(m)
 end
 
 #Creates the categorification of biggest cell in I2(m). So far only the associators work. ev/coev needs more work
-function I2(m)
+function I2(m, F::Ring = cyclotomic_field(2*m)[1])
 	n=m-1
-	F,z=cyclotomic_field(2*m)
+	z=root_of_unity(F, 2*m)
 	q=quantum(z+z^-1,2*n)
 	#println(q)
 
@@ -132,17 +132,17 @@ function I2(m)
 		gr=length(li)
 		#println(lx,ly,lz,lw,li,lj)
 		if rem(lx,2)==1 && rem(ly,2)==1
-	 		C.ass[lx+1,ly+1+n,lz+1,lw+1]=matrix(F,gr,gr, [SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
-			C.ass[lx+1+n,ly+1,lz+1+n,lw+1+n]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
+	 		C.ass[lx+1,ly+1+n,lz+1,lw+1]=matrix(F,gr,gr, [tl_six_j_symbol(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
+			C.ass[lx+1+n,ly+1,lz+1+n,lw+1+n]=matrix(F,gr,gr,[tl_six_j_symbol(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
 		elseif rem(lx,2)==1 && rem(ly,2)==0
-			C.ass[lx+1,ly+1+n,lz+1+n,lw+1]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
-			C.ass[lx+1+n,ly+1,lz+1,lw+1+n]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
+			C.ass[lx+1,ly+1+n,lz+1+n,lw+1]=matrix(F,gr,gr,[tl_six_j_symbol(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
+			C.ass[lx+1+n,ly+1,lz+1,lw+1+n]=matrix(F,gr,gr,[tl_six_j_symbol(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
 		elseif rem(lx,2)==0 && rem(ly,2)==1
-			C.ass[lx+1,ly+1,lz+1+n,lw+1]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
-			C.ass[lx+1+n,ly+1+n,lz+1,lw+1+n]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
+			C.ass[lx+1,ly+1,lz+1+n,lw+1]=matrix(F,gr,gr,[tl_six_j_symbol(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
+			C.ass[lx+1+n,ly+1+n,lz+1,lw+1+n]=matrix(F,gr,gr,[tl_six_j_symbol(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
 		else
-			C.ass[lx+1,ly+1,lz+1,lw+1]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
-			C.ass[lx+1+n,ly+1+n,lz+1+n,lw+1+n]=matrix(F,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
+			C.ass[lx+1,ly+1,lz+1,lw+1]=matrix(F,gr,gr,[tl_six_j_symbol(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
+			C.ass[lx+1+n,ly+1+n,lz+1+n,lw+1+n]=matrix(F,gr,gr,[tl_six_j_symbol(q,ly,lx,lw,lz,j,i) for i in li, j in lj])
 		end
 	end
 	set_one!(C, [mod(i,n) == 1 ? 1 : 0 for i ∈ 1:2*n])
@@ -151,9 +151,9 @@ function I2(m)
 end
 
 #Creates the fusion subcategory version. Objects Bs, Bsts, Bststs,...
-function I2subcategory(m)
+function I2subcategory(m, F::Ring = cyclotomic_field(2*m)[1])
 	n=div(m,2)
-	F,z=cyclotomic_field(2*m)
+	z=root_of_unity(F,2*m)
 	q=quantum(z+z^-1,2*m-2)
 
 	M=fusionmultmatrix(m)
@@ -169,7 +169,7 @@ function I2subcategory(m)
 		li=intersect(m_admissible(m-1,2*lx,2*ly),m_admissible(m-1,2*lz,2*lw))
 		lj=intersect(m_admissible(m-1,2*lx,2*lw),m_admissible(m-1,2*ly,2*lz))
 		gr=length(li)
-		C.ass[lx+1,ly+1,lz+1,lw+1]=matrix(F,gr,gr,[SixJCategory(q,2*ly,2*lx,2*lw,2*lz,j,i) for i in li, j in lj])	
+		C.ass[lx+1,ly+1,lz+1,lw+1]=matrix(F,gr,gr,[tl_six_j_symbol(q,2*ly,2*lx,2*lw,2*lz,j,i) for i in li, j in lj])	
 	end
 	
 	A=[0 for s in simples(C)]::Vector{Int64}
@@ -180,15 +180,34 @@ function I2subcategory(m)
 	return C
 end
 
-function Verlinde(m)
+
+function ver_admissible(m,a,b)
+	return [i for i in abs(a-b):2:min(a+b,2*m-a-b-2)]
+end
+
+
+#Verlinde fusion
+function verlindefusionmultmatrix(m)
+	M=zeros(Int,m,m,m)
+	for i in 1:m, j in 1:m
+		A=[c for c in abs(i-j)+1:2:min(2*m-i-j+2,i+j)]
+		for k in A
+			M[i,j,k]=1
+		end
+	end
+	return M
+end
+
+
+function Verlinde(m, F::Ring = cyclotomic_field(2*m+2)[1])
 	#construct a Verlinde type categorie
-	K=QQBar
-	z=root_of_unity(K,2*m+2)
+	#K=QQBar
+	z=root_of_unity(F,2*m+2)
    q=quantum(z+z^-1,2*m+2)
    #println(q)
 
    M=verlindefusionmultmatrix(m)
-   C=SixJCategory(K,["X$i" for i in 0:m-1])
+   C=SixJCategory(F,["X$i" for i in 0:m-1])
    set_tensor_product!(C,M)
 
    for lx in 0:m-1, ly in 0:m-1, lz in 0:m-1, lw in 0:m-1
@@ -196,7 +215,7 @@ function Verlinde(m)
 	   li=intersect(ver_admissible(m,lx,ly),ver_admissible(m,lw,lz))
 	   lj=intersect(ver_admissible(m,lx,lw),ver_admissible(m,ly,lz))
 	   gr=length(li)
-	   C.ass[lx+1,ly+1,lz+1,lw+1]=matrix(K,gr,gr,[SixJCategory(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
+	   C.ass[lx+1,ly+1,lz+1,lw+1]=matrix(F,gr,gr,[tl_six_j_symbol(q,ly,lx,lw,lz,j,i) for i in li, j in lj])	
    end
    set_one!(C, [mod(i,m) == 1 ? 1 : 0 for i ∈ 1:m])
    TensorCategories.set_name!(C, "Verlinde Category $m")

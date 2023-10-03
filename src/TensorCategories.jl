@@ -22,7 +22,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     leading_coefficient, roots, is_rational, QQMPolyRingElem, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
     height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
     @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix, exponents, symbols,
-    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity, gmodule, trivial_subgroup, hnf, get_attribute
+    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity, gmodule, trivial_subgroup, hnf, get_attribute, central_primitive_idempotents, is_invertible
 
 import Oscar.GModuleFromGap: home_base
 
@@ -307,7 +307,7 @@ include("structures/Center/Center.jl")
 include("structures/Center/Induction.jl")
 include("structures/Center/CenterChecks.jl")
 include("structures/Examples/I2-fusion.jl")
-include("structures/Examples/Verlinde.jl")
+#include("structures/Examples/Verlinde.jl")
 #include("structures/Examples/RepresentationsSL2.jl")
 include("structures/Examples/TambaraYamagami.jl")
 include("structures/Examples/FibonacciCategory.jl")

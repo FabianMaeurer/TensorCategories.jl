@@ -43,6 +43,8 @@ end
 function isequal_without_parent(X::CenterObject, Y::CenterObject)
     return object(X) == object(Y) && half_braiding(X) == half_braiding(Y)
 end
+
+is_multifusion(C::CenterCategory) = is_multifusion(category(C))
 #-------------------------------------------------------------------------------
 #   Center Constructor
 #-------------------------------------------------------------------------------
@@ -614,6 +616,7 @@ function inv(f::CenterMorphism)
     return Morphism(codomain(f),domain(f), inv(f.m))
 end
 
+
 """
     is_isomorphic(X::CenterObject, Y::CenterObject)
 
@@ -622,6 +625,16 @@ else return ```(false,nothing)```.
 """
 function is_isomorphic(X::CenterObject, Y::CenterObject)
     # TODO: Fix This. How to compute a central isomorphism?
+
+    if is_simple(X) && is_simple(Y)
+        H = Hom(X,Y)
+        if int_dim(H) > 0
+            return true, basis(H)[1]
+        else
+            return false, nothing
+        end
+    end
+
     S = simples(parent(X))
 
     if [dim(Hom(X,s)) for s ∈ S] == [dim(Hom(Y,s)) for s ∈ S]

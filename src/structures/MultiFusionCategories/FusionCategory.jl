@@ -128,6 +128,7 @@ function set_simples_name!(F::SixJCategory, names::Vector{String})
 end
 
 simples_names(C::SixJCategory) = C.simples_names
+indecomposables_names(C::SixJCategory) = C.simples_names
 
 #(::Type{Int})(x::fmpq) = Int(numerator(x))
 
@@ -322,7 +323,7 @@ is_simple(X::SixJObject) = sum(X.components) == 1
 ==(f::SixJMorphism, g::SixJMorphism) = domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
 
 
-decompose(X::SixJObject) = [(x,k) for (x,k) ∈ zip(simples(parent(X)), X.components) if k != 0]
+decompose(X::SixJObject, simpls = []) = [(x,k) for (x,k) ∈ zip(simples(parent(X)), X.components) if k != 0]
 
 
 inv(f::SixJMorphism) = SixJMorphism(codomain(f),domain(f), inv.(f.m))

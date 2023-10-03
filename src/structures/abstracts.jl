@@ -45,10 +45,14 @@ endomorphism_ring(X::Object)
 
 Return the endomorphism ring of ``X`` as a matrix algebra.
 """
-function endomorphism_ring(X::Object)
+function endomorphism_ring(X::Object, base = basis(End(X)))
     @assert is_abelian(parent(X))
-    mats = matrix.(basis(End(X)))
-    matrix_algebra(base_ring(X), mats, isbasis = true)
+    try 
+        mats = matrix.(base)
+        matrix_algebra(base_ring(X), mats, isbasis = true)
+    catch
+        error("Non-matrix support comming")
+    end
 end
 
 #=----------------------------------------------------------
@@ -631,9 +635,25 @@ end
 # decomposition morphism
 #-------------------------------------------------------
 
-function decompose(X::Object, S = simples(parent(X)))
+function is_simple(X::Object)
+    is_simple(endomorphism_ring(X))
+end
+function decompose(X::Object)
+    base = basis(End(X))
+    end_ring = endomorphism_ring(X, base)
+
+    idems = central_primitive_idempotents(end_ring)
+    idems_coefficients = coefficients.(idems)
+
+    cat_idems = [sum(c .* base) for c ∈ idems_coefficients]
+    subobjects = [image(f)[1] for f ∈ cat_idems]
+
+    uniques = unique_indecomposables(subobjects)
+    [(s, length(findall(r -> is_isomorphic(s,r)[1], subobjects))) for s ∈ uniques]
+end
+
+function decompose_by_simples(X::Object, S = simples(parent(X)))
     C = parent(X)
-    @assert is_semisimple(C) "Category not semisimple"
     dimensions = [int_dim(Hom(s,X)) for s ∈ S]
     return [(s,d) for (s,d) ∈ zip(S,dimensions) if d > 0]
 end
@@ -702,14 +722,14 @@ end
 function indecomposable_subobjects(X::Object, E = End(X))
     @assert is_semisimple(parent(X)) "Non semisimple categories are not yet supported"
     B = basis(E)
-
+   
     if length(B) == 1 return [X] end
-
 
     for f ∈ B
         eig_spaces = eigenvalues(f)
         if length(eig_spaces) == 0 
-            return indecomposable_subobjects_by_matrix_algebra(X,E)
+            continue
+            
         elseif length(eig_spaces) == 1 && dim(collect(values(eig_spaces))[1]) == dim(X)
             continue
         end
@@ -721,7 +741,10 @@ function indecomposable_subobjects(X::Object, E = End(X))
         return unique_indecomposables([indecomposable_subobjects(K); indecomposable_subobjects(C)])
     end
 
-    return [X]
+    if is_simple(X) 
+        return [X]
+    end
+    indecomposable_subobjects_by_matrix_algebra(X,E)    
 end
 
 
@@ -749,18 +772,29 @@ function unique_simples(simples::Vector{<:Object})
 end
 
 function unique_indecomposables(simples::Vector{<:Object})
-    unique_simples = simples[1:1]
+    if is_semisimple(parent(simples[1]))
+        return unique_simples(simples)
+    end
+    uniques = simples[1:1]
     for s ∈ simples[2:end]
-        if *([!is_isomorphic(s,u)[1] for u ∈ unique_simples]...)
-            unique_simples = [unique_simples; s]
+        if *([!is_isomorphic(s,u)[1] for u ∈ uniques]...)
+            uniques = [uniques; s]
         end
     end
-    return unique_simples
+    return uniques
 end
 
 function simples_names(C::Category) 
     @assert is_semisimple(C)
     return ["X$i" for i ∈ 1:length(simples(C))]
+end
+
+function indecomposables_names(C::Category)
+    try 
+        return simples_names(C)
+    catch
+        return ["X$i" for i ∈ 1:length(indecomposables(C))]
+    end
 end
 
 function indecomposables(C::Category)
