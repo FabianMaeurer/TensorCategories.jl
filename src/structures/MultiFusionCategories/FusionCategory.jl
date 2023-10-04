@@ -140,6 +140,7 @@ function braiding(X::SixJObject, Y::SixJObject)
     end
 
     simple_objects = simples(parent(X))
+    n = length(simple_objects)
 
     X_summands = vcat([[s for l ∈ 1:X.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
     Y_summands = vcat([[s for l ∈ 1:Y.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
