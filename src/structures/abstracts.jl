@@ -551,6 +551,7 @@ function left_trace(f::Morphism)
     V = domain(f)
     W = codomain(f)
     C = parent(V)
+
     if V == zero(C) || W == zero(C) return zero_morphism(one(C),one(C)) end
     
     if V == W

@@ -895,6 +895,7 @@ function smatrix(C::CenterCategory)
     S = [zero_morphism(category(C)) for _ ∈ 1:n, _ ∈ 1:n]
     for i ∈ 1:n
         for j ∈ i:n
+            @show i,j
             S[i,j] = S[j,i] = tr(half_braiding(simpls[i], object(simpls[j])) ∘ half_braiding(simpls[j], object(simpls[i])))
         end
     end

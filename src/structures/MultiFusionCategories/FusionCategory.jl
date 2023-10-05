@@ -147,8 +147,10 @@ function braiding(X::SixJObject, Y::SixJObject)
 
     braid = direct_sum([braiding(x,y) for x ∈ X_summands, y ∈ Y_summands][:])
 
+    return braid 
+
     distr_before = direct_sum([distribute_right(x,Y_summands) for x ∈ X_summands]) ∘ distribute_left(X_summands,Y) 
-    distr_after = direct_sum([distribute_left(y, X_summands) for y ∈ Y_summands]) ∘ distribute_right(Y,X_summands)
+    distr_after = direct_sum([distribute_left(X_summands,Y) for y ∈ Y_summands]) ∘ distribute_right(Y_summands,X)
     
     return inv(distr_after) ∘ braid ∘ distr_before
 end
@@ -409,6 +411,8 @@ function coev(X::SixJObject)
     d = length(summands)
 
     c = vertical_direct_sum([i == j ? coev(summands[i]) : zero_morphism(𝟙, summands[j]⊗dual_summands[i]) for j ∈ 1:d, i ∈ 1:d][:])
+    
+    return c
 
     distr = direct_sum([distribute_right(x,dual_summands) for x ∈ summands]) ∘ distribute_left(summands, dual(X))
 
@@ -439,6 +443,8 @@ function ev(X::SixJObject)
     d = length(summands)
 
     e = horizontal_direct_sum(SixJMorphism[i == j ? ev(summands[i]) : zero_morphism(dual_summands[j]⊗summands[i], 𝟙)  for j ∈ 1:d, i ∈ 1:d][:])
+
+    return e
 
     distr = direct_sum([distribute_right(x,summands) for x ∈ dual_summands]) ∘ distribute_left(dual_summands, X)
 
