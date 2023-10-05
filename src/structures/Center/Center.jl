@@ -524,10 +524,10 @@ function simples(C::CenterCategory; sort = false)
     if isdefined(C, :simples) 
         return C.simples 
     end
-    if is_modular(category(C))
-        C.simples = center_simples_by_braiding(category(C), C)
-        return C.simples
-    end
+    # if is_modular(category(C))
+    #     C.simples = center_simples_by_braiding(category(C), C)
+    #     return C.simples
+    # end
     simples_by_induction!(C)
     if sort 
         sort_simples_by_dimension!(C)
