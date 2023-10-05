@@ -38,7 +38,7 @@ matrices(f::UqSl2repMorphism) = f.m
 matrix(f::UqSl2repMorphism) = diagonal_matrix(findnz(f.m)[2])
 
 function getindex(C::UqSl2Representations, k::Int) 
-    UqSl2rep(C,sparsevec([k],[1])) 
+    UqSl2rep(C,sparsevec([k+1],[1])) 
 end
 
 ==(f::UqSl2repMorphism, g::UqSl2repMorphism) = 
@@ -49,8 +49,8 @@ end
     Functionality 
 ----------------------------------------------------------=#
 
-getindex(X::UqSl2rep, k) = k ≤ length(X.components) ? X.components[k] : 0
-getindex(f::UqSl2repMorphism, k) = k ≤ length(f.m) ? f.m[k] : zero_matrix(base_ring(f), domain(f)[k], codomain(f)[k]) 
+getindex(X::UqSl2rep, k) = k ≤ length(X.components) ? X.components[k+1] : 0
+getindex(f::UqSl2repMorphism, k) = k ≤ length(f.m) ? f.m[k+1] : zero_matrix(base_ring(f), domain(f)[k], codomain(f)[k]) 
 
 function id(X::UqSl2rep)
     ind, vals = findnz(X.components)
@@ -62,7 +62,7 @@ function zero_morphism(X::UqSl2rep, Y::UqSl2rep)
     if X == Y == zero(parent(X)) 
         return Morphism(X,Y, sparsevec(MatElem[]))
     end
-    return Morphism(X,Y, Dict(k => zero_matrix(MatElem, base_ring(X), X[k], Y[k]) for k ∈ findnz(X.components)[1] ∪ findnz(Y.components)[1]))
+    return Morphism(X,Y, Dict(k => zero_matrix(MatElem, base_ring(X), X[k-1], Y[k-1]) for k ∈ findnz(X.components)[1] ∪ findnz(Y.components)[1]))
 end
 
 zero(C::UqSl2Representations) = UqSl2rep(C,sparsevec([]))
@@ -114,8 +114,8 @@ function direct_sum(f::UqSl2repMorphism, g::UqSl2repMorphism)
 
     mats = Dict{Int,MatElem}(k => diagonal_matrix(f[k], g[k]) for k ∈ findnz(f.m)[1] ∩ findnz(g.m)[1])
 
-    not_in_g = [k => f[k] for k ∈ findnz(f.m)[1] if k ∉ findnz(g.m)[1]]
-    not_in_f = [k => g[k] for k ∈ findnz(g.m)[1] if k ∉ findnz(f.m)[1]]
+    not_in_g = [k => f[k-1] for k ∈ findnz(f.m)[1] if k ∉ findnz(g.m)[1]]
+    not_in_f = [k => g[k-1] for k ∈ findnz(g.m)[1] if k ∉ findnz(f.m)[1]]
     length(not_in_f) ≠ 0 ? push!(mats, not_in_f...) : nothing
     length(not_in_g) ≠ 0 ? push!(mats, not_in_g...) : nothing
 
@@ -134,7 +134,7 @@ function +(f::UqSl2repMorphism, g::UqSl2repMorphism)
 end
 
 function compose(f::UqSl2repMorphism, g::UqSl2repMorphism)
-    mats = Dict(k => f[k]*g[k] for k ∈ findnz(f.m)[1] ∪ findnz(g.m)[1])
+    mats = Dict(k => f[k-1]*g[k-1] for k ∈ findnz(f.m)[1] ∪ findnz(g.m)[1])
     Morphism(domain(f), codomain(g), mats)
 end
 
@@ -157,18 +157,18 @@ end
 ----------------------------------------------------------=#
 
 function tensor_product(X::UqSl2rep, Y::UqSl2rep)
-    N = length(X.components)+ length(Y.components)
+    N = maximum(keys(X.components)) + maximum(keys(Y.components)) 
     T_components = sparsevec(zeros(Int,N))
     for (i,v) ∈ zip(findnz(X.components)...), (j,w) ∈ zip(findnz(Y.components)...)
-        for k ∈ clebsch_gordan_rule(i,j)
-            T_components[k] += v*w
+        for k ∈ clebsch_gordan_rule(i-1,j-1)
+            T_components[k+1] += v*w
         end
     end
     return UqSl2rep(parent(X), T_components)
 end
 
 function clebsch_gordan_rule(m::Int, n::Int)
-    collect(m+n-2:-2:abs(m-n)) .+ 1
+    collect(abs(m-n):2:m+n) 
 end
 
 
@@ -184,9 +184,9 @@ function tensor_product(f::UqSl2repMorphism, g::UqSl2repMorphism)
         A = kronecker_product(m,n)
         d1,d2 = size(A)
         #if d1*d2 == 0 continue end
-        for k ∈ clebsch_gordan_rule(i,j)
+        for k ∈ clebsch_gordan_rule(i-1,j-1)
             m = zero_morphism(C[k]^(d1),C[k]^(d2)).m
-            m[k] = A
+            m[k+1] = A
 
             h = h ⊕ Morphism(C[k]^(d1),C[k]^(d2), m)
         end
@@ -206,15 +206,15 @@ function simples_associator(C::UqSl2Representations, i::Int, j::Int, k::Int)
     q = quantum(C.q + inv(C.q), 2*(i+j+k))
 
     for w ∈ 1:i+j+k
-        li = reverse(intersect(clebsch_gordan_rule(i,j),clebsch_gordan_rule(w,k)))
-        lj = reverse(intersect(clebsch_gordan_rule(i,w),clebsch_gordan_rule(j,k)))
+        li = intersect(clebsch_gordan_rule(i,j),clebsch_gordan_rule(w,k))
+        lj = intersect(clebsch_gordan_rule(i,w),clebsch_gordan_rule(j,k))
         gr = length(li)
 
         if gr == 0 continue end
 
         li =  
 
-        push!(mats, w => matrix(K,gr,gr,[SixJCategory(q,j,i,w,k,n,m) for m in li, n in lj]))
+        push!(mats, w => matrix(K,gr,gr,[tl_six_j_symbol(q,j,i,w,k,n,m) for m in li, n in lj]))
     end
     dom = C[i] ⊗ C[j] ⊗ C[k]
     return Morphism(dom,dom,sparsevec(Dict(mats...)))
@@ -330,17 +330,17 @@ function show(io::IO, X::UqSl2rep)
     i,v = popfirst!(indices), popfirst!(values)
 
     if v == 1
-        str *=  "V$(i)"
+        str *=  "V$(i-1)"
     else
-        str *= "$v⋅V$(i)"
+        str *= "$v⋅V$(i-1)"
     end
 
     for (i,v) ∈ zip(indices, values)
         str *= " ⊕ "
         if v == 1
-            str *=  "V$(i)"
+            str *=  "V$(i-1)"
         else
-            str *= "$v⋅V$(i)"
+            str *= "$v⋅V$(i-1)"
         end
     end
     
@@ -350,6 +350,5 @@ end
 function show(io::IO, f::UqSl2repMorphism)
     print(io, """Morphism between representations of Uq(𝔰𝔩₂) with 
     Domain: $(domain(f))
-    Codomain: $(codomain(f))
-    Matrices: $(f.m)""")
+    Codomain: $(codomain(f))""")
 end

@@ -28,7 +28,7 @@ import Oscar.GModuleFromGap: home_base
 
 import Oscar.AbstractAlgebra.Generic: Poly
 
-using Memoization, InteractiveUtils#, SparseArrays
+using Memoization, InteractiveUtils, SparseArrays
 
 export - 
 export * 
@@ -216,6 +216,7 @@ export Representation
 export RepresentationCategory 
 export restriction 
 export Restriction 
+export reverse_braiding
 export right_dual 
 export right_inverse 
 export right_trace 
@@ -261,6 +262,7 @@ export tmatrix
 export tr 
 export trivial_3_cocylce 
 export TwistedGradedVectorSpaces 
+export UqSl2Representations
 export VectorSpaceMorphism 
 export VectorSpaceObject 
 export VectorSpaces 
@@ -309,7 +311,7 @@ include("structures/Center/Induction.jl")
 include("structures/Center/CenterChecks.jl")
 include("structures/Examples/I2-fusion.jl")
 #include("structures/Examples/Verlinde.jl")
-#include("structures/Examples/RepresentationsSL2.jl")
+include("structures/Examples/RepresentationsSL2.jl")
 include("structures/Examples/TambaraYamagami.jl")
 include("structures/Examples/FibonacciCategory.jl")
 include("structures/Examples/VercleyenSingerland/FR_8211/fr_8211.jl")

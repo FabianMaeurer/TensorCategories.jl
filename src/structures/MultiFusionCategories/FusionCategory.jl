@@ -147,7 +147,7 @@ function braiding(X::SixJObject, Y::SixJObject)
 
     braid = direct_sum([braiding(x,y) for x ∈ X_summands, y ∈ Y_summands][:])
 
-    distr_before = direct_sum([distribute_right(x,Y_summands) for x ∈ X_summands]) ∘ distr_left(X_summands,Y) 
+    distr_before = direct_sum([distribute_right(x,Y_summands) for x ∈ X_summands]) ∘ distribute_left(X_summands,Y) 
     distr_after = direct_sum([distribute_left(y, X_summands) for y ∈ Y_summands]) ∘ distribute_right(Y,X_summands)
     
     return inv(distr_after) ∘ braid ∘ distr_before
@@ -941,4 +941,21 @@ function extension_of_scalars(f::SixJMorphism, L::Field)
     catch
         error("Extension of scalars not possible")
     end
+end
+
+#=----------------------------------------------------------
+    Reverse braided  
+----------------------------------------------------------=#
+
+function reverse_braiding(C::SixJCategory)
+    @assert is_braided(C)
+
+    D = deepcopy(C)
+    n = length(simples(D))
+    for i ∈ 1:n, j ∈ 1:n
+        D.braiding[i,j,:] = inv.(C.braiding[j,i,:])
+    end
+
+    set_name!(D, "$(C.name) with reversed braiding")
+    D
 end

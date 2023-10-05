@@ -524,6 +524,10 @@ function simples(C::CenterCategory; sort = false)
     if isdefined(C, :simples) 
         return C.simples 
     end
+    if is_modular(category(C))
+        C.simples = center_simples_by_braiding(category(C), C)
+        return C.simples
+    end
     simples_by_induction!(C)
     if sort 
         sort_simples_by_dimension!(C)
@@ -927,4 +931,19 @@ function karoubian_envelope(C::CenterCategory)
     simpls = unique_simples(vcat([simple_subobjects(s) for s ∈ simples(C)]...))
     KC.simples = [CenterObject(KC, object(s), half_braiding(s)) for s ∈ simpls]
     return KC
+end
+
+
+#=----------------------------------------------------------
+    Center for non-degenerate braided fusion categories
+    by C ⊠ C^rev ≃ 𝒵(C) 
+----------------------------------------------------------=#
+
+function center_simples_by_braiding(C::Category, Z = Center(C))
+    S = simples(C)
+
+    S_braided = [CenterObject(Z, s, [braiding(s,t) for t ∈ S]) for s ∈ S]
+    S_rev_braided = [CenterObject(Z, s, [inv(braiding(t,s)) for t ∈ S]) for s ∈ S]
+
+    [s⊗t for s ∈ S_braided, t ∈ S_rev_braided][:]
 end
