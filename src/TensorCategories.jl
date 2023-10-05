@@ -128,6 +128,7 @@ export GVSObject
 export HaagerupH3 
 export half_braiding 
 export half_braidings 
+export hexagon_axiom
 export hom 
 export Hom 
 export HomFunctor 
