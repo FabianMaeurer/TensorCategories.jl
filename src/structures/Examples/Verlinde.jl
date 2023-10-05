@@ -84,30 +84,48 @@ end
 #Creates the Wess-Zumino-Witten-Verlinde fusion Category
 #It has fusion rules of the Dynking diagram of type A_n; 
 #I.e. X_0 is the monoidal unit; X_1 generates the whole category; X_1\otimes X_i \simeq X_{i-1}\oplus X_{i+1}; exacept for X_0 and X_1\otimes X_{n-1}\simeq X_{n-2}
-function I2subcategory(m)
-	n=div(m,2)
-	F,z=cyclotomic_field(2*m)
-	q=quantum(z+z^-1,2*m-2)
-
-	M=fusionmultmatrix(m)
-	C=SixJCategory(F,[join(["Bs",repeat("ts",i)]) for i in 0:n-1])
-	set_tensor_product!(C,M)
-
-	#Now set associators using SixJCategory symbols above
-	#The associator of (XY)Z-W over J and I cooresponds to SixJCategory(Y,X,W,Z,J,I)
-
-	for lx in 1:n-1, ly in 1:n-1, lz in 1:n-1, lw in 1:n-1
-		li=intersect(m_admissible(m-1,2*lx,2*ly),m_admissible(m-1,2*lz,2*lw))
-		lj=intersect(m_admissible(m-1,2*lx,2*lw),m_admissible(m-1,2*ly,2*lz))
-		gr=length(li)
-		C.ass[lx+1,ly+1,lz+1,lw+1]=matrix(F,gr,gr,[SixJCategory(q,2*ly,2*lx,2*lw,2*lz,j,i) for i in li, j in lj])	
-	end
+#construct the Verlinde type categorie with m many objects,  l-th associator and k-th braiding; Need (m+1, l) coprime
+#furthermore for the braiding k we use even higher roots of unity,  but also need (m+1, k) coprime
+#Formulas come from "Temperley-Lieb Recoupling theory"
+function Verlinde(K, m, l=1, k=1)
+	#K=Oscar.QQBar
+	z = root_of_unity(K, 2*m+2)
+	zz = root_of_unity(K, 4*m+4)
+   	q = quantum(z^l+z^-l, 2*m+2)
 	
-	A=[0 for s in simples(C)]::Vector{Int64}
-	A[1]=1
-	set_one!(C,A)
-	set_spherical!(C, [F(1) for s ∈ simples(C)])
-	set_name!(C, "Fusion subcategory of I₂($m)")
-	return C
-end
+   	#println(q)
 
+   	M = verlindefusionmultmatrix(m)
+   	C = SixJCategory(K, ["X$i" for i in 0:m-1])
+   	set_tensor_product!(C, M)
+
+   	for lx in 0:m-1,  ly in 0:m-1,  lz in 0:m-1,  lw in 0:m-1
+	   #println("$lx,  $ly,  $lz,  $lw")
+	   li = intersect(ver_admissible(m, lx, ly), ver_admissible(m, lw, lz))
+	   lj = intersect(ver_admissible(m, lx, lw), ver_admissible(m, ly, lz))
+	   gr = length(li)
+	   C.ass[lx+1, ly+1, lz+1, lw+1] = matrix(K, gr, gr, [SixJCategory(q, ly, lx, lw, lz, j, i) for i in li,  j in lj])	
+   	end
+
+   	braid = Array{MatElem, 3}(undef,  m, m, m) #slight mistake,  need to check formulas again
+
+   	for a in 0:m-1
+		for b in 0:m-1
+			M=ver_admissible(m, a, b)
+			for i in 0:m-1
+				if i in M
+				    braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [(-1)^(i)*q[i+1]*lambda(zz^k, a, b, i)//Net(q, div(a+b-i, 2), div(a-b+i, 2), div(-a+b+i, 2))])
+			    	#braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [(-1)^(div(a+b+i,2))*zz^(div(i*(i+2)-a*(a+2)-b*(b+2),2))])
+			    else 
+					braid[a+1, b+1, i+1] = matrix(K,  0,  0,  [])
+				end
+			end
+		end
+	end
+
+
+	TensorCategories.set_braiding!(C, braid)
+   	set_one!(C,  [mod(i, m) == 1 ? 1 : 0 for i ∈ 1:m])
+   	TensorCategories.set_name!(C,  "Verlinde Category $m with associator $l and braiding $k")
+   	return C
+end
