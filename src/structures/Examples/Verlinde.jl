@@ -81,6 +81,10 @@ function verlindefusionmultmatrix(m)
 	return M
 end
 
+function lambda(qq, a, b, c)
+	return (-1)^(div(a+b-c, 2))*qq^(div(a*(a+2)+b*(b+2)-c*(c+2), 2))
+end
+
 #Creates the Wess-Zumino-Witten-Verlinde fusion Category
 #It has fusion rules of the Dynking diagram of type A_n; 
 #I.e. X_0 is the monoidal unit; X_1 generates the whole category; X_1\otimes X_i \simeq X_{i-1}\oplus X_{i+1}; exacept for X_0 and X_1\otimes X_{n-1}\simeq X_{n-2}
@@ -112,10 +116,12 @@ function Verlinde(K, m, l=1, k=1)
    	for a in 0:m-1
 		for b in 0:m-1
 			M=ver_admissible(m, a, b)
+			#println(a,b,M)
 			for i in 0:m-1
 				if i in M
-				    braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [(-1)^(i)*q[i+1]*lambda(zz^k, a, b, i)//Net(q, div(a+b-i, 2), div(a-b+i, 2), div(-a+b+i, 2))])
-			    	#braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [(-1)^(div(a+b+i,2))*zz^(div(i*(i+2)-a*(a+2)-b*(b+2),2))])
+				    #@show braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [(-1)^(i)*q[i+1]*lambda(zz^(k+m+1), a, b, i)//Net(q, div(a+b-i, 2), div(a-b+i, 2), div(-a+b+i, 2))])
+			    	braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [lambda(zz^(k),a,b,i)])
+					#braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [(-1)^(div(a+b+i,2))*zz^(div(i*(i+2)-a*(a+2)-b*(b+2),2))])
 			    else 
 					braid[a+1, b+1, i+1] = matrix(K,  0,  0,  [])
 				end
