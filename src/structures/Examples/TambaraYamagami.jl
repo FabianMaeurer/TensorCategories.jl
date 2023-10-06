@@ -120,6 +120,27 @@ function TambaraYamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
     set_one!(TY, [1; [0 for _ ∈ 1:n]])
     set_spherical!(TY, [K(1) for _ ∈ 1:n+1])
 
+    # Try to set a braiding. 
+    # Ref: https://arxiv.org/pdf/2010.00847v1.pdf (Thm 4.9)
+    try 
+        braid = Array{MatElem,3}(undef, n+1, n+1, n+1)
+        q = x -> sqrt(χ(x,inv(x)))
+        
+        a = sqrt(inv(τ) * sum([q(x) for x ∈ A]))
+        for i ∈ 1:n
+            braid[i,n+1,:] = braid[n+1,i,:] = matrices(q(els[i]) * id(TY[n+1]))
+
+            braid[n+1,n+1,1:n] = a .* [matrix(inv(q(els[k])) * id(TY[k])) for k ∈ 1:n]
+            braid[n+1,n+1,n+1] = zero_matrix(K,0,0)
+            for j ∈ i:n
+                braid[i,j,:] = braid[j,i,:] = matrices(χ(els[i],els[j]) * id(TY[i]⊗TY[j]))
+            end
+        end
+        set_braiding!(TY, braid)
+    catch e
+        print(e)
+    end
+
     set_name!(TY, "Tambara-Yamagami fusion category over $A")
     return TY
 end
@@ -258,7 +279,7 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
         braid[3,3,:] = α .* matrices((id(C[1]) ⊕ (inv(ξ) * id(C[2]))))
 
         set_braiding!(C,braid)
-    catch
+    catch 
     end
     return C
 end
