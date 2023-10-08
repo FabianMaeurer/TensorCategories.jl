@@ -524,10 +524,10 @@ function simples(C::CenterCategory; sort = false)
     if isdefined(C, :simples) 
         return C.simples 
     end
-    # if is_modular(category(C))
-    #     C.simples = center_simples_by_braiding(category(C), C)
-    #     return C.simples
-    # end
+    if is_modular(category(C))
+        C.simples = center_simples_by_braiding(category(C), C)
+        return C.simples
+    end
     simples_by_induction!(C)
     if sort 
         sort_simples_by_dimension!(C)
@@ -535,6 +535,18 @@ function simples(C::CenterCategory; sort = false)
     return C.simples
 end
 
+function decompose(X::CenterObject)
+    C = parent(X)
+    if isdefined(C, :simples)
+        return decompose_by_simples(X,simples(C))
+    else
+        return decompose_by_endomorphism_ring(X)
+    end
+end
+
+function decompose(X::CenterObject, S::Vector{CenterObject})
+    decompose_by_simples(X,S)
+end
 
 """
     associator(X::CenterObject, Y::CenterObject, Z::CenterObject)
@@ -895,7 +907,6 @@ function smatrix(C::CenterCategory)
     S = [zero_morphism(category(C)) for _ ∈ 1:n, _ ∈ 1:n]
     for i ∈ 1:n
         for j ∈ i:n
-            @show i,j
             S[i,j] = S[j,i] = tr(half_braiding(simpls[i], object(simpls[j])) ∘ half_braiding(simpls[j], object(simpls[i])))
         end
     end

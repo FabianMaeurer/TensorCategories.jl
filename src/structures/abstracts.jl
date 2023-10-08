@@ -639,7 +639,12 @@ end
 function is_simple(X::Object)
     is_simple(endomorphism_ring(X))
 end
-function decompose(X::Object)
+
+decompose(X::Object) = decompose_by_endomorphism_ring(X)
+
+decompose(X::T, S::Vector{T}) where T <: Object = decompose_by_simples(X,S)
+
+function decompose_by_endomorphism_ring(X::Object)
     base = basis(End(X))
     end_ring = endomorphism_ring(X, base)
 

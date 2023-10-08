@@ -326,7 +326,7 @@ is_simple(X::SixJObject) = sum(X.components) == 1
 ==(f::SixJMorphism, g::SixJMorphism) = domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
 
 
-decompose(X::SixJObject, simpls = []) = [(x,k) for (x,k) ∈ zip(simples(parent(X)), X.components) if k != 0]
+decompose(X::SixJObject, simpls::Vector{SixJObject} = SixJObject[]) = [(x,k) for (x,k) ∈ zip(simples(parent(X)), X.components) if k != 0]
 
 
 inv(f::SixJMorphism) = SixJMorphism(codomain(f),domain(f), inv.(f.m))
@@ -386,13 +386,14 @@ end
 
 
 function coev(X::SixJObject)
-    if X == zero(parent(X))
-        return zero_morphism(one(parent(X)),X)
+    C = parent(X)
+    if X == zero(C)
+        return zero_morphism(one(C),X)
     end
     𝟙 = one(parent(X))
     ks = findall(e -> e > 0, X.components)
     if length(ks) == 1
-        c = simple_objects_coev(X)
+        c = simple_objects_coev(C[ks[1]])
         k = X.components[ks[1]]
         m = collect(matrix(coev(VectorSpaceObject(base_ring(X),k))))[:]
 

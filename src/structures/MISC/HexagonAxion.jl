@@ -7,7 +7,8 @@ function hexagon_axiom(X::T, Y::T, Z::T) where T <: Object
     f = associator(Y,Z,X) ∘ braiding(X,Y⊗Z) ∘ associator(X,Y,Z)
     g = (id(Y)⊗braiding(X,Z)) ∘ associator(Y,X,Z) ∘ (braiding(X,Y)⊗id(Z))
     ff = associator(Z,X,Y)^-1 ∘ braiding(X⊗Y,Z) ∘ associator(X,Y,Z)^-1
-    gg = (braiding(X,Z)⊗id(Y)) ∘ associator(X,Z,Y)^-1 ∘ (id(X)⊗braiding(Y,Z))
+    gg = (braiding(X,Z)⊗id(Y)) ∘ inv_associator(X,Z,Y) ∘ (id(X)⊗braiding(Y,Z))
+
     return (f == g) && (ff == gg)
 end
 

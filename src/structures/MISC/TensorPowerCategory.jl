@@ -145,7 +145,7 @@ end
 
 function braiding(X::TensorPowerObject, Y::TensorPowerObject)
     b = braiding(object(X), object(Y))
-    Morphism(X,Y,b)
+    Morphism(X⊗Y,Y⊗X,b)
 end
 
 dual(X::TensorPowerObject) = TensorPowerObject(parent(X), dual(object(X)))
@@ -221,6 +221,11 @@ end
 
 function decompose(X::TensorPowerObject)
     dec = decompose(object(X))
+    [(TensorPowerObject(parent(X), x), k) for (x,k) ∈ dec]
+end
+
+function decompose(X::TensorPowerObject, S::Vector{TensorPowerObject})
+    dec = decompose(object(X), object.(S))
     [(TensorPowerObject(parent(X), x), k) for (x,k) ∈ dec]
 end
 
