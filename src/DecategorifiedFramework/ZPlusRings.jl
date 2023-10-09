@@ -63,7 +63,7 @@ getindex(R::ℕRing, k::Int) = basis(R)[k]
 
 coefficients(x::ℕRingElem) = coefficients(AlgAssElem(x))
 
-(A::ℕRing)(c::Vector{fmpz}) = ℕRingElem(A, AlgAss(c))
+(A::ℕRing)(c::Vector{fmpz}) = ℕRingElem(A, AlgAssElem{ZZRingElem, typeof(A.algebra)}(A.algebra, c))
 
 multiplication_table(R::ℕRing) = R.algebra.mult_table
 print_multiplication_table(R::ℕRing) = print_multiplication_table(multiplication_table(R))
@@ -78,7 +78,7 @@ print_multiplication_table(R::ℕRing) = print_multiplication_table(multiplicati
 
 div(x::ℕRingElem, y::ℕRingElem) = ℕRingElem(parent(x), div(AlgAssElem(x) ,AlgAssElem(y)))
 
-*(λ, x::ℕRingElem) = ℕRingElem(parent(x), λ*AlgAssElem(x))
+*(λ::RingElem, x::ℕRingElem) = ℕRingElem(parent(x), λ*AlgAssElem(x))
 
 
 
@@ -88,17 +88,7 @@ div(x::ℕRingElem, y::ℕRingElem) = ℕRingElem(parent(x), div(AlgAssElem(x) ,
 
 is_based(R::ℕRing) = get_attribute(R, :involution) !== nothing
 
-function involution(x::ℕRingElem)
-    invol = get_attribute(parent(x), :involution)
-    @assert invol !== nothing "Ring not based"
 
-    [c*x for (c,x) ∈ zip(coefficients(x), invol)]
-end
-
-function involution_of_simples(R::ℕRing)
-    one_coeffs = coefficients(one(R))
-
-end
 
 function tau(x::ℕRingElem)
     sum(coefficients(x)[coefficients(one(parent(x))) .> 0])
@@ -112,6 +102,18 @@ function extension_of_scalars(A::ℕRing, K::Field)
 end
 
 ⊗(A::ℕRing, K::Field) = extension_of_scalars(A,K)
+
+#=----------------------------------------------------------
+    Fusion Rings 
+----------------------------------------------------------=#
+
+function involution(x::ℕRingElem)
+    if has_attribute(parent(x), :involution)
+        invol = get_attribute(parent(x), :involution)
+        return sum(coefficients(x) .* invol)
+    end
+    error("there is no involution on $(parent(x))")
+end
 
 #=----------------------------------------------------------
     Pretty Printing 

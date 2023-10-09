@@ -12,23 +12,23 @@ makedocs(
     ),
     pages = [
         "Home" => "index.md",
-        "Category Interface" => [
+        "Implementing Categories" => [
             "Philosophy" => "Interface/Philosophy.md",
             "Categories" => "Interface/Categories.md",
             "Abelian Categories" => "Interface/AbelianCategories.md",
             "Monoidal Categories" => "Interface/MonoidalCategories.md",
             "Linear Categories" => "Interface/LinearCategories.md",
-            "Tensor Categories" => "Interface/TensorCategories.md",
+            "Tensor Categories" => [
+                "Framework" => "Interface/TensorCategories.md",
+                "6j-Symbols" => "SixJCategories/SixJCategories.md"
+            ],
             "Optimisations" => "Interface/AdvancedInterface.md"
         ],
         "Examples" => [
             "Graded Vector Spaces" => "ConcreteExamples/VectorSpaces.md",
             "Group Representations" => "ConcreteExamples/Representations.md",
             "Equivariant Coherent Sheaves" => "ConcreteExamples/CoherentSheaves.md"
-        ],
-        "6j-Symbols" => [
-            "SixJCategories/SixJCategories.md",
-            "Examples" => "SixJCategories/6JExamples.md"
+            "Fusion Categories with 6j-Symbols" => "SixJCategories/6JExamples.md"
         ],
         # "Concrete Examples" => [
         #     "Vector Spaces" => "VectorSpaces.md",

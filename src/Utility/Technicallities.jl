@@ -1,4 +1,4 @@
-const HashTypes = Union{Morphism, Category, Object, GrothendieckGroup, GrothendieckGroupElem}
+const HashTypes = Union{Morphism, Category, Object}
 
 function Base.hash(C::T, h::UInt) where T <: HashTypes
     content = (getfield(C, s) for s ∈ fieldnames(typeof(C)) if isdefined(C, s))

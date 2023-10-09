@@ -22,7 +22,8 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     leading_coefficient, roots, is_rational, QQMPolyRingElem, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
     height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
     @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix, exponents, symbols,
-    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity, gmodule, trivial_subgroup, hnf, get_attribute, central_primitive_idempotents, is_invertible
+    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity, gmodule, trivial_subgroup, hnf, get_attribute, set_attribute!, central_primitive_idempotents, is_invertible,
+    involution
 
 import Oscar.GModuleFromGap: home_base
 
@@ -67,6 +68,7 @@ export CenterObject
 export central_objects 
 export Cocycle 
 export codomain 
+export coefficients
 export coev 
 export CohSfHomSpace 
 export CohSheafMorphism 
@@ -276,50 +278,61 @@ export ZPlusRing, ℕRing, ℤ₊Ring
 export ZPlusRingElem, ℕRingElem, ℤ₊RingElem
 
 
+include("CategoryFramework/AbstractTypes.jl")
+include("CategoryFramework/AbstractMethods.jl")
+include("CategoryFramework/FrameworkChecks.jl")
+include("CategoryFramework/ProductCategory.jl")
+include("CategoryFramework/Fallbacks.jl")
+include("CategoryFramework/OppositeCategory.jl")
+include("CategoryFramework/DeligneTensorProduct.jl")
+include("CategoryFramework/Semisimplification.jl")
 
-include("structures/abstracts.jl")
-include("structures/FrameworkChecks.jl")
 include("Utility/QQBar_Polynomials.jl")
 include("Utility/SolveGroebner.jl")
 include("Utility/QuantumIntegers.jl")
-include("structures/VectorSpaces/VectorSpaces.jl")
-include("structures/MISC/ProductCategory.jl")
-include("structures/MISC/OppositeCategory.jl")
-include("structures/MISC/DeligneTensorProduct.jl")
-include("structures/MISC/Semisimplification.jl")
-include("structures/VectorSpaces/Cocycles.jl")
-include("structures/VectorSpaces/GradedVectorSpaces.jl")
-include("structures/VectorSpaces/Unitary-3-cocycle.jl")
-include("structures/set.jl")
-include("structures/Representations/Representations.jl")
-include("structures/Representations/GroupRepresentations.jl")
-include("structures/Functors.jl")
-include("structures/ConvolutionCategory/CoherentSheaves.jl")
-include("structures/ConvolutionCategory/ConvolutionCategory.jl")
-include("structures/MultiFusionCategories/FusionCategory.jl")
-#include("structures/MultiFusionCategories/FusionCategoryExperimental.jl")
-include("structures/MultiFusionCategories/6j-Solver.jl")
-include("structures/MultiFusionCategories/Skeletization.jl")
-include("structures/MISC/multiplication_table.jl")
-include("structures/MISC/PentagonAxiom.jl")
-include("structures/MISC/HexagonAxion.jl")
-include("structures/MISC/Subcategories.jl")
-include("structures/MISC/Fusionrings.jl")
-include("structures/MISC/TensorPowerCategory.jl")
-include("structures/GrothendieckRing.jl")
-include("structures/Center/Center.jl")
-include("structures/Center/Induction.jl")
-include("structures/Center/CenterChecks.jl")
-include("structures/Examples/I2-fusion.jl")
-include("structures/Examples/Verlinde.jl")
-include("structures/Examples/RepresentationsSL2.jl")
-include("structures/Examples/TambaraYamagami.jl")
-include("structures/Examples/FibonacciCategory.jl")
-include("structures/Examples/VercleyenSingerland/FR_8211/fr_8211.jl")
-include("structures/Examples/VercleyenSingerland/FR_9143/fr_9143.jl")
-include("structures/Examples/E6subfactor.jl")
-include("structures/Examples/Haagerup/Haagerup.jl")
 include("Utility/Technicallities.jl")
+
+include("Examples/GradedVectorSpaces/VectorSpaces.jl")
+include("Examples/GradedVectorSpaces/Cocycles.jl")
+include("Examples/GradedVectorSpaces/GradedVectorSpaces.jl")
+include("Examples/GradedVectorSpaces/Unitary-3-cocycle.jl")
+include("Examples/Sets/Sets.jl")
+include("Examples/GroupRepresentations/Representations.jl")
+include("Examples/GroupRepresentations/GroupRepresentations.jl")
+include("Examples/ConvolutionCategory/CoherentSheaves.jl")
+include("Examples/ConvolutionCategory/ConvolutionCategory.jl")
+
+include("TensorCategoryFramework/AbstractTensorMethods.jl")
+include("TensorCategoryFramework/FusionCategory.jl")
+#include("structures/MultiFusionCategories/FusionCategoryExperimental.jl")
+include("TensorCategoryFramework/6j-Solver.jl")
+include("TensorCategoryFramework/Skeletization.jl")
+include("TensorCategoryFramework/PentagonAxiom.jl")
+include("TensorCategoryFramework/HexagonAxion.jl")
+include("TensorCategoryFramework/RingSubcategories.jl")
+include("TensorCategoryFramework/TensorPowerCategory.jl")
+include("TensorCategoryFramework/TensorFunctors.jl")
+include("TensorCategoryFramework/Center/Center.jl")
+include("TensorCategoryFramework/Center/Induction.jl")
+include("TensorCategoryFramework/Center/CenterChecks.jl")
+
+include("DecategorifiedFramework/multiplication_table.jl")
+include("DecategorifiedFramework/ZPlusrings.jl")
+include("DecategorifiedFramework/GrothendieckRing.jl")
+
+
+include("Examples/Verlinde/I2-fusion.jl")
+include("Examples/Verlinde/Verlinde.jl")
+include("Examples/UqSl2Representations/RepresentationsSL2.jl")
+include("Examples/TambaraYamagami/TambaraYamagami.jl")
+include("Examples/Fibonacci/FibonacciCategory.jl")
+include("Examples/VercleyenSingerland/FR_8211/fr_8211.jl")
+include("Examples/VercleyenSingerland/FR_9143/fr_9143.jl")
+include("Examples/E6subfactor/E6subfactor.jl")
+include("Examples/Haagerup/Haagerup.jl")
+
+
+
 
 #include("Utility/Serialization.jl")
 

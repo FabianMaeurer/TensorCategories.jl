@@ -1,9 +1,9 @@
 
 # Monoidal Categories
 
-A monoidal category is a quintuplet $(\mathcal C, \otimes, \mathbb 1, a, \iota)$ where 
+A monoidal category is a quintuplet ``(\mathcal C, \otimes, \mathbb 1, a, \iota)`` where 
 
-* ``\mathcal C`` is a category
+- ``\mathcal C`` is a category
 - ``\otimes\colon \mathcal C \times \mathcal C \to \mathcal C``is a
   bifunctor
 - ``a_{X,Y,Z} \colon (X \otimes Y) \otimes Z \to X \otimes (Y \otimes Z)`` is a natural transformation
@@ -27,18 +27,20 @@ such that
 ```
 
 
-commutes for all objects $W,X,Y,Z$ in $\mathcal C$ and
+commutes for all objects ``W,X,Y,Z`` in ``\mathcal C`` and
 
-$$\begin{align*}
+```math
+\begin{align*}
 	L_{\mathbb 1} \colon & X \to \mathbb 1 \otimes X \\
 	R_{\mathbb 1} \colon & X \to X \otimes \mathbb 1
-\end{align*}$$
+\end{align*}
+```
 
 are autoequivalences.
 
 ## Conventions and Restrictions
 
-At the current state all monoidal categories are assumed to satisfy $X \otimes \mathbb 1 \cong X \cong \mathbb 1 \otimes X$ and $\iota = \mathrm{id}_{\mathbb 1}$
+At the current state all monoidal categories are assumed to satisfy ``X \otimes \mathbb 1 \cong X \cong \mathbb 1 \otimes X`` and ``\iota = \mathrm{id}_{\mathbb 1}``.
 
 But building non-strict monoidal categories is explicitly encouraged, as this support is a strength of our Package. 
 
@@ -55,10 +57,10 @@ Following the definition we need the following methods.
 
 Whenever there are objects which admit duals it is feasible to acces them.
 
-- `left_dual(X::YourObject)::YourObject` return the left dual $X^\ast$.
-- `right_dual(X::YourObject)::YourObject` return the right dual ${}^\ast X$.
-- `ev(X::YourObject)::YourMorphism` return the evaluation morphism $\mathrm{ev}_X\colon X^\ast \otimes X \to \mathbb 1$.
-- `coev(X::YourObject)::YourMorphism` return the coevaluation morphism $\mathrm{coev}_X\colon \mathbb 1 \to X\otimes X^\ast$. 
+- `left_dual(X::YourObject)::YourObject` return the left dual ``X^\ast``.
+- `right_dual(X::YourObject)::YourObject` return the right dual ``{}^\ast X``.
+- `ev(X::YourObject)::YourMorphism` return the evaluation morphism ``\mathrm{ev}_X\colon X^\ast \otimes X \to \mathbb 1``.
+- `coev(X::YourObject)::YourMorphism` return the coevaluation morphism ``\mathrm{coev}_X\colon \mathbb 1 \to X\otimes X^\ast``. 
 
 This allows to generically compute 
 

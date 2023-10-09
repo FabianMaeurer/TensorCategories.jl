@@ -20,7 +20,14 @@ function split_grothendieck_ring(C::Category, simples = indecomposables(C))
     catch
     end
 
-    return A, Decategorification(C,A,simples)
+    decat = Decategorification(C,A,simples)
+
+    if is_rigid(C)
+        invol = decat.(dual.(simples))
+        set_attribute!(A, :involution, invol)
+    end
+
+    return A, decat
 end
 
 # TODO: Needs Refinement
@@ -31,9 +38,9 @@ mutable struct Decategorification
 end
 
 function (D::Decategorification)(X::Object)
-    @assert D.domain = parent(X)
-    coeffs = coefficients(X,simples)
-    D.codomain(coeffs)
+    @assert D.domain == parent(X)
+    coeffs = coefficients(X,D.simples)
+    D.codomain(ZZ.(coeffs))
 end
 
 function show(io::IO, D::Decategorification)

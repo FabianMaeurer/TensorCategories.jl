@@ -357,6 +357,17 @@ end
 
 is_simple(V::VectorSpaceObject) = dim(V) == 1
 
+@doc raw""" 
+
+    Forgetful(C::GradedVectorSpaces, D::VectorSpaces)       
+
+Return the forgetful functor $Vec_G \to Vec$.
+"""
+function Forgetful(C::GradedVectorSpaces, D::VectorSpaces)
+    obj_map = x -> X.V
+    mor_map = f -> Morphism(domain(f).V, codomain(f).V, f.m)
+    return Forgetful(C,D,obj_map, mor_map)
+end
 
 # """
 #     function id(V::GVSObject)

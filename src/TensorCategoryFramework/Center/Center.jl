@@ -791,7 +791,7 @@ function simples_by_induction!(C::CenterCategory)
     FI_simples = induction_restriction.(ordered_simples)
     center_dim = 0
     for (s, Is) ∈ zip(ordered_simples, FI_simples)
-       contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
+        contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
         if length(contained_simples) > 0
             if is_isomorphic(Is, direct_sum(object.(contained_simples))[1])[1]
                 continue
@@ -804,6 +804,10 @@ function simples_by_induction!(C::CenterCategory)
             Z = cokernel(f)[1]
         end
         new_simples = indecomposable_subobjects(Z)
+
+        if length(new_simples) == 0
+            continue
+        end
         S = [S; new_simples]
         center_dim += sum(dim.(new_simples).^2)
         # if d == center_dim

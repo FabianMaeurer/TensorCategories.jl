@@ -1,9 +1,6 @@
 # TensorCategories.jl
 
-
-[![][docs-stable-img]][docs-stable-url] [![][build-status-img]][build-status-url] [![][ga-img]][ga-url] [![][codecov_img]][codecov_url]
-
-# TensorCategories.jl
+[![][docs-stable-img]][docs-stable-url][![][ga-img]][ga-url] [![][codecov_img]][codecov_url]
 
 TensorCategories is a package under development with the intention to provide a framework as well a examples for computations in the realm of categories.
 

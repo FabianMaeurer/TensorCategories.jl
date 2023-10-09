@@ -13,7 +13,7 @@ such that
 
 We call a multitensor category 
 
-- __tensor__ if additionally $\mathrm{End}(\mathbb 1) = k$,
+- __tensor__ if additionally ``\mathrm{End}(\mathbb 1) = k``,
 - __multifusion__ if semisimple and finite and
 - __fusion__ if tensor, semisimple and finite.
 
@@ -21,11 +21,13 @@ Thus to implement a one of the above one simply has to implement the interfaces 
 
 ## Multifusion Categories
 
-Semisimple k-linear abelian categories have such a structure that allows one to describe them up to equivalence by matrices. Let $\{X_i \mid i \in \mathcal I\}$ be the set of non-isomorphic simple objects in $\mathcal C$. This we can establish an equivalence 
+Semisimple k-linear abelian categories have such a structure that allows one to describe them up to equivalence by matrices. Let ``\{X_i \mid i \in \mathcal I\}`` be the set of non-isomorphic simple objects in ``\mathcal C``. This we can establish an equivalence 
 
-    $$ \mathcal C \cong \bigoplus\limits_{i ∈ \mathcal I} \mathrm{Vec}_k$$
+```math
+\mathcal C \cong \bigoplus\limits_{i ∈ \mathcal I} \mathrm{Vec}_k
+```
 
-of abelian categories via $X \mapsto \bigoplus \mathrm{Hom(X_i, X)}$. For the detailed construction we refer to [TAMBARA1998692](@cite).
+of abelian categories via ``X \mapsto \bigoplus \mathrm{Hom(X_i, X)}``. For the detailed construction we refer to [TAMBARA1998692](@cite).
 
 This basically implies that morphisms are merely matrices allowing us to efficiently compute thins like subobjects etc. Thus we want to choose *any* faithful functor 
 
