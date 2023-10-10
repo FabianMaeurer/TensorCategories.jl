@@ -3,7 +3,7 @@
 
 TBW
 """
-function is_half_braiding(Z::Object, half_braiding::Vector{<:Morphism})
+function is_half_braiding(Z::Object, half_braiding::Vector{<:Morphism}, log::Bool = false)
     simple_objects = simples(parent(Z))
     n = length(simple_objects)
     flag = false
@@ -14,10 +14,14 @@ function is_half_braiding(Z::Object, half_braiding::Vector{<:Morphism})
         for t ∈ basis(Hom(Xₖ, Xᵢ⊗Xⱼ))
             left = associator(Xᵢ,Xⱼ,Z) ∘ (t⊗id(Z)) ∘ γₖ
             right = (id(Xᵢ)⊗γⱼ) ∘ associator(Xᵢ,Z,Xⱼ) ∘ (γᵢ⊗id(Xⱼ)) ∘ inv_associator(Z,Xᵢ,Xⱼ) ∘ (id(Z)⊗t)
-            if left != right
-                @show (i,j,k)
-                @show matrix(left)
-                @show matrix(right)
+            if left != right 
+                if log == true
+                    @show (i,j,k)
+                    @show matrix(left)
+                    @show matrix(right)
+                else
+                    return false
+                end
                 flag = true
             end
         end

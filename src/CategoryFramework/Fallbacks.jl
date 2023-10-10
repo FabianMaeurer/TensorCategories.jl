@@ -116,9 +116,9 @@ Return the tensor product object.
 
 Return the n-fold product object ```X^n```.
 """
-^(X::Object,n::Integer) = n == 0 ? zero(parent(X)) : product([X for i in 1:n]...)[1]
+^(X::Object,n) = n == 0 ? zero(parent(X)) : product([X for i in 1:n]...)[1]
 
-^(X::Morphism,n::Integer) = n == 0 ? zero_morphism(zero(parent(domain(X))), zero(parent(domain(X)))) : direct_sum([X for i in 1:n]...)
+^(X::Morphism,n) = n == 0 ? zero_morphism(zero(parent(domain(X))), zero(parent(domain(X)))) : direct_sum([X for i in 1:n]...)
 """
     ⊗(f::Morphism, g::Morphism)
 
@@ -164,7 +164,7 @@ end
 -(f::Morphism) = (-1)*f
 
 getindex(C::Category, x::Int) = simples(C)[x]
-
+getindex(C::Category, x::Vector{Int}) = [C[i] for i ∈ x]
 
 #-------------------------------------------------------
 # Hom Spaces

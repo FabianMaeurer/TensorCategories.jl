@@ -105,6 +105,7 @@ end
 function set_canonical_spherical!(C::SixJCategory)
     @assert is_fusion(C)
     set_spherical!(C, [fpdim(s)*inv(dim(s)) for s ∈ simples(C)])
+    C.dims = [base_ring(C)(0) for _ in simples(C)]
 end
 
 function set_one!(F::SixJCategory, v) 

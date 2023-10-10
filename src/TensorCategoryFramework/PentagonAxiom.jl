@@ -33,6 +33,22 @@ function pentagon_axiom(objects::Vector{<:Object}, log::Bool = false)
     end
 end
 
+function randomized_pentagon_axiom(C::Category, n::Int = 0)
+    S = simples(C)
+    m = length(S)
+    if n == 0
+        n = m^2
+    end
+
+    for _ ∈ 1:n
+        if !pentagon_axiom(C[rand(2:m, 4)]...)
+            return false
+        end
+    end
+
+    true
+end
+
 """
     pentagon_axiom(C::Category, log::Bool = false)
 

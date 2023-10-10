@@ -123,7 +123,7 @@ end
 
 function decompose_by_simples(X::Object, S = simples(parent(X)))
     C = parent(X)
-    dimensions = [int_dim(Hom(s,X)) for s ∈ S]
+    dimensions = [div(int_dim(Hom(s,X)), int_dim(End(s))) for s ∈ S]
     return [(s,d) for (s,d) ∈ zip(S,dimensions) if d > 0]
 end
 
