@@ -68,6 +68,10 @@ coefficients(x::ℕRingElem) = coefficients(AlgAssElem(x))
 multiplication_table(R::ℕRing) = R.algebra.mult_table
 print_multiplication_table(R::ℕRing) = print_multiplication_table(multiplication_table(R))
 
+function ==(x::ℕRingElem, y::ℕRingElem) 
+    parent(x) == parent(y) && coefficients(x) == coefficients(y)
+end
+
 #=----------------------------------------------------------
     ℤ₊RingElem Operations 
 ----------------------------------------------------------=#
@@ -79,8 +83,16 @@ print_multiplication_table(R::ℕRing) = print_multiplication_table(multiplicati
 div(x::ℕRingElem, y::ℕRingElem) = ℕRingElem(parent(x), div(AlgAssElem(x) ,AlgAssElem(y)))
 
 *(λ::RingElem, x::ℕRingElem) = ℕRingElem(parent(x), λ*AlgAssElem(x))
+*(λ::Int, x::ℕRingElem) = ℕRingElem(parent(x), λ*AlgAssElem(x))
 
-
+function ^(x::ℕRingElem, k::Int) 
+    if k == 0  
+        return one(parent(x)) 
+    elseif k == 1
+        return x
+    end
+    *([x for i ∈ 1:k]...)
+end
 
 #=----------------------------------------------------------
     Based Rings 
@@ -134,11 +146,15 @@ function show(io::IO, A::ℕRing)
 end
 
 function show(io::IO, x::ℕRingElem)
+    if iszero(x.elem)
+        print(io, "0")
+        return
+    end
     str = "" 
     coeffs = coefficients(x)
     for (c,n) ∈ zip(coeffs, parent(x).basis_names)
-        if c > 0
-            if c > 1
+        if c != 0
+            if c ∉ [1,-1]
                 str = str*"$c⋅$n + "
             else
                 str = str*n*" + "

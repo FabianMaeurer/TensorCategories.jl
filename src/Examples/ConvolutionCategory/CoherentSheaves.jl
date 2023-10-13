@@ -4,6 +4,7 @@ struct CohSheaves <: Category
     GSet::GSet
     orbit_reps
     orbit_stabilizers
+    orbit_stabilizer_categories
 end
 
 struct CohSheafObject <: Object
@@ -32,7 +33,8 @@ function CohSheaves(X::GSet, F::Field)
     G = X.group
     orbit_reps = [O.seeds[1] for O ∈ orbits(X)]
     orbit_stabilizers = [stabilizer(G,x,X.action_function)[1] for x ∈ orbit_reps]
-    return CohSheaves(G, F, X, orbit_reps, orbit_stabilizers)
+    RepCats = [RepresentationCategory(H,F) for H ∈ orbit_stabilizers]
+    return CohSheaves(G, F, X, orbit_reps, orbit_stabilizers, RepCats)
 end
 
 """
@@ -215,7 +217,7 @@ Return the direct sum of morphisms of sheaves.
 """
 function direct_sum(f::CohSheafMorphism, g::CohSheafMorphism)
     dom = direct_sum(domain(f), domain(g))[1]
-    codom = direct_sum(codomain(f), codomain(g))[2]
+    codom = direct_sum(codomain(f), codomain(g))[1]
     mors = [direct_sum(m,n) for (m,n) ∈ zip(f.m,g.m)]
     return CohSheafMorphism(dom,codom, mors)
 end
@@ -338,14 +340,15 @@ Return the simple objects of ``C``.
 function simples(C::CohSheaves)
 
     simple_objects = CohSheafObject[]
+    RepCats = C.orbit_stabilizer_categories
 
     #zero modules
-    zero_mods = [zero(RepresentationCategory(H,C.base_ring)) for H ∈ C.orbit_stabilizers]
+    zero_mods = [zero(D) for D ∈ RepCats]
 
     for k ∈ 1:length(C.orbit_stabilizers)
 
         #Get simple objects from the corresponding representation categories
-        RepH = RepresentationCategory(C.orbit_stabilizers[k], C.base_ring)
+        RepH = RepCats[k]
 
         RepH_simples = simples(RepH)
         for i ∈ 1:length(RepH_simples)
@@ -364,7 +367,7 @@ Decompose ``X`` into a direct sum of simple objects with multiplicity.
 function decompose(X::CohSheafObject)
     ret = []
     C = parent(X)
-    zero_mods = [zero(RepresentationCategory(H,C.base_ring)) for H ∈ C.orbit_stabilizers]
+    zero_mods = [zero(D) for D ∈ C.orbit_stabilizer_categories]
 
     for k ∈ 1:length(C.orbit_reps)
         X_H_facs = decompose(stalks(X)[k])
@@ -435,12 +438,12 @@ struct PullbackFunctor <: AbstractFunctor
     mor_map
 end
 
-pullb_obj_map(CY,CX,X,f) = CohSheafObject(CX, [restriction(stalk(X,f(x)), H) for (x,H) ∈ zip(CX.orbit_reps, CX.orbit_stabilizers)])
+pullb_obj_map(CY,CX,X,f) = CohSheafObject(CX, [restriction(stalk(X,f(x)), H) for (x,H) ∈ zip(CX.orbit_reps, CX.orbit_stabilizer_categories)])
 
 function pullb_mor_map(CY,CX,m,f)
     dom = pullb_obj_map(CY,CX,domain(m),f)
     codom = pullb_obj_map(CY,CX,codomain(m),f)
-    maps = [restriction(m.m[orbit_index(CY,f(x))], H) for (x,H) ∈ zip(CX.orbit_reps, CX.orbit_stabilizers)]
+    maps = [restriction(m.m[orbit_index(CY,f(x))], H) for (x,H) ∈ zip(CX.orbit_reps, CX.orbit_stabilizer_categories)]
     CohSheafMorphism(dom, codom, maps)
 end
 
@@ -466,7 +469,7 @@ struct PushforwardFunctor <: AbstractFunctor
 end
 
 function pushf_obj_map(CX,CY,X,f)
-    stlks = [zero(RepresentationCategory(H,base_ring(CY))) for H ∈ CY.orbit_stabilizers]
+    stlks = [zero(D) for D ∈ CY.orbit_stabilizer_categories]
     for i ∈ 1:length(CY.orbit_reps)
         y = CY.orbit_reps[i]
         Gy = CY.orbit_stabilizers[i]
@@ -477,7 +480,7 @@ function pushf_obj_map(CX,CY,X,f)
         orbit_reps = [O.seeds[1] for O ∈ orbits(fiber)]
 
         for j ∈ 1:length(orbit_reps)
-            stlks[i] = direct_sum(stlks[i], induction(stalk(X,orbit_reps[j]), CY.orbit_stabilizers[i]))[1]
+            stlks[i] = direct_sum(stlks[i], induction(stalk(X,orbit_reps[j]), CY.orbit_stabilizer_categories[i]))[1]
         end
     end
     return CohSheafObject(CY, stlks)
@@ -489,13 +492,14 @@ function pushf_mor_map(CX,CY,m,f)
     for i ∈ 1:length(CY.orbit_reps)
         y = CY.orbit_reps[i]
         Gy = CY.orbit_stabilizers[i]
+        RepGy = CY.orbit_stabilizer_categories[i]
 
         if length([x for x ∈ CX.GSet.seeds if f(x) == y]) == 0 continue end
         fiber = gset(Gy, CX.GSet.action_function, [x for x ∈ CX.GSet.seeds if f(x) == y])
 
         orbit_reps = [O.seeds[1] for O ∈ orbits(fiber)]
 
-        mor = [mor; direct_sum([induction(m.m[orbit_index(CX,y)], Gy) for y ∈ orbit_reps]...)]
+        mor = [mor; direct_sum([induction(m.m[orbit_index(CX,y)], RepGy) for y ∈ orbit_reps]...)]
     end
     return CohSheafMorphism(pushf_obj_map(CX,CY,domain(m),f), pushf_obj_map(CX,CY,codomain(m),f), mor)
 end

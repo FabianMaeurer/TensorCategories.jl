@@ -98,16 +98,6 @@ end
 #     show(io, "Duality Functor in $(F.domain)")
 # end
 
-#=----------------------------------------------------------
-    Just a Functor 
-----------------------------------------------------------=#
-
-struct Functor <: AbstractFunctor
-    domain::Category
-    codomain::Category
-    obj_map
-    mor_map
-end
 
 #=----------------------------------------------------------
     Induction Functor 

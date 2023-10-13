@@ -19,7 +19,7 @@ struct ConvolutionMorphism <: Morphism
     codomain::ConvolutionObject
     m::CohSheafMorphism
 end
-is_tensor(::ConvolutionCategory) = true
+is_multitensor(::ConvolutionCategory) = true
 is_fusion(C::ConvolutionCategory) = mod(order(C.group),characteristic(base_ring(C))) != 0
 """
     ConvolutionCategory(X::GSet, K::Field)
@@ -112,6 +112,8 @@ end
 
 id(X::ConvolutionObject) = ConvolutionMorphism(X,X,id(X.sheaf))
 
+dim(X::ConvolutionObject) = sum(dim.(stalks(X)))
+
 function associator(X::ConvolutionObject, Y::ConvolutionObject, Z::ConvolutionObject)
     dom = (X⊗Y)⊗Z
     cod = X⊗(Y⊗Z)
@@ -146,8 +148,8 @@ end
 Return the direct sum of morphisms of coherent sheaves (with convolution product).
 """
 function direct_sum(f::ConvolutionMorphism, g::ConvolutionMorphism)
-    dom = direct_sum(domain(f), domain(g))
-    codom = direct_sum(codomain(f), codomain(g))
+    dom = direct_sum(domain(f), domain(g))[1]
+    codom = direct_sum(codomain(f), codomain(g))[1]
     m = direct_sum(f.m,g.m)
     return ConvolutionMorphism(dom,codom,m)
 end

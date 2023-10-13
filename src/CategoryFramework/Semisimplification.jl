@@ -71,9 +71,6 @@ end
 
 semisimplify(f::Morphism) = SemisimplifiedMorphism(f,semisimplify(parent(f)))
 
-function Morphism(X::SemisimplifiedObject, Y::SemisimplifiedObject, f::Morphism)
-    SemisimplifiedMorphism(dom,cod,f)
-end
 #=----------------------------------------------------------
     Morphism functionality 
 ----------------------------------------------------------=#

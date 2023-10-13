@@ -681,6 +681,10 @@ function kernel(f::CenterMorphism)
     ker, incl = kernel(f.m)
     #f_inv = left_inverse(incl)
 
+    if ker == zero(parent(f.m))
+        return zero(parent(f)), zero_morphism(zero(parent(f)), domain(f))
+    end
+
     braiding = [left_inverse(id(s)⊗incl)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), domain(f).γ)]
 
     Z = CenterObject(parent(domain(f)), ker, braiding)
@@ -695,6 +699,10 @@ Return a tuple ```(C,c)``` where ```C```is the cokernel object and ```c```is the
 function cokernel(f::CenterMorphism)
     coker, proj = cokernel(f.m)
     #f_inv = right_inverse(proj)
+
+    if coker == zero(parent(f.m))
+        return zero(parent(f)), zero_morphism(codomain(f), zero(parent(f)))
+    end
 
     braiding = [(id(s)⊗proj)∘γ∘(right_inverse(proj⊗id(s))) for (s,γ) ∈ zip(simples(parent(domain(f.m))), codomain(f).γ)]
 
@@ -852,9 +860,12 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject)
 
         Hs = Hom(object(X)⊗s, s⊗object(Y))
         base = basis(Hs)
+        if length(base) == 0
+            continue
+        end
         eq_i = [zero(Fx) for _ ∈ 1:length(base)]
         for (f,a) ∈ zip(B,poly_basis)
-            coeffs = express_in_basis((id(s)⊗f)∘γₛ - λₛ ∘(f⊗id(s)), base)
+            coeffs = express_in_basis((id(s)⊗f)∘γₛ - λₛ∘(f⊗id(s)), base)
             eq_i = eq_i .+ (a .* coeffs)
         end
         

@@ -22,7 +22,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     leading_coefficient, roots, is_rational, QQMPolyRingElem, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
     height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
     @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix, exponents, symbols,
-    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity, gmodule, trivial_subgroup, hnf, get_attribute, set_attribute!, central_primitive_idempotents, is_invertible,
+    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity, gmodule, trivial_subgroup, hnf, get_attribute, set_attribute!, get_attribute!, central_primitive_idempotents, is_invertible,
     involution
 
 import Oscar.GModuleFromGap: home_base
@@ -66,6 +66,7 @@ export CenterMorphism
 export CenterObject 
 export CenterObject 
 export central_objects 
+export central_primitive_idempotents
 export Cocycle 
 export codomain 
 export coefficients

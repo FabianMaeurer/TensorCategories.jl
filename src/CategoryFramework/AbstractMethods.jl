@@ -88,8 +88,9 @@ end
     Hom Space Functionality 
 ----------------------------------------------------------=#
 function express_in_basis(f::T, B::Vector{T}) where T <: Morphism
-    F = base_ring(f)
-    B_mat = matrix(F,hcat([[x for x ∈ matrix(b)][:] for b ∈ B]...))
+    F = base_ring(f)    
+    b_mat = hcat([[x for x ∈ matrix(b)][:] for b ∈ B]...)
+    B_mat = matrix(F, size(b_mat,1), size(b_mat, 2), b_mat)
     f_mat = matrix(F, 1, *(size(matrix(f))...), [x for x ∈ matrix(f)][:])
 
     return [x for x ∈ solve_left(transpose(B_mat),f_mat)][:]
@@ -150,6 +151,14 @@ function direct_sum_decomposition(X::Object, S = simples(parent(X)))
     return Z, f, incl, proj
 end
 
+function central_primitive_idempotents(H::AbstractHomSpace)
+    @assert H.X == H.Y "Not an endomorphism algebra"
+
+    A = endomorphism_ring(H.X, basis(H))
+    A.issemisimple = true
+    idems = central_primitive_idempotents(A)
+    [sum(basis(H) .* coefficients(i)) for i ∈ idems]
+end
 
 function is_subobject(X::Object, Y::Object)
     @assert parent(X) == parent(Y)
@@ -319,6 +328,10 @@ function left_inverse(f::Morphism)
     X = domain(f)
     Y = codomain(f)
 
+    if X == zero(parent(X))
+        return zero_morphism(Y,X)
+    end
+
     HomYX = basis(Hom(Y,X))
     base = basis(End(X))
 
@@ -331,26 +344,28 @@ function left_inverse(f::Morphism)
     end
 
     one_coeffs = express_in_basis(id(X), base)
-    eqs = eqs .- one_coeffs
 
-    M = zero_matrix(K,length(eqs),length(x))
+   M = zero_matrix(K,length(x),length(eqs))
     for (i,e) ∈ zip(1:length(eqs), eqs)
-        M[i,:] = [coeff(e,y) for y ∈ x]
+        M[:,i] = [coeff(e,y) for y ∈ x]
     end
-
-    r,N = nullspace(M)
-
-    if r == 0
+  
+    try 
+         N = solve_left(M, matrix(K,1,length(one_coeffs), one_coeffs))
+        return sum(HomYX .* collect(N[1,:])[:])
+    catch e
         error("Morphism does not have a left inverse")
     end
-
-    return sum(HomYX .* N[1,:])
 end
 
 
 function right_inverse(f::Morphism)
     X = domain(f)
     Y = codomain(f)
+
+    if Y == zero(parent(X))
+        return zero_morphism(Y,X)
+    end
 
     HomYX = basis(Hom(Y,X))
     base = basis(End(Y))
@@ -362,20 +377,19 @@ function right_inverse(f::Morphism)
     for (g,y) ∈ zip(HomYX,x)
         eqs = eqs .+ (y.*express_in_basis(f∘g, base))
     end
-
+    
     one_coeffs = express_in_basis(id(Y), base)
-    eqs = eqs .- one_coeffs
 
-    M = zero_matrix(K,length(eqs),length(x))
+    M = zero_matrix(K,length(x), length(eqs))
     for (i,e) ∈ zip(1:length(eqs), eqs)
-        M[i,:] = [coeff(e,y) for y ∈ x]
+        M[:,i] = [coeff(e,y) for y ∈ x]
     end
 
-    r,N = nullspace(M)
-
-    if r == 0
+    try 
+        N = solve_left(M, matrix(K,1,length(one_coeffs), one_coeffs))
+        return sum(HomYX .* collect(N[1,:])[:])
+    catch e
         error("Morphism does not have a right inverse")
     end
 
-    return sum(HomYX .* N[1,:])
 end

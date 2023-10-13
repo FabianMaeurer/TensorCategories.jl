@@ -1,6 +1,17 @@
-struct GroupRepresentationCategory <: RepresentationCategory
+@attributes mutable struct GroupRepresentationCategory <: RepresentationCategory
     group::GAPGroup
     base_ring::Field
+
+    function GroupRepresentationCategory(G::GAPGroup, F::Field) 
+        C = new(G,F)
+        if characteristic(F) !== 0 && rem(order(G), characteristic(F)) == 0 
+            set_attribute!(C, :semisimple, false)
+            set_attribute!(C, :tensor, true)
+        else
+            set_attribute!(C, :fusion, true)
+        end
+        C
+    end
 end
 
 struct GroupRepresentation <: RepresentationObject
@@ -52,12 +63,17 @@ Group representation defined by the images of generators of G.
 """
 function Representation(G::GAPGroup, pre_img::Vector, img::Vector)
     F = base_ring(img[1])
-    d = size(img[1])[1]
-    H = GL(d, F)
-    m = hom(G,H, pre_img,H.(img))
-    return GroupRepresentation(RepresentationCategory(G,F),G,m,F,d)
+    Representation(RepresentationCategory(G,F),pre_img, img)
 end
 
+function Representation(C::GroupRepresentationCategory, pre_img::Vector, img::Vector)
+    F = base_ring(img[1])
+    d = size(img[1])[1]
+    H = GL(d, F)
+    G = base_group(C)
+    m = hom(G,H, pre_img,H.(img))
+    GroupRepresentation(C,G,m,F,d)
+end
 
 """
     Representation(G::GAPGroup, m::Function)
@@ -66,13 +82,17 @@ Group representation defined by m:G -> Mat_n.
 """
 function Representation(G::GAPGroup, m::Function)
     F = order(G) == 1 ? base_ring(parent(m(elements(G)[1]))) : base_ring(parent(m(G[1])))
+    Representation(RepresentationCategory(G,F),m)
+end
+
+function Representation(C::GroupRepresentationCategory, m::Function)
+    G = base_group(C)
+    F = order(G) == 1 ? base_ring(parent(m(elements(G)[1]))) : base_ring(parent(m(G[1])))
     d = order(G) == 1 ? size(m(elements(G)[1]))[1] : size(m(G[1]))[1]
     H = GL(d,F)
     m = hom(G,H,g -> H(m(g)))
-    return GroupRepresentation(RepresentationCategory(G,F),G,m,F,d)
+    return GroupRepresentation(C,G,m,F,d)
 end
-
-
 """
     Morphism(ρ::GroupRepresentation, τ::GroupRepresentation, m::MatElem; check = true)
 
@@ -146,8 +166,8 @@ Return the trivial representation.
 function one(Rep::GroupRepresentationCategory)
     grp = base_group(Rep)
     F = base_ring(Rep)
-    if order(grp) == 1 return Representation(grp,x -> one(MatrixSpace(F,1,1))) end
-    Representation(grp, gens(grp), [one(MatrixSpace(F,1,1)) for _ ∈ gens(grp)])
+    if order(grp) == 1 return Representation(Rep,x -> one(MatrixSpace(F,1,1))) end
+    Representation(Rep, gens(grp), [one(MatrixSpace(F,1,1)) for _ ∈ gens(grp)])
 end
 
 """
@@ -225,7 +245,7 @@ function dual(ρ::GroupRepresentation)
     F = base_ring(ρ)
     if int_dim(ρ) == 0 return ρ end
     generators = order(G) == 1 ? elements(G) : gens(G)
-    return Representation(G, generators, [transpose(matrix(ρ(inv(g)))) for g ∈ generators])
+    return Representation(parent(ρ), generators, [transpose(matrix(ρ(inv(g)))) for g ∈ generators])
 end
 
 function ev(ρ::GroupRepresentation)
@@ -285,7 +305,7 @@ function kernel(f::GroupRepresentationMorphism)
 
     images = [k*matrix(ρ(g))*k_inv for g ∈ generators]
 
-    K = Representation(G, generators, images)
+    K = Representation(parent(f), generators, images)
 
     return K, Morphism(K,ρ,k)
 end
@@ -306,7 +326,7 @@ function cokernel(f::GroupRepresentationMorphism)
     generators = order(G) == 1 ? elements(G) : gens(G)
 
     images = [c_inv*matrix(ρ(g))*c for g ∈ generators]
-    C = Representation(G, generators, images)
+    C = Representation(parent(f), generators, images)
     return C, Morphism(ρ,C,c)
 end
 #-------------------------------------------------------------------------
@@ -342,10 +362,10 @@ function tensor_product(ρ::GroupRepresentation, τ::GroupRepresentation)
 
     if order(G) == 1
         g = elements(G)[1]
-        return Representation(G, x -> kronecker_product(matrix(ρ(g)),matrix(τ(g))))
+        return Representation(parent(ρ), x -> kronecker_product(matrix(ρ(g)),matrix(τ(g))))
     end
     generators = gens(G)
-    return Representation(G, generators, [kronecker_product(matrix(ρ(g)),matrix(τ(g))) for g ∈ generators])
+    return Representation(parent(ρ), generators, [kronecker_product(matrix(ρ(g)),matrix(τ(g))) for g ∈ generators])
 end
 
 """
@@ -402,7 +422,7 @@ function direct_sum(ρ::GroupRepresentation, τ::GroupRepresentation)
 
     generators = order(grp) == 1 ? elements(grp) : gens(grp)
 
-    S = Representation(grp, generators, [[matrix(ρ(g)) zero(M2); zero(M3) matrix(τ(g))] for g ∈ generators])
+    S = Representation(parent(ρ), generators, [[matrix(ρ(g)) zero(M2); zero(M3) matrix(τ(g))] for g ∈ generators])
 
 
     incl_ρ = Morphism(ρ, S, [one(M1) zero(M2)])
@@ -446,22 +466,27 @@ end
 
 Return a list of the simples objects in Rep.
 """
-#= @memoize Dict =# function simples(Rep::GroupRepresentationCategory)
-    grp = base_group(Rep)
-    F = base_ring(Rep)
+function simples(Rep::GroupRepresentationCategory)
+    
+    return get_attribute!(Rep, :simples) do
+        @show Rep.group
+        grp = base_group(Rep)
+        F = base_ring(Rep)
 
-    if order(grp) == 1 return [one(Rep)] end
+        if order(grp) == 1 return [one(Rep)] end
 
-    #gap_field = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
-    gap_field = codomain(iso_oscar_gap(F))
-    gap_reps = GAP.Globals.IrreducibleRepresentations(grp.X,gap_field)
+        #gap_field = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
+        gap_field = codomain(iso_oscar_gap(F))
+        gap_reps = GAP.Globals.IrreducibleRepresentations(grp.X,gap_field)
 
-    int_dims = [GAP.Globals.DimensionOfMatrixGroup(GAP.Globals.Range(m)) for m ∈ gap_reps]
- 
-    oscar_reps = [GAPGroupHomomorphism(grp, GL(int_dims[i],F), gap_reps[i]) for i ∈ 1:length(gap_reps)]
-    reps = [GroupRepresentation(Rep,grp,m,F,d) for (m,d) ∈ zip(oscar_reps,int_dims)]
+        int_dims = [GAP.Globals.DimensionOfMatrixGroup(GAP.Globals.Range(m)) for m ∈ gap_reps]
+    
+        oscar_reps = [GAPGroupHomomorphism(grp, GL(int_dims[i],F), gap_reps[i]) for i ∈ 1:length(gap_reps)]
+        reps = [GroupRepresentation(Rep,grp,m,F,d) for (m,d) ∈ zip(oscar_reps,int_dims)]
 
-    return reps
+        return reps
+
+    end
 end
 
 
@@ -484,7 +509,7 @@ list of tuples with simple objects and multiplicities.
     d = int_dim(σ)
     for m ∈ facs
         imgs = [matrix(F,[F(n[i,j]) for i ∈ 1:length(n), j ∈ 1:length(n)]) for n ∈ m[2].generators]
-        ret = [ret; Representation(G,gens(G),imgs)]
+        ret = [ret; Representation(parent(σ),gens(G),imgs)]
     end
     uniques = unique_indecomposables(ret)
     [(s, length(findall(r -> is_isomorphic(s,r)[1], ret))) for s ∈ uniques]
@@ -507,7 +532,7 @@ function simple_subobjects(σ::GroupRepresentation)
     d = int_dim(σ)
     for m ∈ facs
         imgs = [matrix(F,[F(n[i,j]) for i ∈ 1:length(n), j ∈ 1:length(n)]) for n ∈ m[1].generators]
-        ret = [ret; Representation(G,gens(G),imgs)]
+        ret = [ret; Representation(parent(σ),gens(G),imgs)]
     end
     ret
 end
@@ -516,7 +541,8 @@ function regular_representation(C::GroupRepresentationCategory)
     G = base_group(C)
     H,_ = trivial_subgroup(G)
     RepH = RepresentationCategory(H, base_ring(C))
-    induction(one(RepH), G)
+    I = induction(one(RepH), G)
+    GroupRepresentation(C, I.group, I.m, I.base_ring, I.int_dim)
 end
 
 #-------------------------------------------------------------------------
@@ -579,6 +605,12 @@ end
 #   Restriction and Induction Functor
 #-------------------------------------------------------------------------
 
+function restriction(ρ::GroupRepresentation, C::GroupRepresentationCategory)
+    H = base_group(C)
+    res = restriction(ρ, H)
+    GroupRepresentation(C, res.group, res.m, res.base_ring, res.int_dim)
+end
+
 function restriction(ρ::GroupRepresentation, H::GAPGroup)
     b,f = is_subgroup(H, ρ.group)
     RepH = RepresentationCategory(H,base_ring(ρ))
@@ -588,9 +620,20 @@ function restriction(ρ::GroupRepresentation, H::GAPGroup)
     return GroupRepresentation(RepH, H, h, base_ring(ρ), int_dim(ρ))
 end
 
-function restriction(f::GroupRepresentationMorphism, H::GAPGroup)
+function restriction(f::GroupRepresentationMorphism, C::GroupRepresentationCategory)
+    H = base_group(C)
     if domain(f).group == H return f end
-    return Morphism(restriction(domain(f),H), restriction(codomain(f),H), matrix(f))
+    return Morphism(restriction(domain(f),C), restriction(codomain(f),C), matrix(f))
+end
+
+function restriction(f::GroupRepresentationMorphism, H::GAPGroup)
+    restriction(f, GroupRepresentationCategory(H, base_ring(f)))
+end
+
+function induction(ρ::GroupRepresentation, C::GroupRepresentationCategory)
+    G = base_group(C)
+    ind = induction(ρ, G)
+    GroupRepresentation(C,ind.group, ind.m, ind.base_ring, ind.int_dim)
 end
 
 function induction(ρ::GroupRepresentation, G::GAPGroup)
@@ -625,10 +668,15 @@ function induction(ρ::GroupRepresentation, G::GAPGroup)
     return Representation(G, g, images)
 end
 
-function induction(f::GroupRepresentationMorphism, G::GAPGroup)
-    dom = induction(domain(f), G)
-    codom = induction(codomain(f), G)
+function induction(f::GroupRepresentationMorphism, C::GroupRepresentationCategory)
+    G = base_group(C)
+    dom = induction(domain(f), C)
+    codom = induction(codomain(f), C)
     return Morphism(dom,codom, direct_sum([Morphism(matrix(f)) for i ∈ 1:Int64(index(G,domain(f).group))]).m)
+end
+
+function induction(f::GroupRepresentationMorphism, G::GAPGroup)
+    induction(f, GroupRepresentationCategory(G,base_ring(f)))
 end
 
 #-------------------------------------------------------------------------

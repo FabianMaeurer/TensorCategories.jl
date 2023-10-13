@@ -45,6 +45,7 @@ function six_j_symbols(C::Category, S = simples(C))
     F = base_ring(C) 
 
     ass = Array{MatElem}(undef,N,N,N,N)
+    homs = Dict()
 
     for (i,j,k,l) ∈ Base.product(1:N, 1:N, 1:N, 1:N)
 
@@ -54,8 +55,19 @@ function six_j_symbols(C::Category, S = simples(C))
         B_XY_Z_W = C_morphism_type[]
         for n ∈ 1:N
             V = S[n]
-            H_XY_V = basis(Hom(X ⊗ Y, V))
-            H_VZ_W = basis(Hom(V ⊗ Z, W))
+
+            H_XY_V = if (XYV = (X⊗Y,V)) ∈ keys(homs) 
+                homs[XYV] 
+            else
+                push!(homs, XYV => basis(Hom(XYV[1], V)))[XYV]
+            end
+
+            H_VZ_W = if (VZW = (V⊗Z,W)) ∈ keys(homs) 
+                homs[VZW] 
+            else
+                push!(homs, VZW => basis(Hom(VZW[1], W)))[VZW]
+            end
+
             B = [f ∘ (g ⊗ id(Z)) for g ∈ H_XY_V, f ∈ H_VZ_W][:]
             B_XY_Z_W = [B_XY_Z_W; B]
         end
@@ -64,8 +76,18 @@ function six_j_symbols(C::Category, S = simples(C))
         B_X_YZ_W = C_morphism_type[]
         for n ∈ 1:N
             V = S[n]
-            H_YZ_V = basis(Hom(Y ⊗ Z, V))
-            H_XV_W = basis(Hom(X ⊗ V, W))
+            H_YZ_V = if (YZV = (Y⊗Z,V)) ∈ keys(homs)
+                homs[YZV]
+            else
+                push!(homs, YZV => basis(Hom(YZV[1], V)))[YZV]
+            end
+
+            H_XV_W = if (XVW = (X⊗V,W)) ∈ keys(homs)
+                homs[XVW]
+            else
+                push!(homs, XVW => basis(Hom(XVW[1], W)))[XVW]
+            end
+            
             B = [f ∘ (id(X) ⊗ g) for g ∈ H_YZ_V, f ∈ H_XV_W][:]
             B_X_YZ_W = [B_X_YZ_W; B]
         end
