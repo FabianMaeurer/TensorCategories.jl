@@ -122,7 +122,8 @@ end
 function involution(x::ℕRingElem)
     if has_attribute(parent(x), :involution)
         invol = get_attribute(parent(x), :involution)
-        return sum(coefficients(x) .* invol)
+        S = basis(parent(x))
+        return sum(coefficients(x) .* S[invol])
     end
     error("there is no involution on $(parent(x))")
 end

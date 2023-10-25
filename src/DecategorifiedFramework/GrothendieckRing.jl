@@ -13,21 +13,23 @@ function split_grothendieck_ring(C::Category, simples = indecomposables(C))
 
     m = multiplication_table(C,simples)
 
-    A = ℕRing(ZZ.(m), ZZ.(coefficients(one(C),simples)))
+    one_coeffs = coefficients(one(C),simples)
+
+    A = ℕRing(ZZ.(m), ZZ.(one_coeffs))
     try 
         names = simples_names(C)
         A.basis_names = names
     catch
     end
 
-    decat = Decategorification(C,A,simples)
+    
 
     if is_rigid(C)
-        invol = decat.(dual.(simples))
+        invol = [findfirst(j -> sum(m[i,j,Bool.(one_coeffs)]) > 0, 1:length(simples)) for i ∈ 1:length(simples)]
         set_attribute!(A, :involution, invol)
     end
 
-    return A, decat
+    return A
 end
 
 # TODO: Needs Refinement

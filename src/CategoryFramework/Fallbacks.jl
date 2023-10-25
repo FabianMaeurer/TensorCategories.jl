@@ -158,6 +158,7 @@ function terminal_object(C::Category)
     return zero(C)
 end
 
+compose(f::Morphism...) = reduce(compose, f)
 ∘(f::Morphism...) = compose(reverse(f)...)
 
 -(f::Morphism, g::Morphism) = f + (-1)*g
@@ -177,8 +178,9 @@ End(X::Object) = Hom(X,X)
 zero_morphism(C::Category) = zero_morphism(zero(C), zero(C))
 
 Base.iterate(H::AbstractHomSpace, state = 1) = state > int_dim(H) ? nothing : (basis(H)[state], state + 1)
+getindex(H::AbstractHomSpace, k) = getindex(basis(H),k)
 Base.length(H::AbstractHomSpace) = int_dim(H)
-Base.eltype(::Type{T}) where T <: AbstractHomSpace = Morphism 
+Base.eltype(H::Type{T}) where T <: AbstractHomSpace = fieldtype(H, :basis).parameters[1] 
 
 function (F::Field)(f::Morphism)
     B = basis(Hom(domain(f), codomain(f)))
@@ -229,3 +231,13 @@ end
 
 *(f::Morphism, x) = x*f
 
+#=----------------------------------------------------------
+    Wrapper type fallbacks 
+----------------------------------------------------------=#
+
+
+*(k, f::Morphism) = Morphism(domain(f), codomain(f), k*morphism(f))
+
++(f::T, g::T) where T <: Morphism = Morphism(domain(f), codomain(g), morphism(f) + morphism(g))
+
+compose(f::T, g::T) where T <: Morphism = Morphism(domain(f), codomain(g), compose(morphism(f), morphism(g)))

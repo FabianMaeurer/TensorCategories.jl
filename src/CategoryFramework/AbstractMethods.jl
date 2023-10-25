@@ -223,6 +223,21 @@ end
 
 function indecomposable_subobjects(X::Object, E = End(X))
     @assert is_semisimple(parent(X)) "Non semisimple categories are not yet supported"
+    _indecomposable_subobjects(X,E)
+end
+
+function minpoly(f::Morphism)
+    @assert domain(f) == codomain(f) "Not an edomorphism"
+    
+    if hasmethod(matrix, Tuple{typeof(f)})
+        return minpoly(matrix(f))
+    else
+        error("Generic minpoly coming soon")
+    end
+end 
+
+function _indecomposable_subobjects(X::Object, E = End(X))
+    
     B = basis(E)
    
     if length(B) == 1 return [X] end
@@ -240,7 +255,7 @@ function indecomposable_subobjects(X::Object, E = End(X))
         K,i = kernel(f - λ*id(X))
         C,_ = cokernel(i)
 
-        return unique_indecomposables([indecomposable_subobjects(K); indecomposable_subobjects(C)])
+        return unique_indecomposables([_indecomposable_subobjects(K); _indecomposable_subobjects(C)])
     end
 
     if is_simple(X) 
@@ -314,14 +329,6 @@ function simples(C::Category)
     return [s for s ∈ simpls if is_simple(s)]
 end
 
-function is_simple(X::Object, S = simples(parent(X)))
-    for s ∈ S
-        if int_dim(Hom(s,X)) != 0 
-            return is_isomorphic(s,X)[1]
-        end
-    end
-    error("You might miss some simples")
-end
 
 
 function left_inverse(f::Morphism)

@@ -12,6 +12,9 @@ function is_fusion(C::Category)
 end
 
 function is_multifusion(C::Category) 
+if is_fusion(C) 
+        return true
+    end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :multifusion) do 
             is_multitensor(C) && is_semisimple(C) && is_finite(C)
@@ -21,6 +24,9 @@ function is_multifusion(C::Category)
 end
 
 function is_tensor(C::Category) 
+if is_fusion(C)
+        return true
+    end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :tensor) do 
             is_multitensor(C) && int_dim(End(one(C))) == 1
@@ -30,6 +36,9 @@ function is_tensor(C::Category)
 end
 
 function is_multitensor(C::Category) 
+if is_multifusion(C) || is_tensor(C)
+        return true
+    end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :multitensor) do 
             is_multiring(C) && is_rigid(C)
@@ -39,6 +48,9 @@ function is_multitensor(C::Category)
 end
 
 function is_ring(C::Category) 
+if is_tensor(C)
+        return true
+    end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :ring) do 
             is_multiring(C) && int_dim(End(one(C))) == 1
@@ -48,6 +60,9 @@ function is_ring(C::Category)
 end
 
 function is_multiring(C::Category) 
+if is_multitensor(C) || is_ring(C)
+        return true
+    end 
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :multiring) do 
             is_abelian(C) && is_linear(C) && is_monoidal(C)
@@ -57,6 +72,9 @@ function is_multiring(C::Category)
 end
 
 function is_finite(C::Category) 
+if is_fusion(C)
+        return true
+    end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :finite) do 
             try 
@@ -72,6 +90,9 @@ function is_finite(C::Category)
 end
 
 function is_monoidal(C::Category) 
+if is_multiring(C)
+        return true
+    end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :monoidal) do 
             T = object_type(C)
@@ -85,6 +106,9 @@ function is_monoidal(C::Category)
 end
 
 function is_abelian(C::Category) 
+if is_multiring(C)
+        return true
+    end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :abelian) do 
             if is_additive(C) && is_linear(C)
@@ -102,6 +126,9 @@ function is_abelian(C::Category)
 end
 
 function is_additive(C::Category) 
+if is_abelian(C)
+        return true
+    end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :additive) do 
             T = object_type(C)
@@ -114,6 +141,9 @@ end
 
 
 function is_linear(C::Category) 
+if is_multiring(C)
+        return true
+    end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :additive) do 
             hasmethod(base_ring, Tuple{typeof(C)})
@@ -169,6 +199,9 @@ function _is_spherical(C::Category)
 end
 
 function is_rigid(C::Category)
+if is_multitensor(C)
+        return true
+    end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute!(C, :spherical) do
             T = object_type(C)
@@ -191,6 +224,9 @@ function is_braided(C::Category)
 end
 
 function is_krull_schmidt(C::Category)
+if is_multiring(C)
+        return true
+    end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute!(C, :spherical) do
             false

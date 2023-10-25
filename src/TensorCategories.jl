@@ -22,8 +22,7 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     leading_coefficient, roots, is_rational, QQMPolyRingElem, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
     height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
     @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix, exponents, symbols,
-    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity, gmodule, trivial_subgroup, hnf, get_attribute, set_attribute!, get_attribute!, central_primitive_idempotents, is_invertible,
-    involution
+    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity, gmodule, trivial_subgroup, hnf, get_attribute, set_attribute!, get_attribute!, central_primitive_idempotents, is_invertible, involution, group_algebra, unit, QQField, minpoly
 
 import Oscar.GModuleFromGap: home_base
 
@@ -44,10 +43,15 @@ export ⊗
 export ⊠ 
 export AbstractHomSpace 
 export add_simple! 
+export AlgebraObject
+export AlgebraMorphism
 export associator 
 export base_ring 
 export base_group
 export basis 
+export BiModule
+export BiModuleCategory
+export BiModuleObject
 export braiding 
 export cat_fr_8122 
 export cat_fr_9143 
@@ -121,6 +125,7 @@ export GRepInduction
 export GRepRestriction 
 export split_grothendieck_ring 
 export GrothendieckRing
+export group_algebra
 export GroupRepresentation 
 export GroupRepresentationCategory 
 export GroupRepresentationCategory 
@@ -144,14 +149,17 @@ export indecomposable_subobjects
 export indecomposables
 export induction 
 export Induction 
+export induction_adjunction
 export induction_restriction
 export int_dim 
 export inv 
 export inv_associator 
+export inverse_induction_adjunction
 export involution
 export is_abelian 
 export is_abelian 
 export is_additive 
+export is_algebra
 export is_braided
 export is_central
 export is_finite 
@@ -179,11 +187,18 @@ export karoubian_envelope
 export kernel 
 export left_dual 
 export left_inverse 
+export LeftModule
+export LeftModuleCategory
+export LeftModuleObject
 export left_trace 
 export load 
 export matrices 
 export matrix 
+export ModuleCategory
+export ModuleMorphism
+export ModuleObject
 export Morphism, morphism 
+export multiplication
 export multiplication_table 
 export multiplicity
 export normalized_smatrix 
@@ -210,6 +225,7 @@ export Pullback
 export PullbackFunctor 
 export Pushforward 
 export PushforwardFunctor 
+export QQBar
 export QuantumZZRing
 export QuantumZZRingElem
 export QZZ
@@ -222,6 +238,9 @@ export Restriction
 export reverse_braiding
 export right_dual 
 export right_inverse 
+export RightModule
+export RightModuleCategory
+export RightModuleObject
 export right_trace 
 export RingCatMorphism 
 export RingSubcategory 
@@ -265,6 +284,9 @@ export tmatrix
 export tr 
 export trivial_3_cocylce 
 export TwistedGradedVectorSpaces 
+export twisted_group_algebra
+export unit
+export unitary_cocycle
 export UqSl2Representations
 export VectorSpaceMorphism 
 export VectorSpaceObject 
@@ -316,6 +338,8 @@ include("TensorCategoryFramework/TensorFunctors.jl")
 include("TensorCategoryFramework/Center/Center.jl")
 include("TensorCategoryFramework/Center/Induction.jl")
 include("TensorCategoryFramework/Center/CenterChecks.jl")
+include("TensorCategoryFramework/InternalModules/InternalAlgebras.jl")
+include("TensorCategoryFramework/InternalModules/ModuleCategories.jl")
 
 include("DecategorifiedFramework/multiplication_table.jl")
 include("DecategorifiedFramework/ZPlusrings.jl")

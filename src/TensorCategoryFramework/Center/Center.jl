@@ -548,6 +548,51 @@ function decompose(X::CenterObject, S::Vector{CenterObject})
     decompose_by_simples(X,S)
 end
 
+function indecomposable_subobjects(X::CenterObject)
+    B = basis(End(object(X)))
+    if length(B) == 1
+        return [X]
+    end
+
+    S = simples(parent(object(X)))
+
+    if length(B) ≤ length(S)^2
+        return _indecomposable_subobjects(X)
+    end
+
+    eig_spaces = []
+
+
+    while length(eig_spaces) ≤ 1 && length(B) > 0
+        f = popat!(B, rand(eachindex(B)))
+        proj_f = central_projection(X,X,f,S)
+        eig_spaces = collect(values(eigenvalues(proj_f)))
+    end
+
+    if length(eig_spaces) ≤ 1 
+        !is_simple(X) && error("Cannot decompose")
+        return [X]
+    end
+
+    return unique_simples(vcat([indecomposable_subobjects(Y) for Y ∈ eig_spaces]...))
+end
+
+function indecomposable_subobjects_of_induction(X::Object, IX::CenterObject = induction(X))
+    @assert object(IX) == X
+    B = basis(Hom(X, object(IX)))
+
+    while length(B) > 0
+        f = popat!(B, rand(eachindex(B)))
+        f = induction_adjunction(f,IX,IX)
+        
+        eig = collect(values(eigenspaces(f)))
+
+        length(B) ≥ 2 && break
+    end
+
+
+
+end
 """
     associator(X::CenterObject, Y::CenterObject, Z::CenterObject)
 
@@ -755,7 +800,7 @@ function central_projection(dom::CenterObject, cod::CenterObject, f::Morphism, s
 
         proj = proj + dim(Xi)*ϕ
     end
-    return inv(D*base_ring(dom)(1))*proj
+    return Morphism(dom, cod, inv(D*base_ring(dom)(1))*proj)
 end
 
 """
@@ -827,9 +872,7 @@ end
 
 function sort_simples_by_dimension!(C::CenterCategory)  
     fp_dims = [fpdim(s) for s ∈ simples(C)]
-    K = base_ring(C)
-    f = complex_embeddings(K)[1]
-    σ = sortperm(fp_dims, by = e -> abs(f(e)))
+    σ = sortperm(fp_dims, by = abs)
     C.simples = C.simples[σ]
 end
 
@@ -857,7 +900,6 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject)
     S = simples(parent(object(X)))
 
     for (s,γₛ,λₛ) ∈ zip(S,half_braiding(X), half_braiding(Y))
-
         Hs = Hom(object(X)⊗s, s⊗object(Y))
         base = basis(Hs)
         if length(base) == 0

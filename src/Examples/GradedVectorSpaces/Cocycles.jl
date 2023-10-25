@@ -19,6 +19,7 @@ function Cocycle(G::GAPGroup, N::Int, f::Function)
 end
 
 trivial_3_cocycle(G,F) = Cocycle{3}(G,F,nothing)
+trivial_cocycle(G,F,k) = Cocycle{k}(G,F,nothing)
 
 (c::Cocycle{N})(x...) where N = c.m === nothing ? c.F(1) : c.m[x]
 

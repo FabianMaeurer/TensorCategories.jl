@@ -195,7 +195,7 @@ end
 #-------------------------------------------------------
 
 function drinfeld_morphism(X::Object)
-     (ev(X)⊗id(dual(dual(X)))) ∘ (braiding(X,dual(X))⊗id(dual(dual(X)))) ∘ (id(X)⊗coev(dual(X)))
+     (ev(X)⊗id(dual(dual(X)))) ∘ (braiding(X,dual(X))⊗id(dual(dual(X)))) ∘ inv_associator(X, dual(X), dual(dual(X))) ∘ (id(X)⊗coev(dual(X)))
  end
 
 function dim(X::Object) 
