@@ -348,7 +348,7 @@ include("DecategorifiedFramework/GrothendieckRing.jl")
 
 include("Examples/Verlinde/I2-fusion.jl")
 include("Examples/Verlinde/Verlinde.jl")
-include("Examples/UqSl2Representations/RepresentationsSL2.jl")
+include("Examples/UqSL2Representations/RepresentationsSL2.jl")
 include("Examples/TambaraYamagami/TambaraYamagami.jl")
 include("Examples/Fibonacci/FibonacciCategory.jl")
 include("Examples/VercleyenSingerland/FR_8211/fr_8211.jl")
