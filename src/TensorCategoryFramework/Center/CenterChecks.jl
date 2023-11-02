@@ -12,7 +12,7 @@ function is_half_braiding(Z::Object, half_braiding::Vector{<:Morphism}, log::Boo
         γᵢ,γⱼ,γₖ = half_braiding[[i,j,k]]
 
         for t ∈ basis(Hom(Xₖ, Xᵢ⊗Xⱼ))
-            left = inv_associator(Xᵢ,Xⱼ,Z) ∘ (t⊗id(Z)) ∘ γₖ
+            left = associator(Xᵢ,Xⱼ,Z) ∘ (t⊗id(Z)) ∘ γₖ
             right = (id(Xᵢ)⊗γⱼ) ∘ associator(Xᵢ,Z,Xⱼ) ∘ (γᵢ⊗id(Xⱼ)) ∘ inv_associator(Z,Xᵢ,Xⱼ) ∘ (id(Z)⊗t)
             if left != right 
                 if log == true
@@ -29,7 +29,7 @@ function is_half_braiding(Z::Object, half_braiding::Vector{<:Morphism}, log::Boo
     return !flag 
 end
 
-is_central(X::CenterObject) = is_half_braiding(object(X), half_braiding(X))
+is_central(X::CenterObject, log = false) = is_half_braiding(object(X), half_braiding(X), log)
 
 function is_central(f::Morphism, X::CenterObject, Y::CenterObject)
     C = category(parent(X))

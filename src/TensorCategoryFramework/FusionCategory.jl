@@ -15,23 +15,19 @@ mutable struct SixJCategory <: Category
     twist::Vector
     one::Vector{Int}
     name::String
-    dims::Vector
-
+    
     function SixJCategory(F::Ring, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1,1,:])])
         C = new(F, length(mult[1,1,:]), names)
         set_tensor_product!(C,mult)
         set_spherical!(C, [F(1) for _ ∈ names])
-        C.dims = [F(0) for _ ∈ names]
-        #C.ass = [id(⊗(X,Y,Z)) for X ∈ simples(C), Y ∈ simples(C), Z ∈ simples(C)]
-        #C.dims = [1 for i ∈ 1:length(names)]
-        return C
+                #C.ass = [id(⊗(X,Y,Z)) for X ∈ simples(C), Y ∈ simples(C), Z ∈ simples(C)]
+                return C
     end
 
     function SixJCategory(F::Ring, names::Vector{String})
         C = new(F,length(names), names)
-        #C.dims = [1 for i ∈ 1:length(names)]
-        set_spherical!(C, [F(1) for _ ∈ names])
-        C.dims = [F(0) for _ ∈ names]
+                set_spherical!(C, [F(1) for _ ∈ names])
+        
         (C)
         return C
     end
@@ -105,8 +101,7 @@ end
 function set_canonical_spherical!(C::SixJCategory)
     @assert is_fusion(C)
     set_spherical!(C, [fpdim(s)*inv(dim(s)) for s ∈ simples(C)])
-    C.dims = [base_ring(C)(0) for _ in simples(C)]
-end
+    end
 
 function set_one!(F::SixJCategory, v) 
     F.one = v
@@ -164,7 +159,7 @@ associator(C::SixJCategory) = C.ass
 
 Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 """
- function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
+ @memoize Dict function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)
@@ -215,6 +210,7 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     YZ_arr = [Yⱼ⊗Zₖ for  Zₖ ∈ Z_summands, Yⱼ ∈ Y_summands][:]
     distr_after = direct_sum([distribute_right(Xᵢ, YZ_arr) for Xᵢ ∈ X_summands]) ∘ distr_after
 
+
     #-----------------------------------
     # Associator morphism
     #-----------------------------------
@@ -226,7 +222,7 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     return inv(distr_after) ∘ m ∘ distr_before
 end
 
-#= @memoize Dict =# function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
+@memoize Dict function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)
@@ -414,8 +410,6 @@ function coev(X::SixJObject)
 
     c = vertical_direct_sum([i == j ? coev(summands[i]) : zero_morphism(𝟙, summands[j]⊗dual_summands[i]) for j ∈ 1:d, i ∈ 1:d][:])
     
-    return c
-
     distr = direct_sum([distribute_right(x,dual_summands) for x ∈ summands]) ∘ distribute_left(summands, dual(X))
 
     return distr ∘ c
@@ -445,8 +439,6 @@ function ev(X::SixJObject)
     d = length(summands)
 
     e = horizontal_direct_sum(SixJMorphism[i == j ? ev(summands[i]) : zero_morphism(dual_summands[j]⊗summands[i], 𝟙)  for j ∈ 1:d, i ∈ 1:d][:])
-
-    return e
 
     distr = direct_sum([distribute_right(x,summands) for x ∈ dual_summands]) ∘ distribute_left(dual_summands, X)
 
@@ -534,21 +526,14 @@ function dim(X::SixJObject)
     if X == zero(parent(X))
         return base_ring(X)(0)
     end
-    C = parent(X)
+
     K = base_ring(X)
+
     if is_simple(X)
-        k = findfirst(e -> e != 0, X.components)
-        if C.dims[k] == 0
-            if sum(C.one) == 1
-                C.dims[k] = K(tr(id(X)))
-            else
-                C.dims[k] = sum([K(id(C[i]) ⊗ tr(id(X)) ⊗ id(C[i])) for i ∈ findall(e -> e > 0, C.one)])
-            end
-        end
-        return C.dims[k]
+        return K(tr(id(X)))
     end
 
-    return sum([X[i]*dim(C[i]) for i ∈ 1:C.simples if X[i] != 0])
+    return sum([k*dim(x) for (x,k) ∈ decompose(X)])
 end
 
         

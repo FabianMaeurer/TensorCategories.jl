@@ -13,7 +13,7 @@ end
 
 function print_multiplication_table(indecomposables::Vector{<:Object}, names::Vector{String} = ["v$i" for i ∈ 1:length(indecomposables)])
     @assert length(indecomposables) == length(names) "Invalid input"
-    mult_table = multiplication_table(parent(indecomposables[1]), indecomposables)
+    #mult_table = multiplication_table(parent(indecomposables[1]), indecomposables)
 
     return [pretty_print_decomposable(s⊗t,indecomposables,names) for s ∈ indecomposables, t ∈ indecomposables]
 end
@@ -66,7 +66,7 @@ function print_sum(facs::Vector{T}, names::Vector{String}) where T <: Union{Int,
             continue
         end
 
-        str = length(str) > 0 ? str*" ⊕ "* (k > 1 ? "$(name)^$k" : "$(name)") : (k > 1 ? str*"$(name)^$k" : str*"$(name)")
+        str = length(str) > 0 ? str*" ⊕ "* (k ∉ [0,1] ? "$k ⋅ $(name)" : "$(name)") : (k ∉ [0,1] ? str*"$k ⋅ $(name)" : str*"$(name)")
     end
     return str
 end

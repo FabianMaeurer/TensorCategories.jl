@@ -34,7 +34,16 @@ function roots(p::PolyElem{qqbar})
 
     rs = roots(cp, initial_prec = prec)
 
-    return [guess(QQBar, r, max_deg) for r ∈ rs]
+    QQBar_roots = qqbar[]
+
+    for r ∈ rs
+        try 
+            push!(QQBar_roots, guess(QQBar, r, max_deg))
+        catch
+            @warn "Maximal precision not high enough to recover root $r"
+        end
+    end
+    return QQBar_roots 
 end
 
 function rational_lift(p::T) where T <: Union{PolyElem, MPolyElem}
@@ -109,4 +118,10 @@ end
 function monomials(f::PolyElem{qqbar})
     x = gen(parent(f))
     return [x^i for i ∈ degree(f):-1:0 if coefficients(f)[i] != 0]
+end
+
+function (::QQField)(x::qqbar) 
+    @assert is_rational(x)
+
+    return roots(minpoly(x))[1]
 end
