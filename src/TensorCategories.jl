@@ -353,7 +353,7 @@ include("Examples/TambaraYamagami/TambaraYamagami.jl")
 include("Examples/Fibonacci/FibonacciCategory.jl")
 include("Examples/VercleyenSingerland/FR_8211/fr_8211.jl")
 include("Examples/VercleyenSingerland/FR_9143/fr_9143.jl")
-include("Examples/E6subfactor/E6subfactor.jl")
+include("Examples/E6Subfactor/E6subfactor.jl")
 include("Examples/Haagerup/Haagerup.jl")
 
 
