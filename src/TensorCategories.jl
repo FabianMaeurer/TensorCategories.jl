@@ -342,7 +342,7 @@ include("TensorCategoryFramework/InternalModules/InternalAlgebras.jl")
 include("TensorCategoryFramework/InternalModules/ModuleCategories.jl")
 
 include("DecategorifiedFramework/multiplication_table.jl")
-include("DecategorifiedFramework/ZPlusrings.jl")
+include("DecategorifiedFramework/ZPlusRings.jl")
 include("DecategorifiedFramework/GrothendieckRing.jl")
 
 
