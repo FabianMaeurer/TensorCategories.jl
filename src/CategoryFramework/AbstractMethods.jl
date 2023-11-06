@@ -66,8 +66,14 @@ function is_simple(X::Object)
     B = basis(End(X))
     if length(B) == 0
         return false
+    elseif length(B) == 1
+        return true
     end
-    is_simple(endomorphism_ring(X, B))
+    try 
+        is_simple(endomorphism_ring(X, B))
+    catch
+        false
+    end
 end
 
 decompose(X::Object) = decompose_by_endomorphism_ring(X)
