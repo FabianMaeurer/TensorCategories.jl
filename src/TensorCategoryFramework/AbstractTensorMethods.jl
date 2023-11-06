@@ -390,6 +390,34 @@ function fpdim(C::Category)
 end
 
 
+#=----------------------------------------------------------
+    Tensor product - Dual adjunction    
+----------------------------------------------------------=#
+
+@doc raw""" 
+
+    left_dual_adjunction(f::Morphism, X::Object, Y::Object, Z::Object)   
+
+Return the natural isomorphism ``Hom(X⊗Z,Y) ≃ Hom(X,Y⊗Z*)`` evaluated at 
+``f: X⊗Z → Y``.
+"""
+
+function left_dual_adjunction(f::Morphism, X::Object, Y::Object, Z::Object)
+    (f ⊗ id(dual(X))) ∘ inv_associator(X,Z,Y) ∘ (id(X) ⊗ coev(Z))
+end
+
+@doc raw""" 
+
+    inverse_left_dual_adjunction(f::Morphism, X::Object, Y::Object, Z::Object)   
+
+Return the natural isomorphism ``Hom(X,Y⊗Z*) ≃ Hom(X⊗Z,Y)`` evaluated at 
+``f: X → Y⊗Z*``.
+"""
+
+function inverse_left_dual_adjunction(f::Morphism, X::Object, Y::Object, Z::Object)
+    (id(Y) ⊗ ev(Z)) ∘ associator(Y,dual(Z),Z) ∘ (f ⊗ id(Z))
+end
+
 #-------------------------------------------------------
 # Misc
 #-------------------------------------------------------

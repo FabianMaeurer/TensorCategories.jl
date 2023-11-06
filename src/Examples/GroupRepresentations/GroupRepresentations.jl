@@ -469,7 +469,7 @@ Return a list of the simples objects in Rep.
 function simples(Rep::GroupRepresentationCategory)
     
     return get_attribute!(Rep, :simples) do
-        #@show Rep.group
+        @show Rep.group
         grp = base_group(Rep)
         F = base_ring(Rep)
 
