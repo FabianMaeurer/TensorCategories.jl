@@ -19,10 +19,11 @@ import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, Fi
     CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det, load,save,
     factor, zero_matrix, identity_matrix, complex_embeddings, QQBar, eigenvalues, @alias,
     abelian_group, PcGroup, is_modular, subgroup, nullspace, factor, qqbar,
-    leading_coefficient, roots, is_rational, QQMPolyRingElem, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
+    leading_coefficient, roots, is_rational, QQMPolyRingElem, lex, Fac, root_of_unity, PolyRingElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
     height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
     @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix, exponents, symbols,
-    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity, gmodule, trivial_subgroup, hnf, get_attribute, set_attribute!, get_attribute!, central_primitive_idempotents, is_invertible, involution, group_algebra, unit, QQField, minpoly
+    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity, gmodule, trivial_subgroup, hnf, get_attribute, set_attribute!, get_attribute!, central_primitive_idempotents, is_invertible, involution, group_algebra, unit, QQField, minpoly,
+    subst
 
 import Oscar.GModuleFromGap: home_base
 
@@ -162,12 +163,14 @@ export is_additive
 export is_algebra
 export is_braided
 export is_central
+export is_epimorphism
 export is_finite 
 export is_fusion 
 export is_half_braiding 
 export is_linear 
 export is_modular 
 export is_monoidal 
+export is_monomorphism
 export is_multifusion 
 export is_multifusion 
 export is_multiring 
@@ -325,6 +328,11 @@ include("Examples/GroupRepresentations/GroupRepresentations.jl")
 include("Examples/ConvolutionCategory/CoherentSheaves.jl")
 include("Examples/ConvolutionCategory/ConvolutionCategory.jl")
 
+
+include("DecategorifiedFramework/multiplication_table.jl")
+include("DecategorifiedFramework/ZPlusrings.jl")
+include("DecategorifiedFramework/GrothendieckRing.jl")
+
 include("TensorCategoryFramework/AbstractTensorMethods.jl")
 include("TensorCategoryFramework/FusionCategory.jl")
 #include("structures/MultiFusionCategories/FusionCategoryExperimental.jl")
@@ -340,10 +348,6 @@ include("TensorCategoryFramework/Center/Induction.jl")
 include("TensorCategoryFramework/Center/CenterChecks.jl")
 include("TensorCategoryFramework/InternalModules/InternalAlgebras.jl")
 include("TensorCategoryFramework/InternalModules/ModuleCategories.jl")
-
-include("DecategorifiedFramework/multiplication_table.jl")
-include("DecategorifiedFramework/ZPlusrings.jl")
-include("DecategorifiedFramework/GrothendieckRing.jl")
 
 
 include("Examples/Verlinde/I2-fusion.jl")

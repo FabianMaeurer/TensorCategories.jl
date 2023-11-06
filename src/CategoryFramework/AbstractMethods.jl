@@ -1,55 +1,15 @@
-function zero_morphism(X::Object, Y::Object) 
-    C = parent(X)
-    if is_additive(C)
-        return basis(Hom(zero(parent(X)), Y))[1] ∘ basis(Hom(X, zero(parent(X))))
-    elseif is_linear(C) 
-        return zero(base_ring(X)) * basis(Hom(X,Y))[1]
-    end
-    @error "There might be no zero morphism"
-end
+#=----------------------------------------------------------
+    A B S T R A C T   M E T H O D S
+    
+    Here are all generic methods dealing with at most the 
+    structure of 
+    
+    - additive
+    - (semisimple) abelian
+    - 𝕜-linear
 
-#---------------------------------------------------------
-#   Horizontal and Vertical direct sums
-#---------------------------------------------------------
-
-"""
-    function horizontal_direct_sum(f::Morphism, g::Morphism)
-
-Return the sum of ``f:X → Z``, ``g:Y → Z`` as ``f+g:X⊕Y → Z.
-"""
-function horizontal_direct_sum(f::Morphism, g::Morphism)
-    #@assert codomain(f) == codomain(g) "Codomains do not coincide"
-    sum = f ⊕ g
-    _,_,(p1,p2) = direct_sum(codomain(f),codomain(g))
-    return p1∘sum + p2∘sum
-end
-
-function horizontal_direct_sum(f::Vector{M}) where M <: Morphism
-    #@assert codomain(f) == codomain(g) "Codomains do not coincide"
-    f_sum = direct_sum(f...)
-    _,_,p = direct_sum([codomain(fi) for fi ∈ f]...)
-    return sum([p1∘f_sum for p1 ∈ p])
-end
-
-"""
-    function vertical_direct_sum(f::Morphism, g::Morphism)
-
-Return the sum of ``f:X → Y``, ``g:X → Z`` as ``f+g: X → Y⊕Z.
-"""
-function vertical_direct_sum(f::Morphism, g::Morphism)
-    #@assert domain(f) == domain(g) "Domains do not coincide"
-
-    sum = f ⊕ g
-    _,(i1,i2),_ = direct_sum(domain(f), domain(g))
-    return sum∘i1 + sum∘i2
-end
-
-function vertical_direct_sum(f::Vector{M}) where M <: Morphism
-    f_sum = direct_sum(f...)
-    _,i,_ = direct_sum([domain(fi) for fi ∈ f]...)
-    return sum([f_sum∘ix for ix ∈ i])
-
-end
+    categories.
+----------------------------------------------------------=#
 
 #=----------------------------------------------------------
     Endomorphism Ring
@@ -78,7 +38,13 @@ end
 #   Image & Kernel
 #------------------------------------------------------
 
+@doc raw""" 
 
+    image(f::Morphism)
+
+Return the image ``Im(f)`` of ``f:X → Y`` together with a monomorphism 
+``Im(f) ↪ Y``.
+"""
 function image(f::Morphism)
     C,c = cokernel(f)
     return kernel(c)
@@ -400,3 +366,75 @@ function right_inverse(f::Morphism)
     end
 
 end
+function zero_morphism(X::Object, Y::Object) 
+    C = parent(X)
+    if is_additive(C)
+        return basis(Hom(zero(parent(X)), Y))[1] ∘ basis(Hom(X, zero(parent(X))))
+    elseif is_linear(C) 
+        return zero(base_ring(X)) * basis(Hom(X,Y))[1]
+    end
+    @error "There might be no zero morphism"
+end
+
+function is_monomorphism(f::Morphism)
+    try 
+        left_inverse(f)
+        return true
+    catch
+        false
+    end
+end
+
+function is_epimorphism(f::Morphism)
+    try 
+        right_inverse(f)
+        return true
+    catch
+        false
+    end
+end
+
+
+#---------------------------------------------------------
+#   Horizontal and Vertical direct sums
+#---------------------------------------------------------
+
+"""
+    function horizontal_direct_sum(f::Morphism, g::Morphism)
+
+Return the sum of ``f:X → Z``, ``g:Y → Z`` as ``f+g:X⊕Y → Z.
+"""
+function horizontal_direct_sum(f::Morphism, g::Morphism)
+    #@assert codomain(f) == codomain(g) "Codomains do not coincide"
+    sum = f ⊕ g
+    _,_,(p1,p2) = direct_sum(codomain(f),codomain(g))
+    return p1∘sum + p2∘sum
+end
+
+function horizontal_direct_sum(f::Vector{M}) where M <: Morphism
+    #@assert codomain(f) == codomain(g) "Codomains do not coincide"
+    f_sum = direct_sum(f...)
+    _,_,p = direct_sum([codomain(fi) for fi ∈ f]...)
+    return sum([p1∘f_sum for p1 ∈ p])
+end
+
+"""
+    function vertical_direct_sum(f::Morphism, g::Morphism)
+
+Return the sum of ``f:X → Y``, ``g:X → Z`` as ``f+g: X → Y⊕Z.
+"""
+function vertical_direct_sum(f::Morphism, g::Morphism)
+    #@assert domain(f) == domain(g) "Domains do not coincide"
+
+    sum = f ⊕ g
+    _,(i1,i2),_ = direct_sum(domain(f), domain(g))
+    return sum∘i1 + sum∘i2
+end
+
+function vertical_direct_sum(f::Vector{M}) where M <: Morphism
+    f_sum = direct_sum(f...)
+    _,i,_ = direct_sum([domain(fi) for fi ∈ f]...)
+    return sum([f_sum∘ix for ix ∈ i])
+
+end
+

@@ -193,6 +193,7 @@ function indecomposables(C::TensorPowerCategory, k = Inf)
 
     while j ≤ k
         new_indecs_temp = []
+        @show j
         for V ∈ indecs_in_X, W ∈ new_indecs
             summands_of_VW = [x for (x,k) ∈ decompose(W ⊗ V)]
             new_indecs_temp = [new_indecs_temp; [x for x ∈ summands_of_VW if findfirst(s -> is_isomorphic(x,s)[1], simpls) === nothing]]
@@ -280,4 +281,8 @@ function Hom(X::TensorPowerObject, Y::TensorPowerObject)
     H = Hom(object(X), object(Y))
     B = [TensorPowerMorphism(X,Y,f) for f ∈ basis(H)]
     HomSpace(X,Y,B,VectorSpaces(base_ring(X)))
+end
+
+function subst(f::PolyRingElem{T}, x::ℕRingElem) where T <: RingElem
+    sum(coefficients(f) .* [x^k for k ∈ 0:degree(f)])
 end

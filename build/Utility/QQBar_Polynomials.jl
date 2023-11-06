@@ -4,7 +4,7 @@ function eigenvalues(M::MatElem{qqbar})
     rs = roots(p)
 end
 
-function factor(p::PolyElem{qqbar})
+function factor(p::PolyRingElem{qqbar})
 
     u = leading_coefficient(p)
 
@@ -14,11 +14,11 @@ function factor(p::PolyElem{qqbar})
     return Fac(parent(p)(u), Dict(y - r => count(==(r), rs) for r ∈ rs))
 end
 
-# function roots(p::PolyElem{qqbar})
+# function roots(p::PolyRingElem{qqbar})
 #     rs = [r for r in roots(rational_lift(p), base_ring(p)) if p(r) == 0]
 # end
 
-function roots(p::PolyElem{qqbar})
+function roots(p::PolyRingElem{qqbar})
     coef_deg = maximum([degree(c) for c in coefficients(p)])
     deg = degree(p)
     max_deg = coef_deg * deg
@@ -35,7 +35,7 @@ function roots(p::PolyElem{qqbar})
     return [guess(QQBar, r, max_deg) for r ∈ rs]
 end
 
-function rational_lift(p::T) where T <: Union{PolyElem, MPolyElem}
+function rational_lift(p::T) where T <: Union{PolyRingElem, MPolyElem}
     K = base_ring(p)
     @assert characteristic(K) == 0
 
@@ -103,7 +103,7 @@ function +(k::qqbar, p::T) where T <: Union{fmpq_poly, QQMPolyRingElem}
     end
 end
 
-function monomials(f::PolyElem{qqbar})
+function monomials(f::PolyRingElem{qqbar})
     x = gen(parent(f))
     return [x^i for i ∈ degree(f):-1:0 if coefficients(f)[i] != 0]
 end

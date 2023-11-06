@@ -13,7 +13,7 @@ struct UnivalentVertex <: SoergelDecoration end
 struct TrivalentVertex <: SoergelDecoration end
 struct MultivalentVertex <: SoergelDecoration end
 struct BoxVertex <: SoergelDecoration 
-    polynomial::PolyElem
+    polynomial::PolyRingElem
 end
     
 
