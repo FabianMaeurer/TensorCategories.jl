@@ -289,11 +289,17 @@ end
 
 is_braided(C::GradedVectorSpaces) = isdefined(C, :braiding)
 
-function braiding(V::GVSObject, W::GVSObject)
+function braiding(X::GVSObject, Y::GVSObject)
     @assert is_braided(parent(V))
-    c = parent(V).braiding
-
-    Morphism(V⊗W, W⊗V, diagonal_matrix([c(g,h) for g ∈ grading(V), h ∈ grading(W)][:]))
+    F = base_ring(X)
+    n,m = int_dim(X),int_dim(Y)
+    map = zero(MatrixSpace(F,n*m,n*m))
+    for i ∈ 1:n, j ∈ 1:m
+        v1 = matrix(F,transpose([k == i ? 1 : 0 for k ∈ 1:n]))
+        v2 = matrix(F,transpose([k == j ? 1 : 0 for k ∈ 1:m]))
+        map[(j-1)*n + i, :] = kronecker_product(v1,v2)
+    end
+    return Morphism(X⊗Y, Y⊗X, transpose(map))
 end
 
 #-----------------------------------------------------------------
