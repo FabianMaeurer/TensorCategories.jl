@@ -853,7 +853,6 @@ function simples_by_induction!(C::CenterCategory)
 
         Z = induction(s, parent_category = C)
         for x ∈ contained_simples
-            @show contained_simples
             f = horizontal_direct_sum(@show basis(Hom(x,Z)))
             Z = cokernel(f)[1]
         end
