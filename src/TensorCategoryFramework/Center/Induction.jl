@@ -22,6 +22,8 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
                 
                 #_basis, basis_dual = dual_basis(Hom(S, W⊗T), Hom(dual(S), dual(W⊗T)))
                 _basis, basis_dual = adjusted_dual_basis(Hom(S, W⊗T), Hom(dual(S)⊗W, dual(T)), S, W, T)
+                
+                @show [base_ring(X)(adjusted_pairing(f,g, S,W,T)) for f in _basis, g in basis_dual]
 
                 if length(_basis) == 0 
                     γ_i_temp = vertical_direct_sum(γ_i_temp, zero_morphism(dom_i, W⊗((T⊗X)⊗dual(T)))) 
@@ -34,7 +36,7 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
                 #@show "component_iso"
                 #component_iso = sum([a(W,T⊗X,dual(T)) ∘ (a(W,T,X)⊗id(dual(T))) ∘ ((f⊗id(X))⊗(inv(dim(W))*inv(k)*g)) ∘ a(S⊗X,dual(S),W) for (k,f,g) ∈ zip(corrections,_basis, basis_dual)])
 
-                component_iso = sum([a(W,T⊗X,dual(T)) ∘ (a(W,T,X)⊗id(dual(T))) ∘ ((f⊗id(X))⊗(inv(dim(W))*g)) ∘ a(S⊗X,dual(S),W) for (f,g) ∈ zip(_basis, basis_dual)])
+                component_iso = sum([a(W,T⊗X,dual(T)) ∘ (a(W,T,X)⊗id(dual(T))) ∘ ((f⊗id(X))⊗(g)) ∘ a(S⊗X,dual(S),W) for (f,g) ∈ zip(_basis, basis_dual)])
 
                 #@show "sum"
 #γ_i_temp = vertical_direct_sum(γ_i_temp, sqrt(dim(T))*(component_iso))
@@ -117,7 +119,7 @@ end
 #                 basis, basis_dual = dual_basis(Hom(one(C), (dual(S)⊗W)⊗T), Hom(one(C), dual((dual(S)⊗W)⊗T)))
 #                 @show "dual_transform"
 #                 # Isomorphism (XY)* ≃ Y*X*
-#                 dual_transform = inv(a(dual(T),dual(W),S)) ∘ (id(dual(T))⊗dual_monoidal_structure(dual(S),W)) ∘ dual_monoidal_structure(dual(S)⊗W,T)
+#                 dual_transform = inv(a(dual(T),dual(W),S)) ∘ (id(dual(T))⊗dual_monoidal_structure(dual(S),W)) ∘ dual_mono-idal_structure(dual(S)⊗W,T)
 #                 basis_dual = [dual_transform ∘ f for f ∈ basis_dual]
 
 #                 @show "basis correction"
@@ -165,7 +167,7 @@ function adjusted_pairing(f::Morphism, g::Morphism, S::Object, W::Object, T::Obj
     # Correspondes to the pairing intriduced in 
     # https://doi.org/10.48550/arXiv.1010.1222 after 
     # natural Isomorphisms
-    (id(W)⊗ev(dual(T))) ∘ (id(W)⊗(spherical(T)⊗id(dual(T)))) ∘ associator(W,T,dual(T)) ∘ (f⊗g) ∘ associator(S,dual(S),W) ∘ (coev(S)⊗id(W))
+    dim(W)*(id(W)⊗ev(dual(T))) ∘ (id(W)⊗(spherical(T)⊗id(dual(T)))) ∘ associator(W,T,dual(T)) ∘ (f⊗g) ∘ associator(S,dual(S),W) ∘ (coev(S)⊗id(W))
 end
 
 # function pairing(f::Morphism, g::Morphism,S,W,T)
