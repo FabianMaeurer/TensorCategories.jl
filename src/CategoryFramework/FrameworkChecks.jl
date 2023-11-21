@@ -12,7 +12,7 @@ function is_fusion(C::Category)
 end
 
 function is_multifusion(C::Category) 
-if is_fusion(C) 
+    if is_fusion(C) 
         return true
     end
     if hasfield(typeof(C), :__attrs) 
@@ -24,7 +24,7 @@ if is_fusion(C)
 end
 
 function is_tensor(C::Category) 
-if is_fusion(C)
+    if is_fusion(C)
         return true
     end
     if hasfield(typeof(C), :__attrs) 
@@ -36,7 +36,7 @@ if is_fusion(C)
 end
 
 function is_multitensor(C::Category) 
-if is_multifusion(C) || is_tensor(C)
+    if is_tensor(C) || is_multifusion(C)
         return true
     end
     if hasfield(typeof(C), :__attrs) 
@@ -48,7 +48,7 @@ if is_multifusion(C) || is_tensor(C)
 end
 
 function is_ring(C::Category) 
-if is_tensor(C)
+    if is_tensor(C)
         return true
     end
     if hasfield(typeof(C), :__attrs) 
@@ -60,7 +60,7 @@ if is_tensor(C)
 end
 
 function is_multiring(C::Category) 
-if is_multitensor(C) || is_ring(C)
+    if is_multitensor(C) || is_ring(C)
         return true
     end 
     if hasfield(typeof(C), :__attrs) 
@@ -72,7 +72,7 @@ if is_multitensor(C) || is_ring(C)
 end
 
 function is_finite(C::Category) 
-if is_fusion(C)
+    if is_fusion(C)
         return true
     end
     if hasfield(typeof(C), :__attrs) 
@@ -90,7 +90,7 @@ if is_fusion(C)
 end
 
 function is_monoidal(C::Category) 
-if is_multiring(C)
+    if is_multiring(C)
         return true
     end
     if hasfield(typeof(C), :__attrs) 
@@ -106,7 +106,7 @@ if is_multiring(C)
 end
 
 function is_abelian(C::Category) 
-if is_multiring(C)
+    if is_multiring(C)
         return true
     end
     if hasfield(typeof(C), :__attrs) 
@@ -141,7 +141,7 @@ end
 
 
 function is_linear(C::Category) 
-if is_multiring(C)
+    if is_multiring(C)
         return true
     end
     if hasfield(typeof(C), :__attrs) 
@@ -199,7 +199,7 @@ function _is_spherical(C::Category)
 end
 
 function is_rigid(C::Category)
-if is_multitensor(C)
+    if is_multitensor(C)
         return true
     end
     if hasfield(typeof(C), :__attrs) 
@@ -224,7 +224,7 @@ function is_braided(C::Category)
 end
 
 function is_krull_schmidt(C::Category)
-if is_multiring(C)
+    if is_multiring(C)
         return true
     end
     if hasfield(typeof(C), :__attrs) 

@@ -38,12 +38,12 @@ function E6subfactor()
            -1 1 inv(K(2))*ξ^4 -inv(K(2))*(ξ^(-3) + i) inv(K(2))*ξ^10 -inv(K(2))*(ξ^2 - 1)])
     a = inv(K(4))*(1-r3)
 
-    Fx = matrix(K,[0 0 0 0 0 0;
-                0 0 0 0 0 0;
-                0 0 0 0 0 0;
-                0 0 0 0 0 0;
-                0 0 inv(K(2))*i 0 inv(K(2)) 0;
-                0 0 0 0 0 0;])
+    # Fx = matrix(K,[0 0 0 0 0 0;
+    #             0 0 0 0 0 0;
+    #             0 0 0 0 0 0;
+    #             0 0 0 0 0 0;
+    #             0 0 inv(K(2))*i 0 inv(K(2)) 0;
+    #             0 0 0 0 0 0;])
 
     # Fx = matrix(K, [-2*a -2*a a*ξ^2 a*ξ^8 a*ξ^8 a*ξ^2;
     #                 -2*a 2*a a*ξ^2 a*ξ^8 -a*ξ^8 -a*ξ^2;
@@ -53,7 +53,7 @@ function E6subfactor()
     #                 -1 1 -inv(K(2))*ξ^4 -inv(K(2))*(ξ^(-4)+i) inv(K(2))*ξ^10 -inv(K(2))*(ξ^2-1)])
 
     set_associator!(E6,2,2,2,[F1,Fx,Fy])
-    set_associator!(E6, [transpose(m) for m in E6.ass])
+    #set_associator!(E6, [transpose(m) for m in E6.ass])
     set_name!(E6, "E6 subfactor fusion category")
     set_one!(E6, [1,0,0])
     return E6

@@ -581,7 +581,7 @@ function tensor_product(f::SixJMorphism, g::SixJMorphism)
         for k ∈ 1:C.simples
             if (c = table[i,j,k]) > 0
                 m = zero_morphism(simpl[k]^(c*d1),simpl[k]^(c*d2)).m
-                m[k] = kronecker_product(identity_matrix(base_ring(C),c), A)
+                m[k] = kronecker_product(A, identity_matrix(base_ring(C),c))
 
                 h = h ⊕ SixJMorphism(simpl[k]^(c*d1),simpl[k]^(c*d2), m)
                 

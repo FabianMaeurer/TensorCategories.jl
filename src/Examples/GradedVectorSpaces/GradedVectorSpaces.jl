@@ -3,10 +3,6 @@ mutable struct GradedVectorSpaces <: Category
     base_ring::Field
     base_group::GAPGroup
     twist::Cocycle{3}
-    braiding::Cocycle{2}
-
-    GradedVectorSpaces(F,G,c) = new(F,G,c)
-    GradedVectorSpaces(F,G,c,b) = new(F,G,c,b)
 end
 
 struct GVSObject <: VectorSpaceObject
@@ -27,11 +23,8 @@ end
 The category of ```G```-graded vector spaces.
 """
 function GradedVectorSpaces(F::Field, G::GAPGroup)
-    if is_abelian(G)
-        GradedVectorSpaces(F,G,trivial_3_cocycle(G,F), trivial_cocycle(G,F,2))
-    else
-        GradedVectorSpaces(F,G,trivial_3_cocycle(G,F))
-    end
+    elems = elements(G)
+    GradedVectorSpaces(F,G,trivial_3_cocycle(G,F))
 end
 
 function GradedVectorSpaces(G::GAPGroup)
@@ -283,19 +276,6 @@ function associator(X::GVSObject, Y::GVSObject, Z::GVSObject)
     return Morphism(dom,cod,m)
 end
 
-#=----------------------------------------------------------
-    braiding 
-----------------------------------------------------------=#
-
-is_braided(C::GradedVectorSpaces) = isdefined(C, :braiding)
-
-function braiding(V::GVSObject, W::GVSObject)
-    @assert is_braided(parent(V))
-    c = parent(V).braiding
-
-    Morphism(V⊗W, W⊗V, diagonal_matrix([c(g,h) for g ∈ grading(V), h ∈ grading(W)][:]))
-end
-
 #-----------------------------------------------------------------
 #   Functionality: Duals
 #-----------------------------------------------------------------
@@ -324,26 +304,6 @@ function ev(V::GVSObject)
     twist = parent(V).twist
     m = [i == j ? inv(twist(g,inv(g),g)) : 0 for (i,g) ∈ zip(1:int_dim(V), V.grading), j ∈ 1:int_dim(V)][:]
     Morphism(dom,cod, matrix(base_ring(V), reshape(m,int_dim(dom),1)))
-end
-
-#=----------------------------------------------------------
-    Twisted Group Algebra 
-----------------------------------------------------------=#
-
-function twisted_group_algebra(C::GradedVectorSpaces, i::Int = 2)
-    G = base_group(C)
-    F = base_ring(C)
-
-    els = elements(G)
-    n = length(els)
-
-    A,i,_ = direct_sum(simples(C)...)
-    
-    cocycle = unitary_cocycle(G, F, 2, i)
-
-    mult = diagonal_matrix([cocycle(els[i], els[j]) for i ∈ 1:n, j ∈ 1:n][:])
-
-    AlgebraObject(C, A, mult, i[1])
 end
 
 #-----------------------------------------------------------------

@@ -2,33 +2,37 @@ module TensorCategories
 
 import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show,div
 
-import Oscar: +, AbstractSet, AlgAss, AlgAssElem, AcbField, Field, FieldElem, FinField, GroupsCore,
-    FiniteField, GAP, GAPGroup, GAPGroupHomomorphism, GL, GSet, GroupElem, Ideal, MPolyQuo,
-    Map, MatElem, MatrixElem, MatrixGroup, MatrixSpace, ModuleIsomorphism, NumberField,
-    PolynomialRing, QQ, Ring, RingElem, ZZ, abelian_closure, action, base_field, base_ring,
-    basis, change_base_ring, characteristic, codomain, coeff, coefficients, cokernel,
-    compose, cyclotomic_field, decompose, degree, diagonal_matrix, dim, domain, dual,
-    eigenspace, eigenspaces, elem_type, elements, fmpq, fmpz, gcd, gen, gens,
-    groebner_basis, gset, hom, id, ideal, image, index, inv, irreducible_modules, is_abelian,
-    is_central, iscommutative, isconstant, isindependent, isinvertible, is_isomorphic,
-    is_semisimple, is_subgroup, jordan_normal_form, kernel, kronecker_product,
-    leading_monomial, left_transversal, matrix, minpoly, real_solutions, multiplication_table,
-    nf_elem, one, orbit, orbits, order, parent, permutation_matrix, primary_decomposition,
-    product, rank, roots, rref, size, solve, solve_left, splitting_field, stabilizer,
-    symmetric_group, tensor_product, tr, zero, ∘, ⊕, ⊗, iso_oscar_gap, preimage, is_simple,
-    CyclotomicField, absolute_simple_field, is_abelian, is_square, charpoly, det, load,save,
-    factor, zero_matrix, identity_matrix, complex_embeddings, QQBar, eigenvalues, @alias,
-    abelian_group, PcGroup, is_modular, subgroup, nullspace, factor, qqbar,
-    leading_coefficient, roots, is_rational, QQMPolyRingElem, lex, Fac, root_of_unity, PolyElem, MPolyElem, monomials, fmpq_poly, MPolyIdeal,
-    height_bits, lcm, change_base_ring, guess, direct_sum, matrix_algebra,
-    @attributes, Hecke.AbsAlgAss, Hecke.AbsAlgAssElem, has_attribute, tensor_power, spectrum, exponent, sparse_matrix, exponents, symbols,
-    nvars, resultant,QQFieldElem, ZZRingElem, divisors, is_finite, is_subfield, multiplicity, gmodule, trivial_subgroup, hnf, get_attribute, set_attribute!, get_attribute!, central_primitive_idempotents, is_invertible, involution, group_algebra, unit, QQField, minpoly
-
-import Oscar.GModuleFromGap: home_base
-
 import Oscar.AbstractAlgebra.Generic: Poly
+import Oscar.GModuleFromGap: home_base
+import Oscar: +, @alias, @attributes, AbstractSet, AcbField, AlgAss, AlgAssElem,
+    CyclotomicField, Fac, Field, FieldElem, FinField, FiniteField, GAP, GAPGroup,
+    GAPGroupHomomorphism, GL, GSet, GroupElem, GroupsCore, Hecke.AbsAlgAss,
+    Hecke.AbsAlgAssElem, Ideal, MPolyElem, MPolyIdeal, MPolyQuo, Map, MatElem, MatrixElem,
+    MatrixGroup, MatrixSpace, ModuleIsomorphism, NumberField, PcGroup, PolyRingElem,
+    PolynomialRing, QQ, QQBar, QQField, QQFieldElem, QQMPolyRingElem, Ring, RingElem, ZZ,
+    ZZRingElem, abelian_closure, abelian_group, absolute_simple_field, action, base_field,
+    base_ring, basis, central_primitive_idempotents, change_base_ring, characteristic,
+    charpoly, codomain, coeff, coefficients, cokernel, complex_embeddings, compose,
+    cyclotomic_field, decompose, degree, det, diagonal_matrix, dim, direct_sum, divisors,
+    domain, dual, eigenspace, eigenspaces, eigenvalues, elem_type, elements, exponent,
+    exponents, factor, fmpq, fmpq_poly, fmpz, gcd, gen, gens, get_attribute, get_attribute!,
+    gmodule, groebner_basis, group_algebra, gset, guess, has_attribute, height_bits, hnf,
+    hom, id, ideal, identity_matrix, image, index, inv, involution, irreducible_modules,
+    is_abelian, is_central, is_finite, is_invertible, is_isomorphic, is_modular,
+    is_rational, is_semisimple, is_simple, is_square, is_subfield, is_subgroup,
+    iscommutative, isconstant, isindependent, isinvertible, iso_oscar_gap,
+    jordan_normal_form, kernel, kronecker_product, lcm, leading_coefficient,
+    leading_monomial, left_transversal, lex, load, matrix, matrix_algebra, minpoly,
+    monomials, multiplication_table, multiplicity, nf_elem, nullspace, nvars, one, orbit,
+    orbits, order, parent, permutation_matrix, preimage, primary_decomposition, product,
+    qqbar, rank, real_solutions, resultant, root_of_unity, roots, rref, save,
+    set_attribute!, size, solve, solve_left, sparse_matrix, spectrum, splitting_field,
+    stabilizer, subgroup, subst, symbols, symmetric_group, tensor_power, tensor_product, tr,
+    trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗
 
-using Memoization, InteractiveUtils, SparseArrays
+using InteractiveUtils
+using Memoization
+using SparseArrays
 
 export - 
 export * 
@@ -162,12 +166,14 @@ export is_additive
 export is_algebra
 export is_braided
 export is_central
+export is_epimorphism
 export is_finite 
 export is_fusion 
 export is_half_braiding 
 export is_linear 
 export is_modular 
 export is_monoidal 
+export is_monomorphism
 export is_multifusion 
 export is_multifusion 
 export is_multiring 
@@ -179,6 +185,7 @@ export is_simple
 export is_spherical 
 export is_subobject 
 export is_tensor 
+export is_zero
 export isequivariant 
 export isgraded 
 export Ising 
@@ -325,6 +332,11 @@ include("Examples/GroupRepresentations/GroupRepresentations.jl")
 include("Examples/ConvolutionCategory/CoherentSheaves.jl")
 include("Examples/ConvolutionCategory/ConvolutionCategory.jl")
 
+
+include("DecategorifiedFramework/multiplication_table.jl")
+include("DecategorifiedFramework/ZPlusrings.jl")
+include("DecategorifiedFramework/GrothendieckRing.jl")
+
 include("TensorCategoryFramework/AbstractTensorMethods.jl")
 include("TensorCategoryFramework/FusionCategory.jl")
 #include("structures/MultiFusionCategories/FusionCategoryExperimental.jl")
@@ -340,10 +352,6 @@ include("TensorCategoryFramework/Center/Induction.jl")
 include("TensorCategoryFramework/Center/CenterChecks.jl")
 include("TensorCategoryFramework/InternalModules/InternalAlgebras.jl")
 include("TensorCategoryFramework/InternalModules/ModuleCategories.jl")
-
-include("DecategorifiedFramework/multiplication_table.jl")
-include("DecategorifiedFramework/ZPlusRings.jl")
-include("DecategorifiedFramework/GrothendieckRing.jl")
 
 
 include("Examples/Verlinde/I2-fusion.jl")

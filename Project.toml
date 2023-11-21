@@ -1,7 +1,7 @@
 name = "TensorCategories"
 uuid = "258c694e-7338-4d4d-b524-4851272a75cf"
 authors = ["Fabian Mäurer"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
