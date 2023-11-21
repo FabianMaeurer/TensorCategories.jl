@@ -30,6 +30,12 @@ function Morphism(X::UqSl2rep, Y::UqSl2rep, ms::Pair{Int, <:MatElem}...)
     UqSl2repMorphism(X,Y, Dict(ms...))
 end
 
+UqSl2Representations(F::Ring) = UqSl2Representations(F,F(1))
+UqSl2Representations(F::Ring, x) = UqSl2Representations(F,F(x))
+UqSl2Representations() = UqSl2Representations(QQBar, QQBar(1))
+
+is_tensor(C::UqSl2Representations) = true
+
 #=----------------------------------------------------------
     getter 
 ----------------------------------------------------------=#
@@ -45,12 +51,18 @@ end
     domain(f) == domain(g) &&
     codomain(f) == codomain(g) &&
     findnz(f.m) == findnz(g.m)
+
+# ==(X::UqSl2rep, Y::UqSl2rep) = 
+
 #=----------------------------------------------------------
     Functionality 
 ----------------------------------------------------------=#
 
-getindex(X::UqSl2rep, k) = k ≤ length(X.components) ? X.components[k+1] : 0
-getindex(f::UqSl2repMorphism, k) = k ≤ length(f.m) ? f.m[k+1] : zero_matrix(base_ring(f), domain(f)[k], codomain(f)[k]) 
+getindex(X::UqSl2rep, k) = k < length(X.components) ? X.components[k+1] : 0
+
+function getindex(f::UqSl2repMorphism, k) 
+    k+1 ∈ findnz(f.m)[1] ? f.m[k+1] : zero_matrix(base_ring(f),  domain(f)[k], codomain(f)[k]) 
+end
 
 function id(X::UqSl2rep)
     ind, vals = findnz(X.components)
@@ -87,8 +99,8 @@ function direct_sum(X::UqSl2rep, Y::UqSl2rep)
     py_mats = matrices(zero_morphism(S,Y))
 
     for i ∈ findnz(S.components)[1]
-        x = i ≤ length(X.components) ? X[i] : 0
-        y = i ≤ length(Y.components) ? Y[i] : 0
+        x = i ≤ length(X.components) ? X[i-1] : 0
+        y = i ≤ length(Y.components) ? Y[i-1] : 0
         for j ∈ 1:x 
             ix_mats[i][j,j] = 1
             px_mats[i][j,j] = 1
@@ -112,7 +124,7 @@ function direct_sum(f::UqSl2repMorphism, g::UqSl2repMorphism)
     cod = codomain(f) ⊕ codomain(g)
     F = base_ring(dom)
 
-    mats = Dict{Int,MatElem}(k => diagonal_matrix(f[k], g[k]) for k ∈ findnz(f.m)[1] ∩ findnz(g.m)[1])
+    mats = Dict{Int,MatElem}(k => diagonal_matrix(f[k-1], g[k-1]) for k ∈ findnz(f.m)[1] ∩ findnz(g.m)[1])
 
     not_in_g = [k => f[k-1] for k ∈ findnz(f.m)[1] if k ∉ findnz(g.m)[1]]
     not_in_f = [k => g[k-1] for k ∈ findnz(g.m)[1] if k ∉ findnz(f.m)[1]]
@@ -129,11 +141,12 @@ end
 
 function +(f::UqSl2repMorphism, g::UqSl2repMorphism)
     @assert domain(f) == domain(g) && codomain(f) == codomain(g)
-    mats = Dict(i => f.m[i] + g.m[i] for i ∈ findnz(f.m)[1])
+    mats = Dict(i => f[i-1] + g[i-1] for i ∈ findnz(f.m)[1])
     return Morphism(domain(f), codomain(f), mats)
 end
 
 function compose(f::UqSl2repMorphism, g::UqSl2repMorphism)
+
     mats = Dict(k => f[k-1]*g[k-1] for k ∈ findnz(f.m)[1] ∪ findnz(g.m)[1])
     Morphism(domain(f), codomain(g), mats)
 end
@@ -187,7 +200,7 @@ function tensor_product(f::UqSl2repMorphism, g::UqSl2repMorphism)
         for k ∈ clebsch_gordan_rule(i-1,j-1)
             m = zero_morphism(C[k]^(d1),C[k]^(d2)).m
             m[k+1] = A
-
+            
             h = h ⊕ Morphism(C[k]^(d1),C[k]^(d2), m)
         end
     end
@@ -205,16 +218,14 @@ function simples_associator(C::UqSl2Representations, i::Int, j::Int, k::Int)
     mats = []
     q = quantum(C.q + inv(C.q), 2*(i+j+k))
 
-    for w ∈ 1:i+j+k
+    for w ∈ 0:i+j+k 
         li = intersect(clebsch_gordan_rule(i,j),clebsch_gordan_rule(w,k))
         lj = intersect(clebsch_gordan_rule(i,w),clebsch_gordan_rule(j,k))
         gr = length(li)
 
         if gr == 0 continue end
 
-        li =  
-
-        push!(mats, w => matrix(K,gr,gr,[tl_six_j_symbol(q,j,i,w,k,n,m) for m in li, n in lj]))
+        push!(mats, w+1 => matrix(K,gr,gr,[tl_six_j_symbol(q,j,i,w,k,n,m) for m in li, n in lj]))
     end
     dom = C[i] ⊗ C[j] ⊗ C[k]
     return Morphism(dom,dom,sparsevec(Dict(mats...)))
@@ -244,9 +255,9 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     # associators on simple objects
     #---------------------------------
     if is_simple(X) && is_simple(Y) && is_simple(Z)
-        i = findnz(X.components)[1][1]
-        j = findnz(Y.components)[1][1]
-        k = findnz(Z.components)[1][1]
+        i = findnz(X.components)[1][1]-1
+        j = findnz(Y.components)[1][1]-1
+        k = findnz(Z.components)[1][1]-1
         return simples_associator(C,i,j,k)
     end
 
@@ -275,6 +286,7 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     YZ_arr = [Yⱼ⊗Zₖ for  Zₖ ∈ Z_summands, Yⱼ ∈ Y_summands][:]
     distr_after = direct_sum([distribute_right(Xᵢ, YZ_arr) for Xᵢ ∈ X_summands]) ∘ distr_after
 
+    
     #-----------------------------------
     # Associator morphism
     #-----------------------------------

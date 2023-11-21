@@ -23,43 +23,43 @@ end
 
 #Calculates the Theta-net
 function Net(q,m,n,p)
-       	a=(-q[1])^(m+n+p)
+	a=(-q[1])^(m+n+p)
 	a*=fac(q,m+n+p+1)*fac(q,n)*fac(q,m)*fac(q,p)//(fac(q,n+m)*fac(q,n+p)*fac(q,m+p))
-       	return a
+	return a
 end
 
 #Calculates the Tetrahedron net following Kauffman-Lins
 function Tet(q,A,B,C,D,E,F)
-       a1=div(A+D+E,2)
-       a2=div(B+C+E,2)
-       a3=div(A+B+F,2)
-       a4=div(C+D+F,2)
-       b1=div(B+D+E+F,2)
-       b2=div(A+C+E+F,2)
-       b3=div(A+B+C+D,2)
-       m=max(a1,a2,a3,a4)
-       M=min(b1,b2,b3)
-       res=q[1]
+	a1=div(A+D+E,2)
+	a2=div(B+C+E,2)
+	a3=div(A+B+F,2)
+	a4=div(C+D+F,2)
+	b1=div(B+D+E+F,2)
+	b2=div(A+C+E+F,2)
+	b3=div(A+B+C+D,2)
+	m=max(a1,a2,a3,a4)
+	M=min(b1,b2,b3)
+	res=q[1]
 	res*=fac(q,b1-a1)*fac(q,b1-a2)*fac(q,b1-a3)*fac(q,b1-a4)*fac(q,b2-a1)*fac(q,b2-a2)*fac(q,b2-a3)*fac(q,b2-a4)*fac(q,b3-a1)*fac(q,b3-a2)*fac(q,b3-a3)*fac(q,b3-a4)//(fac(q,A)*fac(q,B)*fac(q,C)*fac(q,D)*fac(q,E)*fac(q,F))
-       	sum=zero(parent(q[1]))
-       	for i in m:M
-		sum+=(-1)^i*fac(q,i+1)//(fac(q,i-a1)*fac(q,i-a2)*fac(q,i-a3)*fac(q,i-a4)*fac(q,b1-i)*fac(q,b2-i)*fac(q,b3-i))
-       	end
-       	res*=sum
-       	return res
+	sum=zero(parent(q[1]))
+	for i in m:M
+	sum+=(-1)^i*fac(q,i+1)//(fac(q,i-a1)*fac(q,i-a2)*fac(q,i-a3)*fac(q,i-a4)*fac(q,b1-i)*fac(q,b2-i)*fac(q,b3-i))
+	end
+	res*=sum
+	return res
 end
 
 #Gives the 6j-Symbols for TL-Algebra. Also called Recoupling in KL
 function tl_six_j_symbol(q,a,b,c,d,i,j)
-       res=one(parent(q[1]))
-       m1=div(a+d-i,2)
-       n1=div(a-d+i,2)
-       p1=div(d-a+i,2)
-       m2=div(b+c-i,2)
-       n2=div(c+i-b,2)
-       p2=div(i+b-c,2)
+	res=one(parent(q[1]))
+	m1=div(a+d-i,2)
+	n1=div(a-d+i,2)
+	p1=div(d-a+i,2)
+	m2=div(b+c-i,2)
+	n2=div(c+i-b,2)
+	p2=div(i+b-c,2)
 	res*=Tet(q,a,b,c,d,i,j)*(-1)^i*q[i+1]//(Net(q,m1,n1,p1)*Net(q,m2,n2,p2))
-       return res
+	return res
 end
 
 #Return the m-admissible pairings to the tuple (a,b) (See 7.1)

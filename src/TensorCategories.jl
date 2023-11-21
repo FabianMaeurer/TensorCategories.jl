@@ -182,6 +182,7 @@ export is_simple
 export is_spherical 
 export is_subobject 
 export is_tensor 
+export is_zero
 export isequivariant 
 export isgraded 
 export Ising 

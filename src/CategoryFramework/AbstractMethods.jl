@@ -382,6 +382,26 @@ function zero_morphism(X::Object, Y::Object)
     @error "There might be no zero morphism"
 end
 
+zero_morphism(X::Object) = zero_morphism(X,X)
+
+zero_morphism(C::Category) = zero_morphism(zero(C))
+
+is_zero(f::Morphism) = f == zero_morphism(domain(f), codomain(f))
+
+function ==(f::Morphism, x::T) where T <: Union{RingElem, Int} 
+    if x == 0 
+        return is_zero(f)
+    else
+        if domain(f) != codomain(f)
+            return false
+        end
+        try
+            express_in_basis(f, [id(domain(f))]) == [x]
+        catch end
+    end
+    false
+end
+
 function is_monomorphism(f::Morphism)
     try 
         left_inverse(f)
