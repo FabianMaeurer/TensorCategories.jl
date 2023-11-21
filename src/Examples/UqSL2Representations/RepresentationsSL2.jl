@@ -247,7 +247,7 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
         i = findnz(X.components)[1][1]
         j = findnz(Y.components)[1][1]
         k = findnz(Z.components)[1][1]
-        return simples_associator(C,i,j,k)
+        return simples_associator(C,i-1,j-1,k-1)
     end
 
     #---------------------------------
