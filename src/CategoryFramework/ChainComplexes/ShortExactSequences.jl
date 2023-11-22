@@ -3,8 +3,10 @@
     in an abelian category. 
 ----------------------------------------------------------=#
 
-@attributes struct ShortExactSequences <: AbstractChainComplexCategory 
+@attributes mutable struct ShortExactSequences <: AbstractChainComplexCategory 
     category::Category
+
+    ShortExactSequences(C::Category) = new(C)
 end
    
 struct ShortExactSequence <: AbstractChainComplex
@@ -28,12 +30,26 @@ objects(X::ShortExactSequence) = [X.X, X.Y, X.Z]
 morphisms(X::ShortExactSequence) = [X.mono, X.epi]
 morphisms(f::ShortExactSequenceMorphism) = [f.left, f.middle, f.right]
 
+function ShortExactSequence(f::Morphism, g::Morphism)
+    C = parent(f)
+    @assert kernel(f)[1] == zero(C) 
+    @assert cokernel(g)[1] == zero(C)
+    @assert image(f) == kernel(g)
+
+    par = ShortExactSequences(C)
+    X = domain(f)
+    Y = codomain(f)
+    Z = codomain(g)
+    ShortExactSequence(par, X,Y,Z, f,g)
+end
+
+morphism_type(C::ShortExactSequences) = ShortExactSequenceMorphism
 #=----------------------------------------------------------
     Additive Structures 
 ----------------------------------------------------------=#
 
 function direct_sum(S::ShortExactSequence...)
-    C = parent(S)
+    C = parent(S[1])
 
     objs = objects.(S)
     mors = morphisms.(S)
@@ -130,14 +146,14 @@ function Hom(S::ShortExactSequence, T::ShortExactSequence)
     mat_1 = hcat([express_in_basis(h∘s1, base_1) for h ∈ base_Y]...)
     mat_2 = hcat([express_in_basis(s2∘h, base_2) for h ∈ base_Y]...)
 
-    M = matrix(F, length(base_Y), length(base_1) + length(base_2), [mat_1 mat_2])
+    M = matrix(F, length(base_Y), length(base_1) + length(base_2), [mat_1; mat_2])
 
-    for f ∈ H_X, g ∈ H_Y
-        N_1 = matrix(F, 1, length(base_1), express_in_basis(t1∘f, base_1))
-        N_2 = matrix(F, 1, length(base_2), express_in_basis(g∘s2, base_2))
-        N = [N1 N2]
+    for f ∈ H_X, g ∈ H_Z
+        N_1 = matrix(F, length(base_1), 1, express_in_basis(t1∘f, base_1))
+        N_2 = matrix(F, length(base_2), 1, express_in_basis(g∘s2, base_2))
+        N = [N_1; N_2]
 
-        sols = solve_left(M,N)
+        sols = solve_left(transpose(M),transpose(N))
 
         n,m = size(sols)
 
@@ -149,9 +165,13 @@ function Hom(S::ShortExactSequence, T::ShortExactSequence)
             end
         end
 
-        B = collect(eachcol(collect(sols)))
+        B = collect(eachrow(collect(sols)))
 
-        
+        base = [base; [ShortExactSequenceMorphism(S, T, f, sum(b .* base_Y), g) for b ∈ B]]
+    end
+
+    return HomSpace(S, T, base, VectorSpaces(F))
+end
 
 
 

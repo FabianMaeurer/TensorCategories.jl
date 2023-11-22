@@ -3,7 +3,6 @@ module TensorCategories
 import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show,div
 
 import Oscar.AbstractAlgebra.Generic: Poly
-import Oscar.GModuleFromGap: home_base
 import Oscar: +, @alias, @attributes, AbstractSet, AcbField, AlgAss, AlgAssElem,
     CyclotomicField, Fac, Field, FieldElem, FinField, FiniteField, GAP, GAPGroup,
     GAPGroupHomomorphism, GL, GSet, GroupElem, GroupsCore, Hecke.AbsAlgAss,
@@ -269,6 +268,9 @@ export SetHomSet
 export SetMorphism 
 export SetObject 
 export Sets 
+export ShortExactSequence
+export ShortExactSequences
+export ShortExactSequenceMorphism
 export simple_subobjects 
 export simples 
 export simples_names 
@@ -316,6 +318,8 @@ include("CategoryFramework/Fallbacks.jl")
 include("CategoryFramework/OppositeCategory.jl")
 include("CategoryFramework/DeligneTensorProduct.jl")
 include("CategoryFramework/Semisimplification.jl")
+include("CategoryFramework/ChainComplexes/ChainComplexes.jl")
+include("CategoryFramework/ChainComplexes/ShortExactSequences.jl")
 
 include("Utility/QQBar_Polynomials.jl")
 include("Utility/SolveGroebner.jl")

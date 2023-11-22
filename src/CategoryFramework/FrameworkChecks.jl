@@ -257,7 +257,7 @@ function object_type(C::Category)
 
     for T ∈ object_types
         if hasfield(T, :parent)
-            if typeof(C) <: fieldtype(T,:parent)
+            if typeof(C) == fieldtype(T,:parent)
                 return T
             end
         end
@@ -269,7 +269,7 @@ function morphism_type(C::Category)
 
     for T ∈ morphism_types
         if hasfield(T, :domain)
-            if object_type(C) <: fieldtype(T,:domain)
+            if object_type(C) == fieldtype(T,:domain)
                 return T
             end
         end
