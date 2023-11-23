@@ -220,7 +220,7 @@ function is_braided(C::Category)
         end
     end
     T = object_type(C)
-    is_monoidal(C) && hasmethod(braiding, Tuple{T,T})
+    false
 end
 
 function is_krull_schmidt(C::Category)
