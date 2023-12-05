@@ -802,6 +802,9 @@ function Hom(X::SixJObject, Y::SixJObject)
 end
 
 function express_in_basis(f::SixJMorphism, base::Vector{SixJMorphism})
+    if length(base) == 0 
+        return elem_type(base_ring(f))[]
+    end
     F = base_ring(domain(f))
     A = Array{elem_type(F),2}(undef,length(base),0)
     b = []

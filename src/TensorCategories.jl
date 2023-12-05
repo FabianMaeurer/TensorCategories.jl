@@ -44,10 +44,14 @@ export ∘
 export ⊕ 
 export ⊗ 
 export ⊠ 
+export ⋆
 export AbstractHomSpace 
 export add_simple! 
 export AlgebraObject
 export AlgebraMorphism
+export ArrowCategory
+export ArrowObject
+export ArrowMorphism
 export associator 
 export base_ring 
 export base_group
@@ -77,6 +81,7 @@ export central_primitive_idempotents
 export Cocycle 
 export codomain 
 export coefficients
+export coequilizer
 export coev 
 export CohSfHomSpace 
 export CohSheafMorphism 
@@ -110,6 +115,7 @@ export eigenvalues
 export End 
 export end_of_induction
 export endomorphism_ring 
+export equilizer
 export ev 
 export ev_coev 
 export exponent
@@ -227,10 +233,13 @@ export product
 export ProductCategory 
 export ProductMorphism 
 export ProductObject 
+export pullback
 export Pullback 
 export PullbackFunctor 
 export Pushforward 
 export PushforwardFunctor 
+export pushout
+export pushout_product
 export QQBar
 export QuantumZZRing
 export QuantumZZRingElem
@@ -310,21 +319,27 @@ export ZPlusRing, ℕRing, ℤ₊Ring
 export ZPlusRingElem, ℕRingElem, ℤ₊RingElem
 
 
+
+
 include("CategoryFramework/AbstractTypes.jl")
 include("CategoryFramework/AbstractMethods.jl")
 include("CategoryFramework/FrameworkChecks.jl")
 include("CategoryFramework/ProductCategory.jl")
 include("CategoryFramework/Fallbacks.jl")
+include("CategoryFramework/Limits.jl")
 include("CategoryFramework/OppositeCategory.jl")
 include("CategoryFramework/DeligneTensorProduct.jl")
 include("CategoryFramework/Semisimplification.jl")
+include("CategoryFramework/ArrowCategory.jl")
 include("CategoryFramework/ChainComplexes/ChainComplexes.jl")
 include("CategoryFramework/ChainComplexes/ShortExactSequences.jl")
+
 
 include("Utility/QQBar_Polynomials.jl")
 include("Utility/SolveGroebner.jl")
 include("Utility/QuantumIntegers.jl")
 include("Utility/Technicallities.jl")
+
 
 include("Examples/GradedVectorSpaces/VectorSpaces.jl")
 include("Examples/GradedVectorSpaces/Cocycles.jl")

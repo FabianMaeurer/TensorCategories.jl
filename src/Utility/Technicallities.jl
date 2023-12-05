@@ -17,6 +17,21 @@ function ==(X::T,Y::T) where T <: Union{Morphism, Category, Object}
     end
     return true
 end
+
+function unique_without_hash(A::AbstractArray{T,N}) where {T,N}
+    if length(A) ≤ 1 
+        return A
+    end
+    B = T[]
+    A2 = deepcopy(A)
+    while length(A2) > 0
+        f = popfirst!(A2)
+        B = [B; f]
+        A2 = [g for g ∈ A2 if g != f]
+    end
+    return B
+end
+
             
 #=----------------------------------------------------------
     Replace terms in Expression 
