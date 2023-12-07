@@ -575,6 +575,7 @@ function tensor_product(f::SixJMorphism, g::SixJMorphism)
     simpl = simples(C)
 
     for i ∈ 1:C.simples, j ∈ 1:C.simples
+        @show parent(f.m[i]) == parent(g.m[j])
         A = kronecker_product(f.m[i],g.m[j])
         d1,d2 = size(A)
         #if d1*d2 == 0 continue end

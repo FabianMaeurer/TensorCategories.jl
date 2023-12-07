@@ -40,7 +40,7 @@ function pushout(f::T,g::T) where T <: Morphism
     return PushOut, [c ∘ i_Y, c ∘ i_Z]
 end
 
-function pushout_product(f::T, g::T) where T <: Morphism
+function pushout_product(f::T, g::T) where T <: Morphism 
     dom, (ϕ₁, ϕ₂) = pushout(f ⊗ id(domain(g)), id(domain(f)) ⊗ g)
 
     A,B = domain(f), codomain(f)

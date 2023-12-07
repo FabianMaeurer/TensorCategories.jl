@@ -156,7 +156,50 @@ function tensor_product(X::ArrowObject, Y::ArrowObject)
 end
 
 function tensor_product(f::ArrowMorphism, g::ArrowMorphism)
-     
+    cod_f = codomain(f)
+    cod_g = codomain(g)
+    dom_f = domain(f)
+    dom_g = domain(g)
+
+    _,(cx,cy) = pushout(morphism(cod_f) ⊗ id(domain(cod_g)), id(domain(cod_f)) ⊗ morphism(cod_g))
+    
+    _,(dx,dy) = pushout(morphism(dom_f) ⊗ id(domain(dom_g)), id(domain(dom_f)) ⊗ morphism(dom_g)) 
+
+    dom = pushout_product(domain(f), domain(g))
+    cod = pushout_product(codomain(f), codomain(g), PO)
+
+    mor_1 = cx ∘ (right(f) ⊗ left(g))
+    mor_2 = cy ∘ (left(f) ⊗ right(g))
+
+    K = base_ring(f)
+    base = basis(Hom(domain(dom), domain(cod)))
+    base_1 = basis(Hom(domain(mor_1), codomain(mor_1)))
+    base_2 = basis(Hom(domain(mor_2), codomain(mor_2)))
+    n = length(base_1) + length(base_2)
+
+    Rx,x = PolynomialRing(K, length(base))
+
+    eqs = [zero(Rx) for _ ∈ 1:n]
+
+    for (h,a) ∈ zip(base, x)
+        e_1 = express_in_basis(h ∘ dx, base_1)
+        e_2 = express_in_basis(h ∘ dy, base_2)
+
+        eqs = eqs .+ (a.* [e_1; e_2])
+    end
+
+    M_arr = hcat([[coeff(e, a) for a ∈ x] for e ∈ eqs]...)
+    b_arr = [express_in_basis(mor_1, base_1); express_in_basis(m_1, base_1)]
+
+    M = matrix(K, length(base), length(eqs), M_arr)
+    b = matrix(K, 1, length(eqs), b_arr)
+
+    s = solve_left(M,b)
+
+    l = sum(collect(s)[:] .* base)
+    
+    Morphism(dom,cod, l, right(f) ⊗ right(g))
+end
 
 one(C::ArrowCategory) = ArrowObject(C, zero_morphism(zero(category(C)), one(category(C))))
 
