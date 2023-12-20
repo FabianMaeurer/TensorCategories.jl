@@ -159,7 +159,7 @@ associator(C::SixJCategory) = C.ass
 
 Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 """
- @memoize Dict function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
+ #= @memoize Dict =# function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)
@@ -222,7 +222,7 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     return inv(distr_after) ∘ m ∘ distr_before
 end
 
-@memoize Dict function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
+#= @memoize Dict =# function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)
@@ -575,7 +575,6 @@ function tensor_product(f::SixJMorphism, g::SixJMorphism)
     simpl = simples(C)
 
     for i ∈ 1:C.simples, j ∈ 1:C.simples
-        @show parent(f.m[i]) == parent(g.m[j])
         A = kronecker_product(f.m[i],g.m[j])
         d1,d2 = size(A)
         #if d1*d2 == 0 continue end

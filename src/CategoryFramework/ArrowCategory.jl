@@ -161,18 +161,25 @@ function tensor_product(f::ArrowMorphism, g::ArrowMorphism)
     dom_f = domain(f)
     dom_g = domain(g)
 
+    dom = domain(f) ⊗ (domain(g))
+    cod = codomain(f) ⊗ (codomain(g))
+    base = basis(Hom(domain(dom), domain(cod)))
+
+    if length(base) == 0 
+        return Morphism(dom, cod, zero_morphism(domain(dom), domain(cod)), right(f)⊗right(g))
+    end
+
     _,(cx,cy) = pushout(morphism(cod_f) ⊗ id(domain(cod_g)), id(domain(cod_f)) ⊗ morphism(cod_g))
     
     _,(dx,dy) = pushout(morphism(dom_f) ⊗ id(domain(dom_g)), id(domain(dom_f)) ⊗ morphism(dom_g)) 
 
-    dom = pushout_product(domain(f), domain(g))
-    cod = pushout_product(codomain(f), codomain(g), PO)
+
 
     mor_1 = cx ∘ (right(f) ⊗ left(g))
     mor_2 = cy ∘ (left(f) ⊗ right(g))
 
     K = base_ring(f)
-    base = basis(Hom(domain(dom), domain(cod)))
+    
     base_1 = basis(Hom(domain(mor_1), codomain(mor_1)))
     base_2 = basis(Hom(domain(mor_2), codomain(mor_2)))
     n = length(base_1) + length(base_2)
@@ -189,7 +196,7 @@ function tensor_product(f::ArrowMorphism, g::ArrowMorphism)
     end
 
     M_arr = hcat([[coeff(e, a) for a ∈ x] for e ∈ eqs]...)
-    b_arr = [express_in_basis(mor_1, base_1); express_in_basis(m_1, base_1)]
+    b_arr = [express_in_basis(mor_1, base_1); express_in_basis(mor_2, base_1)]
 
     M = matrix(K, length(base), length(eqs), M_arr)
     b = matrix(K, 1, length(eqs), b_arr)
@@ -204,8 +211,9 @@ end
 one(C::ArrowCategory) = ArrowObject(C, zero_morphism(zero(category(C)), one(category(C))))
 
 function associator(X::ArrowObject, Y::ArrowObject, Z::ArrowObject)
-    ass_left = associator(domain.((X,Y,Z))...)
     ass_right = associator(codomain.((X,Y,Z))...)
+
+    
     Morphism((X⊗Y)⊗Z, X⊗(Y⊗Z), ass_left, ass_right)
 end
 #=----------------------------------------------------------
@@ -222,7 +230,10 @@ function Hom(X::ArrowObject, Y::ArrowObject)
     if n+m == 0 
         return HomSpace(X,Y, ArrowMorphism[], VectorSpaces(base_ring(X)))
     end
-    Rx,x = PolynomialRing(base_ring(X), n+m)
+
+    F = base_ring(X)
+
+    Rx,x = PolynomialRing(F, n+m)
 
     eqs = [zero(Rx) for _ ∈ length(base)]
 
@@ -238,7 +249,7 @@ function Hom(X::ArrowObject, Y::ArrowObject)
     end
 
     M_arr = [coeff(e, a) for e ∈ eqs, a ∈ x]
-    M = matrix(base_ring(X), length(eqs), length(x), M_arr)
+    M = matrix(F, length(eqs), length(x), M_arr)
 
     N = collect(nullspace(M)[2])
 
@@ -254,7 +265,7 @@ function Hom(X::ArrowObject, Y::ArrowObject)
 
     B = ArrowMorphism[Morphism(X,Y, l, r) for (l,r) ∈ B]
 
-    return HomSpace(X,Y, unique_without_hash(B), VectorSpaces(base_ring(X)))
+    return HomSpace(X,Y, unique_without_hash(B), VectorSpaces(F))
 end
     
 
