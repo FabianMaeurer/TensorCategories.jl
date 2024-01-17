@@ -873,6 +873,7 @@ Return the category ``C⊗K``.
 function extension_of_scalars(C::SixJCategory, L::Field)
     K = base_ring(C)
     if K != QQ && characteristic(K) == 0
+        if K isa AnticNumberField && L isa NfRel
         _,f = is_subfield(K,L)
     else
         f = K
