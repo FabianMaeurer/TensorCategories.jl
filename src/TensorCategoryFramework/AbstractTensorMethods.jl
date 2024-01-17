@@ -242,12 +242,12 @@ Compute the S-matrix normalized by the factor 1/√dim(𝒞).
 function normalized_smatrix(C::Category, simples = simples(C))
     d = inv(sqrt(dim(C)))
     K = base_ring(C)
-    if characteristic(K) == 0
-        f = complex_embeddings(K)[1]
-        if real(f(d)) < 0
-            d = -d
-        end
-    end
+    # if characteristic(K) == 0
+    #     f = complex_embeddings(K)[1]
+    #     if real(f(d)) < 0
+    #         d = -d
+    #     end
+    # end
     return d * smatrix(C)
 end
 
