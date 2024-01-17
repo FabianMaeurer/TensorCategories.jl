@@ -3,6 +3,7 @@ module TensorCategories
 import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show,div
 
 import Oscar.AbstractAlgebra.Generic: Poly
+import Oscar.Hecke: NfRel
 import Oscar: +, @alias, @attributes, AbstractSet, AcbField, AlgAss, AlgAssElem,
     CyclotomicField, Fac, Field, FieldElem, FinField, FiniteField, GAP, GAPGroup,
     GAPGroupHomomorphism, GL, GSet, GroupElem, GroupsCore, Hecke.AbsAlgAss,
@@ -27,7 +28,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, AlgAss, AlgAssElem,
     qqbar, rank, real_solutions, resultant, root_of_unity, roots, rref, save,
     set_attribute!, size, solve, solve_left, sparse_matrix, spectrum, splitting_field,
     stabilizer, subgroup, subst, symbols, symmetric_group, tensor_power, tensor_product, tr,
-    trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗
+    trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗, AnticNumberField
 
 using InteractiveUtils
 using Memoization
@@ -127,6 +128,7 @@ export Forgetful
 export fpdim 
 export Functor 
 export FusionCategory 
+export fusion_coefficient
 export getindex 
 export GradedVectorSpaces 
 export GRHomSpace 
@@ -301,6 +303,7 @@ export TensorPowerObject
 export tmatrix 
 export tr 
 export trivial_3_cocylce 
+export twist
 export TwistedGradedVectorSpaces 
 export twisted_group_algebra
 export unit

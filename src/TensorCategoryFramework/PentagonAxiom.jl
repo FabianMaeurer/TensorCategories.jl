@@ -4,7 +4,6 @@
 Check the pentagon axiom for ```X, Y, Z, W```.
 """
 function pentagon_axiom(X::T, Y::T, Z::T, W::T) where T <: Object
-    @show X,Y,Z,W
     f = (id(X)⊗associator(Y,Z,W)) ∘ associator(X,Y⊗Z,W) ∘ (associator(X,Y,Z)⊗id(W))
     g = associator(X,Y,Z⊗W) ∘ associator(X⊗Y,Z,W)
     return f == g

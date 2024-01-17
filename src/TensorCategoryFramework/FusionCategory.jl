@@ -566,7 +566,7 @@ end
 
 function tensor_product(f::SixJMorphism, g::SixJMorphism)
     dom = domain(f) ⊗ domain(g)
-    cod = codomain(f) ⊗ codomain(g)
+    # cod = codomain(f) ⊗ codomain(g)
     C = parent(dom)
 
     h = zero_morphism(zero(C), zero(C))
@@ -875,8 +875,12 @@ Return the category ``C⊗K``.
 """
 function extension_of_scalars(C::SixJCategory, L::Field)
     K = base_ring(C)
-    if K != QQ && characteristic(K) == 0
-        _,f = is_subfield(K,L)
+    if characteristic(K) == 0 && K != QQ 
+        if (L isa NfRel) && K isa AnticNumberField
+            f = L
+        else
+            _,f = is_subfield(K,L)
+        end
     else
         f = K
     end

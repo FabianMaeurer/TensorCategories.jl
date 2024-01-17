@@ -38,6 +38,12 @@ function endomorphism_ring(X::Object, base = basis(End(X)))
     return endomorphism_ring_by_basis(X,base)
 end
 
+function extension_of_scalars(R::AbsAlgAss, F::Ring)
+    A = AlgAss(F, F.(multiplication_table(R)), F.(coefficients(one(R))))
+end
+
+⊗(F::Ring, R::AbsAlgAss) = extension_of_scalars(R,F)
+⊗(R::AbsAlgAss, F::Ring) = extension_of_scalars(R,F)
 
 function endomorphism_ring_by_matrices(X::Object, base = basis(End(X)))
 
