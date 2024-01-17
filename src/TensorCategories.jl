@@ -3,7 +3,7 @@ module TensorCategories
 import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show,div
 
 import Oscar.AbstractAlgebra.Generic: Poly
-import Oscar.GModuleFromGap: home_base
+import Oscar.Hecke: NfRel
 import Oscar: +, @alias, @attributes, AbstractSet, AcbField, AlgAss, AlgAssElem,
     CyclotomicField, Fac, Field, FieldElem, FinField, FiniteField, GAP, GAPGroup,
     GAPGroupHomomorphism, GL, GSet, GroupElem, GroupsCore, Hecke.AbsAlgAss,
@@ -28,7 +28,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, AlgAss, AlgAssElem,
     qqbar, rank, real_solutions, resultant, root_of_unity, roots, rref, save,
     set_attribute!, size, solve, solve_left, sparse_matrix, spectrum, splitting_field,
     stabilizer, subgroup, subst, symbols, symmetric_group, tensor_power, tensor_product, tr,
-    trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗
+    trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗, AnticNumberField
 
 using InteractiveUtils
 using Memoization
@@ -45,10 +45,14 @@ export ∘
 export ⊕ 
 export ⊗ 
 export ⊠ 
+export ⋆
 export AbstractHomSpace 
 export add_simple! 
 export AlgebraObject
 export AlgebraMorphism
+export ArrowCategory
+export ArrowObject
+export ArrowMorphism
 export associator 
 export base_ring 
 export base_group
@@ -78,6 +82,7 @@ export central_primitive_idempotents
 export Cocycle 
 export codomain 
 export coefficients
+export coequilizer
 export coev 
 export CohSfHomSpace 
 export CohSheafMorphism 
@@ -111,6 +116,7 @@ export eigenvalues
 export End 
 export end_of_induction
 export endomorphism_ring 
+export equilizer
 export ev 
 export ev_coev 
 export exponent
@@ -122,6 +128,7 @@ export Forgetful
 export fpdim 
 export Functor 
 export FusionCategory 
+export fusion_coefficient
 export getindex 
 export GradedVectorSpaces 
 export GRHomSpace 
@@ -228,10 +235,13 @@ export product
 export ProductCategory 
 export ProductMorphism 
 export ProductObject 
+export pullback
 export Pullback 
 export PullbackFunctor 
 export Pushforward 
 export PushforwardFunctor 
+export pushout
+export pushout_product
 export QQBar
 export QuantumZZRing
 export QuantumZZRingElem
@@ -269,6 +279,9 @@ export SetHomSet
 export SetMorphism 
 export SetObject 
 export Sets 
+export ShortExactSequence
+export ShortExactSequences
+export ShortExactSequenceMorphism
 export simple_subobjects 
 export simples 
 export simples_names 
@@ -290,6 +303,7 @@ export TensorPowerObject
 export tmatrix 
 export tr 
 export trivial_3_cocylce 
+export twist
 export TwistedGradedVectorSpaces 
 export twisted_group_algebra
 export unit
@@ -308,19 +322,27 @@ export ZPlusRing, ℕRing, ℤ₊Ring
 export ZPlusRingElem, ℕRingElem, ℤ₊RingElem
 
 
+
+
 include("CategoryFramework/AbstractTypes.jl")
 include("CategoryFramework/AbstractMethods.jl")
 include("CategoryFramework/FrameworkChecks.jl")
 include("CategoryFramework/ProductCategory.jl")
 include("CategoryFramework/Fallbacks.jl")
+include("CategoryFramework/LimitsAndDiagrams/Limits.jl")
 include("CategoryFramework/OppositeCategory.jl")
 include("CategoryFramework/DeligneTensorProduct.jl")
 include("CategoryFramework/Semisimplification.jl")
+include("CategoryFramework/ArrowCategory.jl")
+include("CategoryFramework/ChainComplexes/ChainComplexes.jl")
+include("CategoryFramework/ChainComplexes/ShortExactSequences.jl")
+
 
 include("Utility/QQBar_Polynomials.jl")
 include("Utility/SolveGroebner.jl")
 include("Utility/QuantumIntegers.jl")
 include("Utility/Technicallities.jl")
+
 
 include("Examples/GradedVectorSpaces/VectorSpaces.jl")
 include("Examples/GradedVectorSpaces/Cocycles.jl")

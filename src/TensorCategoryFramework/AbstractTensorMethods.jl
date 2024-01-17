@@ -419,8 +419,15 @@ function inverse_left_dual_adjunction(f::Morphism, X::Object, Y::Object, Z::Obje
 end
 
 #-------------------------------------------------------
-# Misc
+# Fusion Categories
 #-------------------------------------------------------
 
+function fusion_coefficient(X::Object, Y::Object, Z::Object, check = true)
+    check && @assert is_simple(X) && is_simple(Y) && is_simple(Z)
+    return div(int_dim(Hom(X ⊗ Y, Z)), int_dim(End(Z)))
+end
 
+function fusion_coefficient(C::Category, i::Int, j::Int, k::Int)
+    return fusion_coefficient(C[i], C[j], C[k], false)
+end
 

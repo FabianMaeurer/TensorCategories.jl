@@ -27,7 +27,7 @@ makedocs(
         "Examples" => [
             "Graded Vector Spaces" => "ConcreteExamples/VectorSpaces.md",
             "Group Representations" => "ConcreteExamples/Representations.md",
-            "Equivariant Coherent Sheaves" => "ConcreteExamples/CoherentSheaves.md"
+            "Equivariant Coherent Sheaves" => "ConcreteExamples/CoherentSheaves.md",
             "Fusion Categories with 6j-Symbols" => "SixJCategories/6JExamples.md"
         ],
         # "Concrete Examples" => [

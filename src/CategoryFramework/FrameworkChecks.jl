@@ -5,10 +5,10 @@
 function is_fusion(C::Category) 
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :fusion) do 
-            is_multifusion(C) && int_dim(End(one(C))) == 1
+            false
         end
     end
-    is_multifusion(C) && int_dim(End(one(C))) == 1
+    false
 end
 
 function is_multifusion(C::Category) 
@@ -17,10 +17,10 @@ function is_multifusion(C::Category)
     end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :multifusion) do 
-            is_multitensor(C) && is_semisimple(C) && is_finite(C)
+            false
         end
     end
-    is_multitensor(C) && is_semisimple(C) && is_finite(C)
+    false
 end
 
 function is_tensor(C::Category) 
@@ -29,10 +29,10 @@ function is_tensor(C::Category)
     end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :tensor) do 
-            is_multitensor(C) && int_dim(End(one(C))) == 1
+            false
         end
     end
-    is_multitensor(C) && int_dim(End(one(C))) == 1
+    false
 end
 
 function is_multitensor(C::Category) 
@@ -41,10 +41,10 @@ function is_multitensor(C::Category)
     end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :multitensor) do 
-            is_multiring(C) && is_rigid(C)
+            false
         end
     end
-    is_multiring(C) && is_rigid(C)
+    false
 end
 
 function is_ring(C::Category) 
@@ -53,10 +53,10 @@ function is_ring(C::Category)
     end
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :ring) do 
-            is_multiring(C) && int_dim(End(one(C))) == 1
+            false
         end
     end
-    is_multiring(C) && int_dim(End(one(C))) == 1
+    false
 end
 
 function is_multiring(C::Category) 
@@ -65,10 +65,10 @@ function is_multiring(C::Category)
     end 
     if hasfield(typeof(C), :__attrs) 
         return get_attribute(C, :multiring) do 
-            is_abelian(C) && is_linear(C) && is_monoidal(C)
+            false
         end
     end
-    is_abelian(C) && is_linear(C) && is_monoidal(C)
+    false
 end
 
 function is_finite(C::Category) 
@@ -220,7 +220,7 @@ function is_braided(C::Category)
         end
     end
     T = object_type(C)
-    is_monoidal(C) && hasmethod(braiding, Tuple{T,T})
+    false
 end
 
 function is_krull_schmidt(C::Category)
@@ -257,7 +257,7 @@ function object_type(C::Category)
 
     for T ∈ object_types
         if hasfield(T, :parent)
-            if typeof(C) <: fieldtype(T,:parent)
+            if typeof(C) == fieldtype(T,:parent)
                 return T
             end
         end
@@ -269,7 +269,7 @@ function morphism_type(C::Category)
 
     for T ∈ morphism_types
         if hasfield(T, :domain)
-            if object_type(C) <: fieldtype(T,:domain)
+            if object_type(C) == fieldtype(T,:domain)
                 return T
             end
         end

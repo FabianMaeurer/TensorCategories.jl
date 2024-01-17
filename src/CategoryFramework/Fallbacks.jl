@@ -1,4 +1,6 @@
 
+isequal(f::Morphism, g::Morphism) = f == g
+
 #=----------------------------------------------------------
     Constructors 
 ----------------------------------------------------------=##
@@ -184,7 +186,6 @@ dim(V::HomSpace) = length(basis(V))
 
 End(X::Object) = Hom(X,X)
 
-zero_morphism(C::Category) = zero_morphism(zero(C), zero(C))
 
 Base.iterate(H::AbstractHomSpace, state = 1) = state > int_dim(H) ? nothing : (basis(H)[state], state + 1)
 getindex(H::AbstractHomSpace, k) = getindex(basis(H),k)

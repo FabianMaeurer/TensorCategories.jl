@@ -570,8 +570,8 @@ function indecomposable_subobjects(X::CenterObject)
     end
 
     if length(eig_spaces) ≤ 1 
-        !is_simple(X) && error("Cannot decompose")
-        return [X]
+        is_simple(X) && return [X]
+        return [x for (x,k) ∈ decompose(X)]
     end
 
     return unique_simples(vcat([indecomposable_subobjects(Y) for Y ∈ eig_spaces]...))
@@ -627,7 +627,13 @@ function dual(X::CenterObject)
     γ = Morphism[]
     dX = dual(X.object)
     for (Xi,yXi) ∈ zip(simples(parent(X).category), X.γ)
-        f = (e⊗id(Xi⊗dX))∘inv_a(dX,X.object,Xi⊗dX)∘(id(dX)⊗a(X.object,Xi,dX))∘(id(dX)⊗(inv(yXi)⊗id(dX)))∘(id(dX)⊗inv_a(Xi,X.object,dX))∘a(dX,Xi,X.object⊗dX)∘(id(dX⊗Xi)⊗c)
+        f = (e ⊗ id(Xi ⊗ dX)) ∘ 
+            inv_a(dX, X.object, Xi ⊗ dX) ∘ 
+            (id(dX) ⊗ a(X.object, Xi, dX)) ∘ 
+            (id(dX) ⊗ (inv(yXi) ⊗ id(dX))) ∘ 
+            (id(dX) ⊗ inv_a(Xi, X.object, dX)) ∘ 
+            a(dX, Xi, X.object ⊗ dX) ∘ 
+            (id(dX ⊗ Xi) ⊗ c)
         γ = [γ; f]
     end
     return CenterObject(parent(X),dX,γ)
@@ -1015,4 +1021,30 @@ function center_simples_by_braiding(C::Category, Z = Center(C))
     S_rev_braided = [CenterObject(Z, s, [inv(braiding(t,s)) for t ∈ S]) for s ∈ S]
 
     [s⊗t for s ∈ S_braided, t ∈ S_rev_braided][:]
+end
+
+#=----------------------------------------------------------
+    Drinfeld Morphism 
+----------------------------------------------------------=#
+
+function drinfeld_morphism(X::CenterObject) 
+    Morphism(X,dual(dual(X)), _drinfeld_morphism(X))
+end
+
+function _drinfeld_morphism(X::CenterObject)
+    x = object(X)
+    u = (ev(x)⊗id(dual(dual(x)))) ∘ 
+        (half_braiding(X,dual(x))⊗id(dual(dual(x)))) ∘ 
+        inv_associator(x, dual(x), dual(dual(x))) ∘ 
+        (id(x)⊗coev(dual(x)))
+end
+
+function twist(X::CenterObject)
+    u = _drinfeld_morphism(X)
+    
+    B,k = is_scalar_multiple(matrix(spherical(object(X))), matrix(u))
+
+    !B && error("Something went wrong")
+
+    return k
 end

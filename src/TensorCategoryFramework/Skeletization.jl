@@ -1,6 +1,10 @@
 function SixJCategory(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:length(simples(C))])
     @assert is_multifusion(C)
 
+    if typeof(C) == SixJCategory 
+        return C
+    end
+    
     S = simples(C)
     n = length(S)
     F = base_ring(C)
@@ -69,6 +73,7 @@ function six_j_symbols(C::Category, S = simples(C))
             end
 
             B = [f ∘ (g ⊗ id(Z)) for g ∈ H_XY_V, f ∈ H_VZ_W][:]
+            if length(B) == 0 continue end
             B_XY_Z_W = [B_XY_Z_W; B]
         end
 
@@ -89,6 +94,7 @@ function six_j_symbols(C::Category, S = simples(C))
             end
             
             B = [f ∘ (id(X) ⊗ g) for g ∈ H_YZ_V, f ∈ H_XV_W][:]
+            if length(B) == 0 continue end
             B_X_YZ_W = [B_X_YZ_W; B]
         end
         

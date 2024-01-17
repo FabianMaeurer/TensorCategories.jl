@@ -68,7 +68,15 @@ base_ring(X::Morphism) = base_ring(parent(domain(X)))
 
 Return the base ring ```k```of the ```k```-linear category ```C```.
 """
-base_ring(C::Category) = C.base_ring
+function base_ring(C::Category) 
+    if hasfield(typeof(C), :base_ring) 
+        return C.base_ring
+    elseif hasfield(typeof(C), :category)
+        return base_ring(category(C))
+    else
+        error("Category is not linear")
+    end
+end
 
 base_group(C::Category) = C.base_group
 base_group(X::Object) = parent(X).base_group

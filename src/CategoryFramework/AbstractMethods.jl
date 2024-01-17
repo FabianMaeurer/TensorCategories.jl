@@ -26,6 +26,27 @@ function endomorphism_ring(X::Object, base = basis(End(X)))
     if length(base) == 0
         return matrix_algebra(base_ring(X), [zero_matrix(base_ring(X),1,1)], isbasis = true)
     end
+
+    if hasmethod(matrix, Tuple{typeof(base[1])})
+        try 
+            return endomorphism_ring_by_matrices(X,base)
+        catch
+            @warn "matrix approach failed"
+        end
+    end
+
+    return endomorphism_ring_by_basis(X,base)
+end
+
+function extension_of_scalars(R::AbsAlgAss, F::Ring)
+    A = AlgAss(F, F.(multiplication_table(R)), F.(coefficients(one(R))))
+end
+
+⊗(F::Ring, R::AbsAlgAss) = extension_of_scalars(R,F)
+⊗(R::AbsAlgAss, F::Ring) = extension_of_scalars(R,F)
+
+function endomorphism_ring_by_matrices(X::Object, base = basis(End(X)))
+
     try 
         mats = matrix.(base)
         matrix_algebra(base_ring(X), mats, isbasis = true)
@@ -34,6 +55,18 @@ function endomorphism_ring(X::Object, base = basis(End(X)))
     end
 end
 
+function endomorphism_ring_by_basis(X::Object, base = basis(End(X)))
+    n = length(base)
+    mult = Array{elem_type(base_ring(X)),3}(undef,n,n,n)
+
+    for i ∈ 1:n, j ∈ 1:n
+        mult[i,j,:] = express_in_basis(base[i] ∘ base[j], base)
+    end
+
+    A = AlgAss(base_ring(X), mult)
+    A.one = express_in_basis(id(X), base)
+    return A
+end
 #------------------------------------------------------
 #   Image & Kernel
 #------------------------------------------------------
