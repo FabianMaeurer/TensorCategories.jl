@@ -931,7 +931,7 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject)
 
     _,cols = size(N)
 
-    basis_coeffs = [N[:,i] for i ∈ 1:cols]
+    basis_coeffs = [collect(N[:,i]) for i ∈ 1:cols]
 
     center_basis = [CenterMorphism(X,Y,sum(b .* B)) for b ∈ basis_coeffs]
 
