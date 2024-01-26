@@ -34,7 +34,7 @@ function endomorphism_ring(X::Object, base = basis(End(X)))
             @warn "matrix approach failed"
         end
     end
-
+    
     return endomorphism_ring_by_basis(X,base)
 end
 

@@ -142,7 +142,8 @@ function adjusted_dual_basis(V::AbstractHomSpace, U::AbstractHomSpace, S::Object
         M = matrix(F, n,m, [adjusted_pairing(basis(V)[j], basis(U)[k], S, W, T) for j ∈ 1:n, k ∈ 1:m])
         b = matrix(F,m,1, [i == j ? 1 : 0 for j ∈ 1:m])
         coeffs = collect(solve(M,b))
-        push!(dual_basis, sum(coeffs .* basis(U)))
+        push
+        !(dual_basis, sum(coeffs .* basis(U)))
     end
     return basis(V), dual_basis
 end
