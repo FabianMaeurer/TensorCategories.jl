@@ -987,8 +987,8 @@ end
 
 function extension_of_scalars(C::CenterCategory, L::Field)
     CL = _extension_of_scalars(C,L, category(C)⊗L)
-    
-    CL.simples = [extension_of_scalars(s, L, CL) for s ∈ simples(C)]
+
+    CL.simples = vcat([indecomposable_subobjects(extension_of_scalars(s, L, CL)) for s ∈ simples(C)]...)
 
     return CL
 end

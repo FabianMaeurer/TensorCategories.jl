@@ -876,10 +876,14 @@ function extension_of_scalars(C::SixJCategory, L::Field)
         if K isa AnticNumberField && L isa NfRel
             f = L
         else
-            _,f = is_subfield(K,L)
+            if base_field(K) == base_field(L)
+                _,f = is_subfield(K,L)
+            else
+                f = L
+            end
         end
     else
-        f = K
+        f = L
     end
 
     try
@@ -928,11 +932,16 @@ function extension_of_scalars(m::SixJMorphism, L::Field)
         if K isa AnticNumberField && L isa NfRel
             f = L
         else
-            _,f = is_subfield(K,L)
+            if base_field(K) == base_field(L)
+                _,f = is_subfield(K,L)
+            else
+                f = L
+            end
         end
     else
-        f = K
+        f = L
     end
+
 
 
     try
