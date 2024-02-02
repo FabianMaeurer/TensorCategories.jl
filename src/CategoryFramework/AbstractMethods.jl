@@ -286,10 +286,11 @@ end
 function unique_simples(simples::Vector{<:Object})
     unique_simples = simples[1:1]
     for s ∈ simples[2:end]
-        if sum([dim(Hom(s,u)) for u ∈ unique_simples]) == 0
+        if sum([int_dim(Hom(s,u)) for u ∈ unique_simples]) == 0
             unique_simples = [unique_simples; s]
         end
     end
+
     return unique_simples
 end
 

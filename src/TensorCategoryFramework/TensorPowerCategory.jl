@@ -1,5 +1,5 @@
 mutable struct TensorPowerCategory <: Category
-    generator::Object
+    generator::Vector{Object}
     simples::Vector
     complete::Bool
     max_exponent::Int
@@ -7,7 +7,7 @@ mutable struct TensorPowerCategory <: Category
 
     function TensorPowerCategory(X::Object) 
         C = new()
-        C.generator = X
+        C.generator = indecomposable_subobjects(X)
         C.simples = typeof(X)[]
         
         C.complete = X == zero(parent(X)) ? true : false
@@ -181,22 +181,22 @@ function indecomposables(C::TensorPowerCategory, k = Inf)
     if C.complete
         return C.simples
     end
-    X = C.generator
+
     Y = one(category(C))
     n1 = 0
     j = 2
 
-    indecs_in_X = [x for (x,k) ∈ decompose(X)]
+    indecs_in_X = C.generator
     new_indecs = [x for (x,k) ∈ decompose(Y)]
-    new_indecs = unique_indecomposables([new_indecs; indecs_in_X])
+    @show new_indecs = unique_indecomposables([new_indecs; indecs_in_X])
     simpls = new_indecs
 
     while j ≤ k
         new_indecs_temp = []
         for V ∈ indecs_in_X, W ∈ new_indecs
             summands_of_VW = [x for (x,k) ∈ decompose(W ⊗ V)]
-            new_indecs_temp = [new_indecs_temp; [x for x ∈ summands_of_VW if findfirst(s -> is_isomorphic(x,s)[1], simpls) === nothing]]
-            simpls = Object[simpls; new_indecs_temp]
+            new_indecs_temp = [new_indecs_temp; [x for x ∈ summands_of_VW]]
+            simpls = unique_indecomposables(Object[simpls; new_indecs_temp])
         end
         new_indecs = new_indecs_temp
         if length(simpls) == n1
