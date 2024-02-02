@@ -159,7 +159,7 @@ associator(C::SixJCategory) = C.ass
 
 Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 """
- @memoize Dict function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
+ #= @memoize Dict =# function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)
@@ -222,7 +222,7 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     return inv(distr_after) ∘ m ∘ distr_before
 end
 
-@memoize Dict function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
+#= @memoize Dict =# function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)
@@ -876,17 +876,21 @@ function extension_of_scalars(C::SixJCategory, L::Field)
         if K isa AnticNumberField && L isa NfRel
             f = L
         else
-            _,f = is_subfield(K,L)
+            if base_field(K) == base_field(L)
+                _,f = is_subfield(K,L)
+            else
+                f = L
+            end
         end
     else
-        f = K
+        f = L
     end
 
     try
         D = SixJCategory(L, C.tensor_product, simples_names(C))
 
         if isdefined(C, :ass)
-            D.ass = [matrix(L, size(a)..., f.(a)) for a ∈ C.ass]
+            D.ass = [matrix(L, size(a)..., f.(collect(a))) for a ∈ C.ass]
         end
         if isdefined(C, :one)
             D.one = C.one
@@ -895,13 +899,13 @@ function extension_of_scalars(C::SixJCategory, L::Field)
             D.spherical = f.(C.spherical)
         end
         if  isdefined(C, :braiding)
-            D.braiding = [matrix(L, size(a)..., f.(a)) for a ∈ C.braiding]
+            D.braiding = [matrix(L, size(a)..., f.(collect(a))) for a ∈ C.braiding]
         end
         if isdefined(C, :twist) 
             D.twist = f.(C.twist)
         end
         return D
-    catch
+    catch 
         error("Extension of scalars not possible")
     end
 end
@@ -922,17 +926,28 @@ end
 
 Return the category ``C⊗K``.
 """
-function extension_of_scalars(f::SixJMorphism, L::Field)
-    K = base_ring(f)
-    if K != QQ && characteristic(K) == 0
-        _,incl = is_subfield(K,L)
+function extension_of_scalars(m::SixJMorphism, L::Field)
+    K = base_ring(m)
+    if K != QQ && characteristic(K) == 0 
+        if K isa AnticNumberField && L isa NfRel
+            f = L
+        else
+            if base_field(K) == base_field(L)
+                _,f = is_subfield(K,L)
+            else
+                f = L
+            end
+        end
     else
-        incl = K
+        f = L
     end
 
+
+
     try
-        mats = [matrix(L, size(m)..., incl.(m)) for m ∈ matrices(f)] 
-        g = Morphism(domain(f) ⊗ L, codomain(f) ⊗ L, mats)
+
+        mats = [matrix(L, size(m)..., f.(collect(m))) for m ∈ matrices(m)] 
+        g = Morphism(domain(m) ⊗ L, codomain(m) ⊗ L, mats)
 
         return g
     catch

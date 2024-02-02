@@ -931,7 +931,7 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject)
 
     _,cols = size(N)
 
-    basis_coeffs = [N[:,i] for i ∈ 1:cols]
+    basis_coeffs = [collect(N[:,i]) for i ∈ 1:cols]
 
     center_basis = [CenterMorphism(X,Y,sum(b .* B)) for b ∈ basis_coeffs]
 
@@ -987,8 +987,8 @@ end
 
 function extension_of_scalars(C::CenterCategory, L::Field)
     CL = _extension_of_scalars(C,L, category(C)⊗L)
-    
-    CL.simples = [extension_of_scalars(s, L, CL) for s ∈ simples(C)]
+
+    CL.simples = vcat([indecomposable_subobjects(extension_of_scalars(s, L, CL)) for s ∈ simples(C)]...)
 
     return CL
 end

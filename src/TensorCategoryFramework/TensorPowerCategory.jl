@@ -1,16 +1,27 @@
 mutable struct TensorPowerCategory <: Category
-    generator::Object
+    generator::Vector{Object}
     simples::Vector
     complete::Bool
     max_exponent::Int
     #multiplication_table::Dict
 
-    function TensorPowerCategory(X::Object) 
+    function TensorPowerCategory(X::Object...) 
         C = new()
-        C.generator = X
+        C.generator = unique_simples(vcat(indecomposable_subobjects.(X)...))
         C.simples = typeof(X)[]
         
-        C.complete = X == zero(parent(X)) ? true : false
+        C.complete = X == zero(parent(X[1])) ? true : false
+        C.max_exponent = 0
+        return C
+    end
+
+    function TensorPowerCategory(X::Vector{Object})
+        C = new()
+        C.generator = unique_simples(vcat(indecomposable_subobjects.(X)...))
+
+        C.simples = typeof(X)[]
+        
+        C.complete = X == zero(parent(X[1])) ? true : false
         C.max_exponent = 0
         return C
     end
@@ -171,7 +182,7 @@ function spherical(X::TensorPowerObject)
     Morphism(dom, cod, sp)
 end
 
-zero(T::TensorPowerCategory) = TensorPowerObject(T, zero(parent(T.generator)))
+zero(T::TensorPowerCategory) = TensorPowerObject(T, zero(parent(T.generator[1])))
 
 function zero_morphism(X::TensorPowerObject, Y::TensorPowerObject)
     Morphism(X,Y, zero_morphism(object(X), object(Y)))
@@ -181,22 +192,22 @@ function indecomposables(C::TensorPowerCategory, k = Inf)
     if C.complete
         return C.simples
     end
-    X = C.generator
+
     Y = one(category(C))
     n1 = 0
     j = 2
 
-    indecs_in_X = [x for (x,k) ∈ decompose(X)]
+    indecs_in_X = C.generator
     new_indecs = [x for (x,k) ∈ decompose(Y)]
-    new_indecs = unique_indecomposables([new_indecs; indecs_in_X])
+    @show new_indecs = unique_indecomposables([new_indecs; indecs_in_X])
     simpls = new_indecs
 
     while j ≤ k
         new_indecs_temp = []
         for V ∈ indecs_in_X, W ∈ new_indecs
             summands_of_VW = [x for (x,k) ∈ decompose(W ⊗ V)]
-            new_indecs_temp = [new_indecs_temp; [x for x ∈ summands_of_VW if findfirst(s -> is_isomorphic(x,s)[1], simpls) === nothing]]
-            simpls = Object[simpls; new_indecs_temp]
+            new_indecs_temp = [new_indecs_temp; [x for x ∈ summands_of_VW]]
+            simpls = unique_indecomposables(Object[simpls; new_indecs_temp])
         end
         new_indecs = new_indecs_temp
         if length(simpls) == n1
@@ -251,7 +262,7 @@ function is_isomorphic(X::TensorPowerObject, Y::TensorPowerObject)
 end
 
 function show(io::IO, C::TensorPowerCategory)
-    print(io, "Tensor power category with genrator $(C.generator)")
+    print(io, "Tensor power category with generator $(C.generator)")
 end
 
 function show(io::IO, X::TensorPowerObject)

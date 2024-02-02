@@ -363,9 +363,10 @@ function fpdim(X::Object)
 
  
     A = Array{Int,2}(undef,n,n)
+    end_dims = [int_dim(End(S[i])) for i ∈ 1:n]
     for i ∈ 1:n
         Y = S[i]
-        A[:,i] = [length(basis(Hom(X⊗Y,S[j]))) for j ∈ 1:n]
+        A[:,i] = [length(basis(Hom(X⊗Y,S[j])))//end_dims[i] for j ∈ 1:n]
     end
 
     λ = eigenvalues(matrix(QQ,A),K)

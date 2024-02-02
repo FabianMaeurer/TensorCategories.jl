@@ -127,7 +127,7 @@ function dual_basis(V::AbstractHomSpace, W::AbstractHomSpace)
     for i ∈ 1:m
         M = matrix(F, n,m, [pairing(basis(V)[j], basis(W)[k]) for j ∈ 1:n, k ∈ 1:m])
         b = matrix(F,m,1, [i == j ? 1 : 0 for j ∈ 1:m])
-        coeffs = solve(M,b)
+        coeffs = collect(solve(M,b))
         push!(dual_basis, sum(coeffs .* basis(W)))
     end
     return basis(V), dual_basis
@@ -141,7 +141,7 @@ function adjusted_dual_basis(V::AbstractHomSpace, U::AbstractHomSpace, S::Object
     for i ∈ 1:m
         M = matrix(F, n,m, [adjusted_pairing(basis(V)[j], basis(U)[k], S, W, T) for j ∈ 1:n, k ∈ 1:m])
         b = matrix(F,m,1, [i == j ? 1 : 0 for j ∈ 1:m])
-        coeffs = solve(M,b)
+        coeffs = collect(solve(M,b))
         push!(dual_basis, sum(coeffs .* basis(U)))
     end
     return basis(V), dual_basis

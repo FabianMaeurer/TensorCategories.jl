@@ -1,7 +1,7 @@
 name = "TensorCategories"
 uuid = "258c694e-7338-4d4d-b524-4851272a75cf"
 authors = ["Fabian Mäurer"]
-version = "0.1.2"
+version = "0.1.3"
 
 [deps]
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
@@ -12,7 +12,7 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 [compat]
 Memoization = "0.1, 0.2"
 Oscar = "0.13,0.14"
-julia = "1.6,1.7,1.8"
+julia = "1.6,1.7,1.8,1.9,1.10"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
