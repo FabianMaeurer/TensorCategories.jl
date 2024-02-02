@@ -5,12 +5,23 @@ mutable struct TensorPowerCategory <: Category
     max_exponent::Int
     #multiplication_table::Dict
 
-    function TensorPowerCategory(X::Object) 
+    function TensorPowerCategory(X::Object...) 
         C = new()
-        C.generator = indecomposable_subobjects(X)
+        C.generator = unique_simples(vcat(indecomposable_subobjects.(X)...))
         C.simples = typeof(X)[]
         
-        C.complete = X == zero(parent(X)) ? true : false
+        C.complete = X == zero(parent(X[1])) ? true : false
+        C.max_exponent = 0
+        return C
+    end
+
+    function TensorPowerCategory(X::Vector{Object})
+        C = new()
+        C.generator = unique_simples(vcat(indecomposable_subobjects.(X)...))
+
+        C.simples = typeof(X)[]
+        
+        C.complete = X == zero(parent(X[1])) ? true : false
         C.max_exponent = 0
         return C
     end
@@ -171,7 +182,7 @@ function spherical(X::TensorPowerObject)
     Morphism(dom, cod, sp)
 end
 
-zero(T::TensorPowerCategory) = TensorPowerObject(T, zero(parent(T.generator)))
+zero(T::TensorPowerCategory) = TensorPowerObject(T, zero(parent(T.generator[1])))
 
 function zero_morphism(X::TensorPowerObject, Y::TensorPowerObject)
     Morphism(X,Y, zero_morphism(object(X), object(Y)))
@@ -251,7 +262,7 @@ function is_isomorphic(X::TensorPowerObject, Y::TensorPowerObject)
 end
 
 function show(io::IO, C::TensorPowerCategory)
-    print(io, "Tensor power category with genrator $(C.generator)")
+    print(io, "Tensor power category with generator $(C.generator)")
 end
 
 function show(io::IO, X::TensorPowerObject)
