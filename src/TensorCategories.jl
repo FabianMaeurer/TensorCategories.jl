@@ -356,7 +356,7 @@ include("Examples/ConvolutionCategory/ConvolutionCategory.jl")
 
 
 include("DecategorifiedFramework/multiplication_table.jl")
-include("DecategorifiedFramework/ZPlusrings.jl")
+include("DecategorifiedFramework/ZPlusRings.jl")
 include("DecategorifiedFramework/GrothendieckRing.jl")
 
 include("TensorCategoryFramework/AbstractTensorMethods.jl")
