@@ -540,7 +540,13 @@ function decompose(X::CenterObject)
     if isdefined(C, :simples)
         return decompose_by_simples(X,simples(C))
     else
-        return decompose_by_endomorphism_ring(X)
+        try
+            return decompose_by_endomorphism_ring(X)
+        catch
+            @assert is_semisimple(C)
+            indecs = indecomposable_subobjects(X)
+            return [(x, div(int_dim(Hom(x,X)), int_dim(End(x)))) for x ∈ indecs]
+        end
     end
 end
 

@@ -89,7 +89,7 @@ morphism(f::Morphism) = f.morphism
     Functors
 ----------------------------------------------------------=#
 
-abstract type AbstractFunctor end
+abstract type AbstractFunctor  <: Object end
 
 
 domain(F::AbstractFunctor) = F.domain

@@ -15,7 +15,7 @@ mutable struct TensorPowerCategory <: Category
         return C
     end
 
-    function TensorPowerCategory(X::Vector{Object})
+    function TensorPowerCategory(X::Vector{<:Object})
         C = new()
         C.generator = unique_simples(vcat(indecomposable_subobjects.(X)...))
 
@@ -45,7 +45,7 @@ end
 
 object(X::TensorPowerObject) = X.object
 morphism(f::TensorPowerMorphism) = f.morphism
-category(C::TensorPowerCategory) = parent(C.generator)
+category(C::TensorPowerCategory) = parent(C.generator[1])
 Morphism(X::TensorPowerObject, Y::TensorPowerObject, f::Morphism) = TensorPowerMorphism(X,Y,f)
 matrix(f::TensorPowerObject) = matrix(f.morphism)
 
@@ -193,13 +193,13 @@ function indecomposables(C::TensorPowerCategory, k = Inf)
         return C.simples
     end
 
-    Y = one(category(C))
+   
     n1 = 0
     j = 2
 
     indecs_in_X = C.generator
-    new_indecs = [x for (x,k) ∈ decompose(Y)]
-    @show new_indecs = unique_indecomposables([new_indecs; indecs_in_X])
+    new_indecs = [one(category(C))]
+    new_indecs = unique_indecomposables([new_indecs; indecs_in_X])
     simpls = new_indecs
 
     while j ≤ k
@@ -218,7 +218,7 @@ function indecomposables(C::TensorPowerCategory, k = Inf)
             return simpls
         end
         n1 = length(simpls)
-        Y = Y ⊗ X
+        #Y = Y ⊗ X
         j = j+1
     end
     simpls = [TensorPowerObject(C,s) for s ∈ simpls]
