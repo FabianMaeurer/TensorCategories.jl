@@ -161,7 +161,9 @@ export indecomposables
 export induction 
 export Induction 
 export induction_adjunction
+export induction_monad
 export induction_restriction
+export InductionMonad
 export int_dim 
 export inv 
 export inv_associator 
@@ -211,6 +213,10 @@ export matrix
 export ModuleCategory
 export ModuleMorphism
 export ModuleObject
+export Monad
+export MonadModule
+export MonadModuleMorphism
+export MonadModules
 export Morphism, morphism 
 export multiplication
 export multiplication_table 
@@ -372,8 +378,11 @@ include("TensorCategoryFramework/TensorFunctors.jl")
 include("TensorCategoryFramework/Center/Center.jl")
 include("TensorCategoryFramework/Center/Induction.jl")
 include("TensorCategoryFramework/Center/CenterChecks.jl")
+include("TensorCategoryFramework/Center/InductionMonad.jl")
+
 include("TensorCategoryFramework/InternalModules/InternalAlgebras.jl")
 include("TensorCategoryFramework/InternalModules/ModuleCategories.jl")
+include("TensorCategoryFramework/ModuleCategories/MonadModules.jl")
 
 
 include("Examples/Verlinde/I2-fusion.jl")

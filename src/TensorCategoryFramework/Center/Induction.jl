@@ -62,11 +62,23 @@ function induction_restriction(X::Object, simples::Vector = simples(parent(X)))
     Z = direct_sum([s⊗X⊗dual(s) for s ∈ simples])[1]
 end
 
+function induction_restriction(f::Morphism, simples::Vector = simples(parent(f)))
+    direct_sum([id(s)⊗f⊗id(dual(s)) for s in simples])
+end
+
 
 function end_of_induction(X::Object, IX = induction(X))
     B = basis(Hom(X,object(IX)))
 
-    ind_B = [induction_adjunction(f, IX, IX) for f ∈ B]
+    ind_f = [(dim(xi))*compose(
+        inv(half_braiding(Y, xi)) ⊗ id(dual(xi)),
+        associator(object(Y), xi, dual(xi)),
+        id(object(Y)) ⊗ (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi))))
+    ) for xi ∈ simples(parent(f))]
+
+    ind_B = [horizontal_direct_sum(ind_f) ∘ induction_restriction(f) for f ∈ B]
+
+    ind_B = [Morphism(IX,IX, f) for f ∈ ind_B]
 
     return CenterHomSpace(IX,IX,ind_B, VectorSpaces(base_ring(X)))
 end
@@ -74,14 +86,20 @@ end
 function induction_adjunction(f::Morphism, Y::CenterObject, IX = induction(domain(f)))
 
     ind_f = [(dim(xi))*compose(
-        (id(xi) ⊗ f) ⊗ id(dual(xi)),
-        associator(xi, object(Y), dual(xi)),
-        id(xi) ⊗ half_braiding(Y, dual(xi)),
-        inv_associator(xi, dual(xi), object(Y)),
-        (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
+        inv(half_braiding(Y, xi)) ⊗ id(dual(xi)),
+        associator(object(Y), xi, dual(xi)),
+        id(object(Y)) ⊗ (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi))))
     ) for xi ∈ simples(parent(f))]
 
-    Morphism(IX, Y, horizontal_direct_sum(ind_f))
+    # ind_f = [(dim(xi))*compose(
+    #     (id(xi) ⊗ f) ⊗ id(dual(xi)),
+    #     associator(xi, object(Y), dual(xi)),
+    #     id(xi) ⊗ half_braiding(Y, dual(xi)),
+    #     inv_associator(xi, dual(xi), object(Y)),
+    #     (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
+    # ) for xi ∈ simples(parent(f))]
+
+    Morphism(IX, Y, horizontal_direct_sum(ind_f) ∘ induction_restriction(f))
     # Morphism(IX,Y, horizontal_direct_sum([sqrt(dim(xi))*((ev(dual(xi)) ∘(spherical(xi)⊗id(dual(xi))))⊗id(object(IX))) ∘ (id(xi)⊗half_braiding(Y,dual(xi))) ∘ associator(xi,object(Y),dual(xi)) ∘ ((id(xi)⊗f)⊗id(dual(xi))) for xi in simples(parent(X))]))
 end
 
@@ -118,7 +136,12 @@ function adjusted_pairing(f::Morphism, g::Morphism, S::Object, W::Object, T::Obj
 end
 
 
+@doc raw""" 
 
+    dual_basis(V::AbstractHomSpace, W::AbstractHomSpace)
+
+Compute the dual basis for Hom(X,Y) and Hom(X̄,Ȳ)
+"""
 function dual_basis(V::AbstractHomSpace, W::AbstractHomSpace)
     dual_basis = []
     F = base_ring(V)
@@ -133,6 +156,12 @@ function dual_basis(V::AbstractHomSpace, W::AbstractHomSpace)
     return basis(V), dual_basis
 end
 
+@doc raw""" 
+
+    adjusted_dual_basis(V::AbstractHomSpace, U::AbstractHomSpace, S::Object, W::Object, T::Object)
+
+Compute a dual basis for the spaces Hom(S, W⊗T) and Hom(S̄⊗W, T̄)
+"""
 function adjusted_dual_basis(V::AbstractHomSpace, U::AbstractHomSpace, S::Object, W::Object, T::Object)
     dual_basis = []
     F = base_ring(V)

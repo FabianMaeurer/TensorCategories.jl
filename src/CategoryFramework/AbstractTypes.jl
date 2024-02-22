@@ -90,7 +90,7 @@ morphism(f::Morphism) = f.morphism
 ----------------------------------------------------------=#
 
 abstract type AbstractFunctor  <: Object end
-
+abstract type Monad <: AbstractFunctor end
 
 domain(F::AbstractFunctor) = F.domain
 codomain(F::AbstractFunctor) = F.codomain

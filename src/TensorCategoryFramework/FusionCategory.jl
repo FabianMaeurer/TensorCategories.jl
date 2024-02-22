@@ -803,7 +803,7 @@ end
 
 function express_in_basis(f::SixJMorphism, base::Vector{SixJMorphism})
     F = base_ring(domain(f))
-    A = Array{elem_type(F),2}(undef,length(base),0)
+    A = Array{elem_type(F),2}(undef,int_dim(Hom(domain(f),codomain(f))),0)
     b = []
     for g ∈ base
         y = []
