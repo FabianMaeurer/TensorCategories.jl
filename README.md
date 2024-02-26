@@ -11,7 +11,7 @@ do the following:
 
 ```julia-repl
 julia> import Pkg
-julia> Pkg.add(url = "https://github.com/FabianMaeurer/TensorCategories.jl")
+julia> Pkg.add("TensorCategories")
 ```
 
 ## Usage
