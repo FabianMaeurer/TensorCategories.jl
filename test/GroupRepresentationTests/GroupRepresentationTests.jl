@@ -1,5 +1,5 @@
 G = symmetric_group(3)
-F,a = FiniteField(23)
+F = GF(23)
 
 RepG = RepresentationCategory(G,F)
 simple_objects = simples(RepG)

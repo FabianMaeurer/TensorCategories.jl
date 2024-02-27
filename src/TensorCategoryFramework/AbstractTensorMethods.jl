@@ -139,7 +139,7 @@ function left_dual(f::Morphism)
     Y = codomain(f)
     a = ev(Y)⊗id(dual(X))
     b = (id(dual(Y))⊗f)⊗id(dual(X))
-    c = inv(associator(dual(Y),X,dual(X)))
+    c = inv_associator(dual(Y),X,dual(X))
     d = id(dual(Y))⊗coev(X)
     (a)∘(b)∘(c)∘(d)
 end
@@ -387,7 +387,9 @@ end
 
 function fpdim(C::Category)
     @assert is_fusion(C)
-    sum(fpdim.(simples(C)).^2)
+    S = simples(C)
+    d = int_dim(End(one(C)))
+    sum(d .* fpdim.(S).^2 .// (int_dim.(End.(S))))
 end
 
 

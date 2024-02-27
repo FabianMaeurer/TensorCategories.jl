@@ -33,6 +33,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, AlgAss, AlgAssElem,
 using InteractiveUtils
 using Memoization
 using SparseArrays
+using Graphs
 
 export - 
 export * 
@@ -206,6 +207,7 @@ export left_inverse
 export LeftModule
 export LeftModuleCategory
 export LeftModuleObject
+export LeftTensorProductFunctor
 export left_trace 
 export load 
 export matrices 
@@ -221,6 +223,8 @@ export Morphism, morphism
 export multiplication
 export multiplication_table 
 export multiplicity
+export NaturalTransformation
+export Nat
 export normalized_smatrix 
 export object 
 export object_type 
@@ -264,6 +268,7 @@ export right_inverse
 export RightModule
 export RightModuleCategory
 export RightModuleObject
+export RightTensorProductFunctor
 export right_trace 
 export RingCatMorphism 
 export RingSubcategory 
@@ -359,6 +364,7 @@ include("Examples/GroupRepresentations/Representations.jl")
 include("Examples/GroupRepresentations/GroupRepresentations.jl")
 include("Examples/ConvolutionCategory/CoherentSheaves.jl")
 include("Examples/ConvolutionCategory/ConvolutionCategory.jl")
+include("CategoryFramework/NaturalTransformations.jl")
 
 
 include("DecategorifiedFramework/multiplication_table.jl")

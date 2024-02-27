@@ -19,6 +19,7 @@ function is_half_braiding(Z::Object, half_braiding::Vector{<:Morphism}, log::Boo
                     @show (i,j,k)
                     @show matrix(left)
                     @show matrix(right)
+                    @show matrix(left-right)
                 else
                     return false
                 end

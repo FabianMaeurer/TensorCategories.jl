@@ -21,14 +21,24 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
                 # Set up basis and dual basis
                 
                 #_basis, basis_dual = dual_basis(Hom(S, W⊗T), Hom(dual(S), dual(W⊗T)))
-                _basis, basis_dual = adjusted_dual_basis(Hom(S, W⊗T), Hom(dual(S)⊗W, dual(T)), S, W, T)
                 
+                #_basis, basis_dual = adjusted_dual_basis(Hom(S, W⊗T), Hom(dual(S)⊗W, dual(T)), S, W, T)
+            
+                 _,_,ic,p = direct_sum_decomposition(W⊗T, simples)
+                _basis = [f for f ∈ ic if domain(f) == S]
+                dual_basis = [f for f ∈ p if codomain(f) == S]
+                #_,_,_,p = direct_sum_decomposition(dual(S)⊗W, dual.(simples))
 
+                basis_dual = transform_dual_basis(dual_basis, S,W,T)
 
                 if length(_basis) == 0 
                     γ_i_temp = vertical_direct_sum(γ_i_temp, zero_morphism(dom_i, W⊗((T⊗X)⊗dual(T)))) 
                     continue
                 end
+
+
+                #_basis, basis_dual = adjusted_dual_basis(_basis, basis_dual, S, W, T)
+
 
                 #corrections = base_ring(X).([(id(W)⊗ev(dual(T))) ∘ (id(W)⊗(spherical(T)⊗id(dual(T)))) ∘ a(W,T,dual(T)) ∘ (f⊗g) ∘ a(S,dual(S),W) ∘ (coev(S)⊗id(W)) for (f,g) ∈ zip(_basis,basis_dual)])
                 
@@ -41,7 +51,7 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
                 #@show "sum"
                 γ_i_temp = vertical_direct_sum(γ_i_temp, (component_iso))
             end
-            γ[i] = horizontal_direct_sum(γ[i], dim(S)*γ_i_temp)
+            γ[i] = horizontal_direct_sum(γ[i], γ_i_temp)
         end
       
 
@@ -71,10 +81,10 @@ function end_of_induction(X::Object, IX = induction(X))
     B = basis(Hom(X,object(IX)))
 
     ind_f = [(dim(xi))*compose(
-        inv(half_braiding(Y, xi)) ⊗ id(dual(xi)),
-        associator(object(Y), xi, dual(xi)),
-        id(object(Y)) ⊗ (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi))))
-    ) for xi ∈ simples(parent(f))]
+        inv(half_braiding(IX, xi)) ⊗ id(dual(xi)),
+        associator(object(IX), xi, dual(xi)),
+        id(object(IX)) ⊗ (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi))))
+    ) for xi ∈ simples(parent(X))]
 
     ind_B = [horizontal_direct_sum(ind_f) ∘ induction_restriction(f) for f ∈ B]
 
@@ -132,7 +142,28 @@ function adjusted_pairing(f::Morphism, g::Morphism, S::Object, W::Object, T::Obj
     # Correspondes to the pairing intriduced in 
     # https://doi.org/10.48550/arXiv.1010.1222 after 
     # natural Isomorphisms
-    dim(W)*(id(W)⊗ev(dual(T))) ∘ (id(W)⊗(spherical(T)⊗id(dual(T)))) ∘ associator(W,T,dual(T)) ∘ (f⊗g) ∘ associator(S,dual(S),W) ∘ (coev(S)⊗id(W))
+    ϕ = (id(W)⊗ev(dual(T))) ∘ (id(W)⊗(spherical(T)⊗id(dual(T)))) ∘ associator(W,T,dual(T)) ∘ (f⊗g) ∘ associator(S,dual(S),W) ∘ (coev(S)⊗id(W))
+
+    dim(End(W)) == 1 && return dim(W) * ϕ
+    
+    return tr(ϕ)
+end
+
+function adjusted_sum_pairing(f::Morphism, g::Morphism, S::Object, W::Object, T::Object)
+    # Compute the pairing for f: S → W⊗T, g:S*⊗W, T*
+    # that is defined via the direct sum inclusions
+    # and pojections of Hom(S, W⊗T)
+    WT = W⊗T
+    compose(
+        f,
+        coev(S) ⊗ id(WT),
+        associator(S,dual(S),(WT)),
+        id(S) ⊗ inv_associator(dual(S),W,T),  
+        id(S) ⊗ compose(
+            g ⊗ id(T),
+            ev(T)
+        )
+    )
 end
 
 
@@ -156,6 +187,7 @@ function dual_basis(V::AbstractHomSpace, W::AbstractHomSpace)
     return basis(V), dual_basis
 end
 
+
 @doc raw""" 
 
     adjusted_dual_basis(V::AbstractHomSpace, U::AbstractHomSpace, S::Object, W::Object, T::Object)
@@ -174,6 +206,36 @@ function adjusted_dual_basis(V::AbstractHomSpace, U::AbstractHomSpace, S::Object
         push!(dual_basis, sum(coeffs .* basis(U)))
     end
     return basis(V), dual_basis
+end
+
+function transform_dual_basis(U::Vector{M}, S::Object, W::Object, T::Object) where M <: Morphism
+
+    length(U) == 0 && return M[] 
+    
+    dS = dual(S)
+    dT = dual(T)
+
+    [compose(
+        id(dS) ⊗ (id(W) ⊗ coev(T)),
+        id(dS) ⊗ inv_associator(W, T, dT),
+        id(dS) ⊗ (g ⊗ id(dT)),
+        inv_associator(dS,S,dT),
+        ev(S) ⊗ id(dT)
+    ) for g ∈ U]
+end
+
+function adjusted_dual_basis(V::Vector{<:Morphism}, U::Vector{<:Morphism}, S::Object, W::Object, T::Object)
+    dual_basis = []
+    F = base_ring(V[1])
+    n = length(V)
+    m = length(U)
+    for i ∈ 1:m
+        M = matrix(F, n,m, [adjusted_pairing(V[j], U[k], S, W, T) for j ∈ 1:n, k ∈ 1:m])
+        b = matrix(F,m,1, [i == j ? 1 : 0 for j ∈ 1:m])
+        coeffs = collect(solve(M,b))
+        push!(dual_basis, sum(coeffs .* U))
+    end
+    return V, dual_basis
 end
 
 function partial_induction(X::Object, ind_simples::Vector, simples::Vector = simples(parent(X)); parent_category::CenterCategory = Center(parent(X)))
