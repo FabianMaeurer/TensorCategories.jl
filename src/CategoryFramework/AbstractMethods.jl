@@ -226,9 +226,13 @@ function indecomposable_subobjects_by_matrix_algebra(X::Object, E = End(X))
     return unique_simples([indecomposable_subobjects(K); indecomposable_subobjects(C)])
 end
 
-function indecomposable_subobjects(X::Object, E = End(X))
-    @assert is_semisimple(parent(X)) "Non semisimple categories are not yet supported"
-    _indecomposable_subobjects(X,E)
+function indecomposable_subobjects(X::Object, E = nothing)
+    if is_semisimple(parent(X)) 
+        if E === nothing  E = End(X) end
+        return _indecomposable_subobjects(X,E)
+    else
+        return unique_indecomposables([x for (x,d) ∈ decompose(X)])
+    end
 end
 
 function minpoly(f::Morphism)

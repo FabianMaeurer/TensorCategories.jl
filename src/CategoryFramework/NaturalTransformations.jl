@@ -1,28 +1,51 @@
 #=----------------------------------------------------------
     Compute Natrural Transformations in finitary categories. 
 ----------------------------------------------------------=#
+abstract type NaturalTransformation <: Morphism end
 
-
-struct NaturalTransformation <: Morphism
+struct AdditiveNaturalTransformation <: NaturalTransformation
     domain::AbstractFunctor 
     codomain::AbstractFunctor 
-    maps::Dict{<:Object, <:Morphism} 
+    maps::Vector{<:Morphism} 
 end
 
-function NaturalTransformation(F::AbstractFunctor, G::AbstractFunctor, maps::Vector{<:Pair})
-    NaturalTransformation(F,G,Dict(maps))
+function AdditiveNaturalTransformation(F::AbstractFunctor, G::AbstractFunctor, indecs::Vector{<:Object}, maps::Vector{<:Pair})
+
+    maps = [x ∈ keys(maps) ? maps[x] : zero_morphism(F(x),G(x)) for x ∈ indecs]
+    AdditiveNaturalTransformation(F,G,maps)
 end
 
 struct NaturalTransformations <: AbstractHomSpace
     X::AbstractFunctor
     Y::AbstractFunctor
-    basis::Vector{NaturalTransformation}
+    basis::Vector{<:NaturalTransformation}
     parent::VectorSpaces
 end
+
+#=----------------------------------------------------------
+    Functionality   
+----------------------------------------------------------=#
+
+function compose(η::NaturalTransformation, σ::NaturalTransformation)
+
+end
+
+#=----------------------------------------------------------
+    Compute natural transformations 
+----------------------------------------------------------=#
 
 function Nat(F::AbstractFunctor, G::AbstractFunctor)
     @assert domain(F) == domain(G)
     @assert codomain(F) == codomain(G)
+
+    if is_additive(F) && is_additive(G)
+        return additive_natural_transformations(F,G)
+    end
+
+    @error("Cannot compute natural transformations")
+end
+
+function additive_natural_transformations(F::AbstractFunctor, G::AbstractFunctor)
     
     C = domain(F)
     K = base_ring(C)
@@ -90,7 +113,7 @@ function Nat(F::AbstractFunctor, G::AbstractFunctor)
             push!(solutions, maps)
         end
 
-        nats = [nats; [NaturalTransformation(F,G,[g[i] => T[i] for i ∈ 1:n]) for T ∈ solutions]]
+        nats = [nats; [AdditiveNaturalTransformation(F,G,indecs, [g[i] => T[i] for i ∈ 1:n]) for T ∈ solutions]]
     end
 
     return NaturalTransformations(F,G,nats, VectorSpaces(K))
@@ -106,14 +129,27 @@ function group_indecomposables(indecs::Vector{T}) where T <: Object
 end
 
 
+#=----------------------------------------------------------
+    Monoidal structures     
+----------------------------------------------------------=#
 
+function lax_monoidal_structures(F::AbstractFunctor)
+    @assert is_additive(F)
+
+    C = domain(F)
+
+    T = Functor(
+        C×C,
+
+    )
         
+end
 #=----------------------------------------------------------
     Pretty Printing 
 ----------------------------------------------------------=#
 
 function show(io::IO, η::NaturalTransformation)
-    show(io, """Natural transformation""")
+    print(io, "Natural transformation")
 end
 
 

@@ -42,6 +42,7 @@ struct TensorPowerMorphism <: Morphism
     morphism::Morphism
 end
 
+is_additive(::TensorPowerCategory) = true
 
 object(X::TensorPowerObject) = X.object
 morphism(f::TensorPowerMorphism) = f.morphism

@@ -10,7 +10,10 @@ where p1,p2 = ±1 are parameters for the different possible sets of associators.
 """
 function HaagerupH3(K::Field = QQ; p1 = 1, p2 = 1)
     _,x = QQ["x"]
-    K,_ = NumberField(x^16 - 3380*x^12 + 118368*x^10 + 814294*x^8 - 68093376*x^6 + 572623596*x^4 + 12977778528*x^2 + 1803785841)
+    if K == QQ
+        K,_ = NumberField(x^16 - 4*x^14 + 13*x^12 + 4*x^10 + 53*x^8 + 4*x^6 + 13*x^4 - 4*x^2 + 1)
+    end
+    #K,_ = NumberField(x^16 - 3380*x^12 + 118368*x^10 + 814294*x^8 - 68093376*x^6 + 572623596*x^4 + 12977778528*x^2 + 1803785841)
 
     # _,x = K["x"]
     # r13 = roots(x^2-13)[2]

@@ -44,7 +44,10 @@ end
 getindex(X::ProductObject,x) = X.factors[x]
 getindex(f::ProductMorphism,x) = f.factors[x]
 
-base_ring(C::ProductCategory) = parent(*(gen.(base_ring.([c for c ∈ C.factors]))...))
+function base_ring(C::ProductCategory) 
+    all(e -> e == base_ring(C.factors[1]), base_ring.(C.factors)) && return base_ring(C.factors[1])
+    parent(*(gen.(base_ring.([c for c ∈ C.factors]))...))
+end
 
 function matrix(f::ProductMorphism) 
     diagonal_matrix([change_base_ring(base_ring(f), matrix(fi)) for fi ∈ f.factors])
@@ -93,6 +96,20 @@ function simples(C::ProductCategory{N}) where N
     end
     return simpls
 end
+
+
+function indecomposables(C::ProductCategory{N}) where N
+    indecs = ProductObject{N}[]
+    for i ∈ 1:N
+        for s ∈ indecomposables(C.factors[i])
+            so = [zero(Ci) for Ci ∈ C.factors]
+            so[i] = s
+            push!(indecs, ProductObject(C,Tuple(so)))
+        end
+    end
+    return indecs
+end
+
 
 
 dual(X::ProductObject) = ProductObject(parent(X), Tuple(dual(x) for x ∈ X.factors))

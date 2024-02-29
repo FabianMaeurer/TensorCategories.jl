@@ -38,6 +38,8 @@ end
 
 ⊗(X::Object, ::typeof(-)) = LeftTensorProductFunctor(X)
 
+is_additive(T::LeftTensorProductFunctor) = is_additive(domain(T))
+
 #=----------------------------------------------------------
     Functor  - ⊗ X : C → C 
 ----------------------------------------------------------=#
@@ -56,6 +58,8 @@ function RightTensorProductFunctor(X::Object)
 end
 
 ⊗(::typeof(-), X::Object) = RightTensorProductFunctor(X)
+
+is_additive(T::RightTensorProductFunctor) = is_additive(domain(T))
 
 #-------------------------------------------------------------------------------
 #   Restriction and Induction
