@@ -33,14 +33,41 @@ end
     Limit constructions 
 ----------------------------------------------------------=#
 
-function equilizer(f::T, g::T) where T <: Morphism 
+function _equilizer(f::T, g::T) where T <: Morphism 
     @assert domain(f) == domain(g) && codomain(f) == codomain(g)
     return kernel(f-g)
 end
 
-function coequilizer(f::T, g::T) where T <: Morphism 
+function equilizer(f::Morphism...)
+    length(f) == 1 && return f[1]
+    length(f) == 2 && return _equilizer(f...)
+
+    g,h = f 
+
+    E,e = _equilizer(g,h)
+
+    f_new = [g ∘ e for g ∈ f[2:end]]
+
+    return equilizer(f_new)
+end
+
+
+function _coequilizer(f::T, g::T) where T <: Morphism 
     @assert domain(f) == domain(g) && codomain(f) == codomain(g)
     return cokernel(f-g)
+end
+
+function coequilizer(f::Morphism...)
+    length(f) == 1 && return f[1]
+    length(f) == 2 && return _coequilizer(f...)
+
+    g,h = f 
+
+    C,c = _coequilizer(g,h)
+
+    f_new = [c ∘ g for g ∈ f[2:end]]
+
+    return coequilizer(f_new)
 end
 
 function pullback(f::T,g::T) where T <: Morphism
@@ -166,3 +193,34 @@ end
 
 function universal_morphism(X::Limit, Y::Cone)
 end
+
+
+#=----------------------------------------------------------
+    Coend
+----------------------------------------------------------=#
+
+function is_bifunctor(F::AbstractFunctor)
+    typeof(domain(F)) != ProductCategory && return false
+    C = codomain(F)
+    domain(F) == ProductCategory(OppositeCategory(C),C)
+end
+
+function coend(F::AbstractFunctor)
+    @assert is_bifunctor(F)
+    C = codomain(F)
+    
+    is_abelian(C) && return abelian_coend(F)
+
+    error("not supported yet")
+end
+
+function abelian_coend(F::AbstractFunctor)
+    C = codomain(F)
+    @assert is_abelian(C)
+    
+    indecs = indecomposables(C)
+
+    _,i,p = direct_sum([F(ProductObject(OppositeObject(X),X)) for X ∈ indecs])
+
+end
+

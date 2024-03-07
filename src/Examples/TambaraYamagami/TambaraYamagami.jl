@@ -250,9 +250,7 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
 
     set_spherical!(C, [F(1) for s ∈ simples(C)])
 
-    G = abelian_group(PcGroup, [2])
-    χ = nondegenerate_bilinear_form(G,F(-1))
-
+    
     # C = TambaraYamagami(G)
 
     # set_simples_name!(C,["𝟙","χ","X"])
@@ -263,6 +261,10 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
     # http://arxiv.org/abs/2010.00847v1 (Ex. 4.13)
     
     try 
+
+        G = abelian_group(PcGroup, [2])
+        χ = nondegenerate_bilinear_form(G,F(-1))
+
         ξ = q * root_of_unity(F,4)
 
         α = sqrt(inv(a)*(1 + ξ)) 

@@ -170,7 +170,7 @@ function Hom(S::ShortExactSequence, T::ShortExactSequence)
         base = [base; [ShortExactSequenceMorphism(S, T, f, sum(b .* base_Y), g) for b ∈ B]]
     end
 
-    return HomSpace(S, T, base, VectorSpaces(F))
+    return HomSpace(S, T, base)
 end
 
 

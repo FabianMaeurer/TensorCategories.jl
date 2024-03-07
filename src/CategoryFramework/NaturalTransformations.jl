@@ -6,13 +6,14 @@ abstract type NaturalTransformation <: Morphism end
 struct AdditiveNaturalTransformation <: NaturalTransformation
     domain::AbstractFunctor 
     codomain::AbstractFunctor 
+    indecomposables::Vector{<:Object}
     maps::Vector{<:Morphism} 
 end
 
 function AdditiveNaturalTransformation(F::AbstractFunctor, G::AbstractFunctor, indecs::Vector{<:Object}, maps::Vector{<:Pair})
-
+    @show [x ∈ keys(maps) for x in indecs]
     maps = [x ∈ keys(maps) ? maps[x] : zero_morphism(F(x),G(x)) for x ∈ indecs]
-    AdditiveNaturalTransformation(F,G,maps)
+    AdditiveNaturalTransformation(F,G,indecs,maps)
 end
 
 struct NaturalTransformations <: AbstractHomSpace
@@ -26,9 +27,49 @@ end
     Functionality   
 ----------------------------------------------------------=#
 
-function compose(η::NaturalTransformation, σ::NaturalTransformation)
+function compose(η::AdditiveNaturalTransformation...)
 
 end
+
+function inv(η::AdditiveNaturalTransformation)
+    try 
+        return AdditiveNaturalTransformation(
+            domain(η),
+            codomain(η),
+            indecomposables(η),
+            inv.(η.maps)
+        )
+    catch
+        error("Not invertible")
+    end
+end
+
+function getindex(η::AdditiveNaturalTransformation, X::Object)
+    if X ∈ keys(η.maps)
+        return η.maps[X]
+    end
+
+    return zero_morphism(domain(η)(X), codomain(η(X)))
+end
+
+function indecomposables(η::AdditiveNaturalTransformation)
+    η.indecomposables
+end
+
+function (η::AdditiveNaturalTransformation)(X::Object)
+    indecs = indecomposables(η)
+ 
+    i = findfirst(x -> x == X, indecs)
+
+    i !== nothing && return η.maps[i]
+
+    _,_,i,p = direct_sum_decomposition(X, indecs)
+    F,G = domain(η), codomain(η)
+    
+    sum([G(iᵢ) ∘ η(domain(iᵢ)) ∘ F(pᵢ) for (iᵢ,pᵢ) ∈ zip(i,p)])
+end
+
+
 
 #=----------------------------------------------------------
     Compute natural transformations 
@@ -39,17 +80,20 @@ function Nat(F::AbstractFunctor, G::AbstractFunctor)
     @assert codomain(F) == codomain(G)
 
     if is_additive(F) && is_additive(G)
-        return additive_natural_transformations(F,G)
+        nats = additive_natural_transformations(F,G)
+        return NaturalTransformations(F,G,nats, VectorSpaces(base_ring(domain(F))))
     end
 
     @error("Cannot compute natural transformations")
 end
 
-function additive_natural_transformations(F::AbstractFunctor, G::AbstractFunctor)
+function additive_natural_transformations(F::AbstractFunctor, G::AbstractFunctor, indecs = nothing)
     
     C = domain(F)
     K = base_ring(C)
-    indecs = indecomposables(C)
+    if indecs === nothing 
+        indecs = indecomposables(C)
+    end
 
     nats = NaturalTransformation[]
 
@@ -97,7 +141,7 @@ function additive_natural_transformations(F::AbstractFunctor, G::AbstractFunctor
 
             eqs = eltype(Kx)[eqs; e]
         end
-
+        
         x = union(x_blocks...)
         m = [coeff(e,a) for a ∈ x, e ∈ eqs]
         M = matrix(K, size(m,1), size(m,2), m)
@@ -106,17 +150,23 @@ function additive_natural_transformations(F::AbstractFunctor, G::AbstractFunctor
 
         solution_cols = [collect(c) for c ∈ eachcol(collect(N))]
         solutions = []
-        
+
         for c ∈ solution_cols
             c_blocks = [[popfirst!(c) for _ ∈ b] for b ∈ nat_bases]
             maps = [sum(a .* B) for (a,B) ∈ zip(c_blocks, nat_bases)]
             push!(solutions, maps)
         end
-
-        nats = [nats; [AdditiveNaturalTransformation(F,G,indecs, [g[i] => T[i] for i ∈ 1:n]) for T ∈ solutions]]
+        
+        new_nats = [AdditiveNaturalTransformation(
+            F,
+            G,
+            indecs,
+            [x ∈ g ? popfirst!(T) : zero_morphism(F(x),G(x)) for x ∈ indecs]
+        ) for T ∈ solutions]
+        nats = [nats; new_nats]
     end
 
-    return NaturalTransformations(F,G,nats, VectorSpaces(K))
+    return nats
 end
 
 function group_indecomposables(indecs::Vector{T}) where T <: Object
@@ -137,11 +187,26 @@ function lax_monoidal_structures(F::AbstractFunctor)
     @assert is_additive(F)
 
     C = domain(F)
+    D = codomain(F)
 
-    T = Functor(
+    S = indecomposables(C)
+
+    F1 = Functor(
         C×C,
-
+        D,
+        X -> F(X[1]) ⊗ F(X[2]),
+        f -> F(f[1]) ⊗ F(f[2])
     )
+
+    F2 = Functor(
+        C × C,
+        C,
+        X -> F(X[1] ⊗ X[2]),
+        f -> F(f[1] ⊗ f[2])
+    )
+
+    indecs = [ProductObject(s,t) for s ∈ S, t ∈ S][:]
+    nats = additive_natural_transformations(F1,F2,indecs)
         
 end
 #=----------------------------------------------------------

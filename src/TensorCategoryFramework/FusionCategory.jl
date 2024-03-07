@@ -392,7 +392,8 @@ function coev(X::SixJObject)
     if length(ks) == 1
         c = simple_objects_coev(C[ks[1]])
         k = X.components[ks[1]]
-        m = collect(matrix(coev(VectorSpaceObject(base_ring(X),k))))[:]
+        m = collect(identity_matrix(base_ring(X), k))[:]
+        #m = collect(matrix(coev(VectorSpaceObject(base_ring(X),k))))[:]
 
         return vertical_direct_sum([i * c for i ∈ m]...)
         # cod = X ⊗ dual(X)
@@ -425,7 +426,8 @@ function ev(X::SixJObject)
     if length(ks) == 1
         e = simple_objects_ev(C[ks[1]])
         k = X.components[ks[1]]
-        m = collect(matrix(ev(VectorSpaceObject(base_ring(X),k))))[:]
+        m = collect(identity_matrix(base_ring(X), k))[:]
+        #m = collect(matrix(coev(VectorSpaceObject(base_ring(X),k))))[:]
 
         return horizontal_direct_sum([i * e for i ∈ m]...)
         # dom = dual(X) ⊗ X
@@ -737,20 +739,20 @@ end
 
 function kernel(f::SixJMorphism)
     C = parent(domain(f))
-    kernels = [kernel(Morphism(m)) for m ∈ f.m]
-    mats = [matrix(m) for (_,m) ∈ kernels]
-    ker = SixJObject(C,[int_dim(k) for (k,m) ∈ kernels])
+    kernels = [kernel(m) for m ∈ f.m]
+    
+    ker = SixJObject(C,[k for (k,m) ∈ kernels])
 
-    return ker, Morphism(ker, domain(f), mats)
+    return ker, Morphism(ker, domain(f), [m for (_,m) ∈ kernels])
 end
 
 function cokernel(f::SixJMorphism)
     C = parent(domain(f))
-    cokernels = [cokernel(Morphism(m)) for m ∈ f.m]
-    mats = [matrix(m) for (_,m) ∈ cokernels]
-    coker = SixJObject(C,[int_dim(k) for (k,m) ∈ cokernels])
+    cokernels = [kernel(transpose(m)) for m ∈ f.m]
+    
+    coker = SixJObject(C,[k for (k,m) ∈ cokernels])
 
-    return coker, Morphism(codomain(f),coker, mats)
+    return coker, Morphism(codomain(f),coker, [m for (_,m) ∈ cokernels])
 end
 
 
@@ -776,7 +778,6 @@ struct SixJHomSpace<: AbstractHomSpace
     X::SixJObject
     Y::SixJObject
     basis::Vector{SixJMorphism}
-    parent::VectorSpaces
 end
 
 function Hom(X::SixJObject, Y::SixJObject)
@@ -786,7 +787,7 @@ function Hom(X::SixJObject, Y::SixJObject)
 
     d = sum([x*y for (x,y) ∈ zip(Xi,Yi)])
 
-    if d == 0 return SixJHomSpace(X,Y,SixJMorphism[], VectorSpaces(F)) end
+    if d == 0 return SixJHomSpace(X,Y,SixJMorphism[]) end
 
     basis = [zero_morphism(X,Y).m for i ∈ 1:d]
     next = 1
@@ -798,7 +799,7 @@ function Hom(X::SixJObject, Y::SixJObject)
         end
     end
     basis_mors = [SixJMorphism(X,Y,m) for m ∈ basis]
-    return SixJHomSpace(X,Y,basis_mors, VectorSpaces(F))
+    return SixJHomSpace(X,Y,basis_mors)
 end
 
 function express_in_basis(f::SixJMorphism, base::Vector{SixJMorphism})

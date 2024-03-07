@@ -67,6 +67,15 @@ function endomorphism_ring_by_basis(X::Object, base = basis(End(X)))
     A.one = express_in_basis(id(X), base)
     return A
 end
+
+function is_invertible(f::Morphism)
+    try
+        inv(f) 
+        return true
+    catch
+        return false
+    end
+end
 #------------------------------------------------------
 #   Image & Kernel
 #------------------------------------------------------
@@ -144,7 +153,8 @@ function direct_sum_decomposition(X::Object, S = simples(parent(X)))
 
     # temporary solution!
     iso = is_isomorphic(X,Z)[2]
-    return Z, iso, [inv(iso)∘i for i ∈ incl], [p∘iso for p ∈ proj]
+    inv_iso = inv(iso)
+    return Z, iso, [inv_iso∘i for i ∈ incl], [p∘iso for p ∈ proj]
 
     #----------------------------------
     f = zero_morphism(X,Z)

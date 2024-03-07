@@ -8,7 +8,7 @@ mutable struct InductionMonad <: Monad
     multiplication::Dict{<:Object, <:Morphism}
 
     function InductionMonad(C::Category)
-        T = New()
+        T = new()
         T.category = C
         return T
     end 
@@ -38,9 +38,9 @@ function multiplication(T::InductionMonad, X::Object)
     TX = induction(X)
 
     horizontal_direct_sum([dim(x) * compose(
-        (inv(half_braiding(S[1],x)) ⊗ id(dual(x))),
-        associator(object(S[1]),x,dual(x)),
-        (id(object(S[1])) ⊗ ev(dual(x)))
+        (inv(half_braiding(TX,x)) ⊗ id(dual(x))),
+        associator(object(TX),x,dual(x)),
+        (id(object(TX)) ⊗ ev(dual(x)))
     ) for x ∈ simples(parent(X))])
 end
 
@@ -128,3 +128,12 @@ mutable struct Wedge
     tensor_product_maps::Dict{Tuple{Object,Object}, Morphism}
 end
 
+
+#=----------------------------------------------------------
+    Induction Coend 
+----------------------------------------------------------=#
+
+function induction_wedge(V::Object)
+    indecs = indecomposables(parent(V))
+
+    

@@ -127,7 +127,7 @@ function Hom(X::LeftModuleObject, Y::LeftModuleObject)
     A = algebra(parent(X))
 
     if n == 0 
-        return HomSpace(X,Y, ModuleMorphism[], VectorSpaces(F))
+        return HomSpace(X,Y, ModuleMorphism[])
     end 
 
     Fx,poly_basis = PolynomialRing(F,n)
@@ -159,7 +159,7 @@ function Hom(X::LeftModuleObject, Y::LeftModuleObject)
 
     module_hom_basis = [Morphism(X,Y,sum(b .* B)) for b ∈ basis_coeffs]
 
-    return HomSpace(X,Y,module_hom_basis, VectorSpaces(F))
+    return HomSpace(X,Y,module_hom_basis)
 end
 
 function Hom(X::RightModuleObject, Y::RightModuleObject)
@@ -171,7 +171,7 @@ function Hom(X::RightModuleObject, Y::RightModuleObject)
     A = algebra(parent(X))
 
     if n == 0 
-        return HomSpace(X,Y, ModuleMorphism[], VectorSpaces(F))
+        return HomSpace(X,Y, ModuleMorphism[])
     end 
 
     Fx,poly_basis = PolynomialRing(F,n)
@@ -203,7 +203,7 @@ function Hom(X::RightModuleObject, Y::RightModuleObject)
 
     module_hom_basis = [Morphism(X,Y,sum(b .* B)) for b ∈ basis_coeffs]
 
-    return HomSpace(X,Y,module_hom_basis, VectorSpaces(F))
+    return HomSpace(X,Y,module_hom_basis)
 end
 
 #=----------------------------------------------------------

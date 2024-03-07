@@ -23,6 +23,10 @@ function is_multifusion(C::Category)
     false
 end
 
+function is_split_semisimple(C::Category)
+    is_semisimple(C) && all(s -> int_dim(End(s)) == 1, simples(C))
+end 
+
 function is_tensor(C::Category) 
     if is_fusion(C)
         return true

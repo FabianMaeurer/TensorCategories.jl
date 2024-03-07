@@ -291,5 +291,5 @@ matrix(f::TensorPowerMorphism) = matrix(morphism(f))
 function Hom(X::TensorPowerObject, Y::TensorPowerObject)
     H = Hom(object(X), object(Y))
     B = [TensorPowerMorphism(X,Y,f) for f ∈ basis(H)]
-    HomSpace(X,Y,B,VectorSpaces(base_ring(X)))
+    HomSpace(X,Y,B)
 end

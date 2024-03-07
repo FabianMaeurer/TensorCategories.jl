@@ -228,7 +228,7 @@ function Hom(X::ArrowObject, Y::ArrowObject)
     n,m = length(base_dom), length(base_cod)
 
     if n+m == 0 
-        return HomSpace(X,Y, ArrowMorphism[], VectorSpaces(base_ring(X)))
+        return HomSpace(X,Y, ArrowMorphism[])
     end
 
     F = base_ring(X)
@@ -265,7 +265,7 @@ function Hom(X::ArrowObject, Y::ArrowObject)
 
     B = ArrowMorphism[Morphism(X,Y, l, r) for (l,r) ∈ B]
 
-    return HomSpace(X,Y, unique_without_hash(B), VectorSpaces(F))
+    return HomSpace(X,Y, unique_without_hash(B))
 end
     
 

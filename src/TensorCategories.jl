@@ -193,6 +193,7 @@ export is_ring
 export is_semisimple 
 export is_simple 
 export is_spherical 
+export is_split_semisimple
 export is_subobject 
 export is_tensor 
 export is_zero
@@ -399,7 +400,7 @@ include("Examples/Fibonacci/FibonacciCategory.jl")
 include("Examples/VercleyenSingerland/FR_8211/fr_8211.jl")
 include("Examples/VercleyenSingerland/FR_9143/fr_9143.jl")
 include("Examples/E6Subfactor/E6subfactor.jl")
-include("Examples/Haagerup/Haagerup.jl")
+include("Examples/Haagerup/HaagerupH3.jl")
 
 
 

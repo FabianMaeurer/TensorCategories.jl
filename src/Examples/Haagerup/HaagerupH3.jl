@@ -62,7 +62,7 @@ function HaagerupH3(K::Field = QQ; p1 = 1, p2 = 1)
         return x
     end
 
-    dic = include(modifier, joinpath(@__DIR__, "Haagerup_associator.jl"))
+    dic = include(modifier, joinpath(@__DIR__, "Haagerup_H3_associator.jl"))
 
 
     kk=collect(keys(dic))

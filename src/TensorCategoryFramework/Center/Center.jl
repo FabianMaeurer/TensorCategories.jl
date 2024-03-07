@@ -1,9 +1,9 @@
 mutable struct CenterCategory <: Category
-    base_ring::Field
+    base_ring::Ring
     category::Category
     simples::Vector{O} where O <: Object
 
-    function CenterCategory(F::Field, C::Category)
+    function CenterCategory(F::Ring, C::Category)
         Z = new()
         Z.base_ring = F
         Z.category = C
@@ -227,14 +227,69 @@ function is_central(Z::Object, simples::Vector{<:Object} = simples(parent(Z)))
     return dim(build_center_ideal(Z,simples)) >= 0
 end
 
+function build_natural_center_ideal(Z::Object, indecs = indecomposables(parent(Z)))
+    @assert is_additive(parent(Z))
+
+    # Compute a basis for the natural transformations
+    nat_trans = additive_natural_transformations(Z⊗-, (-)⊗Z, indecs)
+
+    K = base_ring(Z)
+
+    Kx,x = PolynomialRing(K, length(nat_trans))
+
+    eqs = []
+
+    i_O = findfirst(e -> is_isomorphic(e,one(parent(Z)))[1], indecs)
+    O = indecs[i_O]
+    indecs_without_one = filter(e -> (O != e), indecs)
+
+    for X ∈ indecs_without_one, Y ∈ indecs_without_one
+        base_ZXY = basis(Hom((Z⊗X)⊗Y, X⊗(Y⊗Z)))
+        
+        length(base_ZXY) == 0 && continue
+
+        tops = [compose(
+            eᵢ(X)⊗id(Y),
+            associator(X,Z,Y),
+            id(X) ⊗ eⱼ(Y)
+        ) for eᵢ ∈ nat_trans, eⱼ ∈ nat_trans]
+        
+        coeffs = [express_in_basis(t, base_ZXY) for t ∈ tops]
+        ab = [a*b for a in x, b in x]
+        e =  [a .* c for ((a), c) ∈ zip(ab, coeffs)]
+
+        e = reduce(.+, e)
+
+        bottoms = [compose(
+            associator(Z,X,Y),
+            eᵢ(X⊗Y),
+            associator(X,Y,Z)
+        ) for eᵢ ∈ nat_trans]
+
+        coeffs = [express_in_basis(b, base_ZXY) for b ∈ bottoms]
+
+        e2 = [a .* c for (a,c) ∈ zip(x,coeffs)]
+
+        e2 = reduce(.+, e2)
+
+        eqs = [eqs; e .- e2]
+    end
+
+    end_Z = basis(End(Z))
+    one_coeffs = [express_in_basis(eᵢ(O), end_Z) for eᵢ ∈ nat_trans]
+    id_coeffs = express_in_basis(id(Z), end_Z)
+
+    one_eqs = reduce(.+, [a .* c for (a,c) ∈ zip(x,one_coeffs)]) .- id_coeffs
+    ideal(unique([eqs; one_eqs]))
+end
 
 
 function build_center_ideal(Z::Object, simples::Vector = simples(parent(Z)))
-    @assert is_semisimple(parent(Z)) "Not semisimple"
+    #@assert is_semisimple(parent(Z)) "Not semisimple"
 
     Homs = [Hom(Z⊗Xi, Xi⊗Z) for Xi ∈ simples]
     n = length(simples)
-    ks = [dim(Homs[i]) for i ∈ 1:n]
+    ks = [int_dim(Homs[i]) for i ∈ 1:n]
 
     var_count = sum([int_dim(H) for H ∈ Homs])
 
@@ -252,11 +307,14 @@ function build_center_ideal(Z::Object, simples::Vector = simples(parent(Z)))
 
     eqs = []
 
-    for k ∈ 1:n, i ∈ 1:n, j ∈ 1:n
+    one_index = findfirst(e -> is_isomorphic(one(parent(Z)), e)[1], simples)
+
+    for k ∈ 1:n, i ∈ 1:n, j ∈ 1:n
+        if i == one_index || j == one_index continue end
+
         base = basis(Hom(Z⊗simples[k], simples[i]⊗(simples[j]⊗Z)))
 
         for t ∈ basis(Hom(simples[k], simples[i]⊗simples[j]))
-            e = [zero(R) for i ∈ base]
 
             l1 = [zero(R) for i ∈ base]
             l2 = [zero(R) for i ∈ base]
@@ -280,7 +338,7 @@ function build_center_ideal(Z::Object, simples::Vector = simples(parent(Z)))
     I = ideal([f for f ∈ unique(ideal_eqs) if f != 0])
 
     #Require e_Z(1) = id(Z)
-    one_index = findfirst(e -> is_isomorphic(one(parent(Z)), e)[1], simples)
+    
     one_c = K.(express_in_basis(id(Z), basis(End(Z))))
     push!(ideal_eqs, (vars[one_index] .- one_c)...)
 
@@ -555,7 +613,12 @@ function decompose(X::CenterObject, S::Vector{CenterObject})
 end
 
 function indecomposable_subobjects(X::CenterObject)
+
+    !is_split_semisimple(category(parent(X))) && return _indecomposable_subobjects(X)
+
+
     B = basis(End(object(X)))
+
     if length(B) == 1
         return [X]
     end
@@ -618,7 +681,7 @@ matrix(f::CenterMorphism) = matrix(f.m)
 
 Return the composition ```g∘f```.
 """
-compose(f::CenterMorphism, g::CenterMorphism) = Morphism(domain(f), codomain(g), g.m∘f.m)
+compose(f::CenterMorphism, g::CenterMorphism) = Morphism(domain(f), codomain(g), g.m∘f.m) 
 
 """
     dual(X::CenterObject)
@@ -902,7 +965,7 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject)
     n = length(basis(H))
 
     if n == 0 
-        return HomSpace(X,Y, CenterMorphism[], VectorSpaces(F))
+        return HomSpace(X,Y, CenterMorphism[])
     end 
 
     Fx,poly_basis = PolynomialRing(F,n)
@@ -941,7 +1004,7 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject)
 
     center_basis = [CenterMorphism(X,Y,sum(b .* B)) for b ∈ basis_coeffs]
 
-    return HomSpace(X,Y,center_basis, VectorSpaces(F))
+    return HomSpace(X,Y,center_basis)
 end
 
 function hom_by_projection(X::CenterObject, Y::CenterObject)
@@ -961,7 +1024,7 @@ function hom_by_projection(X::CenterObject, Y::CenterObject)
         f = Morphism(X,Y,sum([m*bi for (m,bi) ∈ zip(M[i,:], b)]))
         H_basis = [H_basis; f]
     end
-    return CenterHomSpace(X,Y,H_basis, VectorSpaces(base_ring(X)))
+    return CenterHomSpace(X,Y,H_basis)
 end
 
 
