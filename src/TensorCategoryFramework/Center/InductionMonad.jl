@@ -136,4 +136,4 @@ end
 function induction_wedge(V::Object)
     indecs = indecomposables(parent(V))
 
-    
+end    
