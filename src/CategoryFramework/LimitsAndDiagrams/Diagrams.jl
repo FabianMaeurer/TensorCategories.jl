@@ -6,4 +6,4 @@
 
 abstract type AbstractDiagram <: Functor end
 
-struct KernelDiagram <: AbstractDiagra
+struct KernelDiagram <: AbstractDiagram end
