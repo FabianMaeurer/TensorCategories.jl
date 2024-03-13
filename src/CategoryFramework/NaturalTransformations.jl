@@ -112,7 +112,7 @@ function additive_natural_transformations(F::AbstractFunctor, G::AbstractFunctor
         
         sum(ns) == 0 && continue
 
-        Kx,x = PolynomialRing(K,sum(ns))
+        Kx,x = polynomial_ring(K,sum(ns))
 
         x_blocks = [[popfirst!(x) for _ ∈ b] for b ∈ nat_bases]
 

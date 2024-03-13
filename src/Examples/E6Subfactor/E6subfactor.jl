@@ -3,7 +3,7 @@
 ----------------------------------------------------------=#
 
 function E6subfactor()
-    #K,ξ = CyclotomicField(24,"ξ₂₄") 
+    #K,ξ = cyclotomic_field(24,"ξ₂₄") 
     K = QQBar
     r3 = sqrt(K(3))
     r2 = sqrt(K(2))

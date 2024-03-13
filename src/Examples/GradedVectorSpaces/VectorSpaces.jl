@@ -162,7 +162,7 @@ function is_isomorphic(V::VectorSpaceObject, W::VectorSpaceObject)
     if parent(V) != parent(W) return false, nothing end
     if dim(V) != dim(W) return false, nothing end
 
-    return true, Morphism(V,W,one(MatrixSpace(base_ring(V),int_dim(V),int_dim(V))))
+    return true, Morphism(V,W,one(matrix_space(base_ring(V),int_dim(V),int_dim(V))))
 end
 
 
@@ -227,8 +227,8 @@ function direct_sum(f::VectorSpaceMorphism,g::VectorSpaceMorphism)
     F = base_ring(domain(f))
     mf,nf = size(f.m)
     mg,ng = size(g.m)
-    z1 = zero(MatrixSpace(F,mf,ng))
-    z2 = zero(MatrixSpace(F,mg,nf))
+    z1 = zero(matrix_space(F,mf,ng))
+    z2 = zero(matrix_space(F,mg,nf))
     m = vcat(hcat(f.m,z1), hcat(z2,g.m))
     return VSMorphism(m,direct_sum(domain(f),domain(g))[1],direct_sum(codomain(f),codomain(g))[1])
 end
@@ -239,17 +239,16 @@ end
 
 function kernel(f::VSMorphism)
     F = base_ring(domain(f))
-    d,k = kernel(f.m, F, side = :left)
-    k = k[1:d,:]
-    K = VectorSpaceObject(parent(domain(f)), d)
-    return K, Morphism(K,domain(f),k)
+    k = kernel(f.m)
+    K = VectorSpaceObject(parent(domain(f)), number_of_rows(k))
+    return K, Morphism(K,domain(f), k)
 end
 
 function cokernel(f::VSMorphism)
     F = base_ring(domain(f))
-    d,k = kernel(f.m, F)
-    k = k[:,1:d]
-    K = VectorSpaceObject(parent(domain(f)), d)
+    k = kernel(f.m, side = :right)
+
+    K = VectorSpaceObject(parent(domain(f)), number_of_columns(k))
     return K, Morphism(codomain(f), K, k)
 end
 #-----------------------------------------------------------------
@@ -322,13 +321,14 @@ inv(f::VectorSpaceMorphism)= Morphism(codomain(f), domain(f), inv(matrix(f)))
 
 *(λ,f::VectorSpaceMorphism)  = Morphism(domain(f),codomain(f),parent(domain(f)).base_ring(λ)*f.m)
 
-isinvertible(f::VectorSpaceMorphism) = rank(f.m) == dim(domain(f)) == dimension(codomain(f))
+is_invertible(f::VectorSpaceMorphism) = rank(f.m) == dim(domain(f)) == dimension(codomain(f))
 
 function left_inverse(f::VectorSpaceMorphism)
     k = matrix(f)
     d = rank(k)
     F = base_ring(f)
-    k_inv = transpose(solve_left(transpose(k), one(MatrixSpace(F,d,d))))
+    
+    k_inv = transpose(solve(transpose(k), one(matrix_space(F,d,d))))
     return Morphism(codomain(f), domain(f), k_inv)
 end
 
@@ -336,7 +336,7 @@ function right_inverse(f::VectorSpaceMorphism)
     k = matrix(f)
     d = rank(k)
     F = base_ring(f)
-    c_inv = solve_left(k, one(MatrixSpace(F,d,d)))
+    c_inv = solve(k, one(matrix_space(F,d,d)))
     return Morphism(codomain(f),domain(f), c_inv)
 end
 #---------------------------------------------------------------------------
@@ -387,14 +387,14 @@ basis(V::VSHomSpace) = V.basis
 
 zero(V::VSHomSpace) = Morphism(V.X,V.Y,matrix(base_ring(V.X), [0 for i ∈ 1:dim(V.X), j ∈ 1:dim(V.Y)]))
 
-zero_morphism(V::VectorSpaceObject,W::VectorSpaceObject) = Morphism(V,W, zero(MatrixSpace(base_ring(V), int_dim(V), int_dim(W))))
+zero_morphism(V::VectorSpaceObject,W::VectorSpaceObject) = Morphism(V,W, zero(matrix_space(base_ring(V), int_dim(V), int_dim(W))))
 
 function express_in_basis(f::VectorSpaceMorphism, B::Vector{<:VectorSpaceMorphism})
     F = base_ring(f)
     B_mat = matrix(F,hcat([[x for x ∈ b.m][:] for b ∈ B]...))
     f_mat = matrix(F, 1, *(size(f.m)...), [x for x ∈ f.m][:])
 
-    return [x for x ∈ solve_left(transpose(B_mat),f_mat)][:]
+    return [x for x ∈ solve(transpose(B_mat),f_mat)][:]
 end
 
 (F::Field)(f::VectorSpaceMorphism) = F(matrix(f)[1,1])

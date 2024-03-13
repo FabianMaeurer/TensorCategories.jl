@@ -117,7 +117,7 @@ function universal_property_of_pushout(ϕ₁::Morphism, ϕ₂::Morphism, f::Morp
 
     # Set up equations to find the unique factoring morphism from the 
     # universal property of the pushout
-    Rx, x = PolynomialRing(base_ring(f), length(base_dom_cod))
+    Rx, x = polynomial_ring(base_ring(f), length(base_dom_cod))
 
     eqs = [zero(Rx) for _ ∈ 1:n]
 
@@ -134,7 +134,7 @@ function universal_property_of_pushout(ϕ₁::Morphism, ϕ₂::Morphism, f::Morp
     M = matrix(base_ring(f), length(base_dom_cod), length(eqs), M_arr)
     b = matrix(base_ring(f), 1, length(eqs), b_arr)
 
-    s = solve_left(M,b)
+    s = solve(M,b)
 
     return sum(collect(s)[:] .* base_dom_cod)
 end
@@ -159,7 +159,7 @@ function pushout_product(f::T, g::T) where T <: Morphism
 
     # # Set up equations to find the unique factoring morphism from the 
     # # universal property of the pushout
-    # Rx, x = PolynomialRing(base_ring(f), length(base_dom_cod))
+    # Rx, x = polynomial_ring(base_ring(f), length(base_dom_cod))
 
     # eqs = [zero(Rx) for _ ∈ 1:n]
 
@@ -179,7 +179,7 @@ function pushout_product(f::T, g::T) where T <: Morphism
     # M = matrix(base_ring(f), length(base_dom_cod), length(eqs), M_arr)
     # b = matrix(base_ring(f), 1, length(eqs), b_arr)
 
-    # s = solve_left(M,b)
+    # s = solve(M,b)
 
     # return sum(collect(s)[:] .* base_dom_cod)
 end

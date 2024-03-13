@@ -84,7 +84,7 @@ end
 
 dim(X::NonStrictSixJObject) = base_ring(X)(tr(id(X)))
 
-(::Type{Int})(x::fmpq) = Int(numerator(x))
+(::Type{Int})(x::QQFieldElem) = Int(numerator(x))
 
 
 braiding(X::NonStrictSixJObject, Y::NonStrictSixJObject) = parent(X).braiding(X,Y)
@@ -138,7 +138,7 @@ is_simple(X::NonStrictSixJObject) = length(X.components) == 1
 
 inv(f::NonStrictSixJMorphism) = NonStrictSixJMorphism(codomain(f),domain(f), inv(f.m))
 
-id(X::NonStrictSixJObject) = NonStrictSixJMorphism(X,X, one(MatrixSpace(base_ring(X),length(X.components),length(X.components))))
+id(X::NonStrictSixJObject) = NonStrictSixJMorphism(X,X, one(matrix_space(base_ring(X),length(X.components),length(X.components))))
 
 function compose(f::NonStrictSixJMorphism, g::NonStrictSixJMorphism)
     @assert codomain(f) == domain(g) 
@@ -302,7 +302,7 @@ function tensor_product(f::NonStrictSixJMorphism, g::NonStrictSixJMorphism)
 
     table = C.tensor_product
 
-    mat = zero(MatrixSpace(base_ring(C), 0, length(cod.components)))
+    mat = zero(matrix_space(base_ring(C), 0, length(cod.components)))
 
     mat_f, mat_g = matrix(f), matrix(g)
     nf,mf = size(mat_f)
@@ -310,7 +310,7 @@ function tensor_product(f::NonStrictSixJMorphism, g::NonStrictSixJMorphism)
 
     for row_f ∈ 1:nf, row_g ∈ 1:ng
         dom_k = sum(table[domain(f).components[row_f], domain(g).components[row_g], :])
-        temp_mat = zero(MatrixSpace(base_ring(C), dom_k, 0))
+        temp_mat = zero(matrix_space(base_ring(C), dom_k, 0))
 
         for col_f ∈ 1:mf, col_g ∈ 1:mg
             cod_k = sum(table[codomain(f).components[col_f], codomain(g).components[col_g], :])
@@ -368,7 +368,7 @@ end
 zero(C::NonStrictSixJCategory) = NonStrictSixJObject(C,[])
 
 function zero_morphism(X::NonStrictSixJObject, Y::NonStrictSixJObject)
-    return NonStrictSixJMorphism(X,Y,zero(MatrixSpace(base_ring(X), length(X.components), length(Y.components))))
+    return NonStrictSixJMorphism(X,Y,zero(matrix_space(base_ring(X), length(X.components), length(Y.components))))
 end
 
 function is_isomorphic(X::NonStrictSixJObject, Y::NonStrictSixJObject)
@@ -421,7 +421,7 @@ end
 
 function NonStrictIsing()
     Qx,x = QQ["x"]
-    F,a = NumberField(x^2-2, "√2")
+    F,a = number_field(x^2-2, "√2")
     C = NonStrictSixJCategory(F,["𝟙", "χ", "X"])
     M = zeros(Int,3,3,3)
 
@@ -440,7 +440,7 @@ function NonStrictIsing()
     set_associator!(C,2,3,2, matrices(-id(C[3])))
     set_associator!(C,3,1,3, matrices(id(C[1])⊕(id(C[2]))))
     set_associator!(C,3,2,3, matrices((id(C[1]))⊕(-id(C[2]))))
-    z = zero(MatrixSpace(F,0,0))
+    z = zero(matrix_space(F,0,0))
     set_associator!(C,3,3,3, [z, z, inv(a)*matrix(F,[1 1; 1 -1])])
 
     set_spherical!(C, [F(1) for s ∈ simples(C)])
@@ -497,7 +497,7 @@ function express_in_basis(f::NonStrictSixJMorphism, base::Vector)
         b = [b; [x for x ∈ m][:]]
     end
 
-    return [i for  i ∈ solve_left(transpose(matrix(F,A)), MatrixSpace(F,1,length(b))(F.(b)))][:]
+    return [i for  i ∈ solve(transpose(matrix(F,A)), matrix_space(F,1,length(b))(F.(b)))][:]
 end
 
 

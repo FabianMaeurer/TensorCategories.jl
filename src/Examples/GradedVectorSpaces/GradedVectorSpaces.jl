@@ -84,7 +84,7 @@ function is_isomorphic(X::GVSObject, Y::GVSObject)
     if Set(X.grading) != Set(Y.grading) || !is_isomorphic(X.V,Y.V)[1]
         return false, nothing
     else
-        m = zero(MatrixSpace(base_ring(X),int_dim(X),int_dim(Y)))
+        m = zero(matrix_space(base_ring(X),int_dim(X),int_dim(Y)))
         for g ∈ X.grading
             i = findall(h -> h == g, X.grading)
             j = findall(h -> h == g, Y.grading)
@@ -148,7 +148,7 @@ end
 #     F = base_ring(f)
 #     m1,n1 = size(f.m)
 #     m2,n2 = size(g.m)
-#     m = [f.m zero(MatrixSpace(F,m1,n2)); zero(MatrixSpace(F,m2,n1)) g.m]
+#     m = [f.m zero(matrix_space(F,m1,n2)); zero(matrix_space(F,m2,n1)) g.m]
 # end
 
 #-----------------------------------------------------------------
@@ -207,7 +207,7 @@ function kernel(f::GVSMorphism)
     G = base_group(domain(f))
     X,Y = domain(f),codomain(f)
     n = int_dim(X) - rank(f.m)
-    m = zero(MatrixSpace(F, n, int_dim(X)))
+    m = zero(matrix_space(F, n, int_dim(X)))
     l = 1
     grading = elem_type(G)[]
 
@@ -227,8 +227,8 @@ function kernel(f::GVSMorphism)
 
         mx = f.m[i,j]
 
-        d,k = kernel(mx, side = :left)
-        k = k[1:d,:]
+        k = kernel(mx, side = :left)
+        d = number_of_rows(k)
 
         m[l:l+d-1 ,i] = k
         l = l+d
@@ -266,7 +266,7 @@ function associator(X::GVSObject, Y::GVSObject, Z::GVSObject)
     dom = (X⊗Y)⊗Z
     cod = X⊗(Y⊗Z)
 
-    m = one(MatrixSpace(base_ring(X),int_dim(dom),int_dim(cod)))
+    m = one(matrix_space(base_ring(X),int_dim(dom),int_dim(cod)))
 
     j = 1
     for x ∈ X.grading, y ∈ Y.grading, z ∈ Z.grading
@@ -326,7 +326,7 @@ function Hom(V::GVSObject, W::GVSObject)
     G = base_group(V)
     B = VSMorphism[]
 
-    zero_M = MatrixSpace(base_ring(V), int_dim(V), int_dim(W))
+    zero_M = matrix_space(base_ring(V), int_dim(V), int_dim(W))
 
     for x ∈ unique(V.grading)
         V_grading = findall(e -> e == x, V.grading)
@@ -375,7 +375,7 @@ end
 
 # description
 # """
-# id(X::GVSObject) = Morphism(X,X,one(MatrixSpace(base_ring(X),dim(X),dim(X))))
+# id(X::GVSObject) = Morphism(X,X,one(matrix_space(base_ring(X),dim(X),dim(X))))
 #-----------------------------------------------------------------
 #   Pretty Printing
 #-----------------------------------------------------------------

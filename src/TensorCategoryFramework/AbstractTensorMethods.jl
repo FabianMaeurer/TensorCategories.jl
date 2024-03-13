@@ -369,7 +369,7 @@ function fpdim(X::Object)
         A[:,i] = [length(basis(Hom(X⊗Y,S[j])))//end_dims[i] for j ∈ 1:n]
     end
 
-    λ = eigenvalues(matrix(QQ,A),K)
+    λ = eigenvalues(K, matrix(QQ,A))
     filter!(e -> isreal(e), λ)
     return findmax(e -> abs(e), λ)[1]
 

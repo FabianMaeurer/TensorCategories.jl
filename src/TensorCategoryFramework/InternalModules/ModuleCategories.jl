@@ -130,7 +130,7 @@ function Hom(X::LeftModuleObject, Y::LeftModuleObject)
         return HomSpace(X,Y, ModuleMorphism[])
     end 
 
-    Fx,poly_basis = PolynomialRing(F,n)
+    Fx,poly_basis = polynomial_ring(F,n)
 
     base = basis(Hom(object(A)⊗object(X), object(Y)))
 
@@ -145,7 +145,7 @@ function Hom(X::LeftModuleObject, Y::LeftModuleObject)
     end
     
 
-    M = zero(MatrixSpace(F,length(eqs),n))
+    M = zero(matrix_space(F,length(eqs),n))
 
     for (i,e) ∈ zip(1:length(eqs),eqs)
         M[i,:] = [coeff(e, a) for a ∈ poly_basis]
@@ -174,7 +174,7 @@ function Hom(X::RightModuleObject, Y::RightModuleObject)
         return HomSpace(X,Y, ModuleMorphism[])
     end 
 
-    Fx,poly_basis = PolynomialRing(F,n)
+    Fx,poly_basis = polynomial_ring(F,n)
 
     base = basis(Hom(object(A)⊗object(X), object(Y)))
 
@@ -189,7 +189,7 @@ function Hom(X::RightModuleObject, Y::RightModuleObject)
     end
     
 
-    M = zero(MatrixSpace(F,length(eqs),n))
+    M = zero(matrix_space(F,length(eqs),n))
 
     for (i,e) ∈ zip(1:length(eqs),eqs)
         M[i,:] = [coeff(e, a) for a ∈ poly_basis]

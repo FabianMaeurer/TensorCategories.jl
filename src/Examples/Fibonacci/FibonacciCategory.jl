@@ -22,6 +22,6 @@ end
 
 function Fibonacci(a::Int = 1) 
     _,x = QQ[:x]
-    K,ϕ = NumberField(x^2 + x - 1, "ϕ")
+    K,ϕ = number_field(x^2 + x - 1, "ϕ")
     Fibonacci(K, a)
 end

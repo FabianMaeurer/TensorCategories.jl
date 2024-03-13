@@ -126,7 +126,7 @@ end
 simples_names(C::SixJCategory) = C.simples_names
 indecomposables_names(C::SixJCategory) = C.simples_names
 
-#(::Type{Int})(x::fmpq) = Int(numerator(x))
+#(::Type{Int})(x::QQFieldElem) = Int(numerator(x))
 
 function braiding(X::SixJObject, Y::SixJObject) 
     if is_simple(X) && is_simple(Y)
@@ -329,7 +329,7 @@ decompose(X::SixJObject, simpls::Vector{SixJObject} = SixJObject[]) = [(x,k) for
 inv(f::SixJMorphism) = SixJMorphism(codomain(f),domain(f), inv.(f.m))
 
 
-id(X::SixJObject) = SixJMorphism(X,X, [one(MatrixSpace(base_ring(X),d,d)) for d ∈ X.components])
+id(X::SixJObject) = SixJMorphism(X,X, [one(matrix_space(base_ring(X),d,d)) for d ∈ X.components])
 
 
 function compose(f::SixJMorphism, g::SixJMorphism)
@@ -338,7 +338,27 @@ function compose(f::SixJMorphism, g::SixJMorphism)
     return SixJMorphism(domain(f), codomain(g), [m*n for (m,n) ∈ zip(f.m,g.m)])
 end
 
-#function vertical_direct_sum(f::SixJMorphism, g::SixJMorphism)
+function vertical_direct_sum(f::Vector{SixJMorphism})
+    @assert all(domain(g) == domain(f[1]) for g ∈ f[2:end])
+
+    C = parent(f[1])
+    cod = SixJObject(C, reduce(.+, [X.components for X ∈ codomain.(f)]))
+
+    mats = [hcat([g.m[i] for g ∈ f]...) for i ∈ 1:C.simples]
+
+    Morphism(domain(f[1]), cod, mats)
+end
+
+function horizontal_direct_sum(f::Vector{SixJMorphism})
+    @assert all(codomain(g) == codomain(f[1]) for g ∈ f[2:end])
+
+    C = parent(f[1])
+    dom = SixJObject(C, reduce(.+, [X.components for X ∈ domain.(f)]))
+
+    mats = [vcat([g.m[i] for g ∈ f]...) for i ∈ 1:C.simples]
+
+    Morphism(dom, codomain(f[1]), mats)
+end
 
 function +(f::SixJMorphism, g::SixJMorphism)
     @assert domain(f) == domain(g) && codomain(f) == codomain(g) "Not compatible"
@@ -395,7 +415,7 @@ function coev(X::SixJObject)
         m = collect(identity_matrix(base_ring(X), k))[:]
         #m = collect(matrix(coev(VectorSpaceObject(base_ring(X),k))))[:]
 
-        return vertical_direct_sum([i * c for i ∈ m]...)
+        return vertical_direct_sum([i * c for i ∈ m])
         # cod = X ⊗ dual(X)
         # n = matrices(zero_morphism(𝟙, cod))
         # n[1] = m
@@ -429,7 +449,7 @@ function ev(X::SixJObject)
         m = collect(identity_matrix(base_ring(X), k))[:]
         #m = collect(matrix(coev(VectorSpaceObject(base_ring(X),k))))[:]
 
-        return horizontal_direct_sum([i * e for i ∈ m]...)
+        return horizontal_direct_sum([i * e for i ∈ m])
         # dom = dual(X) ⊗ X
         # n = matrices(zero_morphism(dom, 𝟙))
         # n[1] = m
@@ -679,42 +699,42 @@ function direct_sum(f::SixJMorphism, g::SixJMorphism)
     for i ∈ 1:parent(dom).simples
         mf,nf = size(f.m[i])
         mg,ng = size(g.m[i])
-        z1 = zero(MatrixSpace(F,mf,ng))
-        z2 = zero(MatrixSpace(F,mg,nf))
+        z1 = zero(matrix_space(F,mf,ng))
+        z2 = zero(matrix_space(F,mg,nf))
         m[i] = [f.m[i] z1; z2 g.m[i]]
     end
 
     return Morphism(dom,cod, m)
 end
 
-function vertical_direct_sum(f::SixJMorphism...)
-    if length(f) == 1
-        return f[1]
-    end
+# function vertical_direct_sum(f::Vector{SixJMorphism})
+#     if length(f) == 1
+#         return f[1]
+#     end
     
-    #@assert length(unique!([domain.(f)...])) == 1 "Not compatible"
+#     #@assert length(unique!([domain.(f)...])) == 1 "Not compatible"
 
-    ms = matrices.(f)
-    m = [hcat([n[i] for n ∈ ms]...) for i ∈ 1:parent(f[1]).simples]
-    return Morphism(domain(f[1]), ⊕(codomain.(f)...), m)
-end
+#     ms = matrices.(f)
+#     m = [hcat([n[i] for n ∈ ms]...) for i ∈ 1:parent(f[1]).simples]
+#     return Morphism(domain(f[1]), ⊕(codomain.(f)...), m)
+# end
 
-function horizontal_direct_sum(f::SixJMorphism...)
-    if length(f) == 1
-        return f[1]
-    end
-    # @assert length(unique!([codomain.(f)...])) == 1 "Not compatible"
+# function horizontal_direct_sum(f::Vector{SixJMorphism})
+#     if length(f) == 1
+#         return f[1]
+#     end
+#     # @assert length(unique!([codomain.(f)...])) == 1 "Not compatible"
 
-    ms = matrices.(f)
-    m = [vcat([n[i] for n ∈ ms]...) for i ∈ 1:parent(f[1]).simples]
-    return Morphism(⊕(domain.(f)...), codomain(f[1]), m)
-end
+#     ms = matrices.(f)
+#     m = [vcat([n[i] for n ∈ ms]...) for i ∈ 1:parent(f[1]).simples]
+#     return Morphism(⊕(domain.(f)...), codomain(f[1]), m)
+# end
 
 
 zero(C::SixJCategory) = SixJObject(C,[0 for i ∈ 1:C.simples])
 
 function zero_morphism(X::SixJObject, Y::SixJObject)
-    return SixJMorphism(X,Y,[zero(MatrixSpace(base_ring(X), cX, cY)) for (cX,cY) ∈ zip(X.components, Y.components)])
+    return SixJMorphism(X,Y,[zero(matrix_space(base_ring(X), cX, cY)) for (cX,cY) ∈ zip(X.components, Y.components)])
 end
 
 function is_isomorphic(X::SixJObject, Y::SixJObject)
@@ -739,25 +759,25 @@ end
 
 function kernel(f::SixJMorphism)
     C = parent(domain(f))
-    kernels = [kernel(m) for m ∈ f.m]
+    kernels = [kernel(m, side = :left) for m ∈ f.m]
     
-    ker = SixJObject(C,[k for (k,m) ∈ kernels])
+    ker = SixJObject(C,[number_of_rows(k) for k ∈ kernels])
 
-    return ker, Morphism(ker, domain(f), [m for (_,m) ∈ kernels])
+    return ker, Morphism(ker, domain(f), [m for m ∈ kernels])
 end
 
 function cokernel(f::SixJMorphism)
     C = parent(domain(f))
-    cokernels = [kernel(transpose(m)) for m ∈ f.m]
+    cokernels = [kernel(m, side = :right) for m ∈ f.m]
     
-    coker = SixJObject(C,[k for (k,m) ∈ cokernels])
+    coker = SixJObject(C,[number_of_rows(k) for k ∈ cokernels])
 
-    return coker, Morphism(codomain(f),coker, [m for (_,m) ∈ cokernels])
+    return coker, Morphism(codomain(f),coker, [m for m ∈ cokernels])
 end
 
 
 function left_inverse(f::SixJMorphism)
-    inverses = [left_inverse(Morphism(m)) for m ∈ matrices(f)]
+     inverses = [left_inverse(Morphism(m)) for m ∈ matrices(f)]
     mats = [matrix(m) for m ∈ inverses]
     return Morphism(codomain(f), domain(f), mats)
 end
@@ -817,7 +837,7 @@ function express_in_basis(f::SixJMorphism, base::Vector{SixJMorphism})
         b = [b; [x for x ∈ m][:]]
     end
 
-    return [i for  i ∈ solve_left(transpose(matrix(F,A)), MatrixSpace(F,1,length(b))(F.(b)))][:]
+    return [i for  i ∈ solve(transpose(matrix(F,A)), matrix_space(F,1,length(b))(F.(b)))][:]
 end
 
 
@@ -874,7 +894,7 @@ Return the category ``C⊗K``.
 function extension_of_scalars(C::SixJCategory, L::Field)
     K = base_ring(C)
     if K != QQ && characteristic(K) == 0 
-        if K isa AnticNumberField && L isa NfRel
+        if K isa AbsSimpleNumField && L isa RelSimpleNumField
             f = L
         else
             if base_field(K) == base_field(L)
@@ -930,7 +950,7 @@ Return the category ``C⊗K``.
 function extension_of_scalars(m::SixJMorphism, L::Field)
     K = base_ring(m)
     if K != QQ && characteristic(K) == 0 
-        if K isa AnticNumberField && L isa NfRel
+        if K isa AbsSimpleNumField && L isa RelSimpleNumField
             f = L
         else
             if base_field(K) == base_field(L)

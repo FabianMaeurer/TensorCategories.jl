@@ -48,3 +48,16 @@ function replace!(e, old, new)
     end
     e
 end
+
+
+#=----------------------------------------------------------
+    Dicts    
+----------------------------------------------------------=#
+
+function Base.getindex(D::Dict{<:Object,<:Any}, X::Object)
+    i = findfirst(e -> e == X, collect(keys(D)))
+
+    i === nothing && KeyError("key $X not found")
+
+    return collect(values(D))[i]
+end

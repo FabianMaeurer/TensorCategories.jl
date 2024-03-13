@@ -4,11 +4,18 @@
 #-------------------------------------------------------------------------------
 
 function induction(X::Object, simples::Vector = simples(parent(X)); parent_category::CenterCategory = Center(parent(X)))
+
+    if isdefined(parent_category, :inductions) && X ∈ collect(keys(parent_category.inductions)) 
+        return parent_category.inductions[X]
+    end
+
     @assert is_semisimple(parent(X)) "Requires semisimplicity"
     Z = direct_sum([s⊗X⊗dual(s) for s ∈ simples])[1]
     a = associator
     γ = Vector{Morphism}(undef, length(simples))
+
     C = parent(X)
+
     for i ∈ 1:length(simples)
         W = simples[i]
         γ[i] = zero_morphism(zero(parent(X)), direct_sum([W⊗((s⊗X)⊗dual(s)) for s ∈ simples])[1])
@@ -73,7 +80,11 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
         γ = [(id(b)⊗r) ∘ γᵢ ∘ (ir ⊗ id(b)) for (γᵢ,b) ∈ zip(γ, simples)]
     end
 
-    return CenterObject(parent_category,Z,γ)
+    IX = CenterObject(parent_category,Z,γ)
+
+    add_induction!(parent_category, X, IX)
+
+    return IX
 end
 
 
@@ -128,16 +139,88 @@ function end_of_induction(X::Object, IX = induction(X))
     return CenterHomSpace(IX,IX,ind_B, VectorSpaces(base_ring(X)))
 end
 
-function induction_adjunction(f::Morphism, Y::CenterObject, IX = induction(domain(f)))
-    @assert is_split_semisimple(parent(f))
+function induction_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = induction(domain(H), parent_category = parent(Y)))
+    @assert is_split_semisimple(parent(H[1]))
 
-    simpls = simples(parent(f))
+    simpls = simples(parent(H[1]))
 
     ind_f = [(dim(xi))*compose(
         inv(half_braiding(Y, xi)) ⊗ id(dual(xi)),
         associator(object(Y), xi, dual(xi)),
         id(object(Y)) ⊗ (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi))))
     ) for xi ∈ simpls]
+
+    # ind_f = [(dim(xi))*compose(
+    #     (id(xi) ⊗ f) ⊗ id(dual(xi)),
+    #     associator(xi, object(Y), dual(xi)),
+    #     id(xi) ⊗ half_braiding(Y, dual(xi)),
+    #     inv_associator(xi, dual(xi), object(Y)),
+    #     (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
+    # ) for xi ∈ simples(parent(f))]
+
+    mors = [Morphism(IX, Y, horizontal_direct_sum(ind_f) ∘ induction_restriction(f)) for f ∈ H]
+
+    return HomSpace(IX, Y, mors)
+    # Morphism(IX,Y, horizontal_direct_sum([sqrt(dim(xi))*((ev(dual(xi)) ∘(spherical(xi)⊗id(dual(xi))))⊗id(object(IX))) ∘ (id(xi)⊗half_braiding(Y,dual(xi))) ∘ associator(xi,object(Y),dual(xi)) ∘ ((id(xi)⊗f)⊗id(dual(xi))) for xi in simples(parent(X))]))
+end
+
+function induction_right_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = induction(codomain(H[1]), parent_category = parent(Y)))
+    simpls = simples(parent(H[1]))
+
+    duals = dual.(simpls)
+
+    ind_f = [compose(
+        id(object(Y))⊗coev(xi),
+        inv_associator(object(Y),xi,dxi),
+        half_braiding(Y,xi) ⊗ id(dxi)
+    ) for (xi, dxi) ∈ zip(simpls,duals)]
+
+    # ind_f = [(dim(xi))*compose(
+    #     (id(xi) ⊗ f) ⊗ id(dual(xi)),
+    #     associator(xi, object(Y), dual(xi)),
+    #     id(xi) ⊗ half_braiding(Y, dual(xi)),
+    #     inv_associator(xi, dual(xi), object(Y)),
+    #     (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
+    # ) for xi ∈ simples(parent(f))]
+
+    base = [Morphism(Y, IX, induction_restriction(f) ∘ vertical_direct_sum(ind_f)) for f ∈ H]
+
+    HomSpace(Y, IX, base)
+end
+
+function induction_right_adjunction(f::Morphism, Y::CenterObject, IX = induction(codomain(f), parent_category = parent(Y)))
+    simpls = simples(parent(f))
+
+    duals = dual.(simpls)
+
+    ind_f = [compose(
+        id(object(Y))⊗coev(xi),
+        inv_associator(object(Y),xi,dxi),
+        half_braiding(Y,xi) ⊗ id(dxi)
+    ) for (xi, dxi) ∈ zip(simpls,duals)]
+
+    # ind_f = [(dim(xi))*compose(
+    #     (id(xi) ⊗ f) ⊗ id(dual(xi)),
+    #     associator(xi, object(Y), dual(xi)),
+    #     id(xi) ⊗ half_braiding(Y, dual(xi)),
+    #     inv_associator(xi, dual(xi), object(Y)),
+    #     (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
+    # ) for xi ∈ simples(parent(f))]
+
+    Morphism(Y, IX, induction_restriction(f) ∘ vertical_direct_sum(ind_f))
+end
+
+function induction_adjunction(f::Morphism, Y::CenterObject, IX = induction(domain(f), parent_category = parent(Y)))
+    @assert is_split_semisimple(parent(f))
+
+    simpls = simples(parent(f))
+    duals = dual.(simpls)
+
+    ind_f = [(dim(xi))*compose(
+        inv(half_braiding(Y, xi)) ⊗ id(dxi),
+        associator(object(Y), xi, dxi),
+        id(object(Y)) ⊗ (ev(dxi) ∘ (spherical(xi) ⊗ id(dxi)))
+    ) for (xi,dxi) ∈ zip(simpls,duals)]
 
     # ind_f = [(dim(xi))*compose(
     #     (id(xi) ⊗ f) ⊗ id(dual(xi)),

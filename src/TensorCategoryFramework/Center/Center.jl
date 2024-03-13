@@ -2,6 +2,7 @@ mutable struct CenterCategory <: Category
     base_ring::Ring
     category::Category
     simples::Vector{O} where O <: Object
+    inductions::Dict{<:Object,<:Object}
 
     function CenterCategory(F::Ring, C::Category)
         Z = new()
@@ -179,6 +180,7 @@ function tensor_product(X::CenterObject, Y::CenterObject)
     return CenterObject(parent(X), Z, γ)
 end
 
+
 """
     tensor_product(f::CenterMorphism,g::CenterMorphism)
 
@@ -235,7 +237,7 @@ function build_natural_center_ideal(Z::Object, indecs = indecomposables(parent(Z
 
     K = base_ring(Z)
 
-    Kx,x = PolynomialRing(K, length(nat_trans))
+    Kx,x = polynomial_ring(K, length(nat_trans))
 
     eqs = []
 
@@ -294,7 +296,7 @@ function build_center_ideal(Z::Object, simples::Vector = simples(parent(Z)))
     var_count = sum([int_dim(H) for H ∈ Homs])
 
     K = base_ring(Z)
-    R,x = PolynomialRing(K, var_count, ordering = :lex)
+    R,x = polynomial_ring(K, var_count, ordering = :lex)
 
     # For convinience: build arrays with the variables xi
     vars = []
@@ -471,7 +473,7 @@ function simples_covered(c::Tuple, v::Vector)
     false
 end
 
-function isindependent(c::Vector,v::Vector...)
+function is_independent(c::Vector,v::Vector...)
     if length(v) == 0 return true end
     m = matrix(ZZ, [vi[j] for vi ∈ v, j ∈ 1:length(v[1])])
 
@@ -578,7 +580,7 @@ dim(X::CenterObject) = dim(X.object)
 
 Return a vector containing the simple objects of ```C```. The list might be incomplete.
 """
-function simples(C::CenterCategory; sort = false)
+function simples(C::CenterCategory; sort = false, show_progress = false)
     if isdefined(C, :simples) 
         return C.simples 
     end
@@ -586,7 +588,7 @@ function simples(C::CenterCategory; sort = false)
         C.simples = center_simples_by_braiding(category(C), C)
         return C.simples
     end
-    simples_by_induction!(C)
+    simples_by_induction!(C, show_progress)
     if sort 
         sort_simples_by_dimension!(C)
     end
@@ -805,7 +807,7 @@ function kernel(f::CenterMorphism)
         return zero(parent(f)), zero_morphism(zero(parent(f)), domain(f))
     end
 
-    braiding = [left_inverse(id(s)⊗incl)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), domain(f).γ)]
+    braiding = [id(s)⊗left_inverse(incl)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), domain(f).γ)]
 
     Z = CenterObject(parent(domain(f)), ker, braiding)
     return Z, Morphism(Z,domain(f), incl)
@@ -824,10 +826,23 @@ function cokernel(f::CenterMorphism)
         return zero(parent(f)), zero_morphism(codomain(f), zero(parent(f)))
     end
 
-    braiding = [(id(s)⊗proj)∘γ∘(right_inverse(proj⊗id(s))) for (s,γ) ∈ zip(simples(parent(domain(f.m))), codomain(f).γ)]
+    braiding = [(id(s)⊗proj)∘γ∘(right_inverse(proj)⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), codomain(f).γ)]
 
     Z = CenterObject(parent(domain(f)), coker, braiding)
     return Z, Morphism(codomain(f),Z, proj)
+end
+
+function image(f::CenterMorphism)
+    I, incl = image(f.m)
+
+    if I == zero(parent(f.m))
+        return zero(parent(f)), zero_morphism(zero(parent(f)), domain(f))
+    end
+
+    braiding = [id(s)⊗left_inverse(incl)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(I)), codomain(f).γ)]
+
+    Z = CenterObject(parent(domain(f)), I, braiding)
+    return Z, Morphism(Z,domain(f), incl)
 end
 
 
@@ -855,7 +870,7 @@ struct CenterHomSpace <: AbstractHomSpace
 end
 
 
-Hom(X::CenterObject, Y::CenterObject) = hom_by_linear_equations(X,Y)
+Hom(X::CenterObject, Y::CenterObject) = hom_by_adjunction(X,Y)
 
 function central_projection(dom::CenterObject, cod::CenterObject, f::Morphism, simpls = simples(parent(domain(f))))
     X = domain(f)
@@ -905,44 +920,77 @@ end
 #=------------------------------------------------
     Center by Induction
 ------------------------------------------------=#
+function add_induction!(C::CenterCategory, X::Object, IX::CenterObject)
+    if isdefined(C, :inductions)
+        if !(X ∈ keys(C.inductions))
+            push!(C.inductions, X => IX)
+        end
+    else
+        C.inductions = Dict(X => IX)
+    end
+end
 
-function simples_by_induction!(C::CenterCategory)
+function simples_by_induction!(C::CenterCategory, log = true)
     S = CenterObject[]
     d = dim(C.category)^2
 
-    if characteristic(base_ring(C)) == 0 
-        ordered_simples = sort(simples(C.category), by = fpdim)
-    else 
-        ordered_simples = simples(C.category)
+    simpls = simples(C.category)
+
+    FI_simples = []
+
+    ind_res = [induction_restriction(s) for s ∈ simpls]
+
+    # Group the simples by isomorphic inductions
+    is_iso = [s == t ? true : is_isomorphic(s,t)[1] for s ∈ ind_res, t ∈ ind_res]
+    groups = connected_components(SimpleGraph(is_iso))
+    
+    for gr ∈ groups 
+        Is = induction(simpls[gr[1]], simpls, parent_category = C)
+        push!(FI_simples, (simpls[gr[1]], ind_res[gr[1]], Is))
     end
+    
+    log && println("Simples:")
 
-    FI_simples = induction_restriction.(ordered_simples)
-    center_dim = 0
-    for (s, Is) ∈ zip(ordered_simples, FI_simples)
-        contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
-        if length(contained_simples) > 0
-            if is_isomorphic(Is, direct_sum(object.(contained_simples))[1])[1]
-                continue
-            end
-        end
+    #center_dim = 0
 
-        Z = induction(s, parent_category = C)
-        for x ∈ contained_simples
-            f = horizontal_direct_sum(basis(Hom(x,Z)))
-            Z = cokernel(f)[1]
-        end
-        new_simples = indecomposable_subobjects(Z)
+    for k ∈ eachindex(FI_simples)
 
-        if length(new_simples) == 0
-            continue
-        end
+        s, Is, Z = FI_simples[k]
+        #contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
+        # if length(contained_simples) > 0
+        #     if is_isomorphic(Is, direct_sum(object.(contained_simples))[1])[1]
+        #         continue
+        #     end
+        # end
+
+        #Z = induction(s, simpls, parent_category = C)
+
+        # for x ∈ contained_simples
+        #     f = horizontal_direct_sum(basis(Hom(x,Z)))
+        #     Z = cokernel(f)[1]
+        # end
+
+        # Compute subobjects by computing central primitive central_primitive_idempotents of End(I(X))
+        H = end_of_induction(s, Z)
+        idems = central_primitive_idempotents(H)
+        new_simples = [image(i)[1] for i ∈ idems]
+
+        # Every simple such that Hom(s, Zᵢ) ≠ 0 for an already dealt with s is not new
+        filter!(Zi -> sum(Int[int_dim(Hom(s,object(Zi))) for (s,_) ∈ FI_simples[1:k-1]]) == 0, new_simples)
+
+        # if length(new_simples) == 0
+        #     continue
+        # end
+        
+        log && println.(["    " * "$s" for s ∈ new_simples])
+
         S = [S; new_simples]
-        center_dim += sum(dim.(new_simples).^2)
+        #center_dim += sum(dim.(new_simples).^2)
         # if d == center_dim
         #     break
         # end
     end
-    C.simples = unique_simples(S)
+    C.simples = S
 end
 
 function sort_simples_by_dimension!(C::CenterCategory)  
@@ -956,6 +1004,45 @@ end
     Hom Spaces 2.0 
 ----------------------------------------------------------=#
 
+
+function hom_by_adjunction(X::CenterObject, Y::CenterObject)
+    Z = parent(X)
+    C = category(Z)
+    S = simples(C)
+
+    X_Homs = [Hom(object(X),s) for s ∈ S]
+    Y_Homs = [Hom(s,object(Y)) for s ∈ S]
+
+    candidates = [int_dim(H)*int_dim(H2) > 0 for (s,H,H2) ∈ zip(S,X_Homs,Y_Homs)]
+
+    !any(candidates) && return HomSpace(X,Y, CenterMorphism[]) 
+
+    # Take smalles s for Hom(X,I(s)) -> Hom(I(s), Y)
+    i = findfirst(==(true), candidates)
+
+    s, X_s, s_Y = S[i], X_Homs[i], Y_Homs[i]
+
+    B = induction_right_adjunction(X_s, X)
+    B2 = induction_adjunction(s_Y, Y)
+
+    # Take all combinations
+    B3 = [h ∘ b for b ∈ B, h in B2][:]
+
+    # Build basis
+    M = matrix(base_ring(C), hcat(hcat([collect(matrix(f))[:] for f in B3]...)))
+
+    r, Mrref = rref(M)
+
+    base = CenterMorphism[]
+    for k ∈ 1:r
+        f = sum([m*bi for (m,bi) ∈ zip(Mrref[k,:], B3)])
+        push!(base, f)
+    end
+
+    return HomSpace(X,Y, base)
+end
+
+
 function hom_by_linear_equations(X::CenterObject, Y::CenterObject)
     #@assert parent(X) == parent(Y)
 
@@ -968,7 +1055,7 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject)
         return HomSpace(X,Y, CenterMorphism[])
     end 
 
-    Fx,poly_basis = PolynomialRing(F,n)
+    Fx,poly_basis = polynomial_ring(F,n)
     
     eqs = []
 
@@ -990,7 +1077,7 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject)
 
     end
 
-    M = zero(MatrixSpace(F,length(eqs),n))
+    M = zero(matrix_space(F,length(eqs),n))
 
     for (i,e) ∈ zip(1:length(eqs),eqs)
         M[i,:] = [coeff(e, a) for a ∈ poly_basis]
@@ -1014,7 +1101,7 @@ function hom_by_projection(X::CenterObject, Y::CenterObject)
 
     proj_exprs = [express_in_basis(p,b) for p ∈ projs]
 
-    M = zero(MatrixSpace(base_ring(X), length(b),length(b)))
+    M = zero(matrix_space(base_ring(X), length(b),length(b)))
     for i ∈ 1:length(proj_exprs)
         M[i,:] = proj_exprs[i]
     end

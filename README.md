@@ -20,7 +20,7 @@ To use TensorCategories the structures from the [OSCAR-System](https://github.co
 
 ```@repl
 using TensorCategories, Oscar;
-F,_ = FiniteField(5)
+F = GF(5)
 G = symmetric_group(2)
 X = gset(G,[1,2,3])
 C = ConvolutionCategory(X,F)

@@ -3,7 +3,7 @@
 ----------------------------------------------------------=#
 
 G = alternating_group(4)
-F = GF(13,2)
+F = GF(13)
 
 Rep = RepresentationCategory(G,F)
 

@@ -1,4 +1,4 @@
-function *(m::MatElem{qqbar}, n::MatElem{qqbar})
+function *(m::MatElem{QQBarFieldElem}, n::MatElem{QQBarFieldElem})
     a,b = size(m)
     c,d = size(n)
     @assert b == c "Mismatching dimensions"

@@ -1,7 +1,7 @@
 using Revise, JuCat, Oscar
 
 G = symmetric_group(2)
-F = FiniteField(23)
+F = GF(23)
 Ω = [1,2,3]
 
 function act(x,g)
@@ -25,7 +25,7 @@ using Revise,JuCat, Oscar
 @elapsed begin
     n = 6
     G = symmetric_group(n)
-    F = FiniteField(23)
+    F = GF(23)
     Ω = [i for i in 1:n+1]
     X = gset(G,Ω)
 

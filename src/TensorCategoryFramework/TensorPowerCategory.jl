@@ -7,7 +7,7 @@ mutable struct TensorPowerCategory <: Category
 
     function TensorPowerCategory(X::Object...) 
         C = new()
-        C.generator = unique_simples(vcat(indecomposable_subobjects.(X)...))
+        C.generator = unique_simples(vcat([[k for (k,_) ∈ decompose(x)] for x ∈ X]...))
         C.simples = typeof(X)[]
         
         C.complete = X == zero(parent(X[1])) ? true : false
@@ -17,7 +17,7 @@ mutable struct TensorPowerCategory <: Category
 
     function TensorPowerCategory(X::Vector{<:Object})
         C = new()
-        C.generator = unique_simples(vcat(indecomposable_subobjects.(X)...))
+        C.generator = unique_simples(vcat([[k for (k,_) ∈ decompose(x)] for x ∈ X]...))
 
         C.simples = typeof(X)[]
         

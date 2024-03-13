@@ -31,7 +31,7 @@ VectorSpaces <: TensorCategory
 and can be constructed like so:
 
 ```@example VS
-F,a = FiniteField(5,2)
+F = GF(5,2)
 Vec = VectorSpaces()
 ```
 
