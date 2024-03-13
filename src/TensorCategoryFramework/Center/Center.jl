@@ -972,8 +972,8 @@ function simples_by_induction!(C::CenterCategory, log = true)
 
         # Compute subobjects by computing central primitive central_primitive_idempotents of End(I(X))
         H = end_of_induction(s, Z)
-        idems = central_primitive_idempotents(H)
-        new_simples = [image(i)[1] for i ∈ idems]
+        # idems = central_primitive_idempotents(H)
+        new_simples = [n for (n,_) ∈ decompose_by_endomorphism_ring(Z,H)]
 
         # Every simple such that Hom(s, Zᵢ) ≠ 0 for an already dealt with s is not new
         filter!(Zi -> sum(Int[int_dim(Hom(s,object(Zi))) for (s,_) ∈ FI_simples[1:k-1]]) == 0, new_simples)

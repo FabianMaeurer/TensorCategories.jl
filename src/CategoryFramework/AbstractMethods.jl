@@ -163,13 +163,14 @@ function decompose_by_endomorphism_ring(X::Object, E = End(X))
         end
         
         G = gens(R)
-        if maximum([degree(minpoly(g)) for g ∈ gens(R)]) == d
+
+        if maximum(degree.(minpoly.(G))) == d
             push!(images, x)
             continue
         end
 
         y,k = _simple_end_as_matrix_algebra(x, H) 
-        push!(images,[y for _ ∈ 1:k])
+        push!(images,[y for _ ∈ 1:k]...)
     end
 
 
@@ -226,6 +227,15 @@ function central_primitive_idempotents(H::AbstractHomSpace)
     A.issemisimple = true
     idems = central_primitive_idempotents(A)
     [sum(basis(H) .* coefficients(i)) for i ∈ idems]
+end
+
+function gens(H::AbstractHomSpace)
+    @assert H.X == H.Y "Not an endomorphism algebra"
+
+    A = endomorphism_ring(H.X, basis(H))
+    A.issemisimple = true
+    gs = gens(A)
+    [sum(basis(H) .* coefficients(i)) for i ∈ gs]
 end
 
 function is_subobject(X::Object, Y::Object)
@@ -311,12 +321,12 @@ end
 
 function _simple_end_as_matrix_algebra(X::Object, E = End(X))
     
-    B = basis(E)
+    B = gens(E)
    
     if length(B) == 1 return  (X,1) end
 
     for f ∈ B
-        eig_spaces = eigenvalues(f)
+       eig_spaces = eigenvalues(f)
         if length(eig_spaces) == 0 
             continue
             
