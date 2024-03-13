@@ -168,7 +168,7 @@ function decompose_by_endomorphism_ring(X::Object, E = End(X))
             continue
         end
 
-        y,k = _decompose_by_trial(x, H) 
+        y,k = _simple_end_as_matrix_algebra(x, H) 
         push!(images,[y for _ ∈ 1:k])
     end
 
