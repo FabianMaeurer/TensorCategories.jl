@@ -169,7 +169,7 @@ function terminal_object(C::Category)
     return zero(C)
 end
 
-compose(f::Morphism...) = reduce(compose, f)
+compose(f::T...) where T <: Morphism = reduce(compose, f)
 ∘(f::Morphism...) = compose(reverse(f)...)
 
 -(f::Morphism, g::Morphism) = f + (-1)*g
@@ -192,7 +192,7 @@ getindex(H::AbstractHomSpace, k) = getindex(basis(H),k)
 Base.length(H::AbstractHomSpace) = int_dim(H)
 Base.eltype(H::Type{T}) where T <: AbstractHomSpace = fieldtype(H, :basis).parameters[1] 
 
-function (F::Field)(f::Morphism)
+function (F::Ring)(f::Morphism)
     B = basis(Hom(domain(f), codomain(f)))
     if length(B) == 0 
         return 0

@@ -38,12 +38,17 @@ function endomorphism_ring(X::Object, base = basis(End(X)))
     return endomorphism_ring_by_basis(X,base)
 end
 
-function extension_of_scalars(R::AbsAlgAss, F::Ring)
-    A = AlgAss(F, F.(multiplication_table(R)), F.(coefficients(one(R))))
+function endomorphism_ring(X::Object, H::AbstractHomSpace)
+    @assert domain(H) == codomain(H) == X
+    endomorphism_ring(X, basis(H))
 end
 
-⊗(F::Ring, R::AbsAlgAss) = extension_of_scalars(R,F)
-⊗(R::AbsAlgAss, F::Ring) = extension_of_scalars(R,F)
+function extension_of_scalars(R::AbstractAssociativeAlgebra, F::Ring)
+    A = StructureConstantAlgebra(F, F.(multiplication_table(R)), F.(coefficients(one(R))))
+end
+
+⊗(F::Ring, R::AbstractAssociativeAlgebra) = extension_of_scalars(R,F)
+⊗(R::AbstractAssociativeAlgebra, F::Ring) = extension_of_scalars(R,F)
 
 function endomorphism_ring_by_matrices(X::Object, base = basis(End(X)))
 
@@ -63,9 +68,18 @@ function endomorphism_ring_by_basis(X::Object, base = basis(End(X)))
         mult[i,j,:] = express_in_basis(base[i] ∘ base[j], base)
     end
 
-    A = AlgAss(base_ring(X), mult)
+    A = StructureConstantAlgebra(base_ring(X), mult)
     A.one = express_in_basis(id(X), base)
     return A
+end
+
+function is_invertible(f::Morphism)
+    try
+        inv(f) 
+        return true
+    catch
+        return false
+    end
 end
 #------------------------------------------------------
 #   Image & Kernel
@@ -88,11 +102,16 @@ end
 ----------------------------------------------------------=#
 function express_in_basis(f::T, B::Vector{T}) where T <: Morphism
     F = base_ring(f)    
-    b_mat = hcat([[x for x ∈ matrix(b)][:] for b ∈ B]...)
-    B_mat = matrix(F, size(b_mat,1), size(b_mat, 2), b_mat)
-    f_mat = matrix(F, 1, *(size(matrix(f))...), [x for x ∈ matrix(f)][:])
+    # b_mat = hcat([[x for x ∈ matrix(b)][:] for b ∈ B]...)
+    # B_mat = matrix(F, size(b_mat,1), size(b_mat, 2), b_mat)
+    # f_mat = matrix(F, *(size(matrix(f))...), 1, [x for x ∈ matrix(f)][:])
+    vec_f = Morphism(matrix(f))
+    vec_basis = [Morphism(matrix(b)) for b ∈ B]
+    return express_in_basis(vec_f, vec_basis)
+end
 
-    return [x for x ∈ solve_left(transpose(B_mat),f_mat)][:]
+function express_in_basis(f::Morphism, H = Hom(domain(f), codomain(f)))
+    express_in_basis(f, basis(H))
 end
 
 function is_simple(X::Object)
@@ -113,19 +132,63 @@ decompose(X::Object) = decompose_by_endomorphism_ring(X)
 
 decompose(X::T, S::Vector{T}) where T <: Object = decompose_by_simples(X,S)
 
-function decompose_by_endomorphism_ring(X::Object)
-    base = basis(End(X))
-    end_ring = endomorphism_ring(X, base)
+# function decompose_by_endomorphism_ring(X::Object)
+#     base = basis(End(X))
+#     end_ring = endomorphism_ring(X, base)
 
-    idems = central_primitive_idempotents(end_ring)
-    idems_coefficients = coefficients.(idems)
+#     idems = central_primitive_idempotents(end_ring)
+#     idems_coefficients = coefficients.(idems)
 
-    cat_idems = [sum(c .* base) for c ∈ idems_coefficients]
-    subobjects = [image(f)[1] for f ∈ cat_idems]
+#     cat_idems = [sum(c .* base) for c ∈ idems_coefficients]
+#     subobjects = [image(f)[1] for f ∈ cat_idems]
 
-    uniques = unique_indecomposables(subobjects)
-    [(s, length(findall(r -> is_isomorphic(s,r)[1], subobjects))) for s ∈ uniques]
+#     uniques = unique_indecomposables(subobjects)
+#     [(s, length(findall(r -> is_isomorphic(s,r)[1], subobjects))) for s ∈ uniques]
+# end
+
+function decompose_by_endomorphism_ring(X::Object, E = End(X))
+    idems = central_primitive_idempotents(E)
+
+    _images = [image(f)[1] for f ∈ idems]
+
+    # Check for matrix algebras
+    images = []
+    for x ∈ _images
+        H = End(x)
+        R = endomorphism_ring(x, H)
+        d = dim(R)
+        if is_squarefree(d) || is_commutative(R) 
+            push!(images, x)
+            continue
+        end
+        
+        G = gens(R)
+
+        if maximum(degree.(minpoly.(G))) == d
+            push!(images, x)
+            continue
+        end
+
+        y,k = _simple_end_as_matrix_algebra(x, H) 
+        push!(images,[y for _ ∈ 1:k]...)
+    end
+
+
+
+    tuples = Tuple{typeof(X), Int}[]
+
+    for Y ∈ images
+        i = findfirst(Z -> is_isomorphic(Z[1],Y)[1], tuples)
+        if i === nothing
+            push!(tuples, (Y,1))
+        else
+            tuples[i] = (Y, tuples[i][2] + 1)
+        end
+    end
+
+    return tuples
 end
+
 
 function decompose_by_simples(X::Object, S = simples(parent(X)))
     C = parent(X)
@@ -144,7 +207,8 @@ function direct_sum_decomposition(X::Object, S = simples(parent(X)))
 
     # temporary solution!
     iso = is_isomorphic(X,Z)[2]
-    return Z, iso, [inv(iso)∘i for i ∈ incl], [p∘iso for p ∈ proj]
+    inv_iso = inv(iso)
+    return Z, iso, [inv_iso∘i for i ∈ incl], [p∘iso for p ∈ proj]
 
     #----------------------------------
     f = zero_morphism(X,Z)
@@ -163,6 +227,15 @@ function central_primitive_idempotents(H::AbstractHomSpace)
     A.issemisimple = true
     idems = central_primitive_idempotents(A)
     [sum(basis(H) .* coefficients(i)) for i ∈ idems]
+end
+
+function gens(H::AbstractHomSpace)
+    @assert H.X == H.Y "Not an endomorphism algebra"
+
+    A = endomorphism_ring(H.X, basis(H))
+    A.issemisimple = true
+    gs = gens(A)
+    [sum(basis(H) .* coefficients(i)) for i ∈ gs]
 end
 
 function is_subobject(X::Object, Y::Object)
@@ -195,41 +268,46 @@ function eigenvalues(f::Morphism)
     @assert domain(f) == codomain(f) "Not an endomorphism"
 
     #@show factor(minpoly(matrix(f)))
-    if base_ring(f) == QQBar
-        vals = eigenvalues(matrix(f))
-    else
-        vals = keys(spectrum(matrix(f)))
-    end
+
+    vals = eigenvalues(matrix(f))
+
 
     return Dict(λ => kernel(f-λ*id(domain(f)))[1] for λ ∈ vals)
 end
 
-function indecomposable_subobjects_by_matrix_algebra(X::Object, E = End(X))
-    if length(basis(E)) == 0
-        return typeof(X)[]
-    end
-    A = endomorphism_ring(X, basis(E))
-    dec = decompose(A)
-    if length(dec) == 1
-        return [X]
-    end
 
-    s,f = dec[1]
 
-    b = sum(coefficients(image(f,basis(s)[1])) .* basis(E))
 
-    eig_spaces = eigenvalues(b)
-    λ,_ = collect(eig_spaces)[1]
-    K,i = kernel(b - λ*id(X))
-    C,_ = cokernel(i) 
+# function indecomposable_subobjects_by_matrix_algebra(X::Object, E = End(X))
+#     if length(basis(E)) == 0
+#         return typeof(X)[]
+#     end
+#     A = endomorphism_ring(X, basis(E))
+#     dec = decompose(A)
+#     if length(dec) == 1
+#         return [X]
+#     end
 
-    return unique_simples([indecomposable_subobjects(K); indecomposable_subobjects(C)])
-end
+#     s,f = dec[1]
 
-function indecomposable_subobjects(X::Object, E = End(X))
-    @assert is_semisimple(parent(X)) "Non semisimple categories are not yet supported"
-    _indecomposable_subobjects(X,E)
-end
+#     b = sum(coefficients(image(f,basis(s)[1])) .* basis(E))
+
+#     eig_spaces = eigenvalues(b)
+#     λ,_ = collect(eig_spaces)[1]
+#     K,i = kernel(b - λ*id(X))
+#     C,_ = cokernel(i) 
+
+#     return unique_simples([indecomposable_subobjects(K); indecomposable_subobjects(C)])
+# end
+
+# function indecomposable_subobjects(X::Object, E = nothing)
+#     if is_semisimple(parent(X)) 
+#         if E === nothing  E = End(X) end
+#         return _indecomposable_subobjects(X,E)
+#     else
+#         return unique_indecomposables([x for (x,d) ∈ decompose(X)])
+#     end
+# end
 
 function minpoly(f::Morphism)
     @assert domain(f) == codomain(f) "Not an edomorphism"
@@ -241,14 +319,14 @@ function minpoly(f::Morphism)
     end
 end 
 
-function _indecomposable_subobjects(X::Object, E = End(X))
+function _simple_end_as_matrix_algebra(X::Object, E = End(X))
     
-    B = basis(E)
+    B = gens(E)
    
-    if length(B) == 1 return [X] end
+    if length(B) == 1 return  (X,1) end
 
     for f ∈ B
-        eig_spaces = eigenvalues(f)
+       eig_spaces = eigenvalues(f)
         if length(eig_spaces) == 0 
             continue
             
@@ -256,17 +334,14 @@ function _indecomposable_subobjects(X::Object, E = End(X))
             continue
         end
 
-        λ = collect(keys(eig_spaces))[1]
-        K,i = kernel(f - λ*id(X))
-        C,_ = cokernel(i)
-
-        return unique_indecomposables([_indecomposable_subobjects(K); _indecomposable_subobjects(C)])
+        
+        return (collect(values(eig_spaces))[1], length(eig_spaces))
     end
 
     if is_simple(X) 
-        return [X]
+        return (X,1)
     end
-    indecomposable_subobjects_by_matrix_algebra(X,E)    
+    error("Could not decompose")  
 end
 
 
@@ -349,7 +424,7 @@ function left_inverse(f::Morphism)
     base = basis(End(X))
 
     K = base_ring(f)
-    Kx,x = PolynomialRing(K, length(HomYX))
+    Kx,x = polynomial_ring(K, length(HomYX))
     eqs = [zero(Kx) for _ ∈ length(base)]
 
     for (g,y) ∈ zip(HomYX,x)
@@ -358,13 +433,13 @@ function left_inverse(f::Morphism)
 
     one_coeffs = express_in_basis(id(X), base)
 
-   M = zero_matrix(K,length(x),length(eqs))
+    M = zero_matrix(K,length(x),length(eqs))
     for (i,e) ∈ zip(1:length(eqs), eqs)
         M[:,i] = [coeff(e,y) for y ∈ x]
     end
   
     try 
-         N = solve_left(M, matrix(K,1,length(one_coeffs), one_coeffs))
+         N = solve(M, matrix(K,1,length(one_coeffs), one_coeffs), side = :left)
         return sum(HomYX .* collect(N[1,:])[:])
     catch e
         error("Morphism does not have a left inverse")
@@ -384,7 +459,7 @@ function right_inverse(f::Morphism)
     base = basis(End(Y))
 
     K = base_ring(f)
-    Kx,x = PolynomialRing(K, length(HomYX))
+    Kx,x = polynomial_ring(K, length(HomYX))
     eqs = [zero(Kx) for _ ∈ length(base)]
 
     for (g,y) ∈ zip(HomYX,x)
@@ -399,7 +474,7 @@ function right_inverse(f::Morphism)
     end
 
     try 
-        N = solve_left(M, matrix(K,1,length(one_coeffs), one_coeffs))
+        N = solve(M, matrix(K,1,length(one_coeffs), one_coeffs), side = :left)
         return sum(HomYX .* collect(N[1,:])[:])
     catch e
         error("Morphism does not have a right inverse")

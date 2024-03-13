@@ -75,5 +75,5 @@ is_multifusion(C::OppositeCategory) = is_multifusion(C.C)
 
 function Hom(X::OppositeObject, Y::OppositeObject)
     opposite_basis = op.(basis(Hom(X.X,Y.X)))
-    HomSpace(X,Y,opposite_basis, VectorSpaces(base_ring(X)))
+    HomSpace(X,Y,opposite_basis)
 end

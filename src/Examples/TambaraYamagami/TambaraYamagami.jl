@@ -79,7 +79,7 @@ function TambaraYamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
     
     m = Int(exponent(A))
 
-    #K,ξ = CyclotomicField(8*m, "ξ($(8*m))")
+    #K,ξ = cyclotomic_field(8*m, "ξ($(8*m))")
     
     try 
         a = sqrt(K(n))
@@ -151,7 +151,7 @@ end
     https://mathoverflow.net/questions/374021/is-there-a-non-degenerate-quadratic-form-on-every-finite-abelian-group
 ------------------------------------------------=#
 
-function nondegenerate_bilinear_form(G::GAPGroup, ξ::FieldElem = CyclotomicField(Int(exponent(G)))[2])
+function nondegenerate_bilinear_form(G::GAPGroup, ξ::FieldElem = cyclotomic_field(Int(exponent(G)))[2])
     @assert is_abelian(G)
 
     if order(G) == 1
@@ -223,7 +223,7 @@ end
 Construct the Ising fusion category where ``τ = √2`` a root and `q ∈ {1,-1}` specifies the braiding if it exists.
 """
 function Ising(F::Ring, sqrt_2::RingElem, q::Int)
-    #F,ξ = CyclotomicField(16, "ξ₁₆")
+    #F,ξ = cyclotomic_field(16, "ξ₁₆")
 
     a = sqrt_2 
     C = SixJCategory(F,["𝟙", "χ", "X"])
@@ -243,16 +243,14 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
 
     set_associator!(C,2,3,2, matrices(-id(C[3])))
     set_associator!(C,3,2,3, matrices((id(C[1]))⊕(-id(C[2]))))
-    z = zero(MatrixSpace(F,0,0))
+    z = zero(matrix_space(F,0,0))
     set_associator!(C,3,3,3, [z, z, inv(a)*matrix(F,[1 1; 1 -1])])
 
     set_one!(C,[1,0,0])
 
     set_spherical!(C, [F(1) for s ∈ simples(C)])
 
-    G = abelian_group(PcGroup, [2])
-    χ = nondegenerate_bilinear_form(G,F(-1))
-
+    
     # C = TambaraYamagami(G)
 
     # set_simples_name!(C,["𝟙","χ","X"])
@@ -263,6 +261,10 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
     # http://arxiv.org/abs/2010.00847v1 (Ex. 4.13)
     
     try 
+
+        G = abelian_group(PcGroup, [2])
+        χ = nondegenerate_bilinear_form(G,F(-1))
+
         ξ = q * root_of_unity(F,4)
 
         α = sqrt(inv(a)*(1 + ξ)) 

@@ -31,7 +31,6 @@ struct HomSpace <: AbstractHomSpace
     X::Object
     Y::Object
     basis::Vector{<:Morphism}
-    parent
 end
 
 #=----------------------------------------------------------
@@ -48,6 +47,10 @@ Return the parent category of the object X.
 """
 parent(X::Object) = X.parent
 
+parent(H::AbstractHomSpace) = VectorSpaces(base_ring(H.X))
+domain(H::AbstractHomSpace) = H.X
+codomain(H::AbstractHomSpace) = H.Y
+
 """
     function parent(f::Morphism)
 
@@ -61,7 +64,9 @@ parent(f::Morphism) = parent(domain(f))
 Return the base ring ```k``` of the ```k```-linear parent category of ```X```.
 """
 base_ring(X::Object) = base_ring(parent(X))
-base_ring(X::Morphism) = base_ring(parent(domain(X)))
+base_ring(X::Morphism) = base_ring(domain(X))
+base_ring(H::AbstractHomSpace) = base_ring(domain(H))
+
 
 """
     base_ring(C::Category)
@@ -89,12 +94,13 @@ morphism(f::Morphism) = f.morphism
     Functors
 ----------------------------------------------------------=#
 
-abstract type AbstractFunctor end
-
+abstract type AbstractFunctor  <: Object end
+abstract type Monad <: AbstractFunctor end
 
 domain(F::AbstractFunctor) = F.domain
 codomain(F::AbstractFunctor) = F.codomain
 
+base_ring(F::AbstractFunctor) = base_ring(domain(F))
 
 struct Functor <: AbstractFunctor
     domain::Category

@@ -5,7 +5,7 @@
 
 G    = symmetric_group(3)
 H    = cyclic_group(3) 
-F,ξ  = CyclotomicField(3,"ξ")
+F,ξ  = cyclotomic_field(3,"ξ")
 c    = cyclic_group_3cocycle(H,F,ξ)  
 
 VecG = GradedVectorSpaces(F,G)
@@ -27,7 +27,7 @@ end
     end
 end
 
-F,a = FiniteField(23)
+F = GF(23)
 RepG = RepresentationCategory(G,F)
 
 # @testset "Group Representation Category" begin

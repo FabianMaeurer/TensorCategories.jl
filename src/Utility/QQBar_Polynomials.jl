@@ -1,10 +1,10 @@
-function eigenvalues(M::MatElem{qqbar})
+function eigenvalues(M::MatElem{QQBarFieldElem})
     p = minpoly(M)
 
     rs = roots(p)
 end
 
-function factor(p::PolyRingElem{qqbar})
+function factor(p::PolyRingElem{QQBarFieldElem})
 
     u = leading_coefficient(p)
 
@@ -14,11 +14,11 @@ function factor(p::PolyRingElem{qqbar})
     return Fac(parent(p)(u), Dict(y - r => count(==(r), rs) for r ∈ rs))
 end
 
-# function roots(p::PolyRingElem{qqbar})
+# function roots(p::PolyRingElem{QQBarFieldElem})
 #     rs = [r for r in roots(rational_lift(p), base_ring(p)) if p(r) == 0]
 # end
 
-function roots(p::PolyRingElem{qqbar})
+function roots(p::PolyRingElem{QQBarFieldElem})
     coef_deg = maximum([degree(c) for c in coefficients(p)])
     deg = degree(p)
     max_deg = coef_deg * deg
@@ -34,7 +34,7 @@ function roots(p::PolyRingElem{qqbar})
 
     rs = roots(cp, initial_prec = prec)
 
-    QQBar_roots = qqbar[]
+    QQBar_roots = QQBarFieldElem[]
 
     for r ∈ rs
         try 
@@ -46,7 +46,7 @@ function roots(p::PolyRingElem{qqbar})
     return QQBar_roots 
 end
 
-function rational_lift(p::T) where T <: Union{PolyRingElem, MPolyElem}
+function rational_lift(p::T) where T <: Union{PolyRingElem, MPolyRingElem}
     K = base_ring(p)
     @assert characteristic(K) == 0
 
@@ -65,7 +65,7 @@ function rational_lift(p::T) where T <: Union{PolyRingElem, MPolyElem}
 
     non_rational = [!is_rational(c) for c ∈ p_coeffs]
 
-    Qx,x = PolynomialRing(QQ, Symbol.([["x$i" for i ∈ 1:sum(non_rational)]; parent(p).S]))
+    Qx,x = polynomial_ring(QQ, Symbol.([["x$i" for i ∈ 1:sum(non_rational)]; parent(p).S]))
 
     q = zero(Qx)
     l = 1
@@ -99,7 +99,7 @@ function rational_lift(I::MPolyIdeal)
     ideal(rational_lift.(gens(I)))
 end
 
-function *(k::qqbar, p::T) where T <: Union{fmpq_poly, QQMPolyRingElem}
+function *(k::QQBarFieldElem, p::T) where T <: Union{QQPolyRingElem, QQMPolyRingElem}
     if is_rational(k) 
         return roots(minpoly(k))[1]*p
     else
@@ -107,7 +107,7 @@ function *(k::qqbar, p::T) where T <: Union{fmpq_poly, QQMPolyRingElem}
     end
 end
 
-function +(k::qqbar, p::T) where T <: Union{fmpq_poly, QQMPolyRingElem}
+function +(k::QQBarFieldElem, p::T) where T <: Union{QQPolyRingElem, QQMPolyRingElem}
     if is_rational(k) 
         return roots(minpoly(k))[1] + p
     else
@@ -115,12 +115,12 @@ function +(k::qqbar, p::T) where T <: Union{fmpq_poly, QQMPolyRingElem}
     end
 end
 
-function monomials(f::PolyRingElem{qqbar})
+function monomials(f::PolyRingElem{QQBarFieldElem})
     x = gen(parent(f))
     return [x^i for i ∈ degree(f):-1:0 if coefficients(f)[i] != 0]
 end
 
-function (::QQField)(x::qqbar) 
+function (::QQField)(x::QQBarFieldElem) 
     @assert is_rational(x)
 
     return roots(minpoly(x))[1]

@@ -15,7 +15,7 @@ function cat_fr_9143()
     C = SixJCategory(K,["g0", "g3", "t2", "t1", "t0", "g4" , "g2", "g5", "g1"])
     #g0,g3,t2,t1,t0,g4,g2,g5,g1=simples(C)
     M = zeros(Int64,9,9,9)
-    #Objects gi generate the subgroup Z/6Z
+    #Objects gi generate the sub Z/6Z
     # We have gi.tj=t(i+j) modulo ;
     # tj.gi=t(j-i) modulo 3
     # ti.tj=(i-j).(g0+g3)

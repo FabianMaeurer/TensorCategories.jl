@@ -139,7 +139,7 @@ function left_dual(f::Morphism)
     Y = codomain(f)
     a = ev(Y)⊗id(dual(X))
     b = (id(dual(Y))⊗f)⊗id(dual(X))
-    c = inv(associator(dual(Y),X,dual(X)))
+    c = inv_associator(dual(Y),X,dual(X))
     d = id(dual(Y))⊗coev(X)
     (a)∘(b)∘(c)∘(d)
 end
@@ -369,7 +369,7 @@ function fpdim(X::Object)
         A[:,i] = [length(basis(Hom(X⊗Y,S[j])))//end_dims[i] for j ∈ 1:n]
     end
 
-    λ = eigenvalues(matrix(QQ,A),K)
+    λ = eigenvalues(K, matrix(QQ,A))
     filter!(e -> isreal(e), λ)
     return findmax(e -> abs(e), λ)[1]
 
@@ -387,7 +387,9 @@ end
 
 function fpdim(C::Category)
     @assert is_fusion(C)
-    sum(fpdim.(simples(C)).^2)
+    S = simples(C)
+    d = int_dim(End(one(C)))
+    sum(d .* fpdim.(S).^2 .// (int_dim.(End.(S))))
 end
 
 

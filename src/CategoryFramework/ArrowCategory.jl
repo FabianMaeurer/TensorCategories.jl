@@ -184,7 +184,7 @@ function tensor_product(f::ArrowMorphism, g::ArrowMorphism)
     base_2 = basis(Hom(domain(mor_2), codomain(mor_2)))
     n = length(base_1) + length(base_2)
 
-    Rx,x = PolynomialRing(K, length(base))
+    Rx,x = polynomial_ring(K, length(base))
 
     eqs = [zero(Rx) for _ ∈ 1:n]
 
@@ -201,7 +201,7 @@ function tensor_product(f::ArrowMorphism, g::ArrowMorphism)
     M = matrix(K, length(base), length(eqs), M_arr)
     b = matrix(K, 1, length(eqs), b_arr)
 
-    s = solve_left(M,b)
+    s = solve(M,b)
 
     l = sum(collect(s)[:] .* base)
     
@@ -228,12 +228,12 @@ function Hom(X::ArrowObject, Y::ArrowObject)
     n,m = length(base_dom), length(base_cod)
 
     if n+m == 0 
-        return HomSpace(X,Y, ArrowMorphism[], VectorSpaces(base_ring(X)))
+        return HomSpace(X,Y, ArrowMorphism[])
     end
 
     F = base_ring(X)
 
-    Rx,x = PolynomialRing(F, n+m)
+    Rx,x = polynomial_ring(F, n+m)
 
     eqs = [zero(Rx) for _ ∈ length(base)]
 
@@ -265,7 +265,7 @@ function Hom(X::ArrowObject, Y::ArrowObject)
 
     B = ArrowMorphism[Morphism(X,Y, l, r) for (l,r) ∈ B]
 
-    return HomSpace(X,Y, unique_without_hash(B), VectorSpaces(F))
+    return HomSpace(X,Y, unique_without_hash(B))
 end
     
 

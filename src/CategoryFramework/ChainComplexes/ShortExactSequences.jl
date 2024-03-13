@@ -153,7 +153,7 @@ function Hom(S::ShortExactSequence, T::ShortExactSequence)
         N_2 = matrix(F, length(base_2), 1, express_in_basis(g∘s2, base_2))
         N = [N_1; N_2]
 
-        sols = solve_left(transpose(M),transpose(N))
+        sols = solve(transpose(M),transpose(N))
 
         n,m = size(sols)
 
@@ -170,7 +170,7 @@ function Hom(S::ShortExactSequence, T::ShortExactSequence)
         base = [base; [ShortExactSequenceMorphism(S, T, f, sum(b .* base_Y), g) for b ∈ B]]
     end
 
-    return HomSpace(S, T, base, VectorSpaces(F))
+    return HomSpace(S, T, base)
 end
 
 

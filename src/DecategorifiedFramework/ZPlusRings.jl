@@ -2,23 +2,23 @@
     Structures for ℤ₊-Rings  
 ----------------------------------------------------------=#
 
-@attributes mutable struct ZPlusRing <: AbsAlgAss{fmpz}
-    algebra::AbsAlgAss{fmpz}
+@attributes mutable struct ZPlusRing <: AbstractAssociativeAlgebra{ZZRingElem}
+    algebra::AbstractAssociativeAlgebra{ZZRingElem}
     basis_names::Vector{String}
 
-    function ZPlusRing(mult_table::Array{fmpz,3}) 
+    function ZPlusRing(mult_table::Array{ZZRingElem,3}) 
         A = new()
-        A.algebra = AlgAss(ZZ, mult_table)
+        A.algebra = StructureConstantAlgebra(ZZ, mult_table)
         A.basis_names = ["x$i" for i ∈ 1:size(mult_table)[1]]
         return A
     end
-    function ZPlusRing(mult_table::Array{fmpz,3}, one::Vector{fmpz}) 
+    function ZPlusRing(mult_table::Array{ZZRingElem,3}, one::Vector{ZZRingElem}) 
         A = new()
-        A.algebra = AlgAss(ZZ, mult_table,one)
+        A.algebra = StructureConstantAlgebra(ZZ, mult_table,one)
         A.basis_names = ["x$i" for i ∈ 1:size(mult_table)[1]]
         return A
     end
-    function ZPlusRing(A::AbsAlgAss)
+    function ZPlusRing(A::AbstractAssociativeAlgebra)
         @assert base_ring(A) == ZZ
         B = new()
         B.algebra = A
@@ -37,9 +37,9 @@ end
 @alias ℤ₊Ring ZPlusRing
 @alias ℕRing ZPlusRing
 
-struct ZPlusRingElem <: AbsAlgAssElem{fmpz}
+struct ZPlusRingElem <: AbstractAssociativeAlgebraElem{ZZRingElem}
     parent::ZPlusRing
-    elem::AbsAlgAssElem{fmpz}
+    elem::AbstractAssociativeAlgebraElem{ZZRingElem}
 end
 
 @alias ℤ₊RingElem ZPlusRingElem
@@ -51,19 +51,19 @@ parent(x::ℕRingElem) = x.parent
 base_ring(::ℕRing) = ZZ
 base_ring(::ℕRingElem) = ZZ
 
-AlgAss(R::ℕRing) = R.algebra
-AlgAssElem(x::ℕRingElem) = x.elem
+StructureConstantAlgebra(R::ℕRing) = R.algebra
+AssociativeAlgebraElem(x::ℕRingElem) = x.elem
 
-has_one(R::ℕRing) = has_one(AlgAss(R))
-one(R::ℕRing) = ℕRingElem(R, one(AlgAss(R)))
-zero(R::ℕRing) = ℕRingElem(R, zero(AlgAss(R)))
+has_one(R::ℕRing) = has_one(StructureConstantAlgebra(R))
+one(R::ℕRing) = ℕRingElem(R, one(StructureConstantAlgebra(R)))
+zero(R::ℕRing) = ℕRingElem(R, zero(StructureConstantAlgebra(R)))
 
-basis(R::ℕRing) = [ℕRingElem(R, b) for b ∈ basis(AlgAss(R))]
+basis(R::ℕRing) = [ℕRingElem(R, b) for b ∈ basis(StructureConstantAlgebra(R))]
 getindex(R::ℕRing, k::Int) = basis(R)[k]
 
-coefficients(x::ℕRingElem) = coefficients(AlgAssElem(x))
+coefficients(x::ℕRingElem) = coefficients(AssociativeAlgebraElem(x))
 
-(A::ℕRing)(c::Vector{fmpz}) = ℕRingElem(A, AlgAssElem{ZZRingElem, typeof(A.algebra)}(A.algebra, c))
+(A::ℕRing)(c::Vector{ZZRingElem}) = ℕRingElem(A, AssociativeAlgebraElem{ZZRingElem, typeof(A.algebra)}(A.algebra, c))
 
 multiplication_table(R::ℕRing) = R.algebra.mult_table
 print_multiplication_table(R::ℕRing) = print_multiplication_table(multiplication_table(R))
@@ -76,14 +76,14 @@ end
     ℤ₊RingElem Operations 
 ----------------------------------------------------------=#
 
-+(x::ℕRingElem, y::ℕRingElem) = ℕRingElem(parent(x), AlgAssElem(x) +  AlgAssElem(y))
--(x::ℕRingElem, y::ℕRingElem) = ℕRingElem(parent(x), AlgAssElem(x) -  AlgAssElem(y))
-*(x::ℕRingElem, y::ℕRingElem) = ℕRingElem(parent(x), AlgAssElem(x) *  AlgAssElem(y))
++(x::ℕRingElem, y::ℕRingElem) = ℕRingElem(parent(x), AssociativeAlgebraElem(x) +  AssociativeAlgebraElem(y))
+-(x::ℕRingElem, y::ℕRingElem) = ℕRingElem(parent(x), AssociativeAlgebraElem(x) -  AssociativeAlgebraElem(y))
+*(x::ℕRingElem, y::ℕRingElem) = ℕRingElem(parent(x), AssociativeAlgebraElem(x) *  AssociativeAlgebraElem(y))
 
-div(x::ℕRingElem, y::ℕRingElem) = ℕRingElem(parent(x), div(AlgAssElem(x) ,AlgAssElem(y)))
+div(x::ℕRingElem, y::ℕRingElem) = ℕRingElem(parent(x), div(AssociativeAlgebraElem(x) ,AssociativeAlgebraElem(y)))
 
-*(λ::RingElem, x::ℕRingElem) = ℕRingElem(parent(x), λ*AlgAssElem(x))
-*(λ::Int, x::ℕRingElem) = ℕRingElem(parent(x), λ*AlgAssElem(x))
+*(λ::RingElem, x::ℕRingElem) = ℕRingElem(parent(x), λ*AssociativeAlgebraElem(x))
+*(λ::Int, x::ℕRingElem) = ℕRingElem(parent(x), λ*AssociativeAlgebraElem(x))
 
 function ^(x::ℕRingElem, k::Int) 
     if k == 0  
@@ -110,7 +110,7 @@ end
 
 
 function extension_of_scalars(A::ℕRing, K::Field)
-    AlgAss(K,K.(A.algebra.mult_table), K.(A.algebra.one))
+    StructureConstantAlgebra(K,K.(A.algebra.mult_table), K.(A.algebra.one))
 end
 
 ⊗(A::ℕRing, K::Field) = extension_of_scalars(A,K)

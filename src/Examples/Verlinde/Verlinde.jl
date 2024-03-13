@@ -142,4 +142,4 @@ function Verlinde(K::Ring, m::Int, l::Int = 1, k::Int = 1)
    	return C
 end
 
-Verlinde(m::Int, l::Int = 1, k::Int = 1) = Verlinde(CyclotomicField(2*m+2)[1],m, l, k)
+Verlinde(m::Int, l::Int = 1, k::Int = 1) = Verlinde(cyclotomic_field(2*m+2)[1],m, l, k)

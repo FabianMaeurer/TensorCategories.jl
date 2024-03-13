@@ -3,36 +3,41 @@ module TensorCategories
 import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show,div
 
 import Oscar.AbstractAlgebra.Generic: Poly
-import Oscar.Hecke: NfRel
-import Oscar: +, @alias, @attributes, AbstractSet, AcbField, AlgAss, AlgAssElem,
-    CyclotomicField, Fac, Field, FieldElem, FinField, FiniteField, GAP, GAPGroup,
-    GAPGroupHomomorphism, GL, GSet, GroupElem, GroupsCore, Hecke.AbsAlgAss,
-    Hecke.AbsAlgAssElem, Ideal, MPolyElem, MPolyIdeal, MPolyQuo, Map, MatElem, MatrixElem,
-    MatrixGroup, MatrixSpace, ModuleIsomorphism, NumberField, PcGroup, PolyRingElem,
-    PolynomialRing, QQ, QQBar, QQField, QQFieldElem, QQMPolyRingElem, Ring, RingElem, ZZ,
+import Oscar.Hecke: RelSimpleNumField
+import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAlgebra, AssociativeAlgebraElem,
+    cyclotomic_field, Fac, Field, FieldElem, FinField, GF, GAP, GAPGroup,
+    GAPGroupHomomorphism, GL, GSet, GroupElem, Hecke.AbstractAssociativeAlgebra,
+    Hecke.AbstractAssociativeAlgebraElem, Ideal, MPolyRingElem, MPolyIdeal, Map, MatElem, MatrixElem,
+    MatrixGroup, matrix_space, ModuleIsomorphism, number_field, PcGroup, PolyRingElem,
+    polynomial_ring, QQ, QQBar, QQField, QQFieldElem, QQMPolyRingElem, Ring, RingElem, ZZ, QQBarFieldElem,
     ZZRingElem, abelian_closure, abelian_group, absolute_simple_field, action, base_field,
     base_ring, basis, central_primitive_idempotents, change_base_ring, characteristic,
     charpoly, codomain, coeff, coefficients, cokernel, complex_embeddings, compose,
     cyclotomic_field, decompose, degree, det, diagonal_matrix, dim, direct_sum, divisors,
     domain, dual, eigenspace, eigenspaces, eigenvalues, elem_type, elements, exponent,
-    exponents, factor, fmpq, fmpq_poly, fmpz, gcd, gen, gens, get_attribute, get_attribute!,
+    exponents, factor, QQFieldElem, QQPolyRingElem, ZZRingElem, gcd, gen, gens, get_attribute, get_attribute!,
     gmodule, groebner_basis, group_algebra, gset, guess, has_attribute, height_bits, hnf,
     hom, id, ideal, identity_matrix, image, index, inv, involution, irreducible_modules,
     is_abelian, is_central, is_finite, is_invertible, is_isomorphic, is_modular,
     is_rational, is_semisimple, is_simple, is_square, is_subfield, is_subgroup,
-    iscommutative, isconstant, isindependent, isinvertible, iso_oscar_gap,
+    is_independent, is_invertible, iso_oscar_gap,
     jordan_normal_form, kernel, kronecker_product, lcm, leading_coefficient,
     leading_monomial, left_transversal, lex, load, matrix, matrix_algebra, minpoly,
-    monomials, multiplication_table, multiplicity, nf_elem, nullspace, nvars, one, orbit,
-    orbits, order, parent, permutation_matrix, preimage, primary_decomposition, product,
-    qqbar, rank, real_solutions, resultant, root_of_unity, roots, rref, save,
-    set_attribute!, size, solve, solve_left, sparse_matrix, spectrum, splitting_field,
-    stabilizer, subgroup, subst, symbols, symmetric_group, tensor_power, tensor_product, tr,
-    trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗, AnticNumberField
+    monomials, multiplication_table, multiplicity, nullspace, nvars, one, orbit,
+    orbits, order, parent, permutation_matrix, preimage, primary_decomposition, product, rank, real_solutions, resultant, root_of_unity, roots, rref, save,
+    set_attribute!, size, solve, sparse_matrix, splitting_field,
+    stabilizer, sub, subst, symbols, symmetric_group, tensor_power, tensor_product, tr,
+    trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗, AbsSimpleNumField,
+    number_of_rows, number_of_columns, is_squarefree, is_commutative, gens
+
+import Graphs: SimpleDiGraph, weakly_connected_components,
+            SimpleGraph,connected_components
+
 
 using InteractiveUtils
 using Memoization
 using SparseArrays
+
 
 export - 
 export * 
@@ -161,7 +166,10 @@ export indecomposables
 export induction 
 export Induction 
 export induction_adjunction
+export induction_monad
 export induction_restriction
+export induction_right_adjunction
+export InductionMonad
 export int_dim 
 export inv 
 export inv_associator 
@@ -190,13 +198,14 @@ export is_ring
 export is_semisimple 
 export is_simple 
 export is_spherical 
+export is_split_semisimple
 export is_subobject 
 export is_tensor 
 export is_zero
 export isequivariant 
 export isgraded 
 export Ising 
-export isinvertible
+export is_invertible
 export karoubian_envelope 
 export kernel 
 export left_dual 
@@ -204,6 +213,7 @@ export left_inverse
 export LeftModule
 export LeftModuleCategory
 export LeftModuleObject
+export LeftTensorProductFunctor
 export left_trace 
 export load 
 export matrices 
@@ -211,10 +221,16 @@ export matrix
 export ModuleCategory
 export ModuleMorphism
 export ModuleObject
+export Monad
+export MonadModule
+export MonadModuleMorphism
+export MonadModules
 export Morphism, morphism 
 export multiplication
 export multiplication_table 
 export multiplicity
+export NaturalTransformation
+export Nat
 export normalized_smatrix 
 export object 
 export object_type 
@@ -242,7 +258,6 @@ export Pushforward
 export PushforwardFunctor 
 export pushout
 export pushout_product
-export QQBar
 export QuantumZZRing
 export QuantumZZRingElem
 export QZZ
@@ -258,6 +273,7 @@ export right_inverse
 export RightModule
 export RightModuleCategory
 export RightModuleObject
+export RightTensorProductFunctor
 export right_trace 
 export RingCatMorphism 
 export RingSubcategory 
@@ -322,8 +338,6 @@ export ZPlusRing, ℕRing, ℤ₊Ring
 export ZPlusRingElem, ℕRingElem, ℤ₊RingElem
 
 
-
-
 include("CategoryFramework/AbstractTypes.jl")
 include("CategoryFramework/AbstractMethods.jl")
 include("CategoryFramework/FrameworkChecks.jl")
@@ -353,6 +367,7 @@ include("Examples/GroupRepresentations/Representations.jl")
 include("Examples/GroupRepresentations/GroupRepresentations.jl")
 include("Examples/ConvolutionCategory/CoherentSheaves.jl")
 include("Examples/ConvolutionCategory/ConvolutionCategory.jl")
+include("CategoryFramework/NaturalTransformations.jl")
 
 
 include("DecategorifiedFramework/multiplication_table.jl")
@@ -372,8 +387,11 @@ include("TensorCategoryFramework/TensorFunctors.jl")
 include("TensorCategoryFramework/Center/Center.jl")
 include("TensorCategoryFramework/Center/Induction.jl")
 include("TensorCategoryFramework/Center/CenterChecks.jl")
+include("TensorCategoryFramework/Center/InductionMonad.jl")
+
 include("TensorCategoryFramework/InternalModules/InternalAlgebras.jl")
 include("TensorCategoryFramework/InternalModules/ModuleCategories.jl")
+include("TensorCategoryFramework/ModuleCategories/MonadModules.jl")
 
 
 include("Examples/Verlinde/I2-fusion.jl")
@@ -384,7 +402,7 @@ include("Examples/Fibonacci/FibonacciCategory.jl")
 include("Examples/VercleyenSingerland/FR_8211/fr_8211.jl")
 include("Examples/VercleyenSingerland/FR_9143/fr_9143.jl")
 include("Examples/E6Subfactor/E6subfactor.jl")
-include("Examples/Haagerup/Haagerup.jl")
+include("Examples/Haagerup/HaagerupH3.jl")
 
 
 

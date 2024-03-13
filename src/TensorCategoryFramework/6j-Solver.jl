@@ -17,7 +17,7 @@ function pentagon_equations(mult::Array{Int,3}, one::Vector{Int})
 
     duals = [findfirst( ==(dual(s)), simples(_C)) for s ∈ simples(_C)]
     
-    R,x = PolynomialRing(QQ, var_count)
+    R,x = polynomial_ring(QQ, var_count)
 
     y = deepcopy(x)
     
@@ -97,12 +97,12 @@ function split_ideal(I::MPolyIdeal)
     
     var_names_in_A = var_names[contained]
 
-    R2,y = PolynomialRing(base_ring(R), var_names_in_A)
+    R2,y = polynomial_ring(base_ring(R), var_names_in_A)
     x = [c ? popfirst!(y) : 0 for c ∈ contained]
 
     var_names_in_rest = var_names[contained .⊻ true]
 
-    R3,y = PolynomialRing(base_ring(R), var_names_in_rest)
+    R3,y = polynomial_ring(base_ring(R), var_names_in_rest)
     x2 = [!c ? popfirst!(y) : 0 for c ∈ contained]
 
     return [ideal([f(x...) for f ∈ A]); split_ideal(ideal([f(x2...) for f ∈ not_taken]))]
@@ -120,7 +120,7 @@ function _solve_fewnomial_system(I::Ideal, i::Int = 1)
         if length(B) == 0 
             return [(1,)]
         end
-        R,x = PolynomialRing(QQ,:x)
+        R,x = polynomial_ring(QQ,:x)
         C = [f([ones(Int,n-1);x]...) for f ∈ B]
         rs = roots(gcd(C))
         return [(r,) for r ∈ rs]

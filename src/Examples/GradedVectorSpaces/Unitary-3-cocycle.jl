@@ -6,7 +6,7 @@
 
 function exponent_of_homology(G,k)
 	torsion_coefficients=GAP.Globals.GroupHomology(G.X,k)
-	torsion_coefficients=Vector{fmpz}(GAP.gap_to_julia(torsion_coefficients))
+	torsion_coefficients=Vector{ZZRingElem}(GAP.gap_to_julia(torsion_coefficients))
 	return length(torsion_coefficients) != 0 ? lcm(torsion_coefficients) : 1
 end
 
@@ -22,7 +22,7 @@ function unitary_cocycle(G::GAPGroup, K::Field, k::Int, i::Int = 2)
 	ρ = root_of_unity(K,Int(n))
 	
 	x = gens(symmetric_group(Int(n)))[1]  #We create a cyclic group of order n
-	B,g=subgroup(x)
+	B,g=sub(x)
 	D = Dict{NTuple{k,elem_type(G)},elem_type(parent(ρ))}()
 
 	A=GAP.Globals.TrivialGModuleAsGOuterGroup(G.X,B.X) #This is the cyclic group encoded as a trivial G-module;We need this weird G.X notation to get GAP elements; Need GAP.Globals because tehre is no wrapper for HAP
@@ -57,7 +57,7 @@ function TwistedGradedVectorSpaces(G::GAPGroup, K::Field, i::Int = 2, j::Int = 1
 	GAP.Packages.install("HAP")
 	GAP.Packages.load("HAP") 
     
-    #K,ρ=CyclotomicField(6*Int(n),"ρ") #for some reason cyclotomic_field wants Int64...
+    #K,ρ=cyclotomic_field(6*Int(n),"ρ") #for some reason cyclotomic_field wants Int64...
 	ξ = unitary_cocycle(G,K,3,i) #One must know whetever we have i many classes
 	braid = unitary_cocycle(G,K,2,j)
     return GradedVectorSpaces(K,G,ξ,braid)

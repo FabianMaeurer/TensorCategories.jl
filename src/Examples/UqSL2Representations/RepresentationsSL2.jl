@@ -310,7 +310,7 @@ function Hom(X::UqSl2rep, Y::UqSl2rep)
 
     d = sum([x*y for (x,y) ∈ zip(Xi,Yi)])
 
-    if d == 0 return HomSpace(X,Y,UqSl2repMorphism[], VectorSpaces(F)) end
+    if d == 0 return HomSpace(X,Y,UqSl2repMorphism[]) end
 
     basis = [zero_morphism(X,Y).m for i ∈ 1:d]
     next = 1
@@ -322,7 +322,7 @@ function Hom(X::UqSl2rep, Y::UqSl2rep)
         end
     end
     basis_mors = [Morphism(X,Y,m) for m ∈ basis]
-    return HomSpace(X,Y,basis_mors, VectorSpaces(F))
+    return HomSpace(X,Y,basis_mors)
 end
 #=----------------------------------------------------------
     pretty printing 

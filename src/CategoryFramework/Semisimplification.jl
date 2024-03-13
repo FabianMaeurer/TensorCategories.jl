@@ -113,7 +113,7 @@ function Hom(X::SemisimplifiedObject, Y::SemisimplifiedObject)
     F = base_ring(X)
 
     if length(base_XY) == 0
-        return HomSpace(X,Y,SemisimplifiedMorphism[], VectorSpaces(F))
+        return HomSpace(X,Y,SemisimplifiedMorphism[])
     end
 
     if length(base_YX) == 0
@@ -137,7 +137,7 @@ function Hom(X::SemisimplifiedObject, Y::SemisimplifiedObject)
     end
     filter!(e -> e != zero_morphism(object(X), object(Y)), base)
 
-    HomSpace(X,Y,base, VectorSpaces(F))
+    HomSpace(X,Y,base)
 end
 
 function id(X::SemisimplifiedObject)

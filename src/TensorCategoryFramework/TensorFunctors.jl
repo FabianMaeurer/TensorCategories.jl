@@ -19,6 +19,47 @@ end
 
 ⊗(C::Category) = TensorProductFunctor(C)
 
+#=----------------------------------------------------------
+    Functor  X ⊗ - : C → C 
+----------------------------------------------------------=#
+
+struct LeftTensorProductFunctor <: AbstractFunctor
+    domain::Category
+    codomain::Category 
+    object::Object
+end
+
+(F::LeftTensorProductFunctor)(X::Object) = F.object ⊗ X
+(F::LeftTensorProductFunctor)(f::Morphism) = id(F.object) ⊗ f
+
+function LeftTensorProductFunctor(X::Object) 
+    LeftTensorProductFunctor(parent(X),parent(X), X)
+end
+
+⊗(X::Object, ::typeof(-)) = LeftTensorProductFunctor(X)
+
+is_additive(T::LeftTensorProductFunctor) = is_additive(domain(T))
+
+#=----------------------------------------------------------
+    Functor  - ⊗ X : C → C 
+----------------------------------------------------------=#
+
+struct RightTensorProductFunctor <: AbstractFunctor
+    domain::Category
+    codomain::Category
+    object::Object 
+end
+
+(F::RightTensorProductFunctor)(X::Object) = X ⊗ F.object 
+(F::RightTensorProductFunctor)(f::Morphism) = f ⊗ id(F.object)
+
+function RightTensorProductFunctor(X::Object) 
+    RightTensorProductFunctor(parent(X),parent(X), X)
+end
+
+⊗(::typeof(-), X::Object) = RightTensorProductFunctor(X)
+
+is_additive(T::RightTensorProductFunctor) = is_additive(domain(T))
 
 #-------------------------------------------------------------------------------
 #   Restriction and Induction

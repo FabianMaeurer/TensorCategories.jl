@@ -1,12 +1,12 @@
 function multiplication_table(C::Category, indecomposables::Vector{<:Object} = indecomposables(C))
-    @assert is_multitensor(C) "Category needs to be multitensor"
+    #@assert is_multitensor(C) "Category needs to be multitensor"
     #m = [s⊗t for s ∈ indecomposables, t ∈ indecomposables]
     coeffs = [coefficients(s⊗t, indecomposables) for s ∈ indecomposables, t ∈ indecomposables]
     return [c[k] for c ∈ coeffs, k ∈ 1:length(indecomposables)]
 end
 
 function multiplication_table(indecomposables::Vector{<:Object})
-    @assert is_semisimple(parent(indecomposables[1])) "Category needs to be semi-simple"
+    #@assert is_semisimple(parent(indecomposables[1])) "Category needs to be semi-simple"
 
     return multiplication_table(parent(indecomposables[1]), indecomposables)
 end

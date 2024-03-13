@@ -127,10 +127,10 @@ function Hom(X::LeftModuleObject, Y::LeftModuleObject)
     A = algebra(parent(X))
 
     if n == 0 
-        return HomSpace(X,Y, ModuleMorphism[], VectorSpaces(F))
+        return HomSpace(X,Y, ModuleMorphism[])
     end 
 
-    Fx,poly_basis = PolynomialRing(F,n)
+    Fx,poly_basis = polynomial_ring(F,n)
 
     base = basis(Hom(object(A)⊗object(X), object(Y)))
 
@@ -145,7 +145,7 @@ function Hom(X::LeftModuleObject, Y::LeftModuleObject)
     end
     
 
-    M = zero(MatrixSpace(F,length(eqs),n))
+    M = zero(matrix_space(F,length(eqs),n))
 
     for (i,e) ∈ zip(1:length(eqs),eqs)
         M[i,:] = [coeff(e, a) for a ∈ poly_basis]
@@ -159,7 +159,7 @@ function Hom(X::LeftModuleObject, Y::LeftModuleObject)
 
     module_hom_basis = [Morphism(X,Y,sum(b .* B)) for b ∈ basis_coeffs]
 
-    return HomSpace(X,Y,module_hom_basis, VectorSpaces(F))
+    return HomSpace(X,Y,module_hom_basis)
 end
 
 function Hom(X::RightModuleObject, Y::RightModuleObject)
@@ -171,10 +171,10 @@ function Hom(X::RightModuleObject, Y::RightModuleObject)
     A = algebra(parent(X))
 
     if n == 0 
-        return HomSpace(X,Y, ModuleMorphism[], VectorSpaces(F))
+        return HomSpace(X,Y, ModuleMorphism[])
     end 
 
-    Fx,poly_basis = PolynomialRing(F,n)
+    Fx,poly_basis = polynomial_ring(F,n)
 
     base = basis(Hom(object(A)⊗object(X), object(Y)))
 
@@ -189,7 +189,7 @@ function Hom(X::RightModuleObject, Y::RightModuleObject)
     end
     
 
-    M = zero(MatrixSpace(F,length(eqs),n))
+    M = zero(matrix_space(F,length(eqs),n))
 
     for (i,e) ∈ zip(1:length(eqs),eqs)
         M[i,:] = [coeff(e, a) for a ∈ poly_basis]
@@ -203,7 +203,7 @@ function Hom(X::RightModuleObject, Y::RightModuleObject)
 
     module_hom_basis = [Morphism(X,Y,sum(b .* B)) for b ∈ basis_coeffs]
 
-    return HomSpace(X,Y,module_hom_basis, VectorSpaces(F))
+    return HomSpace(X,Y,module_hom_basis)
 end
 
 #=----------------------------------------------------------
