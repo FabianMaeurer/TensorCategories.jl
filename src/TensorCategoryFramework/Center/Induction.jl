@@ -144,7 +144,7 @@ function induction_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = inducti
 
     simpls = simples(parent(H[1]))
 
-    ind_f = [(dim(xi))*compose(
+    ind_f = [dim(xi)*compose(
         inv(half_braiding(Y, xi)) ⊗ id(dual(xi)),
         associator(object(Y), xi, dual(xi)),
         id(object(Y)) ⊗ (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi))))

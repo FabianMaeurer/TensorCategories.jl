@@ -3,6 +3,7 @@ mutable struct CenterCategory <: Category
     category::Category
     simples::Vector{O} where O <: Object
     inductions::Dict{<:Object,<:Object}
+    induction_gens::Vector{Object}
 
     function CenterCategory(F::Ring, C::Category)
         Z = new()
@@ -46,6 +47,20 @@ function isequal_without_parent(X::CenterObject, Y::CenterObject)
 end
 
 is_multifusion(C::CenterCategory) = is_multifusion(category(C))
+
+function induction_generators(C::CenterCategory) 
+    if isdefined(C, :induction_gens)
+        return C.induction_gens
+    end
+    simpls = simples(category(C))
+    ind_res = [induction_restriction(s) for s ∈ simpls]
+
+    # Group the simples by isomorphic inductions
+    is_iso = [s == t ? true : is_isomorphic(s,t)[1] for s ∈ ind_res, t ∈ ind_res]
+    groups = connected_components(SimpleGraph(is_iso))
+
+    C.induction_gens = [simpls[g[1]] for g ∈ groups]
+end
 #-------------------------------------------------------------------------------
 #   Center Constructor
 #-------------------------------------------------------------------------------
@@ -614,39 +629,39 @@ function decompose(X::CenterObject, S::Vector{CenterObject})
     decompose_by_simples(X,S)
 end
 
-function indecomposable_subobjects(X::CenterObject)
+# function indecomposable_subobjects(X::CenterObject)
 
-    !is_split_semisimple(category(parent(X))) && return _indecomposable_subobjects(X)
-
-
-    B = basis(End(object(X)))
-
-    if length(B) == 1
-        return [X]
-    end
-
-    S = simples(parent(object(X)))
-
-    if length(B) ≤ length(S)^2
-        return _indecomposable_subobjects(X)
-    end
-
-    eig_spaces = []
+#     !is_split_semisimple(category(parent(X))) && return _indecomposable_subobjects(X)
 
 
-    while length(eig_spaces) ≤ 1 && length(B) > 0
-        f = popat!(B, rand(eachindex(B)))
-        proj_f = central_projection(X,X,f,S)
-        eig_spaces = collect(values(eigenvalues(proj_f)))
-    end
+#     B = basis(End(object(X)))
 
-    if length(eig_spaces) ≤ 1 
-        is_simple(X) && return [X]
-        return [x for (x,k) ∈ decompose(X)]
-    end
+#     if length(B) == 1
+#         return [X]
+#     end
 
-    return unique_simples(vcat([indecomposable_subobjects(Y) for Y ∈ eig_spaces]...))
-end
+#     S = simples(parent(object(X)))
+
+#     if length(B) ≤ length(S)^2
+#         return _indecomposable_subobjects(X)
+#     end
+
+#     eig_spaces = []
+
+
+#     while length(eig_spaces) ≤ 1 && length(B) > 0
+#         f = popat!(B, rand(eachindex(B)))
+#         proj_f = central_projection(X,X,f,S)
+#         eig_spaces = collect(values(eigenvalues(proj_f)))
+#     end
+
+#     if length(eig_spaces) ≤ 1 
+#         is_simple(X) && return [X]
+#         return [x for (x,k) ∈ decompose(X)]
+#     end
+
+#     return unique_simples(vcat([indecomposable_subobjects(Y) for Y ∈ eig_spaces]...))
+# end
 
 function indecomposable_subobjects_of_induction(X::Object, IX::CenterObject = induction(X))
     @assert object(IX) == X
@@ -947,6 +962,7 @@ function simples_by_induction!(C::CenterCategory, log = true)
     for gr ∈ groups 
         Is = induction(simpls[gr[1]], simpls, parent_category = C)
         push!(FI_simples, (simpls[gr[1]], ind_res[gr[1]], Is))
+        push!(C.induction_gens, simpls[gr[1]])
     end
     
     log && println("Simples:")
@@ -1008,7 +1024,7 @@ end
 function hom_by_adjunction(X::CenterObject, Y::CenterObject)
     Z = parent(X)
     C = category(Z)
-    S = simples(C)
+    S = induction_generators(Z)
 
     X_Homs = [Hom(object(X),s) for s ∈ S]
     Y_Homs = [Hom(s,object(Y)) for s ∈ S]
@@ -1018,24 +1034,30 @@ function hom_by_adjunction(X::CenterObject, Y::CenterObject)
     !any(candidates) && return HomSpace(X,Y, CenterMorphism[]) 
 
     # Take smalles s for Hom(X,I(s)) -> Hom(I(s), Y)
-    i = findfirst(==(true), candidates)
+    X_Homs = X_Homs[candidates]
+    Y_Homs = Y_Homs[candidates]
+    
 
-    s, X_s, s_Y = S[i], X_Homs[i], Y_Homs[i]
+    M = zero_matrix(base_ring(C),0,*(size(matrix(zero_morphism(X,Y)))...))
 
-    B = induction_right_adjunction(X_s, X)
-    B2 = induction_adjunction(s_Y, Y)
+    mors = []
 
-    # Take all combinations
-    B3 = [h ∘ b for b ∈ B, h in B2][:]
+    for (s, X_s, s_Y) ∈ zip(S[candidates], X_Homs, Y_Homs)
+        Is = induction(s, parent_category = Z)
+        B = induction_right_adjunction(X_s, X, Is)
+        B2 = induction_adjunction(s_Y, Y, Is)
 
-    # Build basis
-    M = matrix(base_ring(C), hcat(hcat([collect(matrix(f))[:] for f in B3]...)))
-
+        # Take all combinations
+        B3 = [h ∘ b for b ∈ B, h in B2][:]
+        mors = [mors; B3]
+        # Build basis
+    end
+    
+    M = matrix(base_ring(C), hcat(hcat([collect(matrix(f))[:] for f in mors]...)))
     r, Mrref = rref(M)
-
     base = CenterMorphism[]
     for k ∈ 1:r
-        f = sum([m*bi for (m,bi) ∈ zip(Mrref[k,:], B3)])
+        f = sum([m*bi for (m,bi) ∈ zip(Mrref[k,:], mors)])
         push!(base, f)
     end
 
@@ -1176,7 +1198,7 @@ function center_simples_by_braiding(C::Category, Z = Center(C))
     S_braided = [CenterObject(Z, s, [braiding(s,t) for t ∈ S]) for s ∈ S]
     S_rev_braided = [CenterObject(Z, s, [inv(braiding(t,s)) for t ∈ S]) for s ∈ S]
 
-    [s⊗t for s ∈ S_braided, t ∈ S_rev_braided][:]
+    [t⊗s for s ∈ S_braided, t ∈ S_rev_braided][:]
 end
 
 #=----------------------------------------------------------
