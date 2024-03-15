@@ -948,7 +948,7 @@ end
 function simples_by_induction!(C::CenterCategory, log = true)
     S = CenterObject[]
     d = dim(C.category)^2
-
+    C.induction_gens = object_type(category(C))[]
     simpls = simples(C.category)
 
     FI_simples = []
@@ -1166,7 +1166,16 @@ end
 function extension_of_scalars(C::CenterCategory, L::Field)
     CL = _extension_of_scalars(C,L, category(C)⊗L)
 
-    CL.simples = vcat([indecomposable_subobjects(extension_of_scalars(s, L, CL)) for s ∈ simples(C)]...)
+    CL.simples = vcat([[x for (x,_) ∈ decompose(extension_of_scalars(s, L, CL))] for s ∈ simples(C)]...)
+
+    if isdefined(C, :inductions)
+        CL.inductions = Dict(extension_of_scalars(x, L, category(CL)) =>
+                        extension_of_scalars(Ix, L, CL) for (x,Ix) ∈ C.inductions)
+    end
+
+    if isdefined(C, :induction_gens)
+        CL.induction_gens = [extension_of_scalars(is, L, category(CL)) for is ∈ C.induction_gens]
+    end
 
     return CL
 end

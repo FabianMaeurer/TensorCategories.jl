@@ -152,37 +152,17 @@ function decompose_by_endomorphism_ring(X::Object, E = End(X))
     _images = [image(f)[1] for f ∈ idems]
 
     # Check for matrix algebras
-    images = []
-    for x ∈ _images
-        H = End(x)
-        R = endomorphism_ring(x, H)
-        d = dim(R)
-        if is_squarefree(d) || is_commutative(R) 
-            push!(images, x)
-            continue
-        end
-        
-        G = gens(R)
-
-        if maximum(degree.(minpoly.(G))) == d
-            push!(images, x)
-            continue
-        end
-
-        y,k = _simple_end_as_matrix_algebra(x, H) 
-        push!(images,[y for _ ∈ 1:k]...)
-    end
-
-
+    images = [_decompose_by_simple_endomorphism_ring(i) for i ∈ _images]
+    
 
     tuples = Tuple{typeof(X), Int}[]
 
-    for Y ∈ images
+    for (Y,k) ∈ images
         i = findfirst(Z -> is_isomorphic(Z[1],Y)[1], tuples)
         if i === nothing
-            push!(tuples, (Y,1))
+            push!(tuples, (Y,k))
         else
-            tuples[i] = (Y, tuples[i][2] + 1)
+            tuples[i] = (Y, tuples[i][2] + k)
         end
     end
 
@@ -319,29 +299,33 @@ function minpoly(f::Morphism)
     end
 end 
 
-function _simple_end_as_matrix_algebra(X::Object, E = End(X))
-    
-    B = gens(E)
-   
-    if length(B) == 1 return  (X,1) end
-
-    for f ∈ B
-       eig_spaces = eigenvalues(f)
-        if length(eig_spaces) == 0 
-            continue
-            
-        elseif length(eig_spaces) == 1 && dim(collect(values(eig_spaces))[1]) == dim(X)
-            continue
-        end
-
-        
-        return (collect(values(eig_spaces))[1], length(eig_spaces))
-    end
-
-    if is_simple(X) 
+function _decompose_by_simple_endomorphism_ring(X::Object, E = End(X))
+    K = base_ring(X)
+    R = endomorphism_ring(X, E)
+    CR,_ = center(R)
+    dR = dim(R)
+    if !is_square(div(dR,dim(CR))) || is_commutative(R) 
         return (X,1)
     end
-    error("Could not decompose")  
+        
+    G = basis(E)
+
+    n,_ = size(matrix(G[1]))
+    mats = matrix.(G)
+
+    for i ∈ 1:n
+        m = matrix(K,n,length(G), hcat([M[i,:] for M ∈ mats]...))
+
+        d,N = nullspace(m)
+
+        if d > 0 
+            Y,y = kernel(sum(collect(N[:,1]) .* G))
+            Z,k = _decompose_by_simple_endomorphism_ring(Y, End(Y))
+            return (Z, sqrt(dR // int_dim(End(Z))))
+        end
+    end
+
+    return (X,1)
 end
 
 

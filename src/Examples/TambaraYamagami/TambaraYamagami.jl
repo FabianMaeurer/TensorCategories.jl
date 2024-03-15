@@ -180,10 +180,12 @@ end
 
     Ising()
 
-Construct the Ising category over ``ℚ̅``.
+Construct the Ising category over ``ℚ(√2)``.
 """
 function Ising()
-    Ising(QQBar, sqrt(QQBar(2)), 1)
+    _,x = QQ[:x]
+    K,r2 = number_field(x^2-2, "√2")
+    Ising(K, r2, 1)
 end
 
 """ 

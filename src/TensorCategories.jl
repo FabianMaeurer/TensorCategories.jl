@@ -28,7 +28,8 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     set_attribute!, size, solve, sparse_matrix, splitting_field,
     stabilizer, sub, subst, symbols, symmetric_group, tensor_power, tensor_product, tr,
     trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗, AbsSimpleNumField,
-    number_of_rows, number_of_columns, is_squarefree, is_commutative, gens
+    number_of_rows, number_of_columns, is_squarefree, is_commutative,
+    gens, center
 
 import Graphs: SimpleDiGraph, weakly_connected_components,
             SimpleGraph,connected_components
