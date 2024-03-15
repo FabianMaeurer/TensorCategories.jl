@@ -20,6 +20,13 @@ function HaagerupH3(K::Field = QQ; p1 = 1, p2 = 1)
 
     r13 = sqrt(K(13))
 
+    try
+        sqrt(6*(1 + r13))
+        sqrt((-3 + r13)//2)
+    catch
+        r13 = -r13
+    end
+    
     H = SixJCategory(K,["𝟙", "α", "α∗", "ρ", "αρ", "α∗ρ"])
 
     mult = Array{Int,3}(undef,6,6,6)
