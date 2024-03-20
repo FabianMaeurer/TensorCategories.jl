@@ -57,7 +57,7 @@ function induction_generators(C::CenterCategory)
 
     # Group the simples by isomorphic inductions
     is_iso = [s == t ? true : is_isomorphic(s,t)[1] for s ∈ ind_res, t ∈ ind_res]
-    groups = connected_components(graph(is_iso))
+    groups = connected_components(graph_from_adjacency_matrix(Undirected, is_iso))
 
     C.induction_gens = [simpls[g[1]] for g ∈ groups]
 end
@@ -958,7 +958,7 @@ function simples_by_induction!(C::CenterCategory, log = true)
 
     # Group the simples by isomorphic inductions
     is_iso = [s == t ? true : is_isomorphic(s,t)[1] for s ∈ ind_res, t ∈ ind_res]
-    groups = connected_components(SimpleGraph(is_iso))
+    groups = connected_components(graph_from_adjacency_matrix(Undirected, is_iso))
     
     for gr ∈ groups 
         Is = induction(simpls[gr[1]], simpls, parent_category = C)

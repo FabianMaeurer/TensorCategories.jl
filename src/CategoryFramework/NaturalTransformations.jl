@@ -171,7 +171,7 @@ end
 
 function group_indecomposables(indecs::Vector{T}) where T <: Object
     
-    G = graph([int_dim(Hom(x,y)) > 0 for x ∈ indecs, y ∈ indecs])
+    G = graph_from_adjacency_matrix(Directed, [int_dim(Hom(x,y)) > 0 for x ∈ indecs, y ∈ indecs])
 
     groups = weakly_connected_components(G)
 
