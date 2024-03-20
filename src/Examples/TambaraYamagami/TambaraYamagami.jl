@@ -7,11 +7,11 @@ struct BilinearForm
     group::GAPGroup
     base_ring::Field
     root_of_unity::FieldElem
-    map::Function
+    map::Dict
 end
 
 function (B::BilinearForm)(x::GroupElem, y::GroupElem) 
-    B.map(x,y,B.root_of_unity)
+    B.map[x*y]*inv(B.map[x])*inv(B.map[y])
 end
 
 #=-------------------------------------------------
@@ -26,7 +26,9 @@ end
 Construct ``TY(A,τ,χ)`` over ``ℚ̅`` where ``τ = √|A|`` and ``χ`` is a generic non-degenerate bilinear form.  
 """
 function TambaraYamagami(A::GAPGroup) 
-    TambaraYamagami(QQBar, A)
+    m = Int(exponent(A))
+    K,_ = cyclotomic_field(m)
+    TambaraYamagami(K, A)
 end
 
 """ 
@@ -36,10 +38,10 @@ end
 Construct ``TY(A,τ,χ)`` over ``K`` where ``τ = √|A|`` and ``χ`` is a generic non-degenerate bilinear form.  
 """
 function TambaraYamagami(K::Ring, A::GAPGroup) 
-    n = Int(order(A))     
+    # n = Int(order(A))     
     m = Int(exponent(A))
     sqrt_n = sqrt(K(Int(order(A))))
-    χ = nondegenerate_bilinear_form(A, root_of_unity(K,m))
+    χ = nondegenerate_bilinear_form(A, K)
     TambaraYamagami(K,A,sqrt_n,χ)
 end
 
@@ -50,7 +52,7 @@ end
 Construct ``TY(A,τ,χ)`` over ``K`` where ``χ`` is a generic non-degenerate bilinear form.  
 """
 function TambaraYamagami(K::Ring, A::GAPGroup, sqrt_n::RingElem) 
-    χ = nondegenerate_bilinear_form(A, root_of_unity(K,m))
+    χ = nondegenerate_bilinear_form(A, K)
     TambaraYamagami(K,A,sqrt_n,χ)
 end
 
@@ -61,8 +63,8 @@ end
 Construct ``TY(A,τ,χ)`` over ``K`` where ``τ = √|A|``.  
 """
 function TambaraYamagami(K::Ring, A::GAPGroup, χ::BilinearForm)
-    n = Int(order(A))     
-    m = Int(exponent(A))
+    # n = Int(order(A))     
+    # m = Int(exponent(A))
     sqrt_n = sqrt(K(Int(order(A))))
     TambaraYamagami(K,A,sqrt_n,χ)
 end
@@ -151,25 +153,26 @@ end
     https://mathoverflow.net/questions/374021/is-there-a-non-degenerate-quadratic-form-on-every-finite-abelian-group
 ------------------------------------------------=#
 
-function nondegenerate_bilinear_form(G::GAPGroup, ξ::FieldElem = cyclotomic_field(Int(exponent(G)))[2])
+function nondegenerate_bilinear_form(G::GAPGroup, K::Field)
     @assert is_abelian(G)
 
     if order(G) == 1
-        return BilinearForm(G,parent(ξ),ξ,(x,y,_) -> one(parent(ξ)))
+        return BilinearForm(G,K,root_of_unity(K,2),Dict(x => one(K) for x ∈ G))
     end
 
-    function nondeg(x::GroupElem, y::GroupElem, ξ::FieldElem)
-        G = parent(x)
-        m = GAP.gap_to_julia(GAP.Globals.AbelianInvariants(G.X))
-        χ(m::Int) = isodd(m) ? 2 : 1
+    m = Int.(GAP.gap_to_julia(GAP.Globals.AbelianInvariants(G.X)))
+    χ(m::Int) = isodd(m) ? 1 : 2
+    
+    x_exp = [GAP.gap_to_julia(GAP.Globals.IndependentGeneratorExponents(G.X, x.X)) for x ∈ G]
+    
+    M = Int(exponent(G))
+    
+    roots = [root_of_unity(K, χ(n)*n) for n ∈ m] 
 
-        x_exp = GAP.gap_to_julia(GAP.Globals.IndependentGeneratorExponents(G.X, x.X))
-        y_exp = GAP.gap_to_julia(GAP.Globals.IndependentGeneratorExponents(G.X, y.X))
+    images = Dict(x => ((prod([r^aₖ^2 for (r,mₖ,aₖ) ∈ zip(roots,m,c)]))) for (x,c) ∈ zip(G, x_exp))
+    
 
-        return ξ^(ZZ(sum([mod(χ(mₖ)*aₖ*bₖ,mₖ) for (mₖ,aₖ,bₖ) ∈ zip(m,x_exp,y_exp)])))
-    end
-
-    return BilinearForm(G,parent(ξ),ξ,nondeg)
+    return BilinearForm(G,K,root_of_unity(K,M),images)
 end
 
 #-------------------------------------------------------------------------------

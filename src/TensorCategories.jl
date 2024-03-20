@@ -29,10 +29,8 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     stabilizer, sub, subst, symbols, symmetric_group, tensor_power, tensor_product, tr,
     trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗, AbsSimpleNumField,
     number_of_rows, number_of_columns, is_squarefree, is_commutative,
-    gens, center
+    gens, center, graph, connected_components, weakly_connected_components
 
-import Graphs: SimpleDiGraph, weakly_connected_components,
-            SimpleGraph,connected_components
 
 
 using InteractiveUtils

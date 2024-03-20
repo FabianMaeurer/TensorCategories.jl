@@ -54,7 +54,7 @@ function endomorphism_ring_by_matrices(X::Object, base = basis(End(X)))
 
     try 
         mats = matrix.(base)
-        matrix_algebra(base_ring(X), mats, isbasis = true)
+        matrix_algebra(base_ring(mats[1]), mats, isbasis = true)
     catch
         error("Non-matrix support comming")
     end
@@ -304,7 +304,7 @@ function _decompose_by_simple_endomorphism_ring(X::Object, E = End(X))
     R = endomorphism_ring(X, E)
     CR,_ = center(R)
     dR = dim(R)
-    if !is_square(div(dR,dim(CR))) || is_commutative(R) 
+    if !is_square(div(dR,dim(CR))) || dR == 1 || is_commutative(R) 
         return (X,1)
     end
         

@@ -171,9 +171,9 @@ end
 
 function group_indecomposables(indecs::Vector{T}) where T <: Object
     
-    graph = SimpleDiGraph([int_dim(Hom(x,y)) > 0 for x ∈ indecs, y ∈ indecs])
+    G = graph([int_dim(Hom(x,y)) > 0 for x ∈ indecs, y ∈ indecs])
 
-    groups = weakly_connected_components(graph)
+    groups = weakly_connected_components(G)
 
     return [indecs[g] for g ∈ groups]
 end

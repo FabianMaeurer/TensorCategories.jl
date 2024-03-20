@@ -57,7 +57,7 @@ function induction_generators(C::CenterCategory)
 
     # Group the simples by isomorphic inductions
     is_iso = [s == t ? true : is_isomorphic(s,t)[1] for s ∈ ind_res, t ∈ ind_res]
-    groups = connected_components(SimpleGraph(is_iso))
+    groups = connected_components(graph(is_iso))
 
     C.induction_gens = [simpls[g[1]] for g ∈ groups]
 end
@@ -619,6 +619,7 @@ function decompose(X::CenterObject)
             return decompose_by_endomorphism_ring(X)
         catch
             @assert is_semisimple(C)
+            error("cannot decompose")
             indecs = indecomposable_subobjects(X)
             return [(x, div(int_dim(Hom(x,X)), int_dim(End(x)))) for x ∈ indecs]
         end
