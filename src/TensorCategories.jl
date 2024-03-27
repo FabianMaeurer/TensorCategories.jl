@@ -36,6 +36,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
 using InteractiveUtils
 using Memoization
 using SparseArrays
+using Base.Threads
 
 
 export - 

@@ -862,12 +862,12 @@ function image(f::CenterMorphism)
 end
 
 
-function left_inverse(f::CenterMorphism)
-    X = domain(f)
-    Y = codomain(f)
-    l_inv = central_projection(Y,X,left_inverse(morphsm(f)))
-    return Morphism(Y,X,l_inv)
-end
+# function left_inverse(f::CenterMorphism)
+#     X = domain(f)
+#     Y = codomain(f)
+#     l_inv = central_projection(Y,X,left_inverse(morphism(f)))
+#     return Morphism(Y,X,l_inv)
+# end
 
 function quotient(Y::CenterObject, X::Object)
     # TODO: Compute quotient
@@ -1030,20 +1030,21 @@ function hom_by_adjunction(X::CenterObject, Y::CenterObject)
     X_Homs = [Hom(object(X),s) for s ∈ S]
     Y_Homs = [Hom(s,object(Y)) for s ∈ S]
 
-    candidates = [int_dim(H)*int_dim(H2) > 0 for (s,H,H2) ∈ zip(S,X_Homs,Y_Homs)]
+    candidates = [int_dim(H)*int_dim(H2) > 0 for (H,H2) ∈ zip(X_Homs,Y_Homs)]
 
     !any(candidates) && return HomSpace(X,Y, CenterMorphism[]) 
 
-    # Take smalles s for Hom(X,I(s)) -> Hom(I(s), Y)
-    X_Homs = X_Homs[candidates]
-    Y_Homs = Y_Homs[candidates]
+    
+    # X_Homs = X_Homs[candidates]
+    # Y_Homs = Y_Homs[candidates]
     
 
     M = zero_matrix(base_ring(C),0,*(size(matrix(zero_morphism(X,Y)))...))
 
     mors = []
 
-    for (s, X_s, s_Y) ∈ zip(S[candidates], X_Homs, Y_Homs)
+    @threads for i ∈ findall(==(true), candidates)
+        s, X_s, s_Y = S[i], X_Homs[i], Y_Homs[i]
         Is = induction(s, parent_category = Z)
         B = induction_right_adjunction(X_s, X, Is)
         B2 = induction_adjunction(s_Y, Y, Is)
@@ -1147,7 +1148,7 @@ function smatrix(C::CenterCategory)
     n = length(simpls)
     K = base_ring(C)
     S = [zero_morphism(category(C)) for _ ∈ 1:n, _ ∈ 1:n]
-    for i ∈ 1:n
+    @threads for i ∈ 1:n
         for j ∈ i:n
             S[i,j] = S[j,i] = tr(half_braiding(simpls[i], object(simpls[j])) ∘ half_braiding(simpls[j], object(simpls[i])))
         end

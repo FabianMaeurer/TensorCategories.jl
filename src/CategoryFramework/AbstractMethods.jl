@@ -201,9 +201,10 @@ function direct_sum_decomposition(X::Object, S = simples(parent(X)))
 end
 
 function central_primitive_idempotents(H::AbstractHomSpace)
-    @assert H.X == H.Y "Not an endomorphism algebra"
+    @assert domain(H) == codomain(H) "Not an endomorphism algebra"
 
     A = endomorphism_ring(H.X, basis(H))
+    one(A)
     A.issemisimple = true
     idems = central_primitive_idempotents(A)
     [sum(basis(H) .* coefficients(i)) for i ∈ idems]
@@ -304,6 +305,7 @@ function _decompose_by_simple_endomorphism_ring(X::Object, E = End(X))
     R = endomorphism_ring(X, E)
     CR,_ = center(R)
     dR = dim(R)
+
     if !is_square(div(dR,dim(CR))) || dR == 1 || is_commutative(R) 
         return (X,1)
     end
@@ -312,6 +314,24 @@ function _decompose_by_simple_endomorphism_ring(X::Object, E = End(X))
 
     n,_ = size(matrix(G[1]))
     mats = matrix.(G)
+
+    for f ∈ E
+        eig = eigenvalues(f)
+
+        length(eig) < 1  && continue
+
+        Z = collect(values(eig))[1]
+
+        length(eig) == 1 && dim(Z) == dim(X) && continue
+                
+        EZ = End(Z)
+
+        k = sqrt(int_dim(E)) - sqrt(int_dim(EZ))
+
+        (Z2, k2) = _decompose_by_simple_endomorphism_ring(Z,EZ)
+
+        return (Z2, k*k2)
+    end     
 
     for i ∈ 1:n
         m = matrix(K,n,length(G), hcat([M[i,:] for M ∈ mats]...))
