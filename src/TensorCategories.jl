@@ -74,7 +74,7 @@ export HomSet
 export HomSpace 
 export Morphism 
 export Object 
-export Center 
+export center 
 export center_simples 
 export CenterCategory 
 export CenterCategory 
@@ -324,7 +324,7 @@ export TwistedGradedVectorSpaces
 export twisted_group_algebra
 export unit
 export unitary_cocycle
-export UqSl2Representations
+export sl2_representations
 export VectorSpaceMorphism 
 export VectorSpaceObject 
 export VectorSpaces 
@@ -388,6 +388,8 @@ include("TensorCategoryFramework/Center/Center.jl")
 include("TensorCategoryFramework/Center/Induction.jl")
 include("TensorCategoryFramework/Center/CenterChecks.jl")
 include("TensorCategoryFramework/Center/InductionMonad.jl")
+include("TensorCategoryFramework/Center/Centralizer.jl")
+include("TensorCategoryFramework/Center/CentralizerInduction.jl")
 
 include("TensorCategoryFramework/InternalModules/InternalAlgebras.jl")
 include("TensorCategoryFramework/InternalModules/ModuleCategories.jl")
@@ -409,6 +411,5 @@ include("Examples/Haagerup/HaagerupH3.jl")
 
 #include("Utility/Serialization.jl")
 
-@alias Centre Center
 
 end

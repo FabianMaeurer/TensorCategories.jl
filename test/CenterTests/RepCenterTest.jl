@@ -7,7 +7,7 @@ F = GF(13)
 
 Rep = RepresentationCategory(G,F)
 
-D = Center(Rep)
+D = center(Rep)
 S = simples(D)
 
 @testset "Simples are central" begin

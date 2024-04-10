@@ -12,7 +12,7 @@ S₁ = simple_subobjects(induction(𝟙))
 S₂ = simple_subobjects(induction(χ))
 S₃ = simple_subobjects(induction(X))
 
-C = Center(I)
+C = center(I)
 
 add_simple!(C, [S₁; S₂; S₃])
 
@@ -30,7 +30,7 @@ S₁ = simple_subobjects(induction(Bs))
 S₂ = simple_subobjects(induction(Bsts))
 
 
-D = Center(B)
+D = center(B)
 
 add_simple!(D, [S₁; S₂; S₃])
 
@@ -46,7 +46,7 @@ I27_time = @elapsed begin
     S₂ = simple_subobjects(induction(Bsts))
     S₃ = simple_subobjects(induction(Bststs))
     
-    D2 = Center(B)
+    D2 = center(B)
     
     add_simple!(D2, [S₁; S₂; S₃])
 
@@ -68,7 +68,7 @@ TY_time = @elapsed begin
     
     S = vcat([simple_subobjects(induction(s)) for s ∈ simples(TY)]...)
 
-    ZTY = Center(TY)
+    ZTY = center(TY)
     add_simple!(ZTY, S)
 end
 
@@ -81,6 +81,6 @@ TY2_times = @elapsed begin
 
     S = vcat([simple_subobjects(induction(s)) for s ∈ simples(TY2)]...)
 
-    ZTY2 = Center(TY2)
+    ZTY2 = center(TY2)
     add_simples(ZTY2, S)
 end

@@ -2,7 +2,7 @@ using TensorCategories, Oscar
 
 # To speed up computation compute the equivalent centre category category
 I = I2subcategory(5)
-C = Center(I)
+C = center(I)
 simples(C)
 
 #Sort the simples in 𝒵(I₂(5)) to match Lusztigs and Malles

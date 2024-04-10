@@ -6,15 +6,10 @@ CurrentModule = TensorCategories
 
 We provide a simple abstract type hierarchy for representation categories:
 
-```
+```julia
 abstract type RepresentationCategory <:Category
 ```
 
-A representation category always requires the field
-
-```
-base_ring::Field
-```
 
 ## Representations of Finite groups
 
@@ -27,8 +22,7 @@ GroupRepresentationCategory <: RepresentationCategory
 
 Build it with the constructor
 
-
-```@docs
+```@docs; canonical = false
 RepresentationCategory(::GAPGroup, ::Field)
 ```
 
@@ -39,9 +33,9 @@ finite dimensional vector space ``k^n``. These objects are of type
 GroupRepresentationObject <: RepresentationObject
 ```
 
-They are constructed in one of two ways, either by imag"es of generators or by a function
+They are constructed in one of two ways, either by images of generators or by a function
 
-```@docs
+```@docs; canonical = false
 Representation(::GAPGroup,::Vector,::Vector)
 Representation(::GAPGroup,::Function)
 ```
@@ -54,4 +48,5 @@ for the important operations
 ```@autodocs
 Modules = [TensorCategories]
 Pages = ["GroupRepresentations.jl"]
+Private = false
 ```

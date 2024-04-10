@@ -1,4 +1,9 @@
+@doc raw""" 
 
+    cat_fr_9143()
+
+Categorification of fusion ring FR9143. 
+"""
 function cat_fr_9143() 
     K = QQBar
     r2 = sqrt(K(2))

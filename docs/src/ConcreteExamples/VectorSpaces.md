@@ -32,7 +32,7 @@ and can be constructed like so:
 
 ```@example VS
 F = GF(5,2)
-Vec = VectorSpaces()
+Vec = VectorSpaces(F)
 ```
 
 Objects of this category are of the type
@@ -58,7 +58,7 @@ VSMorphism <: Morphism
 
 and constructed giving a domain, codomain and matrix element.
 
-```@docs VS
+```@docs 
 Morphism(::VectorSpaceObject, ::VectorSpaceObject, ::MatElem)
 ```
 
@@ -107,7 +107,7 @@ GVSMorphism <: Morphism
 The constructor is given by 
 
 ```@docs
-Morphism(::GVSObject, ::GVSObject,::MatElem) where {G, S <: VectorSpaceMorphism}
+Morphism(::GVSObject, ::GVSObject,::MatElem)
 ```
 
 

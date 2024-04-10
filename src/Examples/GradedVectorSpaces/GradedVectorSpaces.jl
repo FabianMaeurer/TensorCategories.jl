@@ -48,6 +48,7 @@ is_fusion(C::GradedVectorSpaces) = true
 basis(X::GVSObject) = basis(X.V)
 
 grading(V::GVSObject) = V.grading
+
 """
     function Morphism(V::GVSObject, Y::GVSObject, m::MatElem)
 

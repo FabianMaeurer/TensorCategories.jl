@@ -23,7 +23,7 @@ using TensorCategories;
 I = Ising()
 
 # Define the categorical center
-C = Center(Ising())
+C = center(Ising())
 
 # Compute the S-matrix of the center
 S = smatrix(C)

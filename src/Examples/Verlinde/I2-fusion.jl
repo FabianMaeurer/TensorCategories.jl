@@ -110,8 +110,16 @@ function fusionmultmatrix(m)
 	return M
 end
 
-#Creates the categorification of biggest cell in I2(m). So far only the associators work. ev/coev needs more work
+
+@doc raw""" 
+
+	I2(m::Int)
+	I2(m::Int, K::Ring)
+
+Creates the categorification of biggest cell in I2(m). 
+"""
 function I2(m, F::Ring = cyclotomic_field(2*m)[1])
+	#Creates the categorification of biggest cell in I2(m). So far only the associators work. ev/coev needs more work
 	n=m-1
 	z=root_of_unity(F, 2*m)
 	q=quantum(z+z^-1,2*n)
@@ -150,8 +158,15 @@ function I2(m, F::Ring = cyclotomic_field(2*m)[1])
 	return C
 end
 
-#Creates the fusion subcategory version. Objects Bs, Bsts, Bststs,...
+@doc raw""" 
+
+	I2subcategory(m::Int)
+	I2subcategory(m::Int, R::Ring)
+
+Creates the fusion subcategory of I2.
+"""
 function I2subcategory(m, F::Ring = cyclotomic_field(2*m)[1])
+	#Creates the fusion subcategory version. Objects Bs, Bsts, Bststs,...
 	n=div(m,2)
 	z=root_of_unity(F,2*m)
 	q=quantum(z+z^-1,2*m-2)

@@ -58,6 +58,7 @@ function VectorSpaceObject(K::Field, basis::Vector)
     Vec = VectorSpaces(K)
     return VSObject(basis, Vec)
 end
+
 """
     Morphism(X::VectorSpaceObject, Y::VectorSpaceObject, m::MatElem)
 

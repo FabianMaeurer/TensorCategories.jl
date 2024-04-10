@@ -18,7 +18,7 @@ given by
 X \mapsto \mathrm{Hom}(X_i,X).
 ```
 
-We define ``H_{ij}^k := /mathrm{Hom}(X_k, X_i\otimes X_j)`` to be the multiplicity spaces. Now considering the image of a tensor product $X_i \otimes X_j$ of two simple objects we obtain 
+We define ``H_{ij}^k := \mathrm{Hom}(X_k, X_i\otimes X_j)`` to be the multiplicity spaces. Now considering the image of a tensor product $X_i \otimes X_j$ of two simple objects we obtain 
 
 ```math
 X_i \otimes X_j \mapsto \bigoplus\limits_{k \in \mathcal I} H_{ij}^k

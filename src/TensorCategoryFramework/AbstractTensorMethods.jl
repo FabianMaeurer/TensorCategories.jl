@@ -434,3 +434,11 @@ function fusion_coefficient(C::Category, i::Int, j::Int, k::Int)
     return fusion_coefficient(C[i], C[j], C[k], false)
 end
 
+function topologize(X::Object)
+    topologize([X])
+end
+
+function topologize(S::Vector{<:Object})
+    T = TensorPowerCategory(S)
+    object.(indecomposables(T))
+end

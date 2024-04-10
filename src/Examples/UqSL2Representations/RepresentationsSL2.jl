@@ -30,9 +30,16 @@ function Morphism(X::UqSl2rep, Y::UqSl2rep, ms::Pair{Int, <:MatElem}...)
     UqSl2repMorphism(X,Y, Dict(ms...))
 end
 
-UqSl2Representations(F::Ring) = UqSl2Representations(F,F(1))
-UqSl2Representations(F::Ring, x) = UqSl2Representations(F,F(x))
-UqSl2Representations() = UqSl2Representations(QQBar, QQBar(1))
+@doc raw""" 
+
+    sl2_representations(F::Ring)
+    sl2_representations(F::Ring, q::RingElem)
+
+Construct a skeletal category equivalent to the category of representations of ``𝔰𝔩₂(F)`` specialized at ``q``. ``q`` defaults to ``1``.
+"""
+sl2_representations(F::Ring) = sl2_representations(F,F(1))
+sl2_representations(F::Ring, x::RingElem) = UqSl2Representations(F,F(x))
+sl2_representations() = UqSl2Representations(QQBar, QQBar(1))
 
 is_tensor(C::UqSl2Representations) = true
 
@@ -54,6 +61,15 @@ end
 
 # ==(X::UqSl2rep, Y::UqSl2rep) = 
 
+@doc raw""" 
+
+    simples(C::UqSL2Representations, n::Int)
+
+Return the first ``n`` simple objects of ``C``. 
+"""
+function simples(C::UqSl2Representations, n::Int)
+    return [C[i] for i ∈ 0:n-1]
+end
 #=----------------------------------------------------------
     Functionality 
 ----------------------------------------------------------=#

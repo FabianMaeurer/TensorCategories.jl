@@ -41,10 +41,8 @@ to provide a method
 
 This will open acces to the following operations which are necessary for many computations with fusion categories like for example the computation of the [categorical center](@ref center).
 
-```@docs
-eigenvalues
-simple_subobjects
-express_in_basis
-left_inverse
-right_inverse
+
+```@autodocs
+Modules = [TensorCategories]
+Pages = ["PentagonAxiom.jl", "HexagonAxiom.jl"]
 ```
