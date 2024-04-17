@@ -532,7 +532,7 @@ end
 
 
 function matrix(f::SixJMorphism)
-    diagonal_matrix(f.m)
+    diagonal_matrix(f.m...)
 end
 
 

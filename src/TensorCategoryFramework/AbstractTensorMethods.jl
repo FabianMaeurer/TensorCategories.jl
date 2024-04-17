@@ -355,7 +355,7 @@ end
 -------------------------------------------------=#
 
 function fpdim(X::Object)
-    @assert is_multifusion(parent(X))
+    @assert is_weakly_multifusion(parent(X))
     S = simples(parent(X))
     n = length(S)
 
@@ -386,7 +386,7 @@ function fpdim(X::Object)
 end
 
 function fpdim(C::Category)
-    @assert is_fusion(C)
+    @assert is_weakly_multifusion(C)
     S = simples(C)
     d = int_dim(End(one(C)))
     sum(d .* fpdim.(S).^2 .// (int_dim.(End.(S))))

@@ -90,7 +90,7 @@ function end_of_induction(X::Object, simpls::Vector{<:Object}, IX = relative_ind
     B = basis(Hom(X,object(IX)))
     
     m = [zero_morphism(X,X) for _ in 1:length(simpls)]
-
+    
     @threads for i ∈ 1:length(simpls)
         xi = simpls[i]
         dxi = dual(xi)

@@ -34,6 +34,7 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
                  _,_,ic,p = direct_sum_decomposition(W⊗T, simples)
                 _basis = [f for f ∈ ic if domain(f) == S]
                 dual_basis = [f for f ∈ p if codomain(f) == S]
+                
                 #_,_,_,p = direct_sum_decomposition(dual(S)⊗W, dual.(simples))
 
                 basis_dual = transform_dual_basis(dual_basis, S,W,T)

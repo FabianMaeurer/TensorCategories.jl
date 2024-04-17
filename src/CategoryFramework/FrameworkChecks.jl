@@ -11,6 +11,14 @@ function is_fusion(C::Category)
     false
 end
 
+function is_weakly_fusion(C::Category)
+    is_fusion(C)
+end
+
+function is_weakly_multifusion(C::Category)
+    is_multifusion(C) && is_weakly_fusion(C)
+end
+
 function is_multifusion(C::Category) 
     if is_fusion(C) 
         return true

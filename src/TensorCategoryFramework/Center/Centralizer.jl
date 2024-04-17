@@ -176,7 +176,7 @@ spherical(X::CentralizerObject) = Morphism(X,dual(dual(X)), spherical(X.object))
 Return the direct sum object of ```X``` and ```Y```.
 """
 function direct_sum(X::CentralizerObject, Y::CentralizerObject)
-    S = simples(parent(X.object))
+    S = parent(X).subcategory_simples
     Z,(ix,iy),(px,py) = direct_sum(X.object, Y.object)
 
     γZ = [(id(S[i])⊗ix)∘(X.γ[i])∘(px⊗id(S[i])) + (id(S[i])⊗iy)∘(Y.γ[i])∘(py⊗id(S[i])) for i ∈ 1:length(S)]
@@ -209,7 +209,7 @@ Return the tensor product of ```X``` and ```Y```.
 function tensor_product(X::CentralizerObject, Y::CentralizerObject)
     Z = X.object ⊗ Y.object
     γ = Morphism[]
-    simple_objects = simples(parent(X.object))
+    simple_objects = parent(X).subcategory_simples
 
     x,y = X.object, Y.object
 
@@ -245,7 +245,7 @@ Return the zero object of ```C```.
 """
 function zero(C::CentralizerCategory)
     Z = zero(C.category)
-    CentralizerObject(C,Z,[zero_morphism(Z,Z) for _ ∈ simples(C.category)])
+    CentralizerObject(C,Z,[zero_morphism(Z,Z) for _ ∈ C.subcategory_simples])
 end
 
 """
@@ -255,7 +255,7 @@ Return the one object of ```C```.
 """
 function one(C::CentralizerCategory)
     Z = one(C.category)
-    CentralizerObject(C,Z,[id(s) for s ∈ simples(C.category)])
+    CentralizerObject(C,Z,[id(s) for s ∈ C.subcategory_simples])
 end
 
 
@@ -267,7 +267,7 @@ end
 Return the half braiding isomorphism ```γ_X(Y): X⊗Y → Y⊗X```.
 """
 function half_braiding(X::CentralizerObject, Y::Object)
-    simpls = simples(parent(Y))
+    simpls = parent(X).subcategory_simples
 
     if is_simple(Y) 
         if !(Y ∈ simpls)
@@ -436,7 +436,7 @@ function dual(X::CentralizerObject)
     c = coev(X.object)
     γ = Morphism[]
     dX = dual(X.object)
-    for (Xi,yXi) ∈ zip(simples(parent(X).category), X.γ)
+    for (Xi,yXi) ∈ zip(parent(X).subcategory_simples, X.γ)
         f = (e ⊗ id(Xi ⊗ dX)) ∘ 
             inv_a(dX, X.object, Xi ⊗ dX) ∘ 
             (id(dX) ⊗ a(X.object, Xi, dX)) ∘ 
@@ -546,7 +546,7 @@ function kernel(f::CentralizerMorphism)
         return zero(parent(f)), zero_morphism(zero(parent(f)), domain(f))
     end
 
-    braiding = [id(s)⊗left_inverse(incl)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), domain(f).γ)]
+    braiding = [id(s)⊗left_inverse(incl)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(parent(f).subcategory_simples, domain(f).γ)]
 
     Z = CentralizerObject(parent(domain(f)), ker, braiding)
     return Z, Morphism(Z,domain(f), incl)
@@ -565,7 +565,7 @@ function cokernel(f::CentralizerMorphism)
         return zero(parent(f)), zero_morphism(codomain(f), zero(parent(f)))
     end
 
-    braiding = [(id(s)⊗proj)∘γ∘(right_inverse(proj)⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), codomain(f).γ)]
+    braiding = [(id(s)⊗proj)∘γ∘(right_inverse(proj)⊗id(s)) for (s,γ) ∈ zip(parent(f).subcategory_simples, codomain(f).γ)]
 
     Z = CentralizerObject(parent(domain(f)), coker, braiding)
     return Z, Morphism(codomain(f),Z, proj)
@@ -578,7 +578,7 @@ function image(f::CentralizerMorphism)
         return zero(parent(f)), zero_morphism(zero(parent(f)), domain(f))
     end
 
-    braiding = [id(s)⊗left_inverse(incl)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(I)), codomain(f).γ)]
+    braiding = [id(s)⊗left_inverse(incl)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(parent(f).subcategory_simples, codomain(f).γ)]
 
     Z = CentralizerObject(parent(domain(f)), I, braiding)
     return Z, Morphism(Z,domain(f), incl)
@@ -610,7 +610,7 @@ Hom(X::CentralizerObject, Y::CentralizerObject) = hom_by_adjunction(X,Y)
 
 Compute the image under the projection ```Hom(F(X),F(Y)) → Hom(X,Y)```.
 """
-function central_projection(dom::CentralizerObject, cod::CentralizerObject, f::Morphism, simpls = simples(parent(domain(f))))
+function central_projection(dom::CentralizerObject, cod::CentralizerObject, f::Morphism, simpls = parent(dom).subcategory_simples)
     X = domain(f)
     Y = codomain(f)
     C = parent(X)
@@ -676,7 +676,7 @@ function simples_by_induction!(C::CentralizerCategory, log = true)
 
     FI_simples = []
 
-    ind_res = [induction_restriction(s) for s ∈ simpls]
+    ind_res = [induction_restriction(s, C.subcategory_simples) for s ∈ simpls]
 
     # Group the simples by isomorphic inductions
     is_iso = [s == t ? true : is_isomorphic(s,t)[1] for s ∈ ind_res, t ∈ ind_res]
@@ -694,7 +694,7 @@ function simples_by_induction!(C::CentralizerCategory, log = true)
 
     for k ∈ eachindex(FI_simples)
 
-        s, Is, Z = FI_simples[k]
+        s, _, Z = FI_simples[k]
         #contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
         # if length(contained_simples) > 0
         #     if is_isomorphic(Is, direct_sum(object.(contained_simples))[1])[1]
@@ -807,7 +807,7 @@ function hom_by_linear_equations(X::CentralizerObject, Y::CentralizerObject)
     
     eqs = []
 
-    S = simples(parent(object(X)))
+    S = parent(X).subcategory_simples
 
     for (s,γₛ,λₛ) ∈ zip(S,half_braiding(X), half_braiding(Y))
         Hs = Hom(object(X)⊗s, s⊗object(Y))
