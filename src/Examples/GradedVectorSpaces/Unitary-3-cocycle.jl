@@ -59,8 +59,8 @@ function TwistedGradedVectorSpaces(G::GAPGroup, K::Field, i::Int = 2, j::Int = 1
     
     #K,ρ=cyclotomic_field(6*Int(n),"ρ") #for some reason cyclotomic_field wants Int64...
 	ξ = unitary_cocycle(G,K,3,i) #One must know whetever we have i many classes
-	braid = unitary_cocycle(G,K,2,j)
-    return GradedVectorSpaces(K,G,ξ,braid)
+	#braid = unitary_cocycle(G,K,2,j)
+    return GradedVectorSpaces(K,G,ξ)
     #pentagon_axiom(VecGtw)
 end
 

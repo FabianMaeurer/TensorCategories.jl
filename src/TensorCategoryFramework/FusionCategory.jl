@@ -943,7 +943,7 @@ end
 
 """ 
 
-    extension_of_scalars(f::SixJmorphism, K::Field)
+    extension_of_scalars(f::SixJMorphism, K::Field)
 
 Return the category ``C⊗K``.
 """
