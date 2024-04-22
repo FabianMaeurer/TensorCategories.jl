@@ -58,6 +58,7 @@ function VectorSpaceObject(K::Field, basis::Vector)
     Vec = VectorSpaces(K)
     return VSObject(basis, Vec)
 end
+
 """
     Morphism(X::VectorSpaceObject, Y::VectorSpaceObject, m::MatElem)
 
@@ -287,9 +288,8 @@ end
 #-----------------------------------------------------------------
 
 function compose(f::VectorSpaceMorphism...)
-    if [is_isomorphic(domain(f[i]), codomain(f[i-1]))[1] for i ∈ 2:length(f)] != trues(length(f)-1)
-        throw(ErrorException("Morphisms not compatible"))
-    end
+    @assert all([is_isomorphic(domain(f[i]), codomain(f[i-1]))[1] for i ∈ 2:length(f)])  "Morphisms not compatible"
+
     return Morphism(domain(f[1]),codomain(f[end]),*([g.m for g ∈ f]...))
 end
 

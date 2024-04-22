@@ -100,6 +100,12 @@ end
 #=----------------------------------------------------------
     Hom Space Functionality 
 ----------------------------------------------------------=#
+@doc raw""" 
+
+    express_in_basis(f::Morphism, B::Vector{Morphism})
+
+Return a vector of coefficients expressing ``f``in the basis ``B``.
+"""
 function express_in_basis(f::T, B::Vector{T}) where T <: Morphism
     F = base_ring(f)    
     # b_mat = hcat([[x for x ∈ matrix(b)][:] for b ∈ B]...)
@@ -110,10 +116,22 @@ function express_in_basis(f::T, B::Vector{T}) where T <: Morphism
     return express_in_basis(vec_f, vec_basis)
 end
 
+@doc raw""" 
+
+    express_in_basis(f::Morphism)
+
+Return a vector of coefficients expressing ``f: X → Y`` in the basis o f ``\mathrm{Hom}(X,Y)``.
+"""
 function express_in_basis(f::Morphism, H = Hom(domain(f), codomain(f)))
     express_in_basis(f, basis(H))
 end
 
+@doc raw""" 
+
+    is_simple(X::Object)
+
+Check whether ``X`` is a simple object.  
+"""
 function is_simple(X::Object)
     B = basis(End(X))
     if length(B) == 0
@@ -128,8 +146,20 @@ function is_simple(X::Object)
     end
 end
 
+@doc raw""" 
+
+    decompose(X::Object)
+
+Decompose an object ``X`` in an abelian category.
+"""
 decompose(X::Object) = decompose_by_endomorphism_ring(X)
 
+@doc raw""" 
+
+    decompose(X::Object, S::Vector{Object})
+
+Decompose an object ``X`` in a semisimple category into simple objects of ``S``.
+"""
 decompose(X::T, S::Vector{T}) where T <: Object = decompose_by_simples(X,S)
 
 # function decompose_by_endomorphism_ring(X::Object)
@@ -176,6 +206,7 @@ function decompose_by_simples(X::Object, S = simples(parent(X)))
     return [(s,d) for (s,d) ∈ zip(S,dimensions) if d > 0]
 end
 
+
 function direct_sum_decomposition(X::Object, S = simples(parent(X)))
     C = parent(X)
     @assert is_semisimple(C) "Semisimplicity required"
@@ -200,6 +231,12 @@ function direct_sum_decomposition(X::Object, S = simples(parent(X)))
     return Z, f, incl, proj
 end
 
+@doc raw""" 
+
+    central_primitive_idempotents(H::AbstractHomSpace)
+
+Compute the central primitive idempotents of an endomorphism space ``H``.
+"""
 function central_primitive_idempotents(H::AbstractHomSpace)
     @assert domain(H) == codomain(H) "Not an endomorphism algebra"
 
@@ -210,6 +247,12 @@ function central_primitive_idempotents(H::AbstractHomSpace)
     [sum(basis(H) .* coefficients(i)) for i ∈ idems]
 end
 
+@doc raw""" 
+
+    gens(H::AbstractHomSpace)
+
+Compute generators of an endomorphism space ``H``.
+"""
 function gens(H::AbstractHomSpace)
     @assert H.X == H.Y "Not an endomorphism algebra"
 
@@ -245,6 +288,13 @@ end
 # Semisimple: Subobjects
 #-------------------------------------------------------
 
+@doc raw""" 
+
+    eigenvalues(f::Morphism)
+
+Compute the eigenvalues of ``f``. Return a dictonary with 
+entries `λ => ker(f - λid)`.
+"""
 function eigenvalues(f::Morphism)
     @assert domain(f) == codomain(f) "Not an endomorphism"
 
@@ -290,6 +340,12 @@ end
 #     end
 # end
 
+@doc raw""" 
+
+    minpoly(f::Morphism)
+
+Compute the minimal polynomial of an endomorphism ``f: X \to X``.
+"""
 function minpoly(f::Morphism)
     @assert domain(f) == codomain(f) "Not an edomorphism"
     
@@ -415,7 +471,13 @@ function simples(C::Category)
 end
 
 
+@doc raw""" 
 
+    left_inverse(f::Morphism)
+
+Compute a morphism ``g`` such that ``g ∘ f = id``. Errors if 
+``f``is not mono. 
+"""
 function left_inverse(f::Morphism)
     X = domain(f)
     Y = codomain(f)
@@ -450,7 +512,13 @@ function left_inverse(f::Morphism)
     end
 end
 
+@doc raw""" 
 
+    right_inverse(f::Morphism)
+
+Compute a morphism ``g`` such that ``f ∘ g = id``. Errors if ``f``
+is not epi.
+"""
 function right_inverse(f::Morphism)
     X = domain(f)
     Y = codomain(f)
@@ -485,6 +553,13 @@ function right_inverse(f::Morphism)
     end
 
 end
+
+@doc raw""" 
+
+    zero_morphism(X::Object, Y::Object)
+
+Compute the zero morphism between ``X``and ``Y``.
+"""
 function zero_morphism(X::Object, Y::Object) 
     C = parent(X)
     if is_additive(C)
@@ -495,6 +570,12 @@ function zero_morphism(X::Object, Y::Object)
     @error "There might be no zero morphism"
 end
 
+@doc raw""" 
+
+    zero_morphism(X::Object)
+
+Compute the zero morphism on ``X``.
+"""
 zero_morphism(X::Object) = zero_morphism(X,X)
 
 zero_morphism(C::Category) = zero_morphism(zero(C))
@@ -515,6 +596,12 @@ function ==(f::Morphism, x::T) where T <: Union{RingElem, Int}
     false
 end
 
+@doc raw""" 
+
+    is_monomoprhism(f::Morphism)
+
+Check whether ``f`` mono.
+"""
 function is_monomorphism(f::Morphism)
     try 
         left_inverse(f)
@@ -524,6 +611,12 @@ function is_monomorphism(f::Morphism)
     end
 end
 
+@doc raw""" 
+
+    is_epimorphism(f::Morphism)
+
+Check wether ``f``is epi.
+"""
 function is_epimorphism(f::Morphism)
     try 
         right_inverse(f)

@@ -3,6 +3,7 @@ mutable struct GradedVectorSpaces <: Category
     base_ring::Field
     base_group::GAPGroup
     twist::Cocycle{3}
+    spherical::Dict{<:GroupElem, <:FieldElem}
 end
 
 struct GVSObject <: VectorSpaceObject
@@ -23,8 +24,12 @@ end
 The category of ```G```-graded vector spaces.
 """
 function GradedVectorSpaces(F::Field, G::GAPGroup)
-    elems = elements(G)
-    GradedVectorSpaces(F,G,trivial_3_cocycle(G,F))
+    c = trivial_3_cocycle(G,F)
+    GradedVectorSpaces(F,G,c, Dict([g => inv(c(g,inv(g),g)) for g ∈ G]))
+end
+
+function GradedVectorSpaces(F::Field, G::GAPGroup, c::Cocycle)
+    GradedVectorSpaces(F,G,c, Dict([g => inv(c(g,inv(g),g)) for g ∈ G]))
 end
 
 function GradedVectorSpaces(G::GAPGroup)
@@ -48,6 +53,7 @@ is_fusion(C::GradedVectorSpaces) = true
 basis(X::GVSObject) = basis(X.V)
 
 grading(V::GVSObject) = V.grading
+
 """
     function Morphism(V::GVSObject, Y::GVSObject, m::MatElem)
 
@@ -111,9 +117,13 @@ dim(V::GVSObject) = base_ring(V)(tr(id(V)))
 
 function spherical(V::GVSObject) 
     DDV = dual(dual(V))
-    dims = filter!(e -> e != 0, collect(matrix(ev(V)))[:])
-    m = diagonal_matrix([d for d ∈ dims])
+    C = parent(V)
+    m = diagonal_matrix([C.spherical[g] for g ∈ grading(V)])
     Morphism(V,DDV,m)
+end
+
+function set_trivial_spherical!(C::GradedVectorSpaces)
+    C.spherical = Dict(g => base_ring(C)(1) for g ∈ base_group(C))
 end
 #-----------------------------------------------------------------
 #   Functionality: Direct Sums
@@ -376,6 +386,59 @@ end
 # description
 # """
 # id(X::GVSObject) = Morphism(X,X,one(matrix_space(base_ring(X),dim(X),dim(X))))
+
+#=----------------------------------------------------------
+    Extension of scalars 
+----------------------------------------------------------=#
+
+function extension_of_scalars(C::GradedVectorSpaces, L::Ring)
+    K = base_ring(C)
+    if K != QQ && characteristic(K) == 0 
+        if K isa AbsSimpleNumField && L isa RelSimpleNumField
+            f = L
+        else
+            if base_field(K) == base_field(L)
+                _,f = is_subfield(K,L)
+            else
+                f = L
+            end
+        end
+    else
+        f = L
+    end
+    
+    if C.twist === nothing 
+        c = trivial_3_cocycle(C.base_group, L)
+    else
+        c = Cocycle(C.base_group, Dict(g => f(k) for (g,k) ∈ C.twist.m))
+    end
+    D = GradedVectorSpaces(L, C.base_group, c)
+end
+
+function extension_of_scalars(X::GVSObject, L::Ring, parent = parent(X) ⊗ L)
+    GVSObject(parent, X.V, X.grading)
+end
+
+function extension_of_scalars(m::GVSMorphism, L::Ring)
+    
+    K = base_ring(m)
+    if K != QQ && characteristic(K) == 0 
+        if K isa AbsSimpleNumField && L isa RelSimpleNumField
+            f = L
+        else
+            if base_field(K) == base_field(L)
+                _,f = is_subfield(K,L)
+            else
+                f = L
+            end
+        end
+    else
+        f = L
+    end
+
+    mat = matrix(L, size(matrix(m))..., f.(collect(matrix(m))))
+    Morphism(domain(m)⊗L, codomain(m)⊗L, mat)
+end
 #-----------------------------------------------------------------
 #   Pretty Printing
 #-----------------------------------------------------------------

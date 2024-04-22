@@ -47,6 +47,36 @@ simples(C::OppositeCategory) = op.(simples(C.C))
 
 zero(C::OppositeCategory) = op(zero(C.C))
 
+#=----------------------------------------------------------
+    Constructors 
+----------------------------------------------------------=#
+
+@doc raw""" 
+
+    opposite_category(C::Category)
+
+Construct the category ``Cᵒᵖ``.
+"""
+opposite_category(C::Category) = OppositeCategory(C)
+
+@doc raw""" 
+
+    opposite_object(X::Object)
+
+Regard the object ``X ∈ C`` as an object in ``Cᵒᵖ``.
+"""
+opposite_object(X::Object) = OppositeObject(opposite_category(parent(X)),X)
+
+@doc raw""" 
+
+    opposite_morphism(f::Morphism)
+
+Regard the morphism ``f ∈ C`` as a morphism in ``Cᵒᵖ``.
+"""
+opposite_morphism(f::Morphism) = OppositeMorphism(OppositeObject(codomain(f)), OppositeObject(domain(f)), f)
+
+(C::OppositeCategory)(X::Object) = OppositeObject(C,X)
+(C::OppositeCategory)(f::Morphism) = OppositeMorphism(C(codomain(f)), C(domain(f)), f)
 #-------------------------------------------------------------------------------
 #   Inversion
 #-------------------------------------------------------------------------------

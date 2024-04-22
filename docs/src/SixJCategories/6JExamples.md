@@ -75,10 +75,10 @@ In [vercleyen2023low](@cite) they found a huge number of fusion rings and some e
 
 ### FR``{}_2^{82}``
 
-They provide 97 different (but maybe equivalent) associators one can acces.
+They provide 97 different (but maybe equivalent) associators one can access.
 
 ```@docs
-fr_8122
+cat_fr_8122
 ```
 
 ### FR``{}_3^{94}``
@@ -86,5 +86,5 @@ fr_8122
 We have a singel associator for this ring.
 
 ```@docs
-fr_9143
+cat_fr_9143
 ```

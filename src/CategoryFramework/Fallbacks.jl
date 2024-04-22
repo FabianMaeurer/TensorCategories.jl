@@ -192,6 +192,7 @@ getindex(H::AbstractHomSpace, k) = getindex(basis(H),k)
 Base.length(H::AbstractHomSpace) = int_dim(H)
 Base.eltype(H::Type{T}) where T <: AbstractHomSpace = fieldtype(H, :basis).parameters[1] 
 
+
 function (F::Ring)(f::Morphism)
     B = basis(Hom(domain(f), codomain(f)))
     if length(B) == 0 

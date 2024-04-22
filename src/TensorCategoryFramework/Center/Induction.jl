@@ -3,7 +3,7 @@
 #   Induction
 #-------------------------------------------------------------------------------
 
-function induction(X::Object, simples::Vector = simples(parent(X)); parent_category::CenterCategory = Center(parent(X)))
+function induction(X::Object, simples::Vector = simples(parent(X)); parent_category::CenterCategory = center(parent(X)))
 
     if isdefined(parent_category, :inductions) && X ∈ collect(keys(parent_category.inductions)) 
         return parent_category.inductions[X]
@@ -34,6 +34,7 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
                  _,_,ic,p = direct_sum_decomposition(W⊗T, simples)
                 _basis = [f for f ∈ ic if domain(f) == S]
                 dual_basis = [f for f ∈ p if codomain(f) == S]
+                
                 #_,_,_,p = direct_sum_decomposition(dual(S)⊗W, dual.(simples))
 
                 basis_dual = transform_dual_basis(dual_basis, S,W,T)
@@ -142,7 +143,7 @@ function end_of_induction(X::Object, IX = induction(X))
 
     ind_B = [Morphism(IX,IX, f) for f ∈ ind_B]
 
-    return CenterHomSpace(IX,IX,ind_B, VectorSpaces(base_ring(X)))
+    return HomSpace(IX,IX,ind_B)
 end
 
 function induction_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = induction(domain(H), parent_category = parent(Y)))
@@ -374,86 +375,4 @@ function adjusted_dual_basis(V::Vector{<:Morphism}, U::Vector{<:Morphism}, S::Ob
     return V, dual_basis
 end
 
-function relative_induction(X::Object, ind_simples::Vector{<:Object}, simples::Vector = simples(parent(X)); parent_category::CenterCategory = Center(parent(X)))
 
-    if isdefined(parent_category, :inductions) && X ∈ collect(keys(parent_category.inductions)) 
-        return parent_category.inductions[X]
-    end
-
-    @assert is_semisimple(parent(X)) "Requires semisimplicity"
-    Z = direct_sum([s⊗X⊗dual(s) for s ∈ ind_simples])[1]
-    a = associator
-    γ = Vector{Morphism}(undef, length(ind_simples))
-
-    C = parent(X)
-
-    for i ∈ 1:length(ind_simples)
-        W = ind_simples[i]
-        γ[i] = zero_morphism(zero(parent(X)), direct_sum([W⊗((s⊗X)⊗dual(s)) for s ∈ ind_simples])[1])
-  
-        for S ∈ ind_simples
-            dom_i = ((S⊗X)⊗dual(S))⊗W
-            γ_i_temp = zero_morphism(dom_i, zero(parent(X)))
-            for  T ∈ ind_simples
-                #@show S,T,W
-                # Set up basis and dual basis
-                
-                #_basis, basis_dual = dual_basis(Hom(S, W⊗T), Hom(dual(S), dual(W⊗T)))
-                
-                #_basis, basis_dual = adjusted_dual_basis(Hom(S, W⊗T), Hom(dual(S)⊗W, dual(T)), S, W, T)
-
-                 _,_,ic,p = direct_sum_decomposition(W⊗T, simples)
-                _basis = [f for f ∈ ic if domain(f) == S]
-                dual_basis = [f for f ∈ p if codomain(f) == S]
-                #_,_,_,p = direct_sum_decomposition(dual(S)⊗W, dual.(simples))
-
-                basis_dual = transform_dual_basis(dual_basis, S,W,T)
-
-                if length(_basis) == 0 
-                    γ_i_temp = vertical_direct_sum(γ_i_temp, zero_morphism(dom_i, W⊗((T⊗X)⊗dual(T)))) 
-                    continue
-                end
-
-
-                #_basis, basis_dual = adjusted_dual_basis(_basis, basis_dual, S, W, T)
-
-
-                #corrections = base_ring(X).([(id(W)⊗ev(dual(T))) ∘ (id(W)⊗(spherical(T)⊗id(dual(T)))) ∘ a(W,T,dual(T)) ∘ (f⊗g) ∘ a(S,dual(S),W) ∘ (coev(S)⊗id(W)) for (f,g) ∈ zip(_basis,basis_dual)])
-                
-            
-                #@show "component_iso"
-                #component_iso = sum([a(W,T⊗X,dual(T)) ∘ (a(W,T,X)⊗id(dual(T))) ∘ ((f⊗id(X))⊗(inv(dim(W))*inv(k)*g)) ∘ a(S⊗X,dual(S),W) for (k,f,g) ∈ zip(corrections,_basis, basis_dual)])
-
-                component_iso = sum([a(W,T⊗X,dual(T)) ∘ (a(W,T,X)⊗id(dual(T))) ∘ ((f⊗id(X))⊗(g)) ∘ a(S⊗X,dual(S),W) for (f,g) ∈ zip(_basis, basis_dual)])
-
-                #@show "sum"
-                γ_i_temp = vertical_direct_sum(γ_i_temp, (component_iso))
-            end
-            γ[i] = horizontal_direct_sum(γ[i], γ_i_temp)
-        end
-      
-
-        # distribution Before
-        distr_before = distribute_left([s⊗X⊗dual(s) for s ∈ ind_simples],W)
-        # distribution After
-        distr_after = distribute_right(W,[s⊗X⊗dual(s) for s ∈ ind_simples])
-
-        γ[i] = inv(distr_after) ∘ γ[i] ∘ distr_before 
-    end
-
-    if !is_split_semisimple(C)
-        # factor out such that the left and right tensor product coincide.
-        r = direct_sum([horizontal_direct_sum([image(f⊗id(X)⊗id(dual(b)) - id(b)⊗id(X)⊗dual(f))[2] for f in End(b)]) for b in simples])
-
-        @show Z,r = cokernel(r)
-        ir = right_inverse(r)
-
-        γ = [(id(b)⊗r) ∘ γᵢ ∘ (ir ⊗ id(b)) for (γᵢ,b) ∈ zip(γ, simples)]
-    end
-
-    IX = CenterObject(parent_category,Z,γ)
-
-    add_induction!(parent_category, X, IX)
-
-    return IX
-end

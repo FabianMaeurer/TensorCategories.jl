@@ -3,9 +3,10 @@ using Documenter, TensorCategories, Oscar, DocumenterCitations
 bib = CitationBibliography(joinpath(@__DIR__, "src", "MyBib.bib"))
 
 makedocs(
-    bib,
+    plugins = [bib],
     sitename = "TensorCategories.jl",
     modules = [TensorCategories],
+    warnonly = true,
     format = Documenter.HTML(
         canonical = "https://juliadocs.github.io/Documenter.jl/stable/",
         prettyurls = !("local" in ARGS)
@@ -22,13 +23,15 @@ makedocs(
                 "Framework" => "Interface/TensorCategories.md",
                 "6j-Symbols" => "SixJCategories/SixJCategories.md"
             ],
-            "Optimisations" => "Interface/AdvancedInterface.md"
+            "Genericity" => "Interface/Generic.md",
+            "Basic Consttructions" => "Interface/BasicConstructions.md"
         ],
         "Examples" => [
             "Graded Vector Spaces" => "ConcreteExamples/VectorSpaces.md",
             "Group Representations" => "ConcreteExamples/Representations.md",
             "Equivariant Coherent Sheaves" => "ConcreteExamples/CoherentSheaves.md",
-            "Fusion Categories with 6j-Symbols" => "SixJCategories/6JExamples.md"
+            "Fusion Categories with 6j-Symbols" => "SixJCategories/6JExamples.md",
+            "Representations of  ``U_q(\\mathfrak{sl}_2(K))``" => "ConcreteExamples/UqSl2.md"
         ],
         # "Concrete Examples" => [
         #     "Vector Spaces" => "VectorSpaces.md",

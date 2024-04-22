@@ -1,4 +1,4 @@
-# The Center Construction
+# The center Construction
 
 Let ``C``be a fusion category.  
 

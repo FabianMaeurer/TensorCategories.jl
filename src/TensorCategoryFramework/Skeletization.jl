@@ -51,6 +51,8 @@ function six_j_symbols(C::Category, S = simples(C))
     ass = Array{MatElem}(undef,N,N,N,N)
     homs = Dict()
 
+    one_indices = findall(s -> int_dim(Hom(s,one(C))) > 0 , S)
+
     for (i,j,k,l) ∈ Base.product(1:N, 1:N, 1:N, 1:N)
 
         X,Y,Z,W = S[[i,j,k,l]]
@@ -61,16 +63,20 @@ function six_j_symbols(C::Category, S = simples(C))
             V = S[n]
 
             H_XY_V = if (XYV = (X⊗Y,V)) ∈ keys(homs) 
-                homs[XYV] 
-            else
-                push!(homs, XYV => basis(Hom(XYV[1], V)))[XYV]
-            end
+                        homs[XYV] 
+                    elseif !isempty([i,j] ∩ one_indices) && n ∈ [i,j] && (n ∉ one_indices || i == j)
+                        push!(homs, XYV => [id(XYV[1])])[XYV]
+                    else
+                        push!(homs, XYV => basis(Hom(XYV[1], V)))[XYV]
+                    end
 
             H_VZ_W = if (VZW = (V⊗Z,W)) ∈ keys(homs) 
-                homs[VZW] 
-            else
-                push!(homs, VZW => basis(Hom(VZW[1], W)))[VZW]
-            end
+                        homs[VZW] 
+                    elseif !isempty([n,k] ∩ one_indices) && l ∈ [n,k] && (l ∉ one_indices || n == k)
+                        push!(homs, VZW => [id(VZW[1])])[VZW]
+                    else
+                        push!(homs, VZW => basis(Hom(VZW[1], W)))[VZW]
+                    end
 
             B = [f ∘ (g ⊗ id(Z)) for g ∈ H_XY_V, f ∈ H_VZ_W][:]
             if length(B) == 0 continue end
@@ -81,18 +87,23 @@ function six_j_symbols(C::Category, S = simples(C))
         B_X_YZ_W = C_morphism_type[]
         for n ∈ 1:N
             V = S[n]
+
             H_YZ_V = if (YZV = (Y⊗Z,V)) ∈ keys(homs)
-                homs[YZV]
-            else
-                push!(homs, YZV => basis(Hom(YZV[1], V)))[YZV]
-            end
+                        homs[YZV]
+                    elseif !isempty([j,k] ∩ one_indices) && n ∈ [j,k] && (n ∉ one_indices || j == k)
+                        push!(homs, YZV => [id(YZV[1])])[YZV]
+                    else
+                        push!(homs, YZV => basis(Hom(YZV[1], V)))[YZV]
+                    end
 
             H_XV_W = if (XVW = (X⊗V,W)) ∈ keys(homs)
-                homs[XVW]
-            else
-                push!(homs, XVW => basis(Hom(XVW[1], W)))[XVW]
-            end
-            
+                        homs[XVW]
+                    elseif !isempty([i,n] ∩ one_indices) && l ∈ [i,n] && (l ∉ one_indices || i == n)
+                        push!(homs, XVW => [id(XVW[1])])[XVW]
+                    else
+                        push!(homs, XVW => basis(Hom(XVW[1], W)))[XVW]
+                    end
+                    
             B = [f ∘ (id(X) ⊗ g) for g ∈ H_YZ_V, f ∈ H_XV_W][:]
             if length(B) == 0 continue end
             B_X_YZ_W = [B_X_YZ_W; B]
@@ -100,7 +111,7 @@ function six_j_symbols(C::Category, S = simples(C))
         
         # Express the asociator in the corresponding basis
         a = associator(X,Y,Z)
-
+        
         associator_XYZ_W = hcat([express_in_basis(f ∘ a, B_XY_Z_W) for f ∈ B_X_YZ_W]...)
 
         ass[i,j,k,l] = matrix(F, length(B_X_YZ_W), length(B_XY_Z_W), associator_XYZ_W)

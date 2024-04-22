@@ -39,3 +39,13 @@ An abelian category is called __semisimple__ if every object decomposes uniquely
 
 - `simples(C::YourCategory)::Vector{YourObject}`
 
+
+## Categories with fibre functor
+
+Whenever a category ``\mathcal C`` has a fibre functor, i.e. an exact faithful functor ``\mathcal C \to \mathrm{Vec}_k``, we can use matrix calculus to compute technical things we often need to implement certain constructions. Implement an existing fibre functor by providing the a method
+
+```julia
+matrix(f::MyMorphism)::MatElem
+```
+
+

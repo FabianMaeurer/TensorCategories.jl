@@ -155,7 +155,7 @@ function Induction(C::Category)
     @assert is_multifusion(C)
     obj_map = x -> induction(x)
     mor_map = induction_mor_map
-    return InductionFunctor(C,Center(C),obj_map,mor_map)
+    return InductionFunctor(C,center(C),obj_map,mor_map)
 end
 
 function induction_mor_map(f::Morphism)

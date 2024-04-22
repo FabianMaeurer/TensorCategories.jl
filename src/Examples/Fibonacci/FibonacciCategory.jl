@@ -2,8 +2,8 @@ function Fibonacci(K::Ring, a::Int = 1)
 
     C = SixJCategory(K, ["𝟙", "τ"])
 
-    _,x = QQ["x"]
-    a = roots(x^2+x-1, K)[a]
+    _,x = K["x"]
+    a = roots(x^2+x-1K )[a]
 
     M = zeros(Int, 2,2,2)
 

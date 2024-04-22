@@ -12,7 +12,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     polynomial_ring, QQ, QQBar, QQField, QQFieldElem, QQMPolyRingElem, Ring, RingElem, ZZ, QQBarFieldElem,
     ZZRingElem, abelian_closure, abelian_group, absolute_simple_field, action, base_field,
     base_ring, basis, central_primitive_idempotents, change_base_ring, characteristic,
-    charpoly, codomain, coeff, coefficients, cokernel, complex_embeddings, compose,
+    charpoly, codomain, coeff, coefficients, cokernel, complex_embeddings, compose, centralizer,
     cyclotomic_field, decompose, degree, det, diagonal_matrix, dim, direct_sum, divisors,
     domain, dual, eigenspace, eigenspaces, eigenvalues, elem_type, elements, exponent,
     exponents, factor, QQFieldElem, QQPolyRingElem, ZZRingElem, gcd, gen, gens, get_attribute, get_attribute!,
@@ -74,7 +74,7 @@ export HomSet
 export HomSpace 
 export Morphism 
 export Object 
-export Center 
+export center 
 export center_simples 
 export CenterCategory 
 export CenterCategory 
@@ -84,6 +84,7 @@ export CenterObject
 export CenterObject 
 export central_objects 
 export central_primitive_idempotents
+export centralizer
 export Cocycle 
 export codomain 
 export coefficients
@@ -291,6 +292,7 @@ export set_canonical_spherical!
 export set_one! 
 export set_spherical! 
 export set_tensor_product! 
+export set_trivial_spherical!
 export SetHomSet 
 export SetMorphism 
 export SetObject 
@@ -324,7 +326,7 @@ export TwistedGradedVectorSpaces
 export twisted_group_algebra
 export unit
 export unitary_cocycle
-export UqSl2Representations
+export sl2_representations
 export VectorSpaceMorphism 
 export VectorSpaceObject 
 export VectorSpaces 
@@ -388,6 +390,8 @@ include("TensorCategoryFramework/Center/Center.jl")
 include("TensorCategoryFramework/Center/Induction.jl")
 include("TensorCategoryFramework/Center/CenterChecks.jl")
 include("TensorCategoryFramework/Center/InductionMonad.jl")
+include("TensorCategoryFramework/Center/Centralizer.jl")
+include("TensorCategoryFramework/Center/CentralizerInduction.jl")
 
 include("TensorCategoryFramework/InternalModules/InternalAlgebras.jl")
 include("TensorCategoryFramework/InternalModules/ModuleCategories.jl")
@@ -409,6 +413,5 @@ include("Examples/Haagerup/HaagerupH3.jl")
 
 #include("Utility/Serialization.jl")
 
-@alias Centre Center
 
 end

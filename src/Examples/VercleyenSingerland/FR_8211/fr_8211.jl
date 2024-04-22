@@ -2,6 +2,13 @@
 
 #One needs to include the wanted associator of the other files ???
 #In total there are 97 different associators; So far only 10 can be used; For the other one also has to check pentagox; Maybe the import does not work for all
+@doc raw""" 
+
+    cat_fr_8122(n::Int64)
+
+Categorification of fusion ring FR8211. `n` chooses one of 96 possibily 
+equivalent sets of associators.
+"""
 function cat_fr_8122(n::Int) #n gives the number of associator
     K = QQBar
     
