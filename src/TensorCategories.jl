@@ -29,7 +29,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     stabilizer, sub, subst, symbols, symmetric_group, tensor_power, tensor_product, tr,
     trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗, AbsSimpleNumField,
     number_of_rows, number_of_columns, is_squarefree, is_commutative,
-    gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, set_trivial_spherical!
+    gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected
 
 
 
@@ -292,6 +292,7 @@ export set_canonical_spherical!
 export set_one! 
 export set_spherical! 
 export set_tensor_product! 
+export set_trivial_spherical!
 export SetHomSet 
 export SetMorphism 
 export SetObject 
