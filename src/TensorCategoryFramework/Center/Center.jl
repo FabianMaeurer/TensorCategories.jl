@@ -1079,12 +1079,16 @@ function hom_by_adjunction(X::CenterObject, Y::CenterObject)
         mors = [mors; B3]
         # Build basis
     end
-    
-    M = matrix(base_ring(C), hcat(hcat([collect(matrix(f))[:] for f in mors]...)))
-    r, Mrref = rref(M)
+    mats = matrix.(mors)
+    M = transpose(matrix(base_ring(C), hcat(hcat([collect(m)[:] for m in mats]...))))
+
+    Mrref = hnf(M)
     base = CenterMorphism[]
-    for k ∈ 1:r
-        f = sum([m*bi for (m,bi) ∈ zip(Mrref[k,:], mors)])
+    mats_morphisms = Morphism.(mats)
+
+    for k ∈ 1:rank(Mrref)
+        coeffs = express_in_basis(Morphism(transpose(matrix(base_ring(C), size(mats[1])..., Mrref[k,:]))), mats_morphisms)
+        f = sum([m*bi for (m,bi) ∈ zip(coeffs, mors)])
         push!(base, f)
     end
 

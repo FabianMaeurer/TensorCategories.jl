@@ -357,6 +357,7 @@ function minpoly(f::Morphism)
 end 
 
 function _decompose_by_simple_endomorphism_ring(X::Object, E = End(X))
+
     K = base_ring(X)
     R = endomorphism_ring(X, E)
     CR,_ = center(R)

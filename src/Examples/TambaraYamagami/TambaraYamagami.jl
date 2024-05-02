@@ -27,7 +27,8 @@ Construct ``TY(A,τ,χ)`` over ``ℚ̅`` where ``τ = √|A|`` and ``χ`` is a g
 """
 function TambaraYamagami(A::GAPGroup) 
     m = Int(exponent(A))
-    K,_ = cyclotomic_field(m)
+    _, x = QQ[:x]
+    K = splitting_field([x^m + 1, x^2 -2])
     TambaraYamagami(K, A)
 end
 
