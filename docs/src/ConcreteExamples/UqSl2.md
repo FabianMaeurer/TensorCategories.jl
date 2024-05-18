@@ -22,3 +22,4 @@ These categoryies have ``n`` simple objects ``V_0,...,V_{n-1}``and fusion rule
 
 ```math
 V_i \otimes V_j = ⨁\limits_{l = 0}^{\min{(i,j)}} V_{i+j - 2l}.
+```

@@ -151,7 +151,7 @@ zero(Vec::VectorSpaces) = VectorSpaceObject(base_ring(Vec), 0)
 ==(V::VectorSpaces,W::VectorSpaces) = V.base_ring == W.base_ring
 
 function ==(X::VectorSpaceObject, Y::VectorSpaceObject) 
-    basis(X) == basis(Y) && base_ring(X) == base_ring(Y)
+    dim(X) == dim(Y) && base_ring(X) == base_ring(Y)
 end
 
 """
@@ -353,7 +353,7 @@ function associator(X::VectorSpaceObject, Y::VectorSpaceObject, Z::VectorSpaceOb
     if !(parent(X) == parent(Y) == parent(Z))
         throw(ErrorException("Mismatching parents"))
     end
-    n = *(dim.([X,Y,Z])...)
+    n = *(int_dim.([X,Y,Z])...)
     F = base_ring(X)
     m = matrix(F, [i == j ? 1 : 0 for i ∈ 1:n, j ∈ 1:n])
     return Morphism((X⊗Y)⊗Z, X⊗(Y⊗Z), m)

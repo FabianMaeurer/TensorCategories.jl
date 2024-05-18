@@ -768,9 +768,10 @@ end
 
 function cokernel(f::SixJMorphism)
     C = parent(domain(f))
+
     cokernels = [kernel(m, side = :right) for m ∈ f.m]
     
-    coker = SixJObject(C,[number_of_rows(k) for k ∈ cokernels])
+    coker = SixJObject(C,[number_of_columns(k) for k ∈ cokernels])
 
     return coker, Morphism(codomain(f),coker, [m for m ∈ cokernels])
 end

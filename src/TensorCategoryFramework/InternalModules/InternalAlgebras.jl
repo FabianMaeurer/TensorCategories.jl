@@ -57,7 +57,20 @@ function group_algebra(C::Category, G::GAPGroup)
     AlgebraObject(C, S, m, u)
 end
 
+#=----------------------------------------------------------
+    Generic Algebras 
+----------------------------------------------------------=#
 
+function generic_algebra(X::Object)
+    dX = dual(X)
+    A = X ⊗ dX
+    m = compose(
+        associator(X ⊗ dX, X, dX),
+        inv_associator(X,dX,X) ⊗ id(dX),
+        (id(X) ⊗ ev(X)) ⊗ id(dX)
+    )
+    return AlgebraObject(parent(X), A, m, coev(X))
+end
 #=----------------------------------------------------------
     Pretty printing
 ----------------------------------------------------------=#
