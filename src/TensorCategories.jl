@@ -29,7 +29,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     stabilizer, sub, subst, symbols, symmetric_group, tensor_power, tensor_product, tr,
     trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗, AbsSimpleNumField,
     number_of_rows, number_of_columns, is_squarefree, is_commutative,
-    gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism
+    gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra
 
 
 
@@ -53,6 +53,7 @@ export ⊠
 export ⋆
 export AbstractHomSpace 
 export add_simple! 
+export algebra
 export AlgebraObject
 export AlgebraMorphism
 export ArrowCategory
@@ -135,6 +136,7 @@ export fpdim
 export Functor 
 export FusionCategory 
 export fusion_coefficient
+export generic_algebra
 export getindex 
 export GradedVectorSpaces 
 export GRHomSpace 
@@ -188,7 +190,8 @@ export is_central
 export is_epimorphism
 export is_finite 
 export is_fusion 
-export is_half_braiding 
+export is_half_braiding
+export is_left_module 
 export is_linear 
 export is_modular 
 export is_monoidal 
@@ -197,6 +200,7 @@ export is_multifusion
 export is_multifusion 
 export is_multiring 
 export is_multitensor 
+export is_right_module
 export is_ring 
 export is_ring 
 export is_semisimple 
@@ -274,7 +278,8 @@ export restriction
 export Restriction 
 export reverse_braiding
 export right_dual 
-export right_inverse 
+export right_inverse
+export right_module 
 export RightModule
 export RightModuleCategory
 export RightModuleObject

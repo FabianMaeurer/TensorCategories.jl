@@ -33,7 +33,6 @@ object(A::AlgebraObject) = A.object
 ----------------------------------------------------------=#
 
 function is_algebra(X::Object, m::Morphism, u::Morphism)
-    m ∘ (id(X) ⊗ m) == m ∘ (m ⊗ id(X)) &&
     m ∘ (id(X) ⊗ u) == m ∘ (u ⊗ id(X)) == id(X) &&
     m ∘ (id(X) ⊗ m) ∘ associator(X,X,X) == m ∘ (m ⊗ id(X))
 end
@@ -65,9 +64,9 @@ function generic_algebra(X::Object)
     dX = dual(X)
     A = X ⊗ dX
     m = compose(
-        associator(X ⊗ dX, X, dX),
-        inv_associator(X,dX,X) ⊗ id(dX),
-        (id(X) ⊗ ev(X)) ⊗ id(dX)
+        associator(X, dX, A),
+        id(X) ⊗ inv_associator(dX,X,dX),
+        id(X) ⊗ (ev(X) ⊗ id(dX))
     )
     return AlgebraObject(parent(X), A, m, coev(X))
 end

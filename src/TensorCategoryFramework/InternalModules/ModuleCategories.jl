@@ -417,6 +417,40 @@ function Hom(X::RightModuleObject, Y::RightModuleObject)
 end
 
 #=----------------------------------------------------------
+    isomorphic 
+----------------------------------------------------------=#
+
+function is_isomorphic(M::ModuleObject, N::ModuleObject)
+    if is_simple(M) && is_simple(N)
+        return int_dim(Hom(M,N)) > 0
+    else
+        error("not implemented yet")
+    end
+end
+
+#=----------------------------------------------------------
+    Checks 
+----------------------------------------------------------=#
+
+function is_right_module(X::ModuleObject)
+    A = algebra(parent(X))
+    m = multiplication(A)
+    a = associator(object(X), object(A), object(A))
+    r_X = right_action(X)
+
+    r_X ∘ (r_X ⊗ id(object(A))) == r_X ∘ (id(object(X)) ⊗ m) ∘ a
+end
+
+function is_left_module(X::ModuleObject)
+    A = algebra(parent(X))
+    m = multiplication(A)
+    a = associator(object(A), object(A), object(X))
+    l_X = left_action(X)
+
+    (m ⊗ id(object(X))) ∘ l_X == l_X ∘ (l_X ⊗ id(object(A))) ∘ a
+end
+
+#=----------------------------------------------------------
     Pretty printing
 ----------------------------------------------------------=#
 

@@ -53,13 +53,16 @@ function induction_generators(C::CenterCategory)
         return C.induction_gens
     end
     simpls = simples(category(C))
-    ind_res = [induction_restriction(s) for s ∈ simpls]
+    invertibls = invertibles(category(C))
 
-    # Group the simples by isomorphic inductions
-    is_iso = [s == t ? true : is_isomorphic(s,t)[1] for s ∈ ind_res, t ∈ ind_res]
-    groups = connected_components(graph_from_adjacency_matrix(Undirected, is_iso))
+    ind_gens = object_type(category(C))[]
 
-    C.induction_gens = [simpls[g[1]] for g ∈ groups]
+    while !isempty(simpls)
+        x = popfirst!(simpls)
+        push!(ind_gens, x)
+        filter!(s -> all([!is_isomorphic(s,i ⊗ x ⊗ dual(i))[1] for i ∈ invertibls]), simpls)
+    end
+    C.induction_gens = ind_gens
 end
 #-------------------------------------------------------------------------------
 #   Center Constructor
@@ -323,7 +326,7 @@ function build_center_ideal(Z::Object, simples::Vector = simples(parent(Z)))
     var_count = sum([int_dim(H) for H ∈ Homs])
 
     K = base_ring(Z)
-    R,x = polynomial_ring(K, var_count, ordering = :lex)
+    R,x = polynomial_ring(K, var_count, internal_ordering = :lex)
 
     # For convinience: build arrays with the variables xi
     vars = []
@@ -387,11 +390,12 @@ function braidings_from_ideal(Z::Object, I::Ideal, simples::Vector{<:Object}, C)
         c = [k for k ∈ c]
         for i ∈ 1:length(simples)
             if ks[i] == 0 continue end
+   
             e = sum(c[k:k + ks[i] - 1] .* basis(Homs[i]))
             ex = [ex ; e]
             k = k + ks[i]
         end
-        centrals = [centrals; CenterObject(C, Z, inv.(ex))]
+        centrals = [centrals; CenterObject(C, Z, (ex))]
     end
     return centrals
 end
@@ -446,7 +450,7 @@ function center_simples(C::CenterCategory, simples = simples(C.category))
 
     simples_indices = []
     c_simples = CenterObject[]
-    d_max = dim(C.category)
+    d_max = Int(QQ(ceil(fpdim(C.category))))
     d_rem = d
     k = length(simples)
 
@@ -974,30 +978,31 @@ end
 function simples_by_induction!(C::CenterCategory, log = true)
     S = CenterObject[]
     d = dim(C.category)^2
-    C.induction_gens = object_type(category(C))[]
+    C.induction_gens = induction_generators(C)
     simpls = simples(C.category)
 
-    FI_simples = []
+    # FI_simples = [(s, )]
 
-    ind_res = [induction_restriction(s) for s ∈ simpls]
+    # ind_res = [induction_restriction(s) for s ∈ simpls]
 
-    # Group the simples by isomorphic inductions
-    is_iso = [s == t ? true : is_isomorphic(s,t)[1] for s ∈ ind_res, t ∈ ind_res]
-    groups = connected_components(graph_from_adjacency_matrix(Undirected, is_iso))
+    # # Group the simples by isomorphic inductions
+    # is_iso = [s == t ? true : is_isomorphic(s,t)[1] for s ∈ ind_res, t ∈ ind_res]
+    # groups = connected_components(graph_from_adjacency_matrix(Undirected, is_iso))
     
-    for gr ∈ groups 
-        Is = induction(simpls[gr[1]], simpls, parent_category = C)
-        push!(FI_simples, (simpls[gr[1]], ind_res[gr[1]], Is))
-        push!(C.induction_gens, simpls[gr[1]])
-    end
+    # for gr ∈ groups 
+    #     Is = induction(simpls[gr[1]], simpls, parent_category = C)
+    #     push!(FI_simples, (simpls[gr[1]], ind_res[gr[1]], Is))
+    #     push!(C.induction_gens, simpls[gr[1]])
+    # end
     
     log && println("Simples:")
 
     #center_dim = 0
 
-    for k ∈ eachindex(FI_simples)
+    for s ∈ induction_generators(C)
 
-        s, Is, Z = FI_simples[k]
+        Z = induction(s, simpls, parent_category = C)
+        Is = object(Z)
         #contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
         # if length(contained_simples) > 0
         #     if is_isomorphic(Is, direct_sum(object.(contained_simples))[1])[1]

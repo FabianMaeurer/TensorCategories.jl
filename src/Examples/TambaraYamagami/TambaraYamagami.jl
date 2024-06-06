@@ -269,7 +269,7 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
     try 
 
         G = abelian_group(PcGroup, [2])
-        χ = nondegenerate_bilinear_form(G,F(-1))
+        χ = nondegenerate_bilinear_form(G,F)
 
         ξ = q * root_of_unity(F,4)
 
