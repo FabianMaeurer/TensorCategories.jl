@@ -998,7 +998,7 @@ function simples_by_induction!(C::CenterCategory, log = true)
     log && println("Simples:")
 
     #center_dim = 0
-
+    used_gens = []
     for s ∈ induction_generators(C)
 
         Z = induction(s, simpls, parent_category = C)
@@ -1023,7 +1023,7 @@ function simples_by_induction!(C::CenterCategory, log = true)
         new_simples = [n for (n,_) ∈ decompose_by_endomorphism_ring(Z,H)]
 
         # Every simple such that Hom(s, Zᵢ) ≠ 0 for an already dealt with s is not new
-        filter!(Zi -> sum(Int[int_dim(Hom(s,object(Zi))) for (s,_) ∈ FI_simples[1:k-1]]) == 0, new_simples)
+        filter!(Zi -> sum(Int[int_dim(Hom(s,object(Zi))) for s ∈ used_gens]) == 0, new_simples)
 
         # if length(new_simples) == 0
         #     continue
@@ -1032,6 +1032,7 @@ function simples_by_induction!(C::CenterCategory, log = true)
         log && println.(["    " * "$s" for s ∈ new_simples])
 
         S = [S; new_simples]
+        used_gens = [used_gens; s]
         #center_dim += sum(dim.(new_simples).^2)
         # if d == center_dim
         #     break

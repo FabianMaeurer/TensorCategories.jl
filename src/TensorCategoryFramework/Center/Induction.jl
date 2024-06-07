@@ -223,7 +223,7 @@ function induction_adjunction(f::Morphism, Y::CenterObject, IX = induction(domai
     simpls = simples(parent(f))
     duals = dual.(simpls)
 
-    ind_f = [(dim(xi))*compose(
+    ind_f = [compose(
         inv(half_braiding(Y, xi)) ⊗ id(dxi),
         associator(object(Y), xi, dxi),
         id(object(Y)) ⊗ (ev(dxi) ∘ (spherical(xi) ⊗ id(dxi)))
