@@ -125,3 +125,7 @@ function (::QQField)(x::QQBarFieldElem)
 
     return roots(minpoly(x))[1]
 end
+
+function rand(::QQBarField, I::UnitRange)
+    return QQBar(rand(ZZ, I))
+end

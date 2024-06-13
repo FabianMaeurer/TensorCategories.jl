@@ -190,6 +190,11 @@ function right_trace(f::Morphism)
     return (ev(right_dual(dV))) ∘ (j⊗(f∘i)) ∘ coev(right_dual(V))
 end
 
+function invertibles(C::Category)
+    @assert is_rigid(C)
+    return [s for s ∈ simples(C) if int_dim(End(s ⊗ dual(s))) == 1]
+end
+
 #-------------------------------------------------------
 # Spherical structure
 #-------------------------------------------------------

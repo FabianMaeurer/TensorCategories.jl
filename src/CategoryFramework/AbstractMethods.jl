@@ -139,6 +139,7 @@ function is_simple(X::Object)
     elseif length(B) == 1
         return true
     end
+    
     try 
         is_simple(endomorphism_ring(X, B))
     catch
@@ -177,18 +178,25 @@ decompose(X::T, S::Vector{T}) where T <: Object = decompose_by_simples(X,S)
 # end
 
 function decompose_by_endomorphism_ring(X::Object, E = End(X))
+    if base_ring(X) == QQBar
+        return decompose_over_qqbar(X, E)
+    end
+
+    if int_dim(E) == 0 return Tuple{object_type(parent(X)), Int}[] end
+
     idems = central_primitive_idempotents(E)
 
     _images = [image(f)[1] for f ∈ idems]
 
     # Check for matrix algebras
-    images = [_decompose_by_simple_endomorphism_ring(i) for i ∈ _images]
+    images = hcat([simple_subobjects(i, End(i), true) for i ∈ _images]...)
     
 
     tuples = Tuple{typeof(X), Int}[]
 
-    for (Y,k) ∈ images
+    for Y ∈ images
         i = findfirst(Z -> is_isomorphic(Z[1],Y)[1], tuples)
+        k = div(int_dim(Hom(Y,X)), int_dim(End(Y)))
         if i === nothing
             push!(tuples, (Y,k))
         else
@@ -197,6 +205,29 @@ function decompose_by_endomorphism_ring(X::Object, E = End(X))
     end
 
     return tuples
+end
+
+
+function decompose_over_qqbar(X::Object, E = End(X))
+    @assert is_semisimple(parent(X))
+    if int_dim(E) == 1
+        return [(X,1)]
+    end
+    subs = simple_subobjects_over_qqbar(X,E)
+
+    [(s, int_dim(Hom(s, X))) for s ∈ subs]
+end
+
+function simple_subobjects_over_qqbar(X::Object, E = End(X))
+    if int_dim(E) == 1 
+        return [X]
+    end
+
+    f = [f for f ∈ basis(E) if degree(minpoly(f)) > 1][1]
+    
+    K = collect(values(eigenvalues(f)))
+    
+    return unique_simples(vcat([simple_subobjects_over_qqbar(k) for k ∈ K]...))
 end
 
 
@@ -247,6 +278,14 @@ function central_primitive_idempotents(H::AbstractHomSpace)
     [sum(basis(H) .* coefficients(i)) for i ∈ idems]
 end
 
+function radical(H::AbstractHomSpace)
+    @assert domain(H) == codomain(H)
+
+    A = endomorphism_ring(H.X, basis(H))
+    R = radical(A)
+    [sum(basis(H) .* coefficients(r)) for r ∈ basis(R)]
+end
+
 @doc raw""" 
 
     gens(H::AbstractHomSpace)
@@ -282,6 +321,19 @@ function is_subobject(X::Object, Y::Object)
     end
 
     return true,incl
+end
+
+function is_isomorphic(X::Object, Y::Object)
+    H = Hom(X,Y)
+    if !is_square(int_dim(H)) 
+        return false, nothing
+    end
+
+    if is_simple(X) && is_simple(Y)
+        return int_dim(Hom(X,Y)) > 0
+    end
+
+    @error "Not implemented"
 end
 
 #-------------------------------------------------------
@@ -357,6 +409,7 @@ function minpoly(f::Morphism)
 end 
 
 function _decompose_by_simple_endomorphism_ring(X::Object, E = End(X))
+
     K = base_ring(X)
     R = endomorphism_ring(X, E)
     CR,_ = center(R)
@@ -409,19 +462,65 @@ end
 #     _indecomposable_subobjects(X,E)
 # end
 
-function simple_subobjects(X::Object, E = End(X))
-    indecomposables = indecomposable_subobjects(X, E)
-    if is_semisimple(parent(X))
-        return indecomposables
-    else
-        return indecomposables[is_simple.(indecomposables)]
+function simple_subobjects(X::Object, E = End(X), is_simple = false)
+    if base_ring(X) == QQBar
+        return simple_subobjects_over_qqbar(X,E)
     end
+
+    if length(basis(E)) == 1
+        return [X]
+    end
+
+    if is_simple && is_squarefree(dim(E)) 
+        #A simple algebra of squarefree dimension is a division algebra
+        return [X]
+    end
+
+    R = endomorphism_ring(X,E)
+
+    i = findfirst(f -> !is_irreducible(f), minpoly.(basis(E)))
+
+    if !is_simple && is_semisimple(endomorphism_ring(X,E))
+        img = [image(i)[1] for i ∈ central_primitive_idempotents(E)]
+        return vcat([simple_subobjects(i, End(i), true) for i in img]...)
+    end
+
+    if i !== nothing && is_semisimple(R)
+        f = E[i]
+        l = roots(minpoly(f))[1]
+        K = kernel(f - l*id(X))[1]
+        I = image(f - l*id(X))[1]
+        K = simple_subobjects(K, End(K), true)
+        I = simple_subobjects(I, End(I), true)
+
+        return unique_simples([K;I])
+    end
+
+
+
+
+    M = regular_module(R)
+    M.action_of_gens = [representation_matrix(g) for g ∈ gens(R)]
+  
+    submods = minimal_submodules(M)
+    fi = [sum(collect(s)[1,:] .* basis(E)) for s in submods]
+
+    unique_simples([image(f)[1] for f ∈ fi])
+    # indecomposables = indecomposable_subobjects(X, E)
+    # if is_semisimple(parent(X))
+    #     return indecomposables
+    # else
+    #     return indecomposables[is_simple.(indecomposables)]
+    # end
 end
+
+is_isomorphic_simples(X::Object, Y::Object) = is_isomorphic(X,Y)
+
 
 function unique_simples(simples::Vector{<:Object})
     unique_simples = simples[1:1]
     for s ∈ simples[2:end]
-        if sum([int_dim(Hom(s,u)) for u ∈ unique_simples]) == 0
+        if sum([is_isomorphic_simples(s,u)[1] for u ∈ unique_simples]) == 0
             unique_simples = [unique_simples; s]
         end
     end

@@ -53,13 +53,16 @@ function induction_generators(C::CenterCategory)
         return C.induction_gens
     end
     simpls = simples(category(C))
-    ind_res = [induction_restriction(s) for s ∈ simpls]
+    invertibls = invertibles(category(C))
 
-    # Group the simples by isomorphic inductions
-    is_iso = [s == t ? true : is_isomorphic(s,t)[1] for s ∈ ind_res, t ∈ ind_res]
-    groups = connected_components(graph_from_adjacency_matrix(Undirected, is_iso))
+    ind_gens = object_type(category(C))[]
 
-    C.induction_gens = [simpls[g[1]] for g ∈ groups]
+    while !isempty(simpls)
+        x = popfirst!(simpls)
+        push!(ind_gens, x)
+        filter!(s -> all([!is_isomorphic(s,i ⊗ x ⊗ dual(i))[1] for i ∈ invertibls]), simpls)
+    end
+    C.induction_gens = ind_gens
 end
 #-------------------------------------------------------------------------------
 #   Center Constructor
@@ -323,7 +326,7 @@ function build_center_ideal(Z::Object, simples::Vector = simples(parent(Z)))
     var_count = sum([int_dim(H) for H ∈ Homs])
 
     K = base_ring(Z)
-    R,x = polynomial_ring(K, var_count, ordering = :lex)
+    R,x = polynomial_ring(K, var_count, internal_ordering = :lex)
 
     # For convinience: build arrays with the variables xi
     vars = []
@@ -387,11 +390,12 @@ function braidings_from_ideal(Z::Object, I::Ideal, simples::Vector{<:Object}, C)
         c = [k for k ∈ c]
         for i ∈ 1:length(simples)
             if ks[i] == 0 continue end
+   
             e = sum(c[k:k + ks[i] - 1] .* basis(Homs[i]))
             ex = [ex ; e]
             k = k + ks[i]
         end
-        centrals = [centrals; CenterObject(C, Z, inv.(ex))]
+        centrals = [centrals; CenterObject(C, Z, (ex))]
     end
     return centrals
 end
@@ -446,7 +450,7 @@ function center_simples(C::CenterCategory, simples = simples(C.category))
 
     simples_indices = []
     c_simples = CenterObject[]
-    d_max = dim(C.category)
+    d_max = Int(QQ(ceil(fpdim(C.category))))
     d_rem = d
     k = length(simples)
 
@@ -631,6 +635,7 @@ end
 
 function decompose(X::CenterObject)
     C = parent(X)
+
     if isdefined(C, :simples)
         return decompose_by_simples(X,simples(C))
     else
@@ -799,14 +804,14 @@ else return ```(false,nothing)```.
 function is_isomorphic(X::CenterObject, Y::CenterObject)
     # TODO: Fix This. How to compute a central isomorphism?
 
-    if is_simple(X) && is_simple(Y)
-        H = Hom(X,Y)
-        if int_dim(H) > 0
-            return true, basis(H)[1]
-        else
-            return false, nothing
-        end
-    end
+    # if is_simple(X) && is_simple(Y)
+    #     H = hom_by_linear_equations(X,Y)
+    #     if int_dim(H) > 0
+    #         return true, basis(H)[1]
+    #     else
+    #         return false, nothing
+    #     end
+    # end
 
     S = simples(parent(X))
 
@@ -816,6 +821,11 @@ function is_isomorphic(X::CenterObject, Y::CenterObject)
     else
         return false, nothing
     end
+end
+
+function is_isomorphic_simples(X::CenterObject, Y::CenterObject)
+    H = hom_by_linear_equations(X,Y)
+    int_dim(H) > 0 ? (true , H[1]) : (false, nothing)
 end
 
 function +(f::CenterMorphism, g::CenterMorphism)
@@ -905,7 +915,13 @@ struct CenterHomSpace <: AbstractHomSpace
 end
 
 
-Hom(X::CenterObject, Y::CenterObject) = hom_by_adjunction(X,Y)
+function Hom(X::CenterObject, Y::CenterObject) 
+    if is_zero(dim(category(parent(X)))) 
+        return hom_by_linear_equations(X,Y)
+    else 
+        return hom_by_adjunction(X,Y)
+    end
+end
 
 @doc raw""" 
 
@@ -974,30 +990,60 @@ end
 function simples_by_induction!(C::CenterCategory, log = true)
     S = CenterObject[]
     d = dim(C.category)^2
-    C.induction_gens = object_type(category(C))[]
+    C.induction_gens = induction_generators(C)
     simpls = simples(C.category)
+    K = base_ring(C)
 
-    FI_simples = []
+    # FI_simples = [(s, )]
 
-    ind_res = [induction_restriction(s) for s ∈ simpls]
+    # ind_res = [induction_restriction(s) for s ∈ simpls]
 
-    # Group the simples by isomorphic inductions
-    is_iso = [s == t ? true : is_isomorphic(s,t)[1] for s ∈ ind_res, t ∈ ind_res]
-    groups = connected_components(graph_from_adjacency_matrix(Undirected, is_iso))
+    # # Group the simples by isomorphic inductions
+    # is_iso = [s == t ? true : is_isomorphic(s,t)[1] for s ∈ ind_res, t ∈ ind_res]
+    # groups = connected_components(graph_from_adjacency_matrix(Undirected, is_iso))
     
-    for gr ∈ groups 
-        Is = induction(simpls[gr[1]], simpls, parent_category = C)
-        push!(FI_simples, (simpls[gr[1]], ind_res[gr[1]], Is))
-        push!(C.induction_gens, simpls[gr[1]])
-    end
+    # for gr ∈ groups 
+    #     Is = induction(simpls[gr[1]], simpls, parent_category = C)
+    #     push!(FI_simples, (simpls[gr[1]], ind_res[gr[1]], Is))
+    #     push!(C.induction_gens, simpls[gr[1]])
+    # end
     
     log && println("Simples:")
 
     #center_dim = 0
+    used_gens = []
+    remove_gens = []
+    for s ∈ induction_generators(C)
 
-    for k ∈ eachindex(FI_simples)
+        Is = induction_restriction(s, simpls)
 
-        s, Is, Z = FI_simples[k]
+        if dim(category(C)) != 0
+            #Test which simples in S are included
+            multiplicities = K == QQBar ? [int_dim(Hom(object(t),s)) for t ∈ S] : [div(int_dim(Hom(object(t),s)), int_dim(End(t))) for t ∈ S]
+
+            S_in_Z = [(t, k) for (t,k) ∈ zip(S, multiplicities) if k != 0]
+
+            if !isempty(S_in_Z) && sum([dim(t)*k for (t,k) ∈ S_in_Z]) == dim(Is)
+                push!(remove_gens, s)
+                continue
+            end
+        end
+
+        Z = induction(s, simpls, parent_category = C)
+
+        if base_ring(C) == QQBar
+            #factor out all already known simples
+            for (t,k) ∈ S_in_Z
+                for i ∈ 1:k
+                    incl = basis(Hom(t,Z))[1]
+                    @show Z = cokernel(incl)[1]
+                end
+            end
+            H = End(Z)
+        else
+            H = end_of_induction(s, Z)
+        end
+        
         #contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
         # if length(contained_simples) > 0
         #     if is_isomorphic(Is, direct_sum(object.(contained_simples))[1])[1]
@@ -1013,12 +1059,12 @@ function simples_by_induction!(C::CenterCategory, log = true)
         # end
 
         # Compute subobjects by computing central primitive central_primitive_idempotents of End(I(X))
-        H = end_of_induction(s, Z)
+        
         # idems = central_primitive_idempotents(H)
-        new_simples = [n for (n,_) ∈ decompose_by_endomorphism_ring(Z,H)]
+        new_simples = simple_subobjects(Z,H)
 
         # Every simple such that Hom(s, Zᵢ) ≠ 0 for an already dealt with s is not new
-        filter!(Zi -> sum(Int[int_dim(Hom(s,object(Zi))) for (s,_) ∈ FI_simples[1:k-1]]) == 0, new_simples)
+        filter!(Zi -> sum(Int[int_dim(Hom(s,object(Zi))) for s ∈ used_gens]) == 0, new_simples)
 
         # if length(new_simples) == 0
         #     continue
@@ -1027,11 +1073,14 @@ function simples_by_induction!(C::CenterCategory, log = true)
         log && println.(["    " * "$s" for s ∈ new_simples])
 
         S = [S; new_simples]
+        used_gens = [used_gens; s]
         #center_dim += sum(dim.(new_simples).^2)
         # if d == center_dim
         #     break
         # end
     end
+    filter!(e -> e ∉ remove_gens, C.induction_gens)
+
     C.simples = S
 end
 
@@ -1039,6 +1088,17 @@ function sort_simples_by_dimension!(C::CenterCategory)
     fp_dims = [fpdim(s) for s ∈ simples(C)]
     σ = sortperm(fp_dims, by = abs)
     C.simples = C.simples[σ]
+end
+
+function split(X::CenterObject, E = End(X))
+    #Assume X simple
+    int_dim(E) ≤ 1 && return [X]
+
+    g = gens(E)
+    f = g[findmax(degree ∘ minpoly, g)[2]]
+
+    L = splitting_field(minpoly(f))
+    collect(values(eigenvalues(f ⊗ L)))
 end
 
 
@@ -1073,18 +1133,23 @@ function hom_by_adjunction(X::CenterObject, Y::CenterObject)
         Is = induction(s, parent_category = Z)
         B = induction_right_adjunction(X_s, X, Is)
         B2 = induction_adjunction(s_Y, Y, Is)
-
+        
         # Take all combinations
         B3 = [h ∘ b for b ∈ B, h in B2][:]
+
         mors = [mors; B3]
         # Build basis
     end
-    
-    M = matrix(base_ring(C), hcat(hcat([collect(matrix(f))[:] for f in mors]...)))
-    r, Mrref = rref(M)
+    mats = matrix.(mors)
+    M = transpose(matrix(base_ring(C), hcat(hcat([collect(m)[:] for m in mats]...))))
+
+    Mrref = hnf(M)
     base = CenterMorphism[]
-    for k ∈ 1:r
-        f = sum([m*bi for (m,bi) ∈ zip(Mrref[k,:], mors)])
+    mats_morphisms = Morphism.(mats)
+
+    for k ∈ 1:rank(Mrref)
+        coeffs = express_in_basis(Morphism(transpose(matrix(base_ring(C), size(mats[1])..., Mrref[k,:]))), mats_morphisms)
+        f = sum([m*bi for (m,bi) ∈ zip(coeffs, mors)])
         push!(base, f)
     end
 
@@ -1214,6 +1279,15 @@ end
 function extension_of_scalars(X::CenterObject, L::Field, CL = _extension_of_scalars(parent(X),L))
     CenterObject(CL, extension_of_scalars(object(X), L, category(CL)), [f ⊗ L for f ∈ half_braiding(X)])
 end
+
+function extension_of_scalars(f::CenterMorphism, L::Field, CL = _extension_of_scalars(parent(f),L))
+    dom = extension_of_scalars(domain(f), L, CL)
+    cod = extension_of_scalars(codomain(f), L, CL)
+    m = extension_of_scalars(morphism(f), L)
+    CenterMorphism(dom, cod, m)
+end
+
+
 
 function karoubian_envelope(C::CenterCategory)
     KC = CenterCategory(base_ring(C), category(C))

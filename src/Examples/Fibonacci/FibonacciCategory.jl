@@ -3,7 +3,7 @@ function Fibonacci(K::Ring, a::Int = 1)
     C = SixJCategory(K, ["𝟙", "τ"])
 
     _,x = K["x"]
-    a = roots(x^2+x-1K )[a]
+    a = roots(x^2+x-1)[a]
 
     M = zeros(Int, 2,2,2)
 

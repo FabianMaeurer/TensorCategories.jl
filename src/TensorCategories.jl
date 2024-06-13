@@ -1,9 +1,9 @@
 module TensorCategories
 
-import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show,div
+import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show,div, rand, split
 
 import Oscar.AbstractAlgebra.Generic: Poly
-import Oscar.Hecke: RelSimpleNumField
+import Oscar.Hecke: RelSimpleNumField, regular_module
 import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAlgebra, AssociativeAlgebraElem,
     cyclotomic_field, Fac, Field, FieldElem, FinField, GF, GAP, GAPGroup,
     GAPGroupHomomorphism, GL, GSet, GroupElem, Hecke.AbstractAssociativeAlgebra,
@@ -29,7 +29,9 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     stabilizer, sub, subst, symbols, symmetric_group, tensor_power, tensor_product, tr,
     trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗, AbsSimpleNumField,
     number_of_rows, number_of_columns, is_squarefree, is_commutative,
-    gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected
+    gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra,
+    radical, is_zero, minimal_submodules, representation_matrix, QQBarField,
+    is_irreducible
 
 
 
@@ -53,6 +55,7 @@ export ⊠
 export ⋆
 export AbstractHomSpace 
 export add_simple! 
+export algebra
 export AlgebraObject
 export AlgebraMorphism
 export ArrowCategory
@@ -135,6 +138,7 @@ export fpdim
 export Functor 
 export FusionCategory 
 export fusion_coefficient
+export generic_algebra
 export getindex 
 export GradedVectorSpaces 
 export GRHomSpace 
@@ -172,9 +176,12 @@ export induction_restriction
 export induction_right_adjunction
 export InductionMonad
 export int_dim 
+export internal_hom
+export internal_hom_adjunction
 export inv 
 export inv_associator 
 export inverse_induction_adjunction
+export inverse_internal_hom_adjunction
 export involution
 export is_abelian 
 export is_abelian 
@@ -185,7 +192,9 @@ export is_central
 export is_epimorphism
 export is_finite 
 export is_fusion 
-export is_half_braiding 
+export is_half_braiding
+export is_irreducible
+export is_left_module 
 export is_linear 
 export is_modular 
 export is_monoidal 
@@ -194,6 +203,7 @@ export is_multifusion
 export is_multifusion 
 export is_multiring 
 export is_multitensor 
+export is_right_module
 export is_ring 
 export is_ring 
 export is_semisimple 
@@ -215,6 +225,7 @@ export LeftModule
 export LeftModuleCategory
 export LeftModuleObject
 export LeftTensorProductFunctor
+export left_module
 export left_trace 
 export load 
 export matrices 
@@ -259,9 +270,12 @@ export Pushforward
 export PushforwardFunctor 
 export pushout
 export pushout_product
+export QQBar
 export QuantumZZRing
 export QuantumZZRingElem
 export QZZ
+export radical
+export rand
 export rational_lift 
 export regular_representation
 export Representation 
@@ -270,7 +284,8 @@ export restriction
 export Restriction 
 export reverse_braiding
 export right_dual 
-export right_inverse 
+export right_inverse
+export right_module 
 export RightModule
 export RightModuleCategory
 export RightModuleObject
@@ -308,6 +323,7 @@ export smatrix
 export solve_groebner 
 export sort_simples_by_dimension! 
 export spherical 
+export split
 export stalk 
 export stalks 
 export SubcategoryObject 

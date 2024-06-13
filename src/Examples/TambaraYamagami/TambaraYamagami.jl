@@ -23,13 +23,23 @@ end
 
     TambaraYamagami(A::GAPGroup)
 
-Construct ``TY(A,τ,χ)`` over ``ℚ̅`` where ``τ = √|A|`` and ``χ`` is a generic non-degenerate bilinear form.  
+Construct ``TY(A,τ,χ)`` over ℚ̅ where ``τ = √|A|`` and ``χ`` is a generic non-degenerate bilinear form.  
 """
 function TambaraYamagami(A::GAPGroup) 
     m = Int(exponent(A))
-    K,_ = cyclotomic_field(m)
+    _, x = QQ[:x]
+    K = splitting_field([x^m + 1, x^2 - 2])
     TambaraYamagami(K, A)
 end
+
+function TambaraYamagami(A::Int64...)
+    TambaraYamagami(abelian_group(PcGroup, collect(A)))
+end
+
+function TambaraYamagami(K::Ring, A::Int64...)
+    TambaraYamagami(K, abelian_group(PcGroup, collect(A)))
+end
+
 
 """ 
 
@@ -268,7 +278,7 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
     try 
 
         G = abelian_group(PcGroup, [2])
-        χ = nondegenerate_bilinear_form(G,F(-1))
+        χ = nondegenerate_bilinear_form(G,F)
 
         ξ = q * root_of_unity(F,4)
 
