@@ -32,6 +32,15 @@ function TambaraYamagami(A::GAPGroup)
     TambaraYamagami(K, A)
 end
 
+function TambaraYamagami(A::Int64...)
+    TambaraYamagami(abelian_group(PcGroup, collect(A)))
+end
+
+function TambaraYamagami(K::Ring, A::Int64...)
+    TambaraYamagami(K, abelian_group(PcGroup, collect(A)))
+end
+
+
 """ 
 
     TambaraYamagami(K::ring, A::GAPGroup)

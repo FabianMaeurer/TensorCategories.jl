@@ -67,7 +67,7 @@ Return a morphism in the category of vector spaces defined by m.
 function Morphism(X::VectorSpaceObject, Y::VectorSpaceObject, m::MatElem)
     if parent(X) != parent(Y)
         throw(ErrorException("Missmatching parents."))
-    elseif size(m) != (dim(X),dim(Y))
+    elseif size(m) != (int_dim(X),int_dim(Y))
         throw(ErrorException("Mismatching dimensions"))
     else
         return VSMorphism(m,X,Y)
@@ -131,7 +131,7 @@ basis(V::VectorSpaceObject) = V.basis
 
 simples(Vec::VectorSpaces) = [VectorSpaceObject(base_ring(Vec),1)]
 
-decompose(V::VSObject) = [(one(parent(V)),dim(V))]
+decompose(V::VSObject) = [(one(parent(V)),int_dim(V))]
 
 matrix(f::VectorSpaceMorphism) = f.m
 """
@@ -151,7 +151,7 @@ zero(Vec::VectorSpaces) = VectorSpaceObject(base_ring(Vec), 0)
 ==(V::VectorSpaces,W::VectorSpaces) = V.base_ring == W.base_ring
 
 function ==(X::VectorSpaceObject, Y::VectorSpaceObject) 
-    dim(X) == dim(Y) && base_ring(X) == base_ring(Y)
+    int_dim(X) == int_dim(Y) && base_ring(X) == base_ring(Y)
 end
 
 """
@@ -161,7 +161,7 @@ Check whether ``V`` and ``W``are isomorphic. Return the isomorphisms if existent
 """
 function is_isomorphic(V::VectorSpaceObject, W::VectorSpaceObject)
     if parent(V) != parent(W) return false, nothing end
-    if dim(V) != dim(W) return false, nothing end
+    if int_dim(V) != int_dim(W) return false, nothing end
 
     return true, Morphism(V,W,one(matrix_space(base_ring(V),int_dim(V),int_dim(V))))
 end
@@ -200,8 +200,8 @@ function direct_sum(X::VectorSpaceObject, Y::VectorSpaceObject,)
         throw(ErrorException("Mismatching parents."))
     end
 
-    if dim(X) == 0 return (Y,[zero_morphism(X,Y), id(Y)], [zero_morphism(Y,X), id(Y)])  end
-    if dim(Y) == 0 return (X,[id(X), zero_morphism(Y,X)], [id(X), zero_morphism(X,Y), ]) end
+    if int_dim(X) == 0 return (Y,[zero_morphism(X,Y), id(Y)], [zero_morphism(Y,X), id(Y)])  end
+    if int_dim(Y) == 0 return (X,[id(X), zero_morphism(Y,X)], [id(X), zero_morphism(X,Y), ]) end
 
     F = base_ring(X)
     b = [(1,x) for x in basis(X)] ∪ [(2,y) for y in basis(Y)]
@@ -321,7 +321,7 @@ inv(f::VectorSpaceMorphism)= Morphism(codomain(f), domain(f), inv(matrix(f)))
 
 *(λ,f::VectorSpaceMorphism)  = Morphism(domain(f),codomain(f),parent(domain(f)).base_ring(λ)*f.m)
 
-is_invertible(f::VectorSpaceMorphism) = rank(f.m) == dim(domain(f)) == dimension(codomain(f))
+is_invertible(f::VectorSpaceMorphism) = rank(f.m) == int_dim(domain(f)) == int_dim(codomain(f))
 
 function left_inverse(f::VectorSpaceMorphism)
     k = matrix(f)
@@ -385,7 +385,7 @@ end
 
 basis(V::VSHomSpace) = V.basis
 
-zero(V::VSHomSpace) = Morphism(V.X,V.Y,matrix(base_ring(V.X), [0 for i ∈ 1:dim(V.X), j ∈ 1:dim(V.Y)]))
+zero(V::VSHomSpace) = Morphism(V.X,V.Y,matrix(base_ring(V.X), [0 for i ∈ 1:int_dim(V.X), j ∈ 1:int_dim(V.Y)]))
 
 zero_morphism(V::VectorSpaceObject,W::VectorSpaceObject) = Morphism(V,W, zero(matrix_space(base_ring(V), int_dim(V), int_dim(W))))
 

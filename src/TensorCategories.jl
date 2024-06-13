@@ -1,9 +1,9 @@
 module TensorCategories
 
-import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show,div
+import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show,div, rand, split
 
 import Oscar.AbstractAlgebra.Generic: Poly
-import Oscar.Hecke: RelSimpleNumField
+import Oscar.Hecke: RelSimpleNumField, regular_module
 import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAlgebra, AssociativeAlgebraElem,
     cyclotomic_field, Fac, Field, FieldElem, FinField, GF, GAP, GAPGroup,
     GAPGroupHomomorphism, GL, GSet, GroupElem, Hecke.AbstractAssociativeAlgebra,
@@ -29,7 +29,9 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     stabilizer, sub, subst, symbols, symmetric_group, tensor_power, tensor_product, tr,
     trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗, AbsSimpleNumField,
     number_of_rows, number_of_columns, is_squarefree, is_commutative,
-    gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra
+    gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra,
+    radical, is_zero, minimal_submodules, representation_matrix, QQBarField,
+    is_irreducible
 
 
 
@@ -191,6 +193,7 @@ export is_epimorphism
 export is_finite 
 export is_fusion 
 export is_half_braiding
+export is_irreducible
 export is_left_module 
 export is_linear 
 export is_modular 
@@ -267,9 +270,12 @@ export Pushforward
 export PushforwardFunctor 
 export pushout
 export pushout_product
+export QQBar
 export QuantumZZRing
 export QuantumZZRingElem
 export QZZ
+export radical
+export rand
 export rational_lift 
 export regular_representation
 export Representation 
@@ -317,6 +323,7 @@ export smatrix
 export solve_groebner 
 export sort_simples_by_dimension! 
 export spherical 
+export split
 export stalk 
 export stalks 
 export SubcategoryObject 

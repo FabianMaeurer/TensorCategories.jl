@@ -448,5 +448,9 @@ function show(io::IO, C::GradedVectorSpaces)
 end
 function show(io::IO, V::GVSObject)
     elems = elements(base_group(V))
-    print(io, "Graded vector space of dimension $(int_dim(V)) with grading\n$(V.grading)")
+    if int_dim(V) == 0
+        print(io, "0")
+    else
+        print(io, "Graded vector space of dimension $(int_dim(V)) with grading\n$(V.grading)")
+    end
 end

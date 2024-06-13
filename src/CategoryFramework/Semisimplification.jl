@@ -59,10 +59,12 @@ end
 
 is_semisimple(C::Semisimplification) = true
 is_multiring(C::Semisimplification) = is_multiring(category(C))
+is_multifusion(C::Semisimplification) = is_multiring(category(C)) && is_rigid(category(C))
 
 semisimplify(C::Category) = Semisimplification(C)
-semisimplify(X::Object) = SemisimplifiedObject(X)
+semisimplify(X::Object) = SemisimplifiedObject(Semisimplification(parent(X)), X)
 semisimplify(X::Object, C::Category) = SemisimplifiedObject(C,X)
+
 function semisimplify(f::Morphism, C::Semisimplification)   
     dom = semisimplify(domain(f),C)
     cod = semisimplify(codomain(f),C)
@@ -93,6 +95,14 @@ function tensor_product(f::SemisimplifiedMorphism...)
     codom = tensor_product(codomain.(f)...)
     map = tensor_product(morphism.(f)...)
     Morphism(dom, codom, map)
+end
+
+function associator(X::SemisimplifiedObject, Y::SemisimplifiedObject, Z::SemisimplifiedObject)
+    C = parent(X)
+    a = associator(object.([X,Y,Z])...)
+    dom = SemisimplifiedObject(C, domain(a))
+    cod = SemisimplifiedObject(C, codomain(a))
+    SemisimplifiedMorphism(dom,cod, a)
 end
 
 function is_negligible(f::Morphism)
@@ -137,6 +147,7 @@ function Hom(X::SemisimplifiedObject, Y::SemisimplifiedObject)
     end
     filter!(e -> e != zero_morphism(object(X), object(Y)), base)
 
+    base = [SemisimplifiedMorphism(X,Y, f) for f ∈ base]
     HomSpace(X,Y,base)
 end
 
@@ -151,6 +162,23 @@ end
 function zero_morphism(X::SemisimplifiedObject, Y::SemisimplifiedObject)
     Morphism(X,Y, zero_morphism(object(X), object(Y)))
 end
+
+function kernel(f::SemisimplifiedMorphism)
+    SC = parent(f)
+    K,k = kernel(morphism(f))
+    SK = SemisimplifiedObject(SC, K)
+    SK, SemisimplifiedMorphism(SK, domain(f), k)
+end
+
+function cokernel(f::SemisimplifiedMorphism)
+    SC = parent(f)
+    C,c = cokernel(morphism(f))
+    S = SemisimplifiedObject(SC, C)
+    S, SemisimplifiedMorphism(codomain(f), S, c)
+end
+ 
+
+
 #=----------------------------------------------------------
     Object Functionality 
 ----------------------------------------------------------=#
@@ -205,4 +233,20 @@ function coev(X::SemisimplifiedObject)
     dom = SemisimplifiedObject(C, domain(c))
     cod = SemisimplifiedObject(C, codomain(c))
     Morphism(dom, cod, c)
+end
+
+#=----------------------------------------------------------
+    Printing 
+----------------------------------------------------------=#
+
+function show(io::IO, X::SemisimplifiedObject)
+    if int_dim(End(X)) == 0 
+        print(io, "Semisimplified: $(zero(parent(object(X))))")
+    else
+        print(io, "Semisimplified: $(object(X))")
+    end
+end
+
+function show(io::IO, C::Semisimplification)
+    print(io, "Semisimplification of $(category(C))")
 end

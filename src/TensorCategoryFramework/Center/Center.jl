@@ -635,6 +635,7 @@ end
 
 function decompose(X::CenterObject)
     C = parent(X)
+
     if isdefined(C, :simples)
         return decompose_by_simples(X,simples(C))
     else
@@ -803,14 +804,14 @@ else return ```(false,nothing)```.
 function is_isomorphic(X::CenterObject, Y::CenterObject)
     # TODO: Fix This. How to compute a central isomorphism?
 
-    if is_simple(X) && is_simple(Y)
-        H = Hom(X,Y)
-        if int_dim(H) > 0
-            return true, basis(H)[1]
-        else
-            return false, nothing
-        end
-    end
+    # if is_simple(X) && is_simple(Y)
+    #     H = hom_by_linear_equations(X,Y)
+    #     if int_dim(H) > 0
+    #         return true, basis(H)[1]
+    #     else
+    #         return false, nothing
+    #     end
+    # end
 
     S = simples(parent(X))
 
@@ -820,6 +821,11 @@ function is_isomorphic(X::CenterObject, Y::CenterObject)
     else
         return false, nothing
     end
+end
+
+function is_isomorphic_simples(X::CenterObject, Y::CenterObject)
+    H = hom_by_linear_equations(X,Y)
+    int_dim(H) > 0 ? (true , H[1]) : (false, nothing)
 end
 
 function +(f::CenterMorphism, g::CenterMorphism)
@@ -909,7 +915,13 @@ struct CenterHomSpace <: AbstractHomSpace
 end
 
 
-Hom(X::CenterObject, Y::CenterObject) = hom_by_adjunction(X,Y)
+function Hom(X::CenterObject, Y::CenterObject) 
+    if is_zero(dim(category(parent(X)))) 
+        return hom_by_linear_equations(X,Y)
+    else 
+        return hom_by_adjunction(X,Y)
+    end
+end
 
 @doc raw""" 
 
@@ -980,6 +992,7 @@ function simples_by_induction!(C::CenterCategory, log = true)
     d = dim(C.category)^2
     C.induction_gens = induction_generators(C)
     simpls = simples(C.category)
+    K = base_ring(C)
 
     # FI_simples = [(s, )]
 
@@ -999,10 +1012,38 @@ function simples_by_induction!(C::CenterCategory, log = true)
 
     #center_dim = 0
     used_gens = []
+    remove_gens = []
     for s ∈ induction_generators(C)
 
+        Is = induction_restriction(s, simpls)
+
+        if dim(category(C)) != 0
+            #Test which simples in S are included
+            multiplicities = K == QQBar ? [int_dim(Hom(object(t),s)) for t ∈ S] : [div(int_dim(Hom(object(t),s)), int_dim(End(t))) for t ∈ S]
+
+            S_in_Z = [(t, k) for (t,k) ∈ zip(S, multiplicities) if k != 0]
+
+            if !isempty(S_in_Z) && sum([dim(t)*k for (t,k) ∈ S_in_Z]) == dim(Is)
+                push!(remove_gens, s)
+                continue
+            end
+        end
+
         Z = induction(s, simpls, parent_category = C)
-        Is = object(Z)
+
+        if base_ring(C) == QQBar
+            #factor out all already known simples
+            for (t,k) ∈ S_in_Z
+                for i ∈ 1:k
+                    incl = basis(Hom(t,Z))[1]
+                    @show Z = cokernel(incl)[1]
+                end
+            end
+            H = End(Z)
+        else
+            H = end_of_induction(s, Z)
+        end
+        
         #contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
         # if length(contained_simples) > 0
         #     if is_isomorphic(Is, direct_sum(object.(contained_simples))[1])[1]
@@ -1018,9 +1059,9 @@ function simples_by_induction!(C::CenterCategory, log = true)
         # end
 
         # Compute subobjects by computing central primitive central_primitive_idempotents of End(I(X))
-        H = end_of_induction(s, Z)
+        
         # idems = central_primitive_idempotents(H)
-        new_simples = [n for (n,_) ∈ decompose_by_endomorphism_ring(Z,H)]
+        new_simples = simple_subobjects(Z,H)
 
         # Every simple such that Hom(s, Zᵢ) ≠ 0 for an already dealt with s is not new
         filter!(Zi -> sum(Int[int_dim(Hom(s,object(Zi))) for s ∈ used_gens]) == 0, new_simples)
@@ -1038,6 +1079,8 @@ function simples_by_induction!(C::CenterCategory, log = true)
         #     break
         # end
     end
+    filter!(e -> e ∉ remove_gens, C.induction_gens)
+
     C.simples = S
 end
 
@@ -1045,6 +1088,17 @@ function sort_simples_by_dimension!(C::CenterCategory)
     fp_dims = [fpdim(s) for s ∈ simples(C)]
     σ = sortperm(fp_dims, by = abs)
     C.simples = C.simples[σ]
+end
+
+function split(X::CenterObject, E = End(X))
+    #Assume X simple
+    int_dim(E) ≤ 1 && return [X]
+
+    g = gens(E)
+    f = g[findmax(degree ∘ minpoly, g)[2]]
+
+    L = splitting_field(minpoly(f))
+    collect(values(eigenvalues(f ⊗ L)))
 end
 
 
@@ -1079,9 +1133,10 @@ function hom_by_adjunction(X::CenterObject, Y::CenterObject)
         Is = induction(s, parent_category = Z)
         B = induction_right_adjunction(X_s, X, Is)
         B2 = induction_adjunction(s_Y, Y, Is)
-
+        
         # Take all combinations
         B3 = [h ∘ b for b ∈ B, h in B2][:]
+
         mors = [mors; B3]
         # Build basis
     end
@@ -1224,6 +1279,15 @@ end
 function extension_of_scalars(X::CenterObject, L::Field, CL = _extension_of_scalars(parent(X),L))
     CenterObject(CL, extension_of_scalars(object(X), L, category(CL)), [f ⊗ L for f ∈ half_braiding(X)])
 end
+
+function extension_of_scalars(f::CenterMorphism, L::Field, CL = _extension_of_scalars(parent(f),L))
+    dom = extension_of_scalars(domain(f), L, CL)
+    cod = extension_of_scalars(codomain(f), L, CL)
+    m = extension_of_scalars(morphism(f), L)
+    CenterMorphism(dom, cod, m)
+end
+
+
 
 function karoubian_envelope(C::CenterCategory)
     KC = CenterCategory(base_ring(C), category(C))
