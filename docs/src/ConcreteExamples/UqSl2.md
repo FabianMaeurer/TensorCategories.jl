@@ -13,7 +13,7 @@ a rot of unity.
 
 ```@docs; canonical = false
 sl2_representations
-````
+```
 
 ## Verlinde type categories
 

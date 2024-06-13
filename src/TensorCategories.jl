@@ -248,9 +248,9 @@ export object
 export object_type 
 export one 
 export op 
-export OppositeCategory 
-export OppositeMorphism 
-export OppositeObject 
+export opposite_category
+export opposite_morphism
+export opposite_object
 export orbit_index 
 export orbit_stabilizers 
 export pairing 
@@ -260,9 +260,9 @@ export pentagon_equations
 export print_multiplication_table 
 export print_multiplication_table 
 export product 
-export ProductCategory 
-export ProductMorphism 
-export ProductObject 
+export product_category 
+export product_morphism
+export product_object
 export pullback
 export Pullback 
 export PullbackFunctor 

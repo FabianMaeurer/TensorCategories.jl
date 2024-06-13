@@ -1,6 +1,6 @@
 # TensorCategories.jl
 
-TensorCategories.jl is a software package based on the programming language [julia](https://julialang.org) and the open-source computer algebra system [Oscar.jl](https://github.com/oscar-system/Oscar.jl) for computations with tensor categories. 
+TensorCategories.jl is a software package based on the programming language [Julia](https://julialang.org) and the open-source computer algebra system [Oscar.jl](https://github.com/oscar-system/Oscar.jl) for computations with tensor categories. 
 
 ## Installation
 
@@ -18,14 +18,8 @@ To use TensorCategories the structures from the [OSCAR-System](https://github.co
 
 ```@repl
 using TensorCategories;
-
-# Define an Ising Fusion category
 I = Ising()
-
-# Define the categorical center
 C = center(Ising())
-
-# Compute the S-matrix of the center
 S = smatrix(C)
 ```
 

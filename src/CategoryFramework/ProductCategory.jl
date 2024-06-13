@@ -13,9 +13,32 @@ struct ProductMorphism{N} <: Morphism
     factors::Tuple
 end
 
+@doc raw""" 
 
-ProductCategory(C::Category...) = ProductCategory{length(C)}(C)
-ProductObject(X::Object...) = ProductObject{length(X)}(ProductCategory(parent.(X)...), X)
+    product_category(C::Category...)
+
+Construct the product category
+"""
+product_category(C::Vector{Category}) = ProductCategory{length(C)}{tuple(C)}
+
+
+product_category(C::Category...) = ProductCategory{length(C)}(C)
+
+@doc raw""" 
+
+    product_object(X::Object...)
+
+Construct the product in the product category
+"""
+product_object(X::Object...) = ProductObject{length(X)}(ProductCategory(parent.(X)...), X)
+
+@doc raw""" 
+
+    product_morphism(f::Morphism...)
+
+Construct the product morphism in the product category
+"""
+product_morphism(f::Morphism...) = Morphism(f...)
 
 ×(C::Category, D::Category) = ProductCategory(C,D)
 
