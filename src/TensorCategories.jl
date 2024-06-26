@@ -31,7 +31,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     number_of_rows, number_of_columns, is_squarefree, is_commutative,
     gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra,
     radical, is_zero, minimal_submodules, representation_matrix, QQBarField,
-    is_irreducible
+    is_irreducible, polynomial, is_univariate, action
 
 
 
@@ -54,8 +54,11 @@ export ⊗
 export ⊠ 
 export ⋆
 export AbstractHomSpace 
+export action
+export action_matrix
 export add_simple! 
 export algebra
+export algebra_structures
 export AlgebraObject
 export AlgebraMorphism
 export ArrowCategory
@@ -65,6 +68,7 @@ export associator
 export base_ring 
 export base_group
 export basis 
+export bimodule
 export BiModule
 export BiModuleCategory
 export BiModuleObject
@@ -73,6 +77,9 @@ export cat_fr_8122
 export cat_fr_9143 
 export Category 
 export category
+export category_of_right_modules
+export category_of_left_modules
+export category_of_bimodules
 export HomSet 
 export HomSpace 
 export Morphism 
@@ -132,6 +139,9 @@ export exponent
 export express_in_basis 
 export extension_of_scalars
 export factor 
+export free_bimodule
+export free_left_module
+export free_right_module
 export Fibonacci 
 export Forgetful 
 export fpdim 
@@ -207,6 +217,7 @@ export is_right_module
 export is_ring 
 export is_ring 
 export is_semisimple 
+export is_separable
 export is_simple 
 export is_spherical 
 export is_split_semisimple
@@ -219,6 +230,7 @@ export Ising
 export is_invertible
 export karoubian_envelope 
 export kernel 
+export left_action
 export left_dual 
 export left_inverse 
 export LeftModule
@@ -226,6 +238,7 @@ export LeftModuleCategory
 export LeftModuleObject
 export LeftTensorProductFunctor
 export left_module
+export left_module_category
 export left_trace 
 export load 
 export matrices 
@@ -283,6 +296,7 @@ export RepresentationCategory
 export restriction 
 export Restriction 
 export reverse_braiding
+export right_action
 export right_dual 
 export right_inverse
 export right_module 
@@ -301,6 +315,7 @@ export SemisimplifiedMorphism
 export semisimplify
 export SixJCategory 
 export SixJObject 
+export separable_algebra_structures
 export set_associator! 
 export set_braiding! 
 export set_canonical_spherical! 
@@ -411,6 +426,7 @@ include("TensorCategoryFramework/Center/CentralizerInduction.jl")
 
 include("TensorCategoryFramework/InternalModules/InternalAlgebras.jl")
 include("TensorCategoryFramework/InternalModules/ModuleCategories.jl")
+include("TensorCategoryFramework/InternalModules/ComputationOfAlgebras.jl")
 include("TensorCategoryFramework/ModuleCategories/MonadModules.jl")
 
 

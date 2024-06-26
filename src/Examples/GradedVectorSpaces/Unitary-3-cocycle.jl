@@ -53,7 +53,7 @@ end
 
 Construct the category of twisted graded vectorspaces with the i-th 3-cocycle.
 """
-function TwistedGradedVectorSpaces(G::GAPGroup, K::Field, i::Int = 2, j::Int = 1) #Inputs finite group G and the number of Cocycle we want in the twisted_graded_vector_spaces
+function TwistedGradedVectorSpaces(K::Field, G::GAPGroup, i::Int = 2, j::Int = 1) #Inputs finite group G and the number of Cocycle we want in the twisted_graded_vector_spaces
 	GAP.Packages.install("HAP")
 	GAP.Packages.load("HAP") 
     

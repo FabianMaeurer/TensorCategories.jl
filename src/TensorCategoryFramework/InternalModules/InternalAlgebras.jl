@@ -39,6 +39,18 @@ end
 
 is_algebra(X::AlgebraObject) = is_algebra(object(X), multiplication(X), unit(X))
 
+function is_separable(A::AlgebraObject)
+    C = parent(A)
+    m = multiplication(A)
+
+    # Define the multiplication as a bimodule morphism
+    AA = free_bimodule(one(C), A)
+    m = Morphism(AA, bimodule(A), multiplication(A))
+
+    # A is seperable if m has a right inverse as bimodule morphism
+    has_right_inverse(m)
+end
+
 #=----------------------------------------------------------
     Group Algebras
 ----------------------------------------------------------=#

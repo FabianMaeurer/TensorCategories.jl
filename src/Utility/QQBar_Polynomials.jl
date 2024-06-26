@@ -68,6 +68,7 @@ function rational_lift(p::T) where T <: Union{PolyRingElem, MPolyRingElem}
     Qx,x = polynomial_ring(QQ, Symbol.([["x$i" for i ∈ 1:sum(non_rational)]; parent(p).S]))
 
     q = zero(Qx)
+
     l = 1
     y = x[end-n+1:end]
     polys = QQMPolyRingElem[]
@@ -96,7 +97,29 @@ end
 
 
 function rational_lift(I::MPolyIdeal)
-    ideal(rational_lift.(gens(I)))
+    K = base_ring(base_ring((I)))
+    @assert typeof(K) <: Union{QQField, AbsSimpleNumField}
+
+    if K == QQ 
+        return I
+    end
+
+    G = [g for g ∈ gens(I) if g != 0]
+
+    α = gen(K)
+    μ = minpoly(α)
+
+    Qx, x = polynomial_ring(QQ, length(gens(base_ring(I))) + 1) 
+    base = [μ(x[end])]
+
+    for f ∈ G
+        coeffs = [polynomial(QQ, coefficients(a))(x[end]) for a ∈ coefficients(f)]
+        monos = [change_base_ring(QQ,m)(x[1:end-1]...) for m ∈ monomials(f)]
+
+        push!(base, sum(coeffs .* monos))
+    end
+
+    return ideal(base)
 end
 
 function *(k::QQBarFieldElem, p::T) where T <: Union{QQPolyRingElem, QQMPolyRingElem}

@@ -252,3 +252,11 @@ end
 +(f::T, g::T) where T <: Morphism = Morphism(domain(f), codomain(g), morphism(f) + morphism(g))
 
 compose(f::T, g::T) where T <: Morphism = Morphism(domain(f), codomain(g), compose(morphism(f), morphism(g)))
+
+function matrix(f::Morphism) 
+    try 
+        return matrix(morphism(f))
+    catch
+        error("matrix(::$(typeof(f))) not implemented")
+    end
+end

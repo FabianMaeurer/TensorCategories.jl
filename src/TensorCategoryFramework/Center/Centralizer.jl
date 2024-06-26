@@ -323,10 +323,10 @@ function simples(C::CentralizerCategory; sort = false, show_progress = false)
     if isdefined(C, :simples) 
         return C.simples 
     end
-    if is_modular(category(C))
-        C.simples = center_simples_by_braiding(category(C), C)
-        return C.simples
-    end
+    # if is_modular(category(C))
+    #     C.simples = center_simples_by_braiding(category(C), C)
+    #     return C.simples
+    # end
     simples_by_induction!(C, show_progress)
     if sort 
         sort_simples_by_dimension!(C)
@@ -389,22 +389,21 @@ end
 #     return unique_simples(vcat([indecomposable_subobjects(Y) for Y ∈ eig_spaces]...))
 # end
 
-function indecomposable_subobjects_of_induction(X::Object, IX::CentralizerObject = induction(X))
-    @assert object(IX) == X
-    B = basis(Hom(X, object(IX)))
+# function indecomposable_subobjects_of_induction(X::Object, IX::CentralizerObject = induction(X))
+#     @assert object(IX) == X
+#     B = basis(Hom(X, object(IX)))
 
-    while length(B) > 0
-        f = popat!(B, rand(eachindex(B)))
-        f = induction_adjunction(f,IX,IX)
+#     while length(B) > 0
+#         f = popat!(B, rand(eachindex(B)))
+#         f = induction_adjunction(f,IX,IX)
         
-        eig = collect(values(eigenspaces(f)))
+#         eig = collect(values(eigenspaces(f)))
 
-        length(B) ≥ 2 && break
-    end
+#         length(B) ≥ 2 && break
+#     end
+# end
 
 
-
-end
 """
     associator(X::CentralizerObject, Y::CentralizerObject, Z::CentralizerObject)
 
@@ -934,14 +933,14 @@ end
     by C ⊠ C^rev ≃ 𝒵(C) 
 ----------------------------------------------------------=#
 
-function center_simples_by_braiding(C::Category, Z = centralizer(C))
-    S = simples(C)
+# function center_simples_by_braiding(C::Category, Z = centralizer(C))
+#     S = simples(C)
 
-    S_braided = [CentralizerObject(Z, s, [braiding(s,t) for t ∈ S]) for s ∈ S]
-    S_rev_braided = [CentralizerObject(Z, s, [inv(braiding(t,s)) for t ∈ S]) for s ∈ S]
+#     S_braided = [CentralizerObject(Z, s, [braiding(s,t) for t ∈ S]) for s ∈ S]
+#     S_rev_braided = [CentralizerObject(Z, s, [inv(braiding(t,s)) for t ∈ S]) for s ∈ S]
 
-    [t⊗s for s ∈ S_braided, t ∈ S_rev_braided][:]
-end
+#     [t⊗s for s ∈ S_braided, t ∈ S_rev_braided][:]
+# end
 
 #=----------------------------------------------------------
     Drinfeld Morphism 

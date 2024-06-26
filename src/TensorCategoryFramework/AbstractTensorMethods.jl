@@ -207,13 +207,14 @@ function dim(X::Object)
     C = parent(X)
     if is_tensor(C)
         return base_ring(X)(tr(spherical(X)))
-    else
-        𝟙 = indecomposable_subobjects(one(C))
+    elseif is_multi_tensor(C)
+        𝟙 = simple_subobjects(one(C))
         incls = [basis(Hom(𝟙ᵢ, one(C)))[1] for 𝟙ᵢ ∈ 𝟙]
         projs = [basis(Hom(one(C), 𝟙ᵢ))[1] for 𝟙ᵢ ∈ 𝟙]
 
         return sum([base_ring(X)(p∘tr(spherical(X))∘i) for p ∈ projs, i ∈ incls][:])
     end
+    error("No dimension defined")
 end
 
 dim(C::Category) = sum(dim(s)^2 for s ∈ simples(C))

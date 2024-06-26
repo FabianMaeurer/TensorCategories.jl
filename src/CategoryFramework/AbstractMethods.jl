@@ -650,7 +650,15 @@ function right_inverse(f::Morphism)
     catch e
         error("Morphism does not have a right inverse")
     end
+end
 
+function has_right_inverse(f::Morphism)
+    try 
+        right_inverse(f)
+        true
+    catch
+        false
+    end
 end
 
 @doc raw""" 

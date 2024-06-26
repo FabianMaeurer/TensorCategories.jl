@@ -22,7 +22,11 @@ base_ring(C::OppositeCategory) = base_ring(C.C)
 base_ring(X::OppositeObject) = base_ring(X.X)
 parent(X::OppositeObject) = OppositeCategory(parent(X.X))
 
-compose(f::OppositeMorphism, g::OppositeMorphism) = OppositeMorphism(compose(g.m,f.m))
+function compose(f::OppositeMorphism...) 
+    dom = codomain(f[end])
+    cod = domain(f[1])
+    OppositeMorphism(dom, cod, compose(morphism.(f)...))
+end
 
 function product(X::OppositeObject, Y::OppositeObject)
     Z,px = product(X.X,Y.X)
@@ -31,22 +35,42 @@ end
 
 function coproduct(X::OppositeObject, Y::OppositeObject)
     Z,ix = coproduct(X.X,Y.X)
-    return OppositeObject(Z), OppositeMorphism.(ix)
+    C = parent(X)
+    return OppositeObject(C,Z), OppositeMorphism.(C,ix)
 end
 
 function direct_sum(X::OppositeObject, Y::OppositeObject)
     Z,ix,px = coproduct(X.X,Y.X)
-    return OppositeObject(Z), OppositeMorphism.(ix), OppositeMorphism.(px)
+    C = parent(X)
+    return OppositeObject(C,Z), OppositeMorphism.(ix), OppositeMorphism.(px)
 end
 
-tensor_product(X::OppositeObject, Y::OppositeObject) = OppositeObject(tensor_product(X.X,Y.X))
+tensor_product(X::OppositeObject, Y::OppositeObject) = OppositeObject(parent(X), tensor_product(X.X,Y.X))
 
-one(C::OppositeCategory) = OppositeObject(one(C.C))
+function tensor_product(f::OppositeMorphism, g::OppositeMorphism) 
+    dom = codomain(f) ⊗ codomain(g)
+    cod = domain(f) ⊗ domain(g)
+    Morphism(dom, cod, morphism(f) ⊗ morphism(g))
+end
 
-simples(C::OppositeCategory) = op.(simples(C.C))
+function associator(X::OppositeObject, Y::OppositeObject, Z::OppositeObject)
+    a = associator(object(X), object(Y), object(Z))
+    C = parent(X)
+    dom = OppositeObject(C, codomain(a))
+    cod = OppositeObject(C, domain(a))
+    Morphism(dom, cod, a)
+end
 
-zero(C::OppositeCategory) = op(zero(C.C))
+one(C::OppositeCategory) = OppositeObject(C,one(C.C))
 
+simples(C::OppositeCategory) = [OppositeObject(C, s) for s ∈ simples(C.C)]
+
+zero(C::OppositeCategory) = OppositeObject(C, zero(C.C))
+
+id(X::OppositeObject) = Morphism(X,X, id(object(X)))
+
+object(X::OppositeObject) = X.X
+morphism(f::OppositeMorphism) = f.m
 #=----------------------------------------------------------
     Constructors 
 ----------------------------------------------------------=#

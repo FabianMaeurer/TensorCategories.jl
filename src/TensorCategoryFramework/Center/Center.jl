@@ -57,10 +57,11 @@ function induction_generators(C::CenterCategory)
 
     ind_gens = object_type(category(C))[]
 
-    while !isempty(simpls)
-        x = popfirst!(simpls)
+    indicies = eachindex(simpls)
+    while !isempty(indicies)
+        x = simpls[indicies[1]]
         push!(ind_gens, x)
-        filter!(s -> all([!is_isomorphic(s,i ⊗ x ⊗ dual(i))[1] for i ∈ invertibls]), simpls)
+        indicies = [s for s ∈ indicies if all([!is_isomorphic(simpls[s], i ⊗ x ⊗ dual(i))[1] for i ∈ invertibls])]
     end
     C.induction_gens = ind_gens
 end
@@ -688,22 +689,21 @@ end
 #     return unique_simples(vcat([indecomposable_subobjects(Y) for Y ∈ eig_spaces]...))
 # end
 
-function indecomposable_subobjects_of_induction(X::Object, IX::CenterObject = induction(X))
-    @assert object(IX) == X
-    B = basis(Hom(X, object(IX)))
+# function indecomposable_subobjects_of_induction(X::Object, IX::CenterObject = induction(X))
+#     @assert object(IX) == X
+#     B = basis(Hom(X, object(IX)))
 
-    while length(B) > 0
-        f = popat!(B, rand(eachindex(B)))
-        f = induction_adjunction(f,IX,IX)
+#     while length(B) > 0
+#         f = popat!(B, rand(eachindex(B)))
+#         f = induction_adjunction(f,IX,IX)
         
-        eig = collect(values(eigenspaces(f)))
+#         eig = collect(values(eigenspaces(f)))
 
-        length(B) ≥ 2 && break
-    end
+#         length(B) ≥ 2 && break
+#     end
+# end
 
 
-
-end
 """
     associator(X::CenterObject, Y::CenterObject, Z::CenterObject)
 
@@ -1302,7 +1302,7 @@ end
     by C ⊠ C^rev ≃ 𝒵(C) 
 ----------------------------------------------------------=#
 
-function center_simples_by_braiding(C::Category, Z = center(C))
+function center_simples_by_braiding(C::Category, Z::CenterCategory = center(C))
     S = simples(C)
 
     S_braided = [CenterObject(Z, s, [braiding(s,t) for t ∈ S]) for s ∈ S]

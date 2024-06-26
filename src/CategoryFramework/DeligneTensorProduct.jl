@@ -49,7 +49,7 @@ function tensor_product(C::Category, D::Category, names1::Vector{String} = Strin
         end
     end
 
-    CD = SixJCategory(F, mult, ["$s⊠$t" for t ∈ T, s ∈ S][:])
+    CD = SixJCategory(F, mult, ["$s ⊠ $t" for t ∈ T, s ∈ S][:])
 
     set_tensor_product!(CD, mult)
     set_associator!(CD, ass)
@@ -70,6 +70,7 @@ function tensor_product(C::Category, D::Category, names1::Vector{String} = Strin
 
     return CD
 end
+
 
 ⊠(C::Category, D::Category) = tensor_product(C,D)
 

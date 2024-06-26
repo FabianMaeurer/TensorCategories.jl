@@ -122,29 +122,26 @@ function Hom(X::SemisimplifiedObject, Y::SemisimplifiedObject)
 
     F = base_ring(X)
 
-    if length(base_XY) == 0
+    if length(base_XY) == 0 || length(base_YX) == 0
         return HomSpace(X,Y,SemisimplifiedMorphism[])
     end
 
-    if length(base_YX) == 0
-        base = base_XY
-    else
-        # linear system to find negligible morphisms
-        # (tr(f ∘ g) = 0 for all g)
-        M = zero_matrix(F, length(base_YX), length(base_XY))
-        
+    # linear system to find negligible morphisms
+    # (tr(f ∘ g) = 0 for all g)
+    M = zero_matrix(F, length(base_YX), length(base_XY))
+    
 
-        m = [F(tr(f ∘ g)) for f ∈ base_XY, g ∈ base_YX]
-        
-        M = matrix(F, length(base_XY), length(base_YX), m)
+    m = [F(tr(f ∘ g)) for f ∈ base_XY, g ∈ base_YX]
+    
+    M = matrix(F, length(base_XY), length(base_YX), m)
 
-        # The image of M except 0 are all non-negligible morphisms
-        base_coeffs = hnf(M)
-        #base_coeffs = base_coeffs[1:rank(base_coeffs), 1]
-        
-        # Basis 
-        base =  [sum(collect(base_coeffs[i,:])[:] .* base_XY) for i ∈ 1:length(base_coeffs[:,1])]
-    end
+    # The image of M except 0 are all non-negligible morphisms
+    base_coeffs = hnf(M)
+    #base_coeffs = base_coeffs[1:rank(base_coeffs), 1]
+    
+    # Basis 
+    base =  [sum(collect(base_coeffs[i,:])[:] .* base_XY) for i ∈ 1:length(base_coeffs[:,1])]
+
     filter!(e -> e != zero_morphism(object(X), object(Y)), base)
 
     base = [SemisimplifiedMorphism(X,Y, f) for f ∈ base]
