@@ -107,3 +107,4 @@ function tensor_product(X::FusionModuleEndoFunctor, Y::FusionModuleEndoFunctor)
     y = object(Y)
 
     mors = []
+end
