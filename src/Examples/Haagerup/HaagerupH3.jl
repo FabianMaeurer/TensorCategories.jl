@@ -1,6 +1,6 @@
 """ 
 
-    HaagerupH3([p1 = 1, p2 = 2])
+    haagerup_H3([p1 = 1, p2 = 2])
 
 Build the Haagerup ℋ₃ subfactor category. The category is build as SixJCategory. The associators are taken from the paper 
 
@@ -8,7 +8,7 @@ https://arxiv.org/pdf/1906.01322
 
 where p1,p2 = ±1 are parameters for the different possible sets of associators.
 """
-function HaagerupH3(K::Field = QQ; p1 = 1, p2 = 1)
+function haagerup_H3(K::Field = QQ; p1 = 1, p2 = 1)
     _,x = QQ["x"]
     if K == QQ
         K,_ = number_field(x^16 - 4*x^14 + 13*x^12 + 4*x^10 + 53*x^8 + 4*x^6 + 13*x^4 - 4*x^2 + 1)
@@ -27,7 +27,7 @@ function HaagerupH3(K::Field = QQ; p1 = 1, p2 = 1)
         r13 = -r13
     end
     
-    H = SixJCategory(K,["𝟙", "α", "α∗", "ρ", "αρ", "α∗ρ"])
+    H = six_j_category(K,["𝟙", "α", "α∗", "ρ", "αρ", "α∗ρ"])
 
     mult = Array{Int,3}(undef,6,6,6)
 
@@ -102,12 +102,12 @@ function HaagerupH3(K::Field = QQ; p1 = 1, p2 = 1)
     return H
 end
 
-function HaagerupH3(s::Symbol; p1 = 1, p2 = 1)
+function haagerup_H3(s::Symbol; p1 = 1, p2 = 1)
     if s == :splitting_field
         _,x = QQ[:x]
         K,a = number_field()
 
-        return HaagerupH3(K, p1 = p1, p2 = p2)
+        return haagerup_H3(K, p1 = p1, p2 = p2)
     end
 
     error("unknown keyword $s")

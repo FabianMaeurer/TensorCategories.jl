@@ -23,7 +23,7 @@ GroupRepresentationCategory <: RepresentationCategory
 Build it with the constructor
 
 ```@docs; canonical = false
-RepresentationCategory(::GAPGroup, ::Field)
+representation_category(::Field, ::GAPGroup)
 ```
 
 A group representation is defined by a group homomorphism from ``G`` into a

@@ -11,7 +11,7 @@ end
 
 function pentagon_equations(mult::Array{Int,3}, one::Vector{Int})
     #Dummy category with the corresponding multiplication to find number of indeterminates
-    _C = SixJCategory(QQ,mult)
+    _C = six_j_category(QQ,mult)
     _C.one = one
     var_count = _number_of_variables_in_pentagon_equations(_C)
 
@@ -21,7 +21,7 @@ function pentagon_equations(mult::Array{Int,3}, one::Vector{Int})
 
     y = deepcopy(x)
     
-    poly_C = SixJCategory(R, mult)
+    poly_C = six_j_category(R, mult)
     poly_C.one = one
 
     m = poly_C.simples

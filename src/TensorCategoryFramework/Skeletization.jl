@@ -1,4 +1,4 @@
-function SixJCategory(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:length(simples(C))])
+function six_j_category(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:length(simples(C))])
     @assert is_multifusion(C)
 
     if typeof(C) == SixJCategory 
@@ -16,7 +16,7 @@ function SixJCategory(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:le
     end
 
     # Define SixJCategory
-    skel_C = SixJCategory(F,names)
+    skel_C = six_j_category(F,names)
 
     set_tensor_product!(skel_C,mult)
 
@@ -52,6 +52,10 @@ function six_j_symbols(C::Category, S = simples(C))
     homs = Dict()
 
     one_indices = findall(s -> int_dim(Hom(s,one(C))) > 0 , S)
+    one_components = simple_subobjects(one(C))
+
+    # Set unitors to identity
+    S[one_indices] = one_components
 
     for (i,j,k,l) ∈ Base.product(1:N, 1:N, 1:N, 1:N)
 
@@ -110,13 +114,15 @@ function six_j_symbols(C::Category, S = simples(C))
         end
         
         # Express the asociator in the corresponding basis
-        a = associator(X,Y,Z)
-        
-        associator_XYZ_W = hcat([express_in_basis(f ∘ a, B_XY_Z_W) for f ∈ B_X_YZ_W]...)
+        a = inv_associator(X,Y,Z)
+
+        associator_XYZ_W = hcat([express_in_basis(f ∘ a, B_X_YZ_W) for f ∈ B_XY_Z_W]...)
 
         ass[i,j,k,l] = matrix(F, length(B_X_YZ_W), length(B_XY_Z_W), associator_XYZ_W)
             
     end
+
+    
 
     return ass           
 end
@@ -217,7 +223,7 @@ end
 # end
 
 # function SkeletizationFunctor(C::Category)
-#     SkeletizationFunctor(C,SixJCategory(C))
+#     SkeletizationFunctor(C,six_j_category(C))
 # end
 
 # function (F::SkeletizationFunctor)(X::Object)
@@ -249,7 +255,7 @@ end
 #         m[l] = matrix(direct_sum(after_proj_l) ∘ f ∘ direct_sum(before_incl_l))
 #     end
 
-#     return Morphism(F(X),F(Y),m)
+#     return morphism(F(X),F(Y),m)
 # end
 
 # function show(io::IO, F::SkeletizationFunctor)

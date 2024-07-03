@@ -57,6 +57,8 @@ function is_relative_braiding(Z::Object, half_braiding::Vector{<:Morphism}, simp
     return !flag 
 end
 
+is_central(X::CentralizerObject, log = false) = is_relative_braiding(object(X), half_braiding(X), parent(X).subcategory_simples, log)
+
 is_central(X::CenterObject, log = false) = is_half_braiding(object(X), half_braiding(X), log)
 
 function is_central(f::Morphism, X::CenterObject, Y::CenterObject)

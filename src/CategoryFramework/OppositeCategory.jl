@@ -50,7 +50,7 @@ tensor_product(X::OppositeObject, Y::OppositeObject) = OppositeObject(parent(X),
 function tensor_product(f::OppositeMorphism, g::OppositeMorphism) 
     dom = codomain(f) ⊗ codomain(g)
     cod = domain(f) ⊗ domain(g)
-    Morphism(dom, cod, morphism(f) ⊗ morphism(g))
+    morphism(dom, cod, morphism(f) ⊗ morphism(g))
 end
 
 function associator(X::OppositeObject, Y::OppositeObject, Z::OppositeObject)
@@ -58,7 +58,7 @@ function associator(X::OppositeObject, Y::OppositeObject, Z::OppositeObject)
     C = parent(X)
     dom = OppositeObject(C, codomain(a))
     cod = OppositeObject(C, domain(a))
-    Morphism(dom, cod, a)
+    morphism(dom, cod, a)
 end
 
 one(C::OppositeCategory) = OppositeObject(C,one(C.C))
@@ -67,7 +67,7 @@ simples(C::OppositeCategory) = [OppositeObject(C, s) for s ∈ simples(C.C)]
 
 zero(C::OppositeCategory) = OppositeObject(C, zero(C.C))
 
-id(X::OppositeObject) = Morphism(X,X, id(object(X)))
+id(X::OppositeObject) = morphism(X,X, id(object(X)))
 
 object(X::OppositeObject) = X.X
 morphism(f::OppositeMorphism) = f.m

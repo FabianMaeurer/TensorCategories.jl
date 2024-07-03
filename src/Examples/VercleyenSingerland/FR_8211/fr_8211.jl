@@ -13,7 +13,7 @@ function cat_fr_8122(n::Int) #n gives the number of associator
     K = QQBar
     
     #(1,7,8) are class of one in D3/Z3; (2,3,4) are other class (5) is element t_1, (6) is other one
-    C = SixJCategory(K,["e", "a", "b", "aba", "t", "s", "ba", "ab"])
+    C = six_j_category(K,["e", "a", "b", "aba", "t", "s", "ba", "ab"])
 
 
     M = zeros(Int64,8,8,8)

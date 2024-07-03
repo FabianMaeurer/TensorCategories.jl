@@ -91,7 +91,7 @@ end
 #construct the Verlinde type categorie with m many objects,  l-th associator and k-th braiding; Need (m+1, l) coprime
 #furthermore for the braiding k we use even higher roots of unity,  but also need (m+1, k) coprime
 #Formulas come from "Temperley-Lieb Recoupling theory"
-function Verlinde(K::Ring, m::Int, l::Int = 1, k::Int = 1)
+function verlinde_category(K::Ring, m::Int, l::Int = 1, k::Int = 1)
 	#K=Oscar.QQBar
 	z = root_of_unity(K, 2*m+2)
    	q = quantum(z^l+z^-l, 2*m+2)
@@ -99,7 +99,7 @@ function Verlinde(K::Ring, m::Int, l::Int = 1, k::Int = 1)
    	#println(q)
 
    	M = verlindefusionmultmatrix(m)
-   	C = SixJCategory(K, ["X$i" for i in 0:m-1])
+   	C = six_j_category(K, ["X$i" for i in 0:m-1])
    	set_tensor_product!(C, M)
 
    	for lx in 0:m-1,  ly in 0:m-1,  lz in 0:m-1,  lw in 0:m-1
@@ -142,4 +142,4 @@ function Verlinde(K::Ring, m::Int, l::Int = 1, k::Int = 1)
    	return C
 end
 
-Verlinde(m::Int, l::Int = 1, k::Int = 1) = Verlinde(cyclotomic_field(2*m+2)[1],m, l, k)
+verlinde_category(m::Int, l::Int = 1, k::Int = 1) = verlinde_category(cyclotomic_field(2*m+2)[1],m, l, k)

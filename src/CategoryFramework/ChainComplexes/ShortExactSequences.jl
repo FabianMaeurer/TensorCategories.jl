@@ -63,9 +63,9 @@ function direct_sum(S::ShortExactSequence...)
 
     sum_sequence = ShortExactSequence(C, sum_X, sum_Y, sum_Z, sum_mono, sum_epi)
 
-    sum_incl = [Morphism(s, sum_sequence, i, j, k) for (s,i,j,k) ∈ zip(S,i_X,i_Y,i_Z)]
+    sum_incl = [morphism(s, sum_sequence, i, j, k) for (s,i,j,k) ∈ zip(S,i_X,i_Y,i_Z)]
 
-    sum_proj = [Morphism(sum_sequence, s, i, j, k) for (s,i,j,k) ∈ zip(S,p_X,p_Y,p_Z)]
+    sum_proj = [morphism(sum_sequence, s, i, j, k) for (s,i,j,k) ∈ zip(S,p_X,p_Y,p_Z)]
 
     return sum_sequence, sum_incl, sum_proj
 end
@@ -79,16 +79,16 @@ function direct_sum(f::ShortExactSequenceMorphism...)
 
     morphism_sum = [direct_sum([morphisms(fi)[j] for fi ∈ f]...) for j ∈ 1:3]
 
-    return Morphism(sum_domain, sum_codomain, morphism_sum...)
+    return morphism(sum_domain, sum_codomain, morphism_sum...)
 end
 
 function +(f::ShortExactSequenceMorphism, g::ShortExactSequenceMorphism)
     @assert domain(f) == domain(g) && codomain(f) == codomain(g)
-    Morphism(domain(f), codomain(f), (morphism(f) .+ morphisms(g))...)
+    morphism(domain(f), codomain(f), (morphism(f) .+ morphisms(g))...)
 end
 
 function *(λ, f::ShortExactSequenceMorphism) 
-    Morphism(domain(f), codomain(f), (λ .* morphisms(f))...)
+    morphism(domain(f), codomain(f), (λ .* morphisms(f))...)
 end
 
 #=----------------------------------------------------------
@@ -105,7 +105,7 @@ function tensor_product(f::ShortExactSequenceMorphism, g::ShortExactSequenceMorp
     dom = domain(f) ⊗ domain(g)
     cod = codomain(f) ⊗ codomain(g)
     mors = [h⊗l for (h,l) ∈ zip(morphisms(f), morphisms(g))]
-    Morphism(dom,cod, mors...)
+    morphism(dom,cod, mors...)
 end
 
 
@@ -114,7 +114,7 @@ end
 ----------------------------------------------------------=#
 
 function compose(f::ShortExactSequenceMorphism, g::ShortExactSequenceMorphism)
-    Morphism(domain(f), codomain(g), [compose(h,l) for (h,l) ∈ zip(morphisms(f), morphisms(g))]...)
+    morphism(domain(f), codomain(g), [compose(h,l) for (h,l) ∈ zip(morphisms(f), morphisms(g))]...)
 end
 
 function Hom(S::ShortExactSequence, T::ShortExactSequence)

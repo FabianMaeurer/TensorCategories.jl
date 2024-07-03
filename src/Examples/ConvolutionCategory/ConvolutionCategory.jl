@@ -14,6 +14,8 @@ struct ConvolutionObject <: Object
     parent::ConvolutionCategory
 end
 
+convolution_object = ConvolutionObject
+
 struct ConvolutionMorphism <: Morphism
     domain::ConvolutionObject
     codomain::ConvolutionObject
@@ -26,12 +28,12 @@ is_fusion(C::ConvolutionCategory) = mod(order(C.group),characteristic(base_ring(
 
 Return the category of equivariant coherent sheaves on ``X`` with convolution product.
 """
-function ConvolutionCategory(X::GSet, K::Field)
+function convolution_category(X::GSet, K::Field)
     G = X.group
     sqX = gset(G,(x,g) -> Tuple(X.action_function(xi,g) for xi ∈ x), [(x,y) for x ∈ X.seeds, y ∈ X.seeds][:])
     cuX = gset(G,(x,g) -> Tuple(X.action_function(xi,g) for xi ∈ x), [(x,y,z) for x ∈ X.seeds, y ∈ X.seeds, z ∈ X.seeds][:])
-    sqCoh = CohSheaves(sqX,K)
-    cuCoh = CohSheaves(cuX,K)
+    sqCoh = coherent_sheaves(sqX,K)
+    cuCoh = coherent_sheaves(cuX,K)
 
     p12 = x -> (x[1],x[2])
     p13 = x -> (x[1],x[3])
@@ -48,16 +50,16 @@ end
 
 Return the category of coherent sheaves on ``X`` with convolution product.
 """
-function ConvolutionCategory(X, K::Field)
+function convolution_category(X, K::Field)
     G = symmetric_group(1)
     return ConvolutionCategory(gset(G,X), K)
 end
 
-function ConvolutionCategory(X, G::GAPGroup, K::Field)
+function convolution_category(X, G::GAPGroup, K::Field)
     ConvolutionCategory(gset(G,X), K)
 end
 
-Morphism(D::ConvolutionObject, C::ConvolutionObject, m:: CohSheafMorphism) = ConvolutionMorphism(D,C,m)
+morphism(D::ConvolutionObject, C::ConvolutionObject, m:: CohSheafMorphism) = ConvolutionMorphism(D,C,m)
 
 function Base.hash(C::ConvolutionCategory, h::UInt)
     hash((getfield(C, s) for s ∈ fieldnames(ConvolutionCategory)), h)
@@ -134,7 +136,7 @@ documentation
 function direct_sum(X::ConvolutionObject, Y::ConvolutionObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
     Z,ix,px = direct_sum(X.sheaf,Y.sheaf)
-    Z = ConvolutionObject(Z,parent(X))
+    Z = Convolution_object(Z,parent(X))
 
 
     ix = [ConvolutionMorphism(x,Z,i) for (x,i) ∈ zip([X,Y],ix)]
@@ -169,14 +171,14 @@ zero(C::ConvolutionCategory) = ConvolutionObject(zero(C.squaredCoh),C)
 
 function kernel(f::ConvolutionMorphism)
     K,k = kernel(f.m)
-    Conv_K = ConvolutionObject(K,parent(f))
-    return ConvolutionObject(K,parent(domain(f))), Morphism(Conv_K, domain(f), k)
+    Conv_K = Convolution_object(K,parent(f))
+    return Convolution_object(K,parent(domain(f))), morphism(Conv_K, domain(f), k)
 end
 
 function cokernel(f::ConvolutionMorphism)
     C,c = cokernel(f.m)
-    Conv_C = ConvolutionObject(C,parent(f))
-    return ConvolutionObject(C, parent(domain(f))), Morphism(codomain(f), Conv_C, c)
+    Conv_C = Convolution_object(C,parent(f))
+    return Convolution_object(C, parent(domain(f))), morphism(codomain(f), Conv_C, c)
 end
 
 #-----------------------------------------------------------------
@@ -192,7 +194,7 @@ function tensor_product(X::ConvolutionObject, Y::ConvolutionObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
     p12,p13,p23 = parent(X).projectors
 
-    return ConvolutionObject(p13(p12(X.sheaf)⊗p23(Y.sheaf)),parent(X))
+    return Convolution_object(p13(p12(X.sheaf)⊗p23(Y.sheaf)),parent(X))
 end
 
 """
@@ -216,13 +218,13 @@ Return the one object in Conv(``X``).
 function one(C::ConvolutionCategory)
     F = base_ring(C)
 
-    stlks = [zero(RepresentationCategory(H,F)) for H ∈ orbit_stabilizers(C)]
+    stlks = [zero(representation_category(F,H)) for H ∈ orbit_stabilizers(C)]
     diag = [(x,x) for x ∈ C.GSet.seeds]
 
     for i ∈ [orbit_index(C,d) for d ∈ diag]
-        stlks[i] = one(RepresentationCategory(orbit_stabilizers(C)[i], F))
+        stlks[i] = one(representation_category(F,orbit_stabilizers(C)[i]))
     end
-    return ConvolutionObject(CohSheafObject(C.squaredCoh, stlks), C)
+    return Convolution_object(CohSheafObject(C.squaredCoh, stlks), C)
 end
 
 function dual(X::ConvolutionObject)
@@ -230,7 +232,7 @@ function dual(X::ConvolutionObject)
     GSet = parent(X).squaredCoh.GSet
     perm = [findfirst(e -> e ∈ orbit(GSet, (y,x)), orbit_reps) for (x,y) ∈ orbit_reps]
     reps = [dual(ρ) for ρ ∈ stalks(X)][perm]
-    return ConvolutionObject(CohSheafObject(parent(X.sheaf), reps), parent(X))
+    return Convolution_object(CohSheafObject(parent(X.sheaf), reps), parent(X))
 end
 
 spherical(X::ConvolutionObject) = id(X)
@@ -247,11 +249,11 @@ function zero_morphism(X::ConvolutionObject, Y::ConvolutionObject)
 end
 
 function +(f::ConvolutionMorphism, g::ConvolutionMorphism)
-    Morphism(domain(f),codomain(f), f.m + g.m)
+    morphism(domain(f),codomain(f), f.m + g.m)
 end
 
 function *(x, f::ConvolutionMorphism)
-    Morphism(domain(f), codomain(f), x * f.m)
+    morphism(domain(f), codomain(f), x * f.m)
 end
 
 function matrices(f::ConvolutionMorphism)
@@ -261,10 +263,10 @@ end
 matrix(f::ConvolutionMorphism) = matrix(f.m)
 
 function inv(f::ConvolutionMorphism)
-    return Morphism(codomain(f), domain(f), inv(f.m))
+    return morphism(codomain(f), domain(f), inv(f.m))
 end
 
-left_inverse(f::ConvolutionMorphism) = Morphism(codomain(f),domain(f), left_inverse(f.m))
+left_inverse(f::ConvolutionMorphism) = morphism(codomain(f),domain(f), left_inverse(f.m))
 #-----------------------------------------------------------------
 #   Simple Objects
 #-----------------------------------------------------------------
@@ -275,7 +277,7 @@ left_inverse(f::ConvolutionMorphism) = Morphism(codomain(f),domain(f), left_inve
 Return a list of simple objects in Conv(``X``).
 """
 #= @memoize Dict =# function simples(C::ConvolutionCategory)
-    return [ConvolutionObject(sh,C) for sh ∈ simples(C.squaredCoh)]
+    return [Convolution_object(sh,C) for sh ∈ simples(C.squaredCoh)]
 end
 
 """
@@ -285,7 +287,7 @@ Decompose ``X`` into a direct sum of simple objects with multiplicities.
 """
 function decompose(X::ConvolutionObject)
     facs = decompose(X.sheaf)
-    return [(ConvolutionObject(sh,parent(X)),d) for (sh,d) ∈ facs]
+    return [(Convolution_object(sh,parent(X)),d) for (sh,d) ∈ facs]
 end
 
 function is_simple(X::ConvolutionObject)

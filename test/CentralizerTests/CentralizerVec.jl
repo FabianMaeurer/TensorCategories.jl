@@ -1,6 +1,6 @@
 #=-------------------------------------------------
     Test sets for the induction functor
-        𝒞 → 𝒵(𝒞) 
+        𝒞 → 𝒵(𝒞:\scr) 
 -------------------------------------------------=#
 
 G    = symmetric_group(3)
@@ -12,20 +12,26 @@ VecG = graded_vector_spaces(F,G)
 VecH = graded_vector_spaces(F,H,c)
 
 @testset "Graded Vector Spaces" begin
-    S = simples(VecG)
-    induction_S = induction.(S)
-    for X ∈ induction_S
-        @test is_half_braiding(object(X), half_braiding(X))
+    Z = centralizer(VecG, VecG[2])
+
+    simps = simples(Z)
+
+    for s ∈ simps
+        @test is_central(s)
     end
 end
 
-@testset "Twisted Graded Vector Spaces" begin
-    S = simples(VecH)
-    induction_S = induction.(S)
-    for X ∈ induction_S
-        @test is_half_braiding(object(X), half_braiding(X))
+
+@testset "Graded Vector Spaces" begin
+    Z = centralizer(VecH, VecH[2])
+
+    simps = simples(Z)
+
+    for s ∈ simps
+        @test is_central(s) 
     end
 end
+
 
 F = GF(23)
 RepG = representation_category(F,G)

@@ -17,7 +17,7 @@ function cat_fr_9143()
     end
 
     dic = include(modifier, joinpath(@__DIR__, "fr_9143_associator.jl"))#This imports a dictionary of associators.
-    C = SixJCategory(K,["g0", "g3", "t2", "t1", "t0", "g4" , "g2", "g5", "g1"])
+    C = six_j_category(K,["g0", "g3", "t2", "t1", "t0", "g4" , "g2", "g5", "g1"])
     #g0,g3,t2,t1,t0,g4,g2,g5,g1=simples(C)
     M = zeros(Int64,9,9,9)
     #Objects gi generate the sub Z/6Z

@@ -25,29 +25,29 @@ is_multifusion(C::CohSheaves) = mod(order(C.group),characteristic(base_ring(C)))
 #   Constructors
 #-----------------------------------------------------------------
 """
-    CohSheaves(X::GSet,F::Field)
+    coherent_sheaves(X::GSet,F::Field)
 
 The category of ``G``-equivariant coherent sheafes on ``X``.
 """
-function CohSheaves(X::GSet, F::Field)
+function coherent_sheaves(X::GSet, F::Field)
     G = X.group
     orbit_reps = [O.seeds[1] for O ∈ orbits(X)]
     orbit_stabilizers = [stabilizer(G,x,X.action_function)[1] for x ∈ orbit_reps]
-    RepCats = [RepresentationCategory(H,F) for H ∈ orbit_stabilizers]
-    return CohSheaves(G, F, X, orbit_reps, orbit_stabilizers, RepCats)
+    RepCats = [representation_category(F,H) for H ∈ orbit_stabilizers]
+    return coherent_sheaves(G, F, X, orbit_reps, orbit_stabilizers, RepCats)
 end
 
 """
-    CohSheaves(X, F::Field)
+    coherent_sheaves(X, F::Field)
 
 The category of coherent sheafes on ``X``.
 """
-function CohSheaves(X,F::Field)
+function coherent_sheaves(X,F::Field)
     G = symmetric_group(1)
-    return CohSheaves(gset(G,X), F)
+    return coherent_sheaves(gset(G,X), F)
 end
 
-Morphism(X::CohSheafObject, Y::CohSheafObject, m::Vector) = CohSheafMorphism(X,Y,m)
+morphism(X::CohSheafObject, Y::CohSheafObject, m::Vector) = CohSheafMorphism(X,Y,m)
 
 
 #-----------------------------------------------------------------
@@ -86,7 +86,7 @@ end
 
 Return the zero sheaf on the ``G``-set.
 """
-zero(C::CohSheaves) = CohSheafObject(C,[zero(RepresentationCategory(H,base_ring(C))) for H ∈ C.orbit_stabilizers])
+zero(C::CohSheaves) = CohSheafObject(C,[zero(representation_category(base_ring(C), H)) for H ∈ C.orbit_stabilizers])
 
 """
     zero_morphism(X::CohSheafObject, Y::CohSheafObject)
@@ -168,14 +168,14 @@ end
 
 Return the spherical structure isomorphism ```X → X∗∗```.
 """
-spherical(X::CohSheafObject) = Morphism(X,X,[spherical(s) for s ∈ stalks(X)])
+spherical(X::CohSheafObject) = morphism(X,X,[spherical(s) for s ∈ stalks(X)])
 
 """
     braiding(X::cohSheaf, Y::CohSheafObject)
 
 Return the braiding isomoephism ```X⊗Y → Y⊗X```.
 """
-braiding(X::CohSheafObject, Y::CohSheafObject) = Morphism(X⊗Y, Y⊗X, [braiding(x,y) for (x,y) ∈ zip(stalks(X),stalks(Y))])
+braiding(X::CohSheafObject, Y::CohSheafObject) = morphism(X⊗Y, Y⊗X, [braiding(x,y) for (x,y) ∈ zip(stalks(X),stalks(Y))])
 
 dim(X::CohSheafObject) = sum(dim.(stalks(X)))
 
@@ -235,7 +235,7 @@ Return a tuple ```(K,k)``` where ```K``` is the kernel object and ```k``` is the
 function kernel(f::CohSheafMorphism)
     kernels = [kernel(g) for g ∈ f.m]
     K = CohSheafObject(parent(domain(f)), [k for (k,_) ∈ kernels])
-    return K, Morphism(K, domain(f), [m for (_,m) ∈ kernels])
+    return K, morphism(K, domain(f), [m for (_,m) ∈ kernels])
 end
 
 """
@@ -246,7 +246,7 @@ Return a tuple ```(C,c)``` where ```C``` is the kernel object and ```c``` is the
 function cokernel(f::CohSheafMorphism)
     cokernels = [cokernel(g) for g ∈ f.m]
     C = CohSheafObject(parent(domain(f)), [c for (c,_) ∈ cokernels])
-    return C, Morphism(codomain(f), C, [m for (_,m) ∈ cokernels])
+    return C, morphism(codomain(f), C, [m for (_,m) ∈ cokernels])
 end
 
 #-----------------------------------------------------------------
@@ -282,7 +282,7 @@ end
 Return the one object in ``C``.
 """
 function one(C::CohSheaves)
-    return CohSheafObject(C,[one(RepresentationCategory(H,base_ring(C))) for H ∈ C.orbit_stabilizers])
+    return CohSheafObject(C,[one(representation_category(base_ring(C),H)) for H ∈ C.orbit_stabilizers])
 end
 
 #-----------------------------------------------------------------
@@ -303,11 +303,11 @@ end
 
 function +(f::CohSheafMorphism, g::CohSheafMorphism)
     #@assert domain(f) == domain(g) && codomain(f) == codomain(g) "Not compatible"
-    return Morphism(domain(f), codomain(f), [fm + gm for (fm,gm) ∈ zip(f.m,g.m)])
+    return morphism(domain(f), codomain(f), [fm + gm for (fm,gm) ∈ zip(f.m,g.m)])
 end
 
 function *(x,f::CohSheafMorphism)
-    Morphism(domain(f),codomain(f),x .* f.m)
+    morphism(domain(f),codomain(f),x .* f.m)
 end
 
 matrices(f::CohSheafMorphism) = matrix.(f.m)
@@ -318,7 +318,7 @@ matrices(f::CohSheafMorphism) = matrix.(f.m)
 Retrn the inverse morphism of ```f```.
 """
 function inv(f::CohSheafMorphism)
-    return Morphism(codomain(f), domain(f), [inv(g) for g in f.m])
+    return morphism(codomain(f), domain(f), [inv(g) for g in f.m])
 end
 
 
@@ -327,7 +327,7 @@ function matrix(f::CohSheafMorphism)
 end
 
 function left_inverse(f::CohSheafMorphism)
-    return Morphism(codomain(f),domain(f), [left_inverse(g) for g ∈ f.m])
+    return morphism(codomain(f),domain(f), [left_inverse(g) for g ∈ f.m])
 end
 #-----------------------------------------------------------------
 #   Simple Objects

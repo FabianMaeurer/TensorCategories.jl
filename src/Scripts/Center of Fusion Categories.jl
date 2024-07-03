@@ -64,7 +64,7 @@ TY_time = @elapsed begin
     # the group ZZ/2×ZZ/2
     A = abelian_group(PcGroup,[2,2])
 
-    TY = TambaraYamagami(A)
+    TY = tambara_yamagami(A)
     
     S = vcat([simple_subobjects(induction(s)) for s ∈ simples(TY)]...)
 
@@ -77,7 +77,7 @@ TY2_times = @elapsed begin
     # The group ZZ/2×ZZ/4
     A = abelian_group(PcGroup, [2,4])
 
-    TY2 = TambaraYamagami(A)
+    TY2 = tambara_yamagami(A)
 
     S = vcat([simple_subobjects(induction(s)) for s ∈ simples(TY2)]...)
 

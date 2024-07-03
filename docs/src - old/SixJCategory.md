@@ -12,7 +12,7 @@ As an example we will construct the Ising fusion category. This is a fusion cate
 
 ```@example FC
 F = QQBar
-I = SixJCategory(F,["𝟙", "χ", "X"])
+I = six_j_category(F,["𝟙", "χ", "X"])
 
 M = zeros(Int,3,3,3)
 

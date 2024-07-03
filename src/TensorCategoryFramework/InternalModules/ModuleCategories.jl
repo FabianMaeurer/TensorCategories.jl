@@ -74,7 +74,7 @@ struct ModuleMorphism{T<:ModuleObject} <: Morphism
     map::Morphism
 end
 
-function Morphism(X::T, Y::T, m::Morphism) where T <: ModuleObject
+function morphism(X::T, Y::T, m::Morphism) where T <: ModuleObject
     ModuleMorphism(X,Y,m)
 end
 
@@ -115,9 +115,44 @@ is_multitensor(C::BiModuleCategory) = true
 
 is_tensor(C::BiModuleCategory) = int_dim(End(one(C))) == 1
 
-is_weak_multifusion(C::BiModuleCategory) = left_algebra(C) == right_algebra(C) && is_seperable(left_algebra(C))
+is_weak_multifusion(C::BiModuleCategory) = is_weak_multifusion(category(C)) &&
+                                    left_algebra(C) == right_algebra(C) && 
+                                    is_separable(left_algebra(C))
 
-is_weak_fusion(C::BiModuleCategory) = is_weak_multifusion(C) && int_dim(End(one(C))) == 1
+is_weak_fusion(C::BiModuleCategory) = is_weak_multifusion(C) && 
+                                    int_dim(End(one(C))) == 1
+
+is_multifusion(C::BiModuleCategory) = is_weak_multifusion(C) &&
+                                    all(int_dim(End(s)) == 1 for s ∈ simples(C))
+
+function ==(M::ModuleCategory, N::ModuleCategory)
+    typeof(M) != typeof(N) && return false
+
+    category(M) != category(N) && return false
+
+    isdefined(M, :left_algebra) && left_algebra(M) != left_algebra(N) && return false
+
+    isdefined(M, :right_algebra) && right_algebra(M) != right_algebra(N) && return false
+
+    true
+end
+
+function ==(X::ModuleObject, Y::ModuleObject)
+    typeof(X) != typeof(Y) && return false
+
+    parent(X) != parent(Y) && return false
+
+    isdefined(X, :left_action) && left_action(X) != left_action(Y) && return false
+
+    isdefined(X, :right_action) && right_action(X) != right_action(Y) && return false
+
+    true
+end
+
+morphism_type(C::LeftModuleCategory) = ModuleMorphism{LeftModuleObject}
+morphism_type(C::RightModuleCategory) = ModuleMorphism{RightModuleObject}
+morphism_type(C::BiModuleCategory) = ModuleMorphism{BiModuleObject}
+
 #=----------------------------------------------------------
     Constructors 
 ----------------------------------------------------------=#
@@ -248,6 +283,10 @@ function bimodule_cokernel(f::ModuleMorphism)
     coker = BiModuleObject(parent(f), C, left_coker_action, right_coker_action)
 
     return coker, ModuleMorphism(X, coker, c)
+end
+
+function inv(M::ModuleMorphism)
+    morphism(codomain(M), domain(M), inv(morphism(M)))
 end
 #=----------------------------------------------------------
     Free modules   
@@ -504,7 +543,7 @@ function associator(X::BiModuleObject, Y::BiModuleObject, Z::BiModuleObject)
         associator(object(X), object(Y), object(Z)),
         after
     )
-    Morphism(XY_Z, X_YZ, a)
+    morphism(XY_Z, X_YZ, a)
 end
 
 function one(C::BiModuleCategory)
@@ -514,49 +553,122 @@ function one(C::BiModuleCategory)
 end
 
 function dual(M::BiModuleObject)
-    @assert left_algebra(parent(M)) == right_algebra(parent(M))
+    #@assert left_algebra(parent(M)) == right_algebra(parent(M))
 
     lM = left_module(right_module(M))
     rM = right_module(left_module(M))
-    
+    A = left_algebra(parent(M))
+    B = right_algebra(parent(M))
+
+    if A == B
+        C = parent(M)
+    else
+        C = BiModuleCategory(
+            category(parent(M)),
+            B,
+            A
+        )
+    end
+
     BiModuleObject(
-        parent(M),
+        C,
         object(lM),
         left_action(lM),
         right_action(rM)
     )
 end
 
-function ev(M::BiModuleObject)
-    dM = dual(M)
-    e = ev(right_module(M), right_module(one(parent(M))))
-    dMM,p = bimodule_tensor_product(dM,M)
-    inv_p = right_inverse(p)
-    Morphism(dMM, one(parent(M)), morphism(e) ∘ inv_p)
-end
+# function ev(M::BiModuleObject)
+#     dM = dual(M)
+#     dMM,p = bimodule_tensor_product(dM,M)
+#     inv_p = right_inverse(p)
+#     u = unit(right_algebra(parent(M)))
+#     morphism(dMM, one(parent(M)), u ∘ ev(object(M)) ∘ inv_p)
+# end
 
-function coev(M::BiModuleObject)
-    dM = dual(M)
-    MdM, p = bimodule_tensor_product(M,dM)
+# function coev(M::BiModuleObject)
+#     dM = dual(M)
+#     MdM, p = bimodule_tensor_product(M,dM)
 
-    base = basis(Hom(one(parent(M)), MdM))
-    M_basis = basis(End(M))
+#     base = basis(Hom(one(parent(M)), MdM))
+#     M_basis = basis(End(M))
 
-    m = (id(M)⊗ev(M))∘associator(M,dM,M)
+#     m = (id(M)⊗ev(M))∘associator(M,dM,M)
 
-    M = hcat([express_in_basis(m∘(f ⊗ id(M)), M_basis) for f ∈ base]...)
-    one_coeffs = express_in_basis(id(one(parent(dM))), M_basis)
+#     M = hcat([express_in_basis(m∘(f ⊗ id(M)), M_basis) for f ∈ base]...)
+#     one_coeffs = express_in_basis(id(one(parent(dM))), M_basis)
 
-    s = solve(transpose(matrix(base_ring(dM), size(M,1), size(M,2), M)), one_coeffs)
+#     s = solve(transpose(matrix(base_ring(dM), size(M,1), size(M,2), M)), one_coeffs)
 
-    sum(s .* base)
-end
+#     sum(s .* base)
+# end
 
 function spherical(M::BiModuleObject)
     ddM = dual(dual(M))
-    Morphism(M, ddM, spherical(object(M)))
+    morphism(M, ddM, spherical(object(M)))
 end
 
+function tr(f::ModuleMorphism{BiModuleObject}) 
+    C = parent(f)
+    A,B = left_algebra(C), right_algebra(C)
+
+    d = sqrt(dim(object(A))*dim(object(B)))
+
+    t = base_ring(f)(tr(morphism(f)))*inv(d) 
+    t * id(one(parent(f)))
+end
+
+#=----------------------------------------------------------
+    Direct sum 
+----------------------------------------------------------=#
+
+function direct_sum(M::T...) where T <: ModuleObject
+    if length(M) == 1
+        return M[1], [id(M[1])], [id(M[1])]
+    end
+
+    Z, incl, proj = direct_sum(object.(M)...)
+    C = parent(M[1])
+    
+    if isdefined(M[1], :right_action)
+        B = object(right_algebra(parent(M[1])))
+        r = compose(
+            distribute_left([object(m) for m ∈ M], B),
+            direct_sum(right_action.(M)...)
+        )
+    end
+    
+    if isdefined(M[1], :left_action)
+        A = object(left_algebra(parent(M[1])))
+        l = compose(
+            distribute_right(A, [object(m) for m ∈ M]),
+            direct_sum(left_action.(M)...)
+        )
+    end
+
+    if T == RightModuleObject 
+        Z =  RightModuleObject(C,Z,r)
+        incl = [morphism(m,Z,i) for (m,i) ∈ zip(M,incl)]
+        proj = [morphism(m,Z,p) for (m,p) ∈ zip(M,proj)]
+        return Z, incl, proj
+    elseif T == LeftModuleObject
+        Z = LeftModuleObject(C,Z,l)
+        incl = [morphism(m,Z,i) for (m,i) ∈ zip(M,incl)]
+        proj = [morphism(m,Z,p) for (m,p) ∈ zip(M,proj)]
+        return Z, incl, proj
+    else
+        Z = BiModuleObject(C,Z,l,r)
+        incl = [morphism(m,Z,i) for (m,i) ∈ zip(M,incl)]
+        proj = [morphism(m,Z,p) for (m,p) ∈ zip(M,proj)]
+        return Z, incl, proj
+    end
+end
+
+function direct_sum(f::ModuleMorphism...)
+    dom = direct_sum(domain.(f)...)[1]
+    cod = direct_sum(codomain.(f)...)[1]
+    morphism(dom, cod, direct_sum(morphism.(f)...))
+end
 #=----------------------------------------------------------
     Internal Hom 
 ----------------------------------------------------------=#
@@ -687,6 +799,44 @@ end
 ⊗(X::Object, M::RightModuleObject) = left_module_action(X, M)
 ⊗(M::LeftModuleObject, X::Object) = right_module_action(X, M)
 
+
+#=----------------------------------------------------------
+    Equivalence of Module categories 
+----------------------------------------------------------=#
+
+@doc raw""" 
+
+    is_equivalent(M::ModuleCategory, N::ModuleCategory)     
+
+Check if ``M`` and ``N`` are equivalent as module categories.
+The equivalence is provided by a suitable bimodule object.
+"""
+function is_equivalent(M::T, N::T) where T <: Union{LeftModuleCategory, RightModuleCategory}
+    Func = category_of_bimodules(algebra(M), algebra(N))
+
+    S = simples(Func)
+
+    for s ∈ S
+        
+        # If End(s) > 1 s cannot be an isomorphism
+        int_dim(End(s)) > 1 && continue
+        
+        dual_s = dual(s)
+        sds = s ⊗ dual(s)
+        dss = dual(s) ⊗ s
+        NN = parent(sds)
+        MM = parent(dss)
+        
+        # If id(M) ≠ s∗ ∘ s continue
+        !is_isomorphic(dss, one(NN))[1] && continue
+        # If also s ∘ s∗ = id(N) we found an isomorphism
+        is_isomorphic(sds, one(MM))[1] && return true, s
+    end
+
+    return false, nothing
+end
+    
+
 #=----------------------------------------------------------
     Checks 
 ----------------------------------------------------------=#
@@ -749,9 +899,14 @@ function Hom(X::LeftModuleObject, Y::LeftModuleObject)
 
     basis_coeffs = [N[:,i] for i ∈ 1:cols]
 
-    module_hom_basis = [Morphism(X,Y,sum(b .* B)) for b ∈ basis_coeffs]
+    T = ModuleMorphism{LeftModuleObject}
+    module_hom_basis = T[morphism(X,Y,sum(b .* B)) for b ∈ basis_coeffs]
 
     return HomSpace(X,Y,module_hom_basis)
+end
+
+function zero_morphism(M::ModuleObject, N::ModuleObject)
+    morphism(M,N, zero_morphism(object(M), object(N)))
 end
 
 function Hom(X::RightModuleObject, Y::RightModuleObject)
@@ -793,12 +948,14 @@ function Hom(X::RightModuleObject, Y::RightModuleObject)
 
     basis_coeffs = [N[:,i] for i ∈ 1:cols]
 
-    module_hom_basis = [Morphism(X,Y,sum(b .* B)) for b ∈ basis_coeffs]
+    T = ModuleMorphism{RightModuleObject}
+    module_hom_basis = T[morphism(X,Y,sum(b .* B)) for b ∈ basis_coeffs]
 
     return HomSpace(X,Y,module_hom_basis)
 end
 
 function Hom(X::BiModuleObject, Y::BiModuleObject)
+    @assert parent(X) == parent(Y)
     H = Hom(object(X), object(Y))
     B_H = basis(H)
     F = base_ring(X)
@@ -848,18 +1005,44 @@ function Hom(X::BiModuleObject, Y::BiModuleObject)
 
     basis_coeffs = [N[:,i] for i ∈ 1:cols]
 
-    module_hom_basis = ModuleMorphism[Morphism(X,Y,sum(b .* B_H)) for b ∈ basis_coeffs]
+    T = ModuleMorphism{BiModuleObject}
+    module_hom_basis = T[morphism(X,Y,sum(b .* B_H)) for b ∈ basis_coeffs]
 
     return HomSpace(X,Y,module_hom_basis)
 end
 
+function end_of_free_bimodule(X::Object, A::AlgebraObject, B::AlgebraObject)
+    M = free_bimodule(X, A, B)
+    H = Hom(X,object(M))
+
+    after = compose(
+        left_action(M) ⊗ id(object(B)),
+        right_action(M)
+    )
+    base = [after ∘ ((id(object(A)) ⊗ f) ⊗ id(object(B))) for f ∈ H]
+    base = [morphism(M,M, f) for f ∈ base]
+
+    HomSpace(M,M, base)
+end
+
+function end_of_free_bimodule(X::Object, A::AlgebraObject)
+    end_of_free_bimodule(X,A,A)
+end
+
+
+function (R::Ring)(f::ModuleMorphism)
+    R(morphism(f))
+end
 #=----------------------------------------------------------
     isomorphic 
 ----------------------------------------------------------=#
 
 function is_isomorphic(M::ModuleObject, N::ModuleObject)
     if is_simple(M) && is_simple(N)
-        return int_dim(Hom(M,N)) > 0
+        H = Hom(M,N)
+        return int_dim(H) ≥ 1 ? (true, basis(Hom(M,N))[1]) : (false,nothing)
+    elseif int_dim(End(M)) != int_dim(End(N))
+        return false, nothing
     else
         error("not implemented yet")
     end
@@ -986,3 +1169,5 @@ function show(io::IO, X::ModuleObject)
     typeof(X) == BiModuleObject && 
         print(io, """Bimodule: $(object(X))""")
 end
+
+

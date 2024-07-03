@@ -1,7 +1,7 @@
 G = symmetric_group(3)
 F = GF(23)
 
-RepG = RepresentationCategory(G,F)
+RepG = representation_category(F,G)
 simple_objects = simples(RepG)
 𝟙,σ,τ = simple_objects
 

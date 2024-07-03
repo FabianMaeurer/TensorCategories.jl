@@ -5,7 +5,7 @@
 G = alternating_group(4)
 F = GF(13)
 
-Rep = RepresentationCategory(G,F)
+Rep = representation_category(F,G)
 
 D = center(Rep)
 S = simples(D)

@@ -94,7 +94,7 @@ centralizer(C::Category, S::Object) = centralizer(C,[S])
 centralizer(S::Vector{<:Object}) = centralizer(parent(S[1]), S)
 centralizer(X::Object) = centralizer(parent(X), [X])
 
-function Morphism(dom::CentralizerObject, cod::CentralizerObject, m::Morphism)
+function morphism(dom::CentralizerObject, cod::CentralizerObject, m::Morphism)
     return CentralizerMorphism(dom,cod,m)
 end
 
@@ -158,7 +158,7 @@ end
 
 Return the spherical structure ```X → X∗∗``` of ```X```.
 """
-spherical(X::CentralizerObject) = Morphism(X,dual(dual(X)), spherical(X.object))
+spherical(X::CentralizerObject) = morphism(X,dual(dual(X)), spherical(X.object))
 
 (F::Field)(f::CentralizerMorphism) = F(f.m)
 
@@ -200,7 +200,7 @@ function direct_sum(f::CentralizerMorphism, g::CentralizerMorphism)
     dom = domain(f) ⊕ domain(g)
     cod = codomain(f) ⊕ codomain(g)
     m = f.m ⊕ g.m
-    return Morphism(dom,cod, m)
+    return morphism(dom,cod, m)
 end
 
 """
@@ -237,7 +237,7 @@ Return the tensor product of ```f``` and ```g```.
 function tensor_product(f::CentralizerMorphism,g::CentralizerMorphism)
     dom = domain(f)⊗domain(g)
     cod = codomain(f)⊗codomain(g)
-    return Morphism(dom,cod,f.m⊗g.m)
+    return morphism(dom,cod,f.m⊗g.m)
 end
 
 """
@@ -412,7 +412,7 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 function associator(X::CentralizerObject, Y::CentralizerObject, Z::CentralizerObject)
     dom = (X⊗Y)⊗Z
     cod = X⊗(Y⊗Z)
-    return Morphism(dom,cod, associator(X.object, Y.object, Z.object))
+    return morphism(dom,cod, associator(X.object, Y.object, Z.object))
 end
 
 matrices(f::CentralizerMorphism) = matrices(f.m)
@@ -423,7 +423,7 @@ matrix(f::CentralizerMorphism) = matrix(f.m)
 
 Return the composition ```g∘f```.
 """
-compose(f::CentralizerMorphism, g::CentralizerMorphism) = Morphism(domain(f), codomain(g), g.m∘f.m) 
+compose(f::CentralizerMorphism, g::CentralizerMorphism) = morphism(domain(f), codomain(g), g.m∘f.m) 
 
 """
     dual(X::CentralizerObject)
@@ -456,7 +456,7 @@ end
 Return the evaluation morphism ``` X⊗X → 1```.
 """
 function ev(X::CentralizerObject)
-    Morphism(dual(X)⊗X,one(parent(X)),ev(X.object))
+    morphism(dual(X)⊗X,one(parent(X)),ev(X.object))
 end
 
 """
@@ -465,7 +465,7 @@ end
 Return the coevaluation morphism ```1 → X⊗X∗```.
 """
 function coev(X::CentralizerObject)
-    Morphism(one(parent(X)),X⊗dual(X),coev(X.object))
+    morphism(one(parent(X)),X⊗dual(X),coev(X.object))
 end
 
 """
@@ -473,7 +473,7 @@ end
 
 Return the identity on ```X```.
 """
-id(X::CentralizerObject) = Morphism(X,X,id(X.object))
+id(X::CentralizerObject) = morphism(X,X,id(X.object))
 
 """
     tr(f:::CentralizerMorphism)
@@ -491,7 +491,7 @@ end
 Return the inverse of ```f```if possible.
 """
 function inv(f::CentralizerMorphism)
-    return Morphism(codomain(f),domain(f), inv(f.m))
+    return morphism(codomain(f),domain(f), inv(f.m))
 end
 
 
@@ -517,18 +517,18 @@ function is_isomorphic(X::CentralizerObject, Y::CentralizerObject)
 
     if [dim(Hom(X,s)) for s ∈ S] == [dim(Hom(Y,s)) for s ∈ S]
         _, iso = is_isomorphic(X.object, Y.object)
-        return true, Morphism(X,Y,central_projection(X,Y,iso))
+        return true, morphism(X,Y,central_projection(X,Y,iso))
     else
         return false, nothing
     end
 end
 
 function +(f::CentralizerMorphism, g::CentralizerMorphism)
-    return Morphism(domain(f), codomain(f), g.m +f.m)
+    return morphism(domain(f), codomain(f), g.m +f.m)
 end
 
 function *(x, f::CentralizerMorphism)
-    return Morphism(domain(f),codomain(f),x*f.m)
+    return morphism(domain(f),codomain(f),x*f.m)
 end
 #-------------------------------------------------------------------------------
 #   Functionality: Image
@@ -550,7 +550,7 @@ function kernel(f::CentralizerMorphism)
     braiding = [id(s)⊗left_inverse(incl)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(parent(f).subcategory_simples, domain(f).γ)]
 
     Z = CentralizerObject(parent(domain(f)), ker, braiding)
-    return Z, Morphism(Z,domain(f), incl)
+    return Z, morphism(Z,domain(f), incl)
 end
 
 """
@@ -569,7 +569,7 @@ function cokernel(f::CentralizerMorphism)
     braiding = [(id(s)⊗proj)∘γ∘(right_inverse(proj)⊗id(s)) for (s,γ) ∈ zip(parent(f).subcategory_simples, codomain(f).γ)]
 
     Z = CentralizerObject(parent(domain(f)), coker, braiding)
-    return Z, Morphism(codomain(f),Z, proj)
+    return Z, morphism(codomain(f),Z, proj)
 end
 
 function image(f::CentralizerMorphism)
@@ -582,7 +582,7 @@ function image(f::CentralizerMorphism)
     braiding = [id(s)⊗left_inverse(incl)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(parent(f).subcategory_simples, codomain(f).γ)]
 
     Z = CentralizerObject(parent(domain(f)), I, braiding)
-    return Z, Morphism(Z,domain(f), incl)
+    return Z, morphism(Z,domain(f), incl)
 end
 
 
@@ -590,7 +590,7 @@ end
 #     X = domain(f)
 #     Y = codomain(f)
 #     l_inv = central_projection(Y,X,left_inverse(morphism(f)))
-#     return Morphism(Y,X,l_inv)
+#     return morphism(Y,X,l_inv)
 # end
 
 function quotient(Y::CentralizerObject, X::Object)
@@ -629,7 +629,7 @@ function central_projection(dom::CentralizerObject, cod::CentralizerObject, f::M
 
         proj = proj + dim(Xi)*ϕ
     end
-    return Morphism(dom, cod, inv(D*base_ring(dom)(1))*proj)
+    return morphism(dom, cod, inv(D*base_ring(dom)(1))*proj)
 end
 
 """
@@ -637,7 +637,7 @@ end
 
 Return the zero morphism ```0:X → Y```.
 """
-zero_morphism(X::CentralizerObject, Y::CentralizerObject) = Morphism(X,Y,zero_morphism(X.object,Y.object))
+zero_morphism(X::CentralizerObject, Y::CentralizerObject) = morphism(X,Y,zero_morphism(X.object,Y.object))
 
 #-------------------------------------------------------------------------------
 #   Pretty Printing
@@ -785,10 +785,10 @@ function hom_by_adjunction(X::CentralizerObject, Y::CentralizerObject)
 
     Mrref = hnf(M)
     base = CentralizerMorphism[]
-    mats_morphisms = Morphism.(mats)
+    mats_morphisms = morphism.(mats)
 
     for k ∈ 1:rank(Mrref)
-        coeffs = express_in_basis(Morphism(transpose(matrix(base_ring(C), size(mats[1])..., Mrref[k,:]))), mats_morphisms)
+        coeffs = express_in_basis(morphism(transpose(matrix(base_ring(C), size(mats[1])..., Mrref[k,:]))), mats_morphisms)
         f = sum([m*bi for (m,bi) ∈ zip(coeffs, mors)])
         push!(base, f)
     end
@@ -862,7 +862,7 @@ function hom_by_projection(X::CentralizerObject, Y::CentralizerObject)
     r, M = rref(M)
     H_basis = CentralizerMorphism[]
     for i ∈ 1:r
-        f = Morphism(X,Y,sum([m*bi for (m,bi) ∈ zip(M[i,:], b)]))
+        f = morphism(X,Y,sum([m*bi for (m,bi) ∈ zip(M[i,:], b)]))
         H_basis = [H_basis; f]
     end
     return HomSpace(X,Y,H_basis)
@@ -947,7 +947,7 @@ end
 ----------------------------------------------------------=#
 
 function drinfeld_morphism(X::CentralizerObject) 
-    Morphism(X,dual(dual(X)), _drinfeld_morphism(X))
+    morphism(X,dual(dual(X)), _drinfeld_morphism(X))
 end
 
 function _drinfeld_morphism(X::CentralizerObject)

@@ -49,22 +49,22 @@ end
 
 """ 
 
-	TwistedGradedVectorSpaces(G::GAPGroup, i::Int)
+	twisted_graded_vector_spaces(G::GAPGroup, i::Int)
 
 Construct the category of twisted graded vectorspaces with the i-th 3-cocycle.
 """
-function TwistedGradedVectorSpaces(K::Field, G::GAPGroup, i::Int = 2, j::Int = 1) #Inputs finite group G and the number of Cocycle we want in the twisted_graded_vector_spaces
+function twisted_graded_vector_spaces(K::Field, G::GAPGroup, i::Int = 2, j::Int = 1) #Inputs finite group G and the number of Cocycle we want in the twisted_graded_vector_spaces
 	GAP.Packages.install("HAP")
 	GAP.Packages.load("HAP") 
     
     #K,ρ=cyclotomic_field(6*Int(n),"ρ") #for some reason cyclotomic_field wants Int64...
 	ξ = unitary_cocycle(G,K,3,i) #One must know whetever we have i many classes
 	#braid = unitary_cocycle(G,K,2,j)
-    return GradedVectorSpaces(K,G,ξ)
+    return graded_vector_spaces(K,G,ξ)
     #pentagon_axiom(VecGtw)
 end
 
 
-function TwistedGradedVectorSpaces(G::GAPGroup, i::Int = 2, j::Int = 1)
-	TwistedGradedVectorSpaces(G, QQBar, i, j)
+function twisted_graded_vector_spaces(G::GAPGroup, i::Int = 2, j::Int = 1)
+	twisted_graded_vector_spaces(G, QQBar, i, j)
 end

@@ -30,16 +30,16 @@ end
 #   Constructors
 #-------------------------------------------------------------------------
 """
-    RepresentationCategory(G::GAPGroup, F::Field)
+    representation_category(F::Field, G::GAPGroup)
 
 Category of finite dimensonal group representations of ``G``.
 """
-function RepresentationCategory(G::GAPGroup, F::Field)
+function representation_category(F::Field, G::GAPGroup)
     return GroupRepresentationCategory(G,F)
 end
 
-function RepresentationCategory(G::GAPGroup)
-    return RepresentationCategory(G, abelian_closure(QQ)[1])
+function representation_category(G::GAPGroup)
+    return representation_category(abelian_closure(QQ)[1],G)
 end
 
 """
@@ -51,7 +51,7 @@ function Representation(G::GAPGroup, img::Vector)
     F = base_ring(img[1])
     d = size(img[1])[1]
     M = gmodule(G,img)
-    return GroupRepresentation(RepresentationCategory(G,F),G,M,d)
+    return GroupRepresentation(representation_category(F,G),G,M,d)
 end
 
 
@@ -65,17 +65,17 @@ function Representation(G::GAPGroup, m::Function)
     F = base_ring(parent(m(G[1])))
     d = size(m(G[1]))[1]
     M = gmodule(G, [m(g) for g ∈ gens(G)])
-    return GroupRepresentation(RepresentationCategory(G,F),G,M,d)
+    return GroupRepresentation(representation_category(F,G),G,M,d)
 end
 
 
 """
-    Morphism(ρ::GroupRepresentation, τ::GroupRepresentation, m::MatElem; check = true)
+    morphism(ρ::GroupRepresentation, τ::GroupRepresentation, m::MatElem; check = true)
 
 Morphism between representations defined by ``m``. If check == false equivariancy
 will not be checked.
 """
-function Morphism(ρ::GroupRepresentation, τ::GroupRepresentation, m::MatElem; check = true)
+function morphism(ρ::GroupRepresentation, τ::GroupRepresentation, m::MatElem; check = true)
     if size(m) != (dim(ρ), dim(τ)) throw(ErrorException("Mismatching dimensions")) end
     if check
         if !isequivariant(m,ρ,τ)
@@ -193,7 +193,7 @@ Check whether σ and τ are isomorphic. If true return the isomorphism.
     F = base_ring(σ)
     grp = σ.group
 
-    if order(grp) == 1 return true, Morphism(σ,τ,one(matrix_space(F,intdim(σ),intdim(τ)))) end
+    if order(grp) == 1 return true, morphism(σ,τ,one(matrix_space(F,intdim(σ),intdim(τ)))) end
 
     gap_F = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
 
@@ -211,7 +211,7 @@ Check whether σ and τ are isomorphic. If true return the isomorphism.
     if iso == GAP.Globals.fail return false,nothing end
 
     m = matrix(F,[F(iso[i,j]) for i ∈ 1:intdim(σ), j ∈ 1:intdim(τ)])
-    return true, Morphism(σ,τ,m)
+    return true, morphism(σ,τ,m)
 end
 
 function dual(ρ::GroupRepresentation)
@@ -227,7 +227,7 @@ function ev(ρ::GroupRepresentation)
     cod = one(parent(ρ))
     F = base_ring(ρ)
     m = matrix(ev(VectorSpaceObject(F,intdim(ρ))))
-    return Morphism(dom,cod,m)
+    return morphism(dom,cod,m)
 end
 
 function coev(ρ::GroupRepresentation)
@@ -235,7 +235,7 @@ function coev(ρ::GroupRepresentation)
     cod = ρ ⊗ dual(ρ)
     F = base_ring(ρ)
     m = matrix(coev(VectorSpaceObject(F,intdim(ρ))))
-    return Morphism(dom,cod, m)
+    return morphism(dom,cod, m)
 end
 #-------------------------------------------------------------------------
 #   Functionality: Morphisms
@@ -246,15 +246,15 @@ function compose(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
     return GroupRepresentationMorphism(domain(f),codomain(g), matrix(f)*matrix(g))
 end
 
-inv(f::GroupRepresentationMorphism)= Morphism(codomain(f), domain(f), inv(matrix(f)))
+inv(f::GroupRepresentationMorphism)= morphism(codomain(f), domain(f), inv(matrix(f)))
 
 associator(σ::GroupRepresentation, τ::GroupRepresentation, ρ::GroupRepresentation) = id(σ⊗τ⊗ρ)
 
-*(x, f::GroupRepresentationMorphism) = Morphism(domain(f),codomain(f),x*f.map)
+*(x, f::GroupRepresentationMorphism) = morphism(domain(f),codomain(f),x*f.map)
 
 function +(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
     @assert domain(f) == domain(g) && codomain(f) == codomain(g) "Not compatible"
-    return Morphism(domain(f), codomain(f), f.map + g.map)
+    return morphism(domain(f), codomain(f), f.map + g.map)
 end
 
 #-------------------------------------------------------------------------
@@ -281,7 +281,7 @@ function kernel(f::GroupRepresentationMorphism)
 
     K = Representation(G, generators, images)
 
-    return K, Morphism(K,ρ,k)
+    return K, morphism(K,ρ,k)
 end
 
 function cokernel(f::GroupRepresentationMorphism)
@@ -301,7 +301,7 @@ function cokernel(f::GroupRepresentationMorphism)
 
     images = [c_inv*matrix(ρ(g))*c for g ∈ generators]
     C = Representation(G, generators, images)
-    return C, Morphism(ρ,C,c)
+    return C, morphism(ρ,C,c)
 end
 #-------------------------------------------------------------------------
 #   Necessities
@@ -352,7 +352,7 @@ function tensor_product(f::GroupRepresentationMorphism, g::GroupRepresentationMo
     codom = codomain(f) ⊗ codomain(g)
 
     m = kronecker_product(matrix(f),matrix(g))
-    return Morphism(dom,codom, m)
+    return morphism(dom,codom, m)
 end
 
 function braiding(X::GroupRepresentation, Y::GroupRepresentation)
@@ -364,7 +364,7 @@ function braiding(X::GroupRepresentation, Y::GroupRepresentation)
         v2 = matrix(F,transpose([k == j ? 1 : 0 for k ∈ 1:m]))
         map[(j-1)*n + i, :] = kronecker_product(v1,v2)
     end
-    return Morphism(X⊗Y, Y⊗X, transpose(map))
+    return morphism(X⊗Y, Y⊗X, transpose(map))
 end
 
 spherical(X::GroupRepresentation) = id(X)
@@ -399,10 +399,10 @@ function direct_sum(ρ::GroupRepresentation, τ::GroupRepresentation)
     S = Representation(grp, generators, [[matrix(ρ(g)) zero(M2); zero(M3) matrix(τ(g))] for g ∈ generators])
 
 
-    incl_ρ = Morphism(ρ, S, [one(M1) zero(M2)])
-    incl_τ = Morphism(τ, S, [zero(M3) one(M4)])
-    proj_ρ = Morphism(S, ρ, [one(M1); zero(M3)])
-    proj_τ = Morphism(S, τ, [zero(M2); one(M4)])
+    incl_ρ = morphism(ρ, S, [one(M1) zero(M2)])
+    incl_τ = morphism(τ, S, [zero(M3) one(M4)])
+    proj_ρ = morphism(S, ρ, [one(M1); zero(M3)])
+    proj_τ = morphism(S, τ, [zero(M2); one(M4)])
 
     return S, [incl_ρ, incl_τ], [proj_ρ, proj_τ]
 end
@@ -424,7 +424,7 @@ function direct_sum(f::GroupRepresentationMorphism, g::GroupRepresentationMorphi
 
     m = [matrix(f) z1; z2 matrix(g)]
 
-    return Morphism(dom,codom, m)
+    return morphism(dom,codom, m)
 end
 
 # product(X::GroupRepresentation,Y::GroupRepresentation, morphisms = false) = morphisms ? direct_sum(X,Y, true)[[1,3]] : direct_sum(X,Y)
@@ -523,7 +523,7 @@ function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
 
     mat_homs = [matrix(F,[preimage(gap_to_F, m[i,j]) for i ∈ 1:intdims_m, j ∈ 1:intdims_n]) for m ∈ gap_homs]
 
-    rep_homs = [Morphism(σ,τ,m,check = false) for m ∈ mat_homs]
+    rep_homs = [morphism(σ,τ,m,check = false) for m ∈ mat_homs]
 
     return GRHomSpace(σ,τ, rep_homs, VectorSpaces(F))
 end
@@ -532,12 +532,12 @@ function zero(H::GRHomSpace)
     dom = H.X
     codom = H.Y
     m = zero(matrix_space(base_ring(dom),intdim(dom),intdim(codom)))
-    return Morphism(dom,codom,m)
+    return morphism(dom,codom,m)
 end
 
 function zero_morphism(X::GroupRepresentation, Y::GroupRepresentation)
     m = zero(matrix_space(base_ring(X),intdim(X),intdim(Y)))
-    return Morphism(X,Y,m)
+    return morphism(X,Y,m)
 end
 
 #-------------------------------------------------------------------------
@@ -546,7 +546,7 @@ end
 
 function restriction(ρ::GroupRepresentation, H::GAPGroup)
     b,f = issubgroup(ρ.group, H)
-    RepH = RepresentationCategory(H,base_ring(ρ))
+    RepH = representation_category(base_ring(ρ),H)
     if b == false throw(ErrorException("Not a sub")) end
     if ρ.m == 0 return zero(RepH) end
     h = hom(H,codomain(ρ.m), gens(H), [ρ(f(g)) for g ∈ gens(H)])
@@ -555,7 +555,7 @@ end
 
 function restriction(f::GroupRepresentationMorphism, H::GAPGroup)
     if domain(f).group == H return f end
-    return Morphism(restriction(domain(f),H), restriction(codomain(f),H), matrix(f))
+    return morphism(restriction(domain(f),H), restriction(codomain(f),H), matrix(f))
 end
 
 function induction(ρ::GroupRepresentation, G::GAPGroup)
@@ -565,7 +565,7 @@ function induction(ρ::GroupRepresentation, G::GAPGroup)
 
     if !issubgroup(G, H)[1] throw(ErrorException("Not a supergroup")) end
 
-    if ρ.m == 0 return zero(RepresentationCategory(G,base_ring(ρ))) end
+    if ρ.m == 0 return zero(representation_category(base_ring(ρ),G)) end
 
     transversal = left_transversal(G,H)
 
@@ -593,7 +593,7 @@ end
 function induction(f::GroupRepresentationMorphism, G::GAPGroup)
     dom = induction(domain(f), G)
     codom = induction(codomain(f), G)
-    return Morphism(dom,codom, direct_sum([Morphism(matrix(f)) for i ∈ 1:Int64(index(G,domain(f).group))]).m)
+    return morphism(dom,codom, direct_sum([morphism(matrix(f)) for i ∈ 1:Int64(index(G,domain(f).group))]).m)
 end
 
 #-------------------------------------------------------------------------
@@ -628,5 +628,5 @@ end
 
 function express_in_basis(f::GroupRepresentationMorphism, basis::Vector{GroupRepresentationMorphism})
     o = one(base_group(domain(f)))
-    express_in_basis(Morphism(f.map), [Morphism(g.map) for g in basis])
+    express_in_basis(morphism(f.map), [morphism(g.map) for g in basis])
 end

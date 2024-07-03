@@ -17,7 +17,7 @@ struct AlgebraMorphism <: Morphism
     map::Morphism
 end
 
-function Morphism(X::AlgebraObject, Y::AlgebraObject, f::Morphism)
+function morphism(X::AlgebraObject, Y::AlgebraObject, f::Morphism)
     AlgebraMorphism(X,Y,f)
 end
 #=----------------------------------------------------------
@@ -45,7 +45,7 @@ function is_separable(A::AlgebraObject)
 
     # Define the multiplication as a bimodule morphism
     AA = free_bimodule(one(C), A)
-    m = Morphism(AA, bimodule(A), multiplication(A))
+    m = morphism(AA, bimodule(A), multiplication(A))
 
     # A is seperable if m has a right inverse as bimodule morphism
     has_right_inverse(m)
@@ -69,6 +69,16 @@ function group_algebra(C::Category, G::GAPGroup)
 end
 
 #=----------------------------------------------------------
+    Morita equivalence 
+----------------------------------------------------------=#
+
+function is_morita_equivalent(A::AlgebraObject, B::AlgebraObject)
+    M = category_of_right_modules(A)
+    N = category_of_right_modules(B)
+    is_equivalent(M,N)
+end
+
+#=----------------------------------------------------------
     Generic Algebras 
 ----------------------------------------------------------=#
 
@@ -81,6 +91,18 @@ function generic_algebra(X::Object)
         id(X) ⊗ (ev(X) ⊗ id(dX))
     )
     return AlgebraObject(parent(X), A, m, coev(X))
+end
+
+#=----------------------------------------------------------
+    extension of scalars  
+----------------------------------------------------------=#
+
+function extension_of_scalars(A::AlgebraObject, K::Ring)
+    C = extension_of_scalars(parent(A), K)
+    X = extension_of_scalars(object(A), K)
+    m = extension_of_scalars(multiplication(A), K)
+    u = extension_of_scalars(unit(A), K)
+    AlgebraObject(C,X,m,u)
 end
 #=----------------------------------------------------------
     Pretty printing

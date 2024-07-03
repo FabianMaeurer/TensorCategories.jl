@@ -31,7 +31,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     number_of_rows, number_of_columns, is_squarefree, is_commutative,
     gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra,
     radical, is_zero, minimal_submodules, representation_matrix, QQBarField,
-    is_irreducible, polynomial, is_univariate, action
+    is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars
 
 
 
@@ -58,6 +58,7 @@ export action
 export action_matrix
 export add_simple! 
 export algebra
+export algebras
 export algebra_structures
 export AlgebraObject
 export AlgebraMorphism
@@ -80,6 +81,8 @@ export category
 export category_of_right_modules
 export category_of_left_modules
 export category_of_bimodules
+export commutative_algebra_structures
+export commutative_algebras
 export HomSet 
 export HomSpace 
 export Morphism 
@@ -130,9 +133,14 @@ export E6subfactor
 export eigenspace 
 export eigenvalues 
 export End 
+export end_of_free_bimodule
+export end_of_free_left_module
+export end_of_free_right_module
 export end_of_induction
 export endomorphism_ring 
 export equilizer
+export etale_algebra_structures
+export etale_algebras
 export ev 
 export ev_coev 
 export exponent
@@ -150,6 +158,7 @@ export FusionCategory
 export fusion_coefficient
 export generic_algebra
 export getindex 
+export graded_vector_spaces
 export GradedVectorSpaces 
 export GRHomSpace 
 export GRepInduction 
@@ -157,6 +166,7 @@ export GRepRestriction
 export split_grothendieck_ring 
 export GrothendieckRing
 export group_algebra
+export GroupRepresentationCategory
 export GroupRepresentation 
 export GroupRepresentationCategory 
 export GroupRepresentationCategory 
@@ -164,7 +174,7 @@ export GroupRepresentationMorphism
 export GVSHomSpace 
 export GVSMorphism 
 export GVSObject 
-export HaagerupH3 
+export haagerup_H3 
 export half_braiding 
 export half_braidings 
 export hexagon_axiom
@@ -197,9 +207,11 @@ export is_abelian
 export is_abelian 
 export is_additive 
 export is_algebra
+export is_bimodule
 export is_braided
 export is_central
 export is_epimorphism
+export is_equivalent
 export is_finite 
 export is_fusion 
 export is_half_braiding
@@ -209,10 +221,12 @@ export is_linear
 export is_modular 
 export is_monoidal 
 export is_monomorphism
+export is_morita_equivalent
 export is_multifusion 
 export is_multifusion 
 export is_multiring 
 export is_multitensor 
+export is_relative_braiding
 export is_right_module
 export is_ring 
 export is_ring 
@@ -293,6 +307,7 @@ export rational_lift
 export regular_representation
 export Representation 
 export RepresentationCategory 
+export representation_category
 export restriction 
 export Restriction 
 export reverse_braiding
@@ -343,9 +358,10 @@ export stalk
 export stalks 
 export SubcategoryObject 
 export SubcategoryMorphism 
-export TambaraYamagami 
+export tambara_yamagami
 export tensor_product 
 export tensor_power
+export tensor_power_category
 export TensorPowerCategory
 export TensorPowerMorphism
 export TensorPowerObject
@@ -353,6 +369,7 @@ export tmatrix
 export tr 
 export trivial_3_cocylce 
 export twist
+export twisted_graded_vector_spaces
 export TwistedGradedVectorSpaces 
 export twisted_group_algebra
 export unit
@@ -361,7 +378,7 @@ export sl2_representations
 export VectorSpaceMorphism 
 export VectorSpaceObject 
 export VectorSpaces 
-export Verlinde
+export verlinde_category
 export vertical_direct_sum
 export VSHomSpace 
 export VSObject 
@@ -403,10 +420,6 @@ include("Examples/ConvolutionCategory/ConvolutionCategory.jl")
 include("CategoryFramework/NaturalTransformations.jl")
 
 
-include("DecategorifiedFramework/multiplication_table.jl")
-include("DecategorifiedFramework/ZPlusRings.jl")
-include("DecategorifiedFramework/GrothendieckRing.jl")
-
 include("TensorCategoryFramework/AbstractTensorMethods.jl")
 include("TensorCategoryFramework/FusionCategory.jl")
 #include("structures/MultiFusionCategories/FusionCategoryExperimental.jl")
@@ -419,15 +432,20 @@ include("TensorCategoryFramework/TensorPowerCategory.jl")
 include("TensorCategoryFramework/TensorFunctors.jl")
 include("TensorCategoryFramework/Center/Center.jl")
 include("TensorCategoryFramework/Center/Induction.jl")
-include("TensorCategoryFramework/Center/CenterChecks.jl")
 include("TensorCategoryFramework/Center/InductionMonad.jl")
 include("TensorCategoryFramework/Center/Centralizer.jl")
 include("TensorCategoryFramework/Center/CentralizerInduction.jl")
+include("TensorCategoryFramework/Center/CenterChecks.jl")
+
 
 include("TensorCategoryFramework/InternalModules/InternalAlgebras.jl")
 include("TensorCategoryFramework/InternalModules/ModuleCategories.jl")
 include("TensorCategoryFramework/InternalModules/ComputationOfAlgebras.jl")
 include("TensorCategoryFramework/ModuleCategories/MonadModules.jl")
+
+include("DecategorifiedFramework/multiplication_table.jl")
+include("DecategorifiedFramework/ZPlusRings.jl")
+include("DecategorifiedFramework/GrothendieckRing.jl")
 
 
 include("Examples/Verlinde/I2-fusion.jl")

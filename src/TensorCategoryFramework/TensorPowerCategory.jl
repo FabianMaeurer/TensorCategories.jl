@@ -5,26 +5,29 @@ mutable struct TensorPowerCategory <: Category
     max_exponent::Int
     #multiplication_table::Dict
 
-    function TensorPowerCategory(X::Object...) 
-        C = new()
-        C.generator = unique_simples(vcat([[k for (k,_) ∈ decompose(x)] for x ∈ X]...))
-        C.simples = typeof(X)[]
-        
-        C.complete = X == zero(parent(X[1])) ? true : false
-        C.max_exponent = 0
-        return C
-    end
+    TensorPowerCategory() = new()
 
-    function TensorPowerCategory(X::Vector{<:Object})
-        C = new()
-        C.generator = unique_simples(vcat([[k for (k,_) ∈ decompose(x)] for x ∈ X]...))
+end
 
-        C.simples = typeof(X)[]
-        
-        C.complete = X == zero(parent(X[1])) ? true : false
-        C.max_exponent = 0
-        return C
-    end
+function tensor_power_category(X::Object...) 
+    C = TensorPowerCategory()
+    C.generator = unique_indecomposables(vcat([[k for (k,_) ∈ decompose(x)] for x ∈ X]...))
+    C.simples = typeof(X)[]
+    
+    C.complete = X == zero(parent(X[1])) ? true : false
+    C.max_exponent = 0
+    return C
+end
+
+function tensor_power_category(X::Vector{<:Object})
+    C = TensorPowerCategory()
+    C.generator = unique_indecomposables(vcat([[k for (k,_) ∈ decompose(x)] for x ∈ X]...))
+
+    C.simples = typeof(X)[]
+    
+    C.complete = X == zero(parent(X[1])) ? true : false
+    C.max_exponent = 0
+    return C
 end
 
 function ==(C::TensorPowerCategory, D::TensorPowerCategory)
@@ -47,7 +50,7 @@ is_additive(::TensorPowerCategory) = true
 object(X::TensorPowerObject) = X.object
 morphism(f::TensorPowerMorphism) = f.morphism
 category(C::TensorPowerCategory) = parent(C.generator[1])
-Morphism(X::TensorPowerObject, Y::TensorPowerObject, f::Morphism) = TensorPowerMorphism(X,Y,f)
+morphism(X::TensorPowerObject, Y::TensorPowerObject, f::Morphism) = TensorPowerMorphism(X,Y,f)
 matrix(f::TensorPowerObject) = matrix(f.morphism)
 
 base_ring(C::TensorPowerCategory) = base_ring(category(C))
@@ -84,8 +87,8 @@ end
 function direct_sum(X::TensorPowerObject...)
     S, incl, proj= direct_sum(object.(X))
     S = TensorPowerObject(parent(X[1]), S)
-    incl = [Morphism(x, S, i) for (i,x) ∈ zip(incl, X)]
-    proj = [Morphism(S, x, p) for (p,x) ∈ zip(proj, X)]
+    incl = [morphism(x, S, i) for (i,x) ∈ zip(incl, X)]
+    proj = [morphism(S, x, p) for (p,x) ∈ zip(proj, X)]
     S, incl, proj
 end
 
@@ -96,28 +99,28 @@ end
 function direct_sum(f::TensorPowerMorphism, g::TensorPowerMorphism)
     dom = domain(f) ⊕ domain(g)
     cod = codomain(f) ⊕ codomain(g)
-    Morphism(dom,cod, direct_sum(morphism(f), morphism(g)))
+    morphism(dom,cod, direct_sum(morphism(f), morphism(g)))
 end
 
 function tensor_product(f::TensorPowerMorphism, g::TensorPowerMorphism)
     dom = domain(f) ⊗ domain(g)
     cod = codomain(f) ⊗ codomain(g)
-    Morphism(dom, cod, tensor_product(morphism(f), morphism(g)))
+    morphism(dom, cod, tensor_product(morphism(f), morphism(g)))
 end
 
 function associator(X::TensorPowerObject, Y::TensorPowerObject, Z::TensorPowerObject)
     ass = associator(object.([X,Y,Z])...)
     dom = TensorPowerObject(parent(X), domain(ass))
     cod = TensorPowerObject(parent(X), codomain(ass))
-    Morphism(dom,cod, ass)
+    morphism(dom,cod, ass)
 end
 
-inv(f::TensorPowerMorphism) = Morphism(codomain(f), domain(f), inv(morphism(f)))
+inv(f::TensorPowerMorphism) = morphism(codomain(f), domain(f), inv(morphism(f)))
 
 one(C::TensorPowerCategory) = TensorPowerObject(C, one(category(C)))
 
 function id(X::TensorPowerObject) 
-    Morphism(X,X, id(object(X)))
+    morphism(X,X, id(object(X)))
 end
 
 #=----------------------------------------------------------
@@ -157,7 +160,7 @@ end
 
 function braiding(X::TensorPowerObject, Y::TensorPowerObject)
     b = braiding(object(X), object(Y))
-    Morphism(X⊗Y,Y⊗X,b)
+    morphism(X⊗Y,Y⊗X,b)
 end
 
 dual(X::TensorPowerObject) = TensorPowerObject(parent(X), dual(object(X)))
@@ -166,27 +169,27 @@ function ev(X::TensorPowerObject)
     evaluation = ev(object(X))
     dom = TensorPowerObject(parent(X), domain(evaluation))
     cod = TensorPowerObject(parent(X), codomain(evaluation))
-    Morphism(dom, cod, evaluation)
+    morphism(dom, cod, evaluation)
 end
 
 function coev(X::TensorPowerObject) 
     coevaluation = coev(object(X))
     dom = TensorPowerObject(parent(X), domain(coevaluation))
     cod = TensorPowerObject(parent(X), codomain(coevaluation))
-    Morphism(dom, cod, coevaluation)
+    morphism(dom, cod, coevaluation)
 end
 
 function spherical(X::TensorPowerObject)
     sp = spherical(object(X))
     dom = TensorPowerObject(parent(X), domain(sp))
     cod = TensorPowerObject(parent(X), codomain(sp))
-    Morphism(dom, cod, sp)
+    morphism(dom, cod, sp)
 end
 
 zero(T::TensorPowerCategory) = TensorPowerObject(T, zero(parent(T.generator[1])))
 
 function zero_morphism(X::TensorPowerObject, Y::TensorPowerObject)
-    Morphism(X,Y, zero_morphism(object(X), object(Y)))
+    morphism(X,Y, zero_morphism(object(X), object(Y)))
 end
 
 function indecomposables(C::TensorPowerCategory, k = Inf)
@@ -244,19 +247,19 @@ end
 function kernel(f::TensorPowerMorphism)
     K,incl = kernel(morphism(f))
     K = TensorPowerObject(parent(f), K)
-    return K, Morphism(K,domain(f), incl)
+    return K, morphism(K,domain(f), incl)
 end
 
 function cokernel(f::TensorPowerMorphism)
     C,proj = cokernel(morphism(f))
     C = TensorPowerObject(parent(f), C)
-    return C, Morphism(codomain(f), C, proj)
+    return C, morphism(codomain(f), C, proj)
 end
 
 function is_isomorphic(X::TensorPowerObject, Y::TensorPowerObject)
     is_iso, iso = is_isomorphic(object(X), object(Y))
     if is_iso
-        return true, Morphism(X,Y,iso)
+        return true, morphism(X,Y,iso)
     else
         return false, nothing
     end

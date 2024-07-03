@@ -111,8 +111,8 @@ function express_in_basis(f::T, B::Vector{T}) where T <: Morphism
     # b_mat = hcat([[x for x ∈ matrix(b)][:] for b ∈ B]...)
     # B_mat = matrix(F, size(b_mat,1), size(b_mat, 2), b_mat)
     # f_mat = matrix(F, *(size(matrix(f))...), 1, [x for x ∈ matrix(f)][:])
-    vec_f = Morphism(matrix(f))
-    vec_basis = [Morphism(matrix(b)) for b ∈ B]
+    vec_f = morphism(matrix(f))
+    vec_basis = [morphism(matrix(b)) for b ∈ B]
     return express_in_basis(vec_f, vec_basis)
 end
 
@@ -271,11 +271,22 @@ Compute the central primitive idempotents of an endomorphism space ``H``.
 function central_primitive_idempotents(H::AbstractHomSpace)
     @assert domain(H) == codomain(H) "Not an endomorphism algebra"
 
-    A = endomorphism_ring(H.X, basis(H))
+    base = basis(H)
+    A = endomorphism_ring(H.X, base)
     one(A)
+ 
+
+    if !is_semisimple(A) && characteristic(base_ring(H)) == 0 
+        X = semisimplify(domain(H))
+        base = basis(semisimplify(H))
+        A = endomorphism_ring(X, base)
+        base = morphism.(base)
+    end
+
     A.issemisimple = true
+
     idems = central_primitive_idempotents(A)
-    [sum(basis(H) .* coefficients(i)) for i ∈ idems]
+    [sum(base .* coefficients(i)) for i ∈ idems]
 end
 
 function radical(H::AbstractHomSpace)
@@ -383,14 +394,9 @@ end
 #     return unique_simples([indecomposable_subobjects(K); indecomposable_subobjects(C)])
 # end
 
-# function indecomposable_subobjects(X::Object, E = nothing)
-#     if is_semisimple(parent(X)) 
-#         if E === nothing  E = End(X) end
-#         return _indecomposable_subobjects(X,E)
-#     else
-#         return unique_indecomposables([x for (x,d) ∈ decompose(X)])
-#     end
-# end
+function indecomposable_subobjects(X::Object)
+    [x for (x,_) ∈ decompose(X)]
+end
 
 @doc raw""" 
 
@@ -495,8 +501,6 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false)
 
         return unique_simples([K;I])
     end
-
-
 
 
     M = regular_module(R)

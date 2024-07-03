@@ -52,7 +52,7 @@ function distribute_right(X::Object, Y::Object, Z::Object)
 end
 
 """
-    distribute_left(X::O, Z::Vector{O}) where O <: Object
+    distribute_right(X::O, Z::Vector{O}) where O <: Object
 
 Return the canonical isomorphism ```Z⊗(⨁Xi) → ⨁(Z⊗Xi)```.
 """
@@ -206,7 +206,7 @@ function drinfeld_morphism(X::Object)
 function dim(X::Object) 
     C = parent(X)
     if is_tensor(C)
-        return base_ring(X)(tr(spherical(X)))
+        return base_ring(X)(tr(id(X)))
     elseif is_multi_tensor(C)
         𝟙 = simple_subobjects(one(C))
         incls = [basis(Hom(𝟙ᵢ, one(C)))[1] for 𝟙ᵢ ∈ 𝟙]
@@ -445,6 +445,6 @@ function topologize(X::Object)
 end
 
 function topologize(S::Vector{<:Object})
-    T = TensorPowerCategory(S)
+    T = tensor_power_category(S)
     object.(indecomposables(T))
 end

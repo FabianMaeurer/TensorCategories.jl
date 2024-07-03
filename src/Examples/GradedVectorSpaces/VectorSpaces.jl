@@ -60,11 +60,11 @@ function VectorSpaceObject(K::Field, basis::Vector)
 end
 
 """
-    Morphism(X::VectorSpaceObject, Y::VectorSpaceObject, m::MatElem)
+    morphism(X::VectorSpaceObject, Y::VectorSpaceObject, m::MatElem)
 
 Return a morphism in the category of vector spaces defined by m.
 """
-function Morphism(X::VectorSpaceObject, Y::VectorSpaceObject, m::MatElem)
+function morphism(X::VectorSpaceObject, Y::VectorSpaceObject, m::MatElem)
     if parent(X) != parent(Y)
         throw(ErrorException("Missmatching parents."))
     elseif size(m) != (int_dim(X),int_dim(Y))
@@ -75,16 +75,16 @@ function Morphism(X::VectorSpaceObject, Y::VectorSpaceObject, m::MatElem)
 end
 
 """
-    Morphism(m::MatElem)
+    morphism(m::MatElem)
 
 Vector space morphisms defined by m.
 """
-function Morphism(m::MatElem)
+function morphism(m::MatElem)
     l,n = size(m)
     F = base_ring(m)
     dom = VectorSpaceObject(F,l)
     codom = VectorSpaceObject(F,n)
-    return Morphism(dom,codom,m)
+    return morphism(dom,codom,m)
 end
 #
 # function VectorSpaceMorphism(X::VectorSpaceObject{T}, Y::VectorSpaceObject{T}, m::U) where {T,U <: MatrixElem}
@@ -163,7 +163,7 @@ function is_isomorphic(V::VectorSpaceObject, W::VectorSpaceObject)
     if parent(V) != parent(W) return false, nothing end
     if int_dim(V) != int_dim(W) return false, nothing end
 
-    return true, Morphism(V,W,one(matrix_space(base_ring(V),int_dim(V),int_dim(V))))
+    return true, morphism(V,W,one(matrix_space(base_ring(V),int_dim(V),int_dim(V))))
 end
 
 
@@ -173,17 +173,17 @@ function ev(V::VectorSpaceObject)
     dom = dual(V)⊗V
     cod = one(parent(V))
     m = [matrix(f)[i] for f ∈ basis(dual(V)), i ∈ 1:int_dim(V)]
-    Morphism(dom,cod, matrix(base_ring(V), reshape(m,int_dim(dom),1)))
+    morphism(dom,cod, matrix(base_ring(V), reshape(m,int_dim(dom),1)))
 end
 
 function coev(V::VectorSpaceObject)
     dom = one(parent(V))
     cod = V ⊗ dual(V)
     m = [Int(i==j) for i ∈ 1:int_dim(V), j ∈ 1:int_dim(V)][:]
-    Morphism(dom,cod, transpose(matrix(base_ring(V), reshape(m,int_dim(cod),1))))
+    morphism(dom,cod, transpose(matrix(base_ring(V), reshape(m,int_dim(cod),1))))
 end
 
-spherical(V::VectorSpaceObject) = Morphism(V,dual(dual(V)), id(V).m)
+spherical(V::VectorSpaceObject) = morphism(V,dual(dual(V)), id(V).m)
 
 int_dim(V::VectorSpaceObject) = length(basis(V))
 #-----------------------------------------------------------------
@@ -208,11 +208,11 @@ function direct_sum(X::VectorSpaceObject, Y::VectorSpaceObject,)
 
     V = VectorSpaceObject(parent(X),b)
 
-    ix = Morphism(X,V, matrix(F,[i == j ? 1 : 0 for i ∈ 1:int_dim(X), j ∈ 1:int_dim(V)]))
-    iy = Morphism(Y,V, matrix(F,[i == j - int_dim(X) for i ∈ 1:int_dim(Y), j ∈ 1:int_dim(V)]))
+    ix = morphism(X,V, matrix(F,[i == j ? 1 : 0 for i ∈ 1:int_dim(X), j ∈ 1:int_dim(V)]))
+    iy = morphism(Y,V, matrix(F,[i == j - int_dim(X) for i ∈ 1:int_dim(Y), j ∈ 1:int_dim(V)]))
 
-    px = Morphism(V,X, transpose(matrix(ix)))
-    py = Morphism(V,Y, transpose(matrix(iy)))
+    px = morphism(V,X, transpose(matrix(ix)))
+    py = morphism(V,Y, transpose(matrix(iy)))
 
     return V,[ix,iy], [px,py]
 end
@@ -242,7 +242,7 @@ function kernel(f::VSMorphism)
     F = base_ring(domain(f))
     k = kernel(f.m)
     K = VectorSpaceObject(parent(domain(f)), number_of_rows(k))
-    return K, Morphism(K,domain(f), k)
+    return K, morphism(K,domain(f), k)
 end
 
 function cokernel(f::VSMorphism)
@@ -250,7 +250,7 @@ function cokernel(f::VSMorphism)
     k = kernel(f.m, side = :right)
 
     K = VectorSpaceObject(parent(domain(f)), number_of_columns(k))
-    return K, Morphism(codomain(f), K, k)
+    return K, morphism(codomain(f), K, k)
 end
 #-----------------------------------------------------------------
 #   Functionality: Tensor Product
@@ -278,7 +278,7 @@ function tensor_product(f::VectorSpaceMorphism, g::VectorSpaceMorphism)
     D = tensor_product(domain(f),domain(g))
     C = tensor_product(codomain(f),codomain(g))
     m = kronecker_product(f.m, g.m)
-    return Morphism(D,C,m)
+    return morphism(D,C,m)
 end
 #
 
@@ -290,7 +290,7 @@ end
 function compose(f::VectorSpaceMorphism...)
     @assert all([is_isomorphic(domain(f[i]), codomain(f[i-1]))[1] for i ∈ 2:length(f)])  "Morphisms not compatible"
 
-    return Morphism(domain(f[1]),codomain(f[end]),*([g.m for g ∈ f]...))
+    return morphism(domain(f[1]),codomain(f[end]),*([g.m for g ∈ f]...))
 end
 
 
@@ -303,7 +303,7 @@ end
 
 function +(f::VectorSpaceMorphism, g::VectorSpaceMorphism)
     @assert is_isomorphic(domain(f),domain(g))[1] && is_isomorphic(codomain(f),codomain(g))[1]
-    return Morphism(domain(f),codomain(f), f.m + g.m)
+    return morphism(domain(f),codomain(f), f.m + g.m)
 end
 
 """
@@ -314,12 +314,12 @@ Return the identity on the vector space ``X``.
 function id(X::VectorSpaceObject)
     n = int_dim(X)
     m = matrix(base_ring(X), [i == j ? 1 : 0 for i ∈ 1:n, j ∈ 1:n])
-    return Morphism(X,X,m)
+    return morphism(X,X,m)
 end
 
-inv(f::VectorSpaceMorphism)= Morphism(codomain(f), domain(f), inv(matrix(f)))
+inv(f::VectorSpaceMorphism)= morphism(codomain(f), domain(f), inv(matrix(f)))
 
-*(λ,f::VectorSpaceMorphism)  = Morphism(domain(f),codomain(f),parent(domain(f)).base_ring(λ)*f.m)
+*(λ,f::VectorSpaceMorphism)  = morphism(domain(f),codomain(f),parent(domain(f)).base_ring(λ)*f.m)
 
 is_invertible(f::VectorSpaceMorphism) = rank(f.m) == int_dim(domain(f)) == int_dim(codomain(f))
 
@@ -329,7 +329,7 @@ function left_inverse(f::VectorSpaceMorphism)
     F = base_ring(f)
     
     k_inv = transpose(solve(transpose(k), one(matrix_space(F,d,d))))
-    return Morphism(codomain(f), domain(f), k_inv)
+    return morphism(codomain(f), domain(f), k_inv)
 end
 
 function right_inverse(f::VectorSpaceMorphism)
@@ -337,7 +337,15 @@ function right_inverse(f::VectorSpaceMorphism)
     d = rank(k)
     F = base_ring(f)
     c_inv = solve(k, one(matrix_space(F,d,d)))
-    return Morphism(codomain(f),domain(f), c_inv)
+    return morphism(codomain(f),domain(f), c_inv)
+end
+
+function extension_of_scalars(C::VectorSpaces, K::Ring)
+    VectorSpaces(K)
+end
+
+function extension_of_scalars(V::VectorSpaceObject, K::Ring)
+    VSObject(basis(V), parent(V) ⊗ K)
 end
 #---------------------------------------------------------------------------
 #   Associators
@@ -356,7 +364,7 @@ function associator(X::VectorSpaceObject, Y::VectorSpaceObject, Z::VectorSpaceOb
     n = *(int_dim.([X,Y,Z])...)
     F = base_ring(X)
     m = matrix(F, [i == j ? 1 : 0 for i ∈ 1:n, j ∈ 1:n])
-    return Morphism((X⊗Y)⊗Z, X⊗(Y⊗Z), m)
+    return morphism((X⊗Y)⊗Z, X⊗(Y⊗Z), m)
 end
 
 
@@ -379,15 +387,15 @@ Return the Hom(``X,Y```) as a vector space.
 function Hom(X::VectorSpaceObject, Y::VectorSpaceObject)
     n1,n2 = (length(basis(X)), length(basis(Y)))
     mats = [matrix(base_ring(X), [i==k && j == l ? 1 : 0 for i ∈ 1:n1, j ∈ 1:n2]) for k ∈ 1:n1, l ∈ 1:n2]
-    base = [[Morphism(X,Y,m) for m ∈ mats]...]
+    base = [[morphism(X,Y,m) for m ∈ mats]...]
     return VSHomSpace(X,Y,base,VectorSpaces(base_ring(X)))
 end
 
 basis(V::VSHomSpace) = V.basis
 
-zero(V::VSHomSpace) = Morphism(V.X,V.Y,matrix(base_ring(V.X), [0 for i ∈ 1:int_dim(V.X), j ∈ 1:int_dim(V.Y)]))
+zero(V::VSHomSpace) = morphism(V.X,V.Y,matrix(base_ring(V.X), [0 for i ∈ 1:int_dim(V.X), j ∈ 1:int_dim(V.Y)]))
 
-zero_morphism(V::VectorSpaceObject,W::VectorSpaceObject) = Morphism(V,W, zero(matrix_space(base_ring(V), int_dim(V), int_dim(W))))
+zero_morphism(V::VectorSpaceObject,W::VectorSpaceObject) = morphism(V,W, zero(matrix_space(base_ring(V), int_dim(V), int_dim(W))))
 
 function express_in_basis(f::VectorSpaceMorphism, B::Vector{<:VectorSpaceMorphism})
     F = base_ring(f)

@@ -22,7 +22,7 @@ struct SemisimplifiedMorphism <: Morphism
     morphism::Morphism
 end
 
-function Morphism(dom::SemisimplifiedObject, cod::SemisimplifiedObject, m::Morphism) 
+function morphism(dom::SemisimplifiedObject, cod::SemisimplifiedObject, m::Morphism) 
     SemisimplifiedMorphism(dom,cod, m)
 end
 
@@ -49,7 +49,7 @@ end
 function Semisimplification(f::Morphism, C::Semisimplification)
     dom = SemisimplifiedObject(C, domain(f))
     cod = SemisimplifiedObject(C, codomain(f))
-    Morphism(dom, cod, f)
+    morphism(dom, cod, f)
 end
 
 function Semisimplification(f::Morphism)
@@ -80,21 +80,21 @@ semisimplify(f::Morphism) = SemisimplifiedMorphism(f,semisimplify(parent(f)))
 function compose(f::SemisimplifiedMorphism...)
     dom = domain(f[1])
     codom = codomain(f[end])
-    Morphism(dom, codom, compose(morphism.(f)...))
+    morphism(dom, codom, compose(morphism.(f)...))
 end
 
 function direct_sum(f::SemisimplifiedMorphism...)
     dom = direct_sum(domain.(f)...)
     codom = direct_sum(codomain.(f)...)
     map = direct_sum(morphism.(f)...)
-    Morphism(dom, codom, map)
+    morphism(dom, codom, map)
 end
 
 function tensor_product(f::SemisimplifiedMorphism...)
     dom = tensor_product(domain.(f)...)
     codom = tensor_product(codomain.(f)...)
     map = tensor_product(morphism.(f)...)
-    Morphism(dom, codom, map)
+    morphism(dom, codom, map)
 end
 
 function associator(X::SemisimplifiedObject, Y::SemisimplifiedObject, Z::SemisimplifiedObject)
@@ -115,9 +115,9 @@ function ==(f::SemisimplifiedMorphism, g::SemisimplifiedMorphism)
     is_negligible(f-g)
 end
 
-function Hom(X::SemisimplifiedObject, Y::SemisimplifiedObject)
-    base_XY = basis(Hom(object(X), object(Y)))
-    base_YX = basis(Hom(object(Y), object(X)))
+function Hom(X::SemisimplifiedObject, Y::SemisimplifiedObject, XY = Hom(object(X), object(Y)), YX = Hom(object(Y), object(X)))
+    base_XY = basis(XY)
+    base_YX = basis(YX)
 
 
     F = base_ring(X)
@@ -145,11 +145,25 @@ function Hom(X::SemisimplifiedObject, Y::SemisimplifiedObject)
     filter!(e -> e != zero_morphism(object(X), object(Y)), base)
 
     base = [SemisimplifiedMorphism(X,Y, f) for f ∈ base]
+
     HomSpace(X,Y,base)
 end
 
+function semisimplify(H::AbstractHomSpace)
+    if domain(H) == codomain(H)
+        X = semisimplify(domain(H))
+        return Hom(X,X, H,H)
+    end
+
+    YX = Hom(codomain(H), domain(H))
+    X = semisimplify(domain(H))
+    Y = semisimplify(codomain(H))
+    return Hom(X,Y, H, YX)
+end
+
+
 function id(X::SemisimplifiedObject)
-    Morphism(X,X, id(object(X)))
+    morphism(X,X, id(object(X)))
 end
 
 function matrix(f::SemisimplifiedMorphism)
@@ -157,7 +171,7 @@ function matrix(f::SemisimplifiedMorphism)
 end
 
 function zero_morphism(X::SemisimplifiedObject, Y::SemisimplifiedObject)
-    Morphism(X,Y, zero_morphism(object(X), object(Y)))
+    morphism(X,Y, zero_morphism(object(X), object(Y)))
 end
 
 function kernel(f::SemisimplifiedMorphism)
@@ -209,10 +223,10 @@ function simples(C::Semisimplification)
 end
 
 function inv(f::SemisimplifiedMorphism)
-    Morphism(codomain(f), domain(f), inv(morphism(f)))
+    morphism(codomain(f), domain(f), inv(morphism(f)))
 end
 
-spherical(X::SemisimplifiedObject) = Morphism(X,dual(dual(X)), spherical(object(X)))
+spherical(X::SemisimplifiedObject) = morphism(X,dual(dual(X)), spherical(object(X)))
 
 dual(X::SemisimplifiedObject) = SemisimplifiedObject(parent(X), dual(object(X)))
 
@@ -221,7 +235,7 @@ function ev(X::SemisimplifiedObject)
     C = parent(X)
     dom = SemisimplifiedObject(C, domain(e))
     cod = SemisimplifiedObject(C, codomain(e))
-    Morphism(dom, cod, e)
+    morphism(dom, cod, e)
 end
 
 function coev(X::SemisimplifiedObject)
@@ -229,7 +243,7 @@ function coev(X::SemisimplifiedObject)
     C = parent(X)
     dom = SemisimplifiedObject(C, domain(c))
     cod = SemisimplifiedObject(C, codomain(c))
-    Morphism(dom, cod, c)
+    morphism(dom, cod, c)
 end
 
 #=----------------------------------------------------------
@@ -237,11 +251,7 @@ end
 ----------------------------------------------------------=#
 
 function show(io::IO, X::SemisimplifiedObject)
-    if int_dim(End(X)) == 0 
-        print(io, "Semisimplified: $(zero(parent(object(X))))")
-    else
-        print(io, "Semisimplified: $(object(X))")
-    end
+    print(io, "Semisimplified: $(object(X))")
 end
 
 function show(io::IO, C::Semisimplification)

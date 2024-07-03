@@ -61,47 +61,6 @@ end
 
 is_additive(T::RightTensorProductFunctor) = is_additive(domain(T))
 
-#-------------------------------------------------------------------------------
-#   Restriction and Induction
-#-------------------------------------------------------------------------------
-
-struct GRepRestriction <: AbstractFunctor
-    domain::GroupRepresentationCategory
-    codomain::GroupRepresentationCategory
-    obj_map
-    mor_map
-end
-
-function Restriction(C::GroupRepresentationCategory, D::GroupRepresentationCategory)
-    @assert base_ring(C) == base_ring(D) "Not compatible"
-    #@assert issubgroup(base_group(D), base_group(C))[1] "Not compatible"
-    obj_map = X -> restriction(X, base_group(D))
-    mor_map = f -> restriction(f, base_group(D))
-    return GRepRestriction(C,D,obj_map,mor_map)
-end
-
-struct GRepInduction <: AbstractFunctor
-    domain::GroupRepresentationCategory
-    codomain::GroupRepresentationCategory
-    obj_map
-    mor_map
-end
-
-function Induction(C::GroupRepresentationCategory, D::GroupRepresentationCategory)
-    @assert base_ring(C) == base_ring(D) "Not compatible"
-    #@assert issubgroup(base_group(C), base_group(D))[1] "Not compatible"
-    obj_map = X -> induction(X, base_group(D))
-    mor_map = f -> induction(f, base_group(D))
-    return GRepInduction(C,D, obj_map, mor_map)
-end
-
-function show(io::IO, F::GRepRestriction)
-    print(io,"Restriction functor from $(domain(F)) to $(codomain(F)).")
-end
-
-function show(io::IO, F::GRepInduction)
-    print(io,"Induction functor from $(domain(F)) to $(codomain(F)).")
-end
 
 
 #=------------------------------------------------

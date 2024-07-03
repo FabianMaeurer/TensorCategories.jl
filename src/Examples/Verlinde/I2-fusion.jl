@@ -126,13 +126,13 @@ function I2(m, F::Ring = cyclotomic_field(2*m)[1])
 	#println(q)
 
 	M=multifusionmultmatrix(m)
-	C=SixJCategory(F,vcat([rem(i,2)==1 ? join(["Bs",repeat("ts",div(i,2))]) : join(["B",repeat("st",div(i,2))]) for i in 1:n],[if rem(i,2)==1 join(["Bt",repeat("st",div(i,2))]) else join(["B",repeat("ts",div(i,2))]) end for i in 1:n]))
+	C=six_j_category(F,vcat([rem(i,2)==1 ? join(["Bs",repeat("ts",div(i,2))]) : join(["B",repeat("st",div(i,2))]) for i in 1:n],[if rem(i,2)==1 join(["Bt",repeat("st",div(i,2))]) else join(["B",repeat("ts",div(i,2))]) end for i in 1:n]))
 	set_tensor_product!(C,M)
 
 	#Now set associators using SixJCategory symbols above
 	#Note, that Bs, Bt always have trivial associators (prove this)
 	#Further note, that the order of elements is different. 
-	#The associator of (XY)Z-W over J and I cooresponds to SixJCategory(Y,X,W,Z,J,I)
+	#The associator of (XY)Z-W over J and I cooresponds to six_j_category(Y,X,W,Z,J,I)
 
 	for lx in 1:n-1, ly in 1:n-1, lz in 1:n-1, lw in 1:n-1
 		li=intersect(m_admissible(n,lx,ly),m_admissible(n,lz,lw))
@@ -172,13 +172,13 @@ function I2subcategory(m, F::Ring = cyclotomic_field(2*m)[1])
 	q=quantum(z+z^-1,2*m-2)
 
 	M=fusionmultmatrix(m)
-	C=SixJCategory(F,[join(["Bs",repeat("ts",i)]) for i in 0:n-1])
+	C=six_j_category(F,[join(["Bs",repeat("ts",i)]) for i in 0:n-1])
 	set_tensor_product!(C,M)
 
 	#Now set associators using SixJCategory symbols above
 	#Note, that Bs, Bt always have trivial associators (prove this)
 	#Further note, that the order of elements is different. 
-	#The associator of (XY)Z-W over J and I cooresponds to SixJCategory(Y,X,W,Z,J,I)
+	#The associator of (XY)Z-W over J and I cooresponds to six_j_category(Y,X,W,Z,J,I)
 
 	for lx in 1:n-1, ly in 1:n-1, lz in 1:n-1, lw in 1:n-1
 		li=intersect(m_admissible(m-1,2*lx,2*ly),m_admissible(m-1,2*lz,2*lw))

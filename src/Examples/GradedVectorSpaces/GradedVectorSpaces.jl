@@ -4,6 +4,7 @@ mutable struct GradedVectorSpaces <: Category
     base_group::GAPGroup
     twist::Cocycle{3}
     spherical::Dict{<:GroupElem, <:FieldElem}
+    braiding
 end
 
 struct GVSObject <: VectorSpaceObject
@@ -19,21 +20,36 @@ struct GVSMorphism <: VectorSpaceMorphism
 end
 
 """
-    GradedVectorSpaces(F::Field, G::GAPGroup)
+    graded_vector_spaces(F::Field, G::GAPGroup)
 
 The category of ```G```-graded vector spaces.
 """
-function GradedVectorSpaces(F::Field, G::GAPGroup)
+function graded_vector_spaces(F::Field, G::GAPGroup)
     c = trivial_3_cocycle(G,F)
-    GradedVectorSpaces(F,G,c, Dict([g => inv(c(g,inv(g),g)) for g ∈ G]))
+
+    graded_vector_spaces(F,G,c)
 end
 
-function GradedVectorSpaces(F::Field, G::GAPGroup, c::Cocycle)
-    GradedVectorSpaces(F,G,c, Dict([g => inv(c(g,inv(g),g)) for g ∈ G]))
+function graded_vector_spaces(F::Field, G::GAPGroup, χ::BilinearForm)
+    @assert is_abelian(G)
+
+    c = trivial_3_cocycle(G,F)
+
+    GradedVectorSpaces(F, G, c, Dict([g => one(F) for g ∈ G]), χ)
 end
 
-function GradedVectorSpaces(G::GAPGroup)
-    GradedVectorSpaces(QQBar, G)
+
+function graded_vector_spaces(F::Field, G::GAPGroup, c::Cocycle)
+    χ = nothing
+    try
+        χ = trivial_bilinear_form(G,F)
+    catch
+    end
+    GradedVectorSpaces(F,G,c, Dict([g => inv(c(g,inv(g),g)) for g ∈ G]), χ)
+end
+
+function graded_vector_spaces(G::GAPGroup)
+    graded_vector_spaces(QQBar, G)
 end
 """
     VectorSpaceObject(V::Pair{<:GroupElem, <:VectorSpaceObject}...)
@@ -44,8 +60,16 @@ function VectorSpaceObject(V::Pair{<:GroupElem, <:VectorSpaceObject}...)
     W,_,_ = direct_sum([v for (_,v) ∈ V])
     G = parent(V[1][1])
     grading = vcat([[g for _ ∈ 1:int_dim(v)] for (g,v) ∈ V]...)
-    C = GradedVectorSpaces(base_ring(W), G)
+    C = graded_vector_spaces(base_ring(W), G)
     return GVSObject(C, W, grading)
+end
+
+function getindex(C::GradedVectorSpaces, g::GroupElem...)
+    GVSObject(C,VectorSpaceObject(VectorSpaces(base_ring(C)), length(g)), [g...])
+end
+
+function get_indec(C::GradedVectorSpaces, g::Vector{<:GroupElem})
+    C[g...]
 end
 
 is_fusion(C::GradedVectorSpaces) = true
@@ -53,13 +77,16 @@ is_fusion(C::GradedVectorSpaces) = true
 basis(X::GVSObject) = basis(X.V)
 
 grading(V::GVSObject) = V.grading
+twist(C::GradedVectorSpaces) = C.twist
+
+is_braided(C::GradedVectorSpaces) = C.braiding !== nothing
 
 """
-    function Morphism(V::GVSObject, Y::GVSObject, m::MatElem)
+    function morphism(V::GVSObject, Y::GVSObject, m::MatElem)
 
 Return the morphism ``V → W``defined by ``m``.
 """
-function Morphism(X::GVSObject, Y::GVSObject, m::MatElem)
+function morphism(X::GVSObject, Y::GVSObject, m::MatElem)
     if !isgraded(X,Y,m)
         throw(ErrorException("Matrix does not define graded morphism"))
     end
@@ -98,12 +125,15 @@ function is_isomorphic(X::GVSObject, Y::GVSObject)
                 m[l,k] = 1
             end
         end
-        return true, Morphism(X,Y,m)
+        return true, morphism(X,Y,m)
     end
 end
 
+function ==(C::GradedVectorSpaces, D::GradedVectorSpaces)
+    base_ring(C) == base_ring(D) && base_group(C) == base_group(D) && C.twist == D.twist
+end
 function ==(V::GVSObject, W::GVSObject)
-    if parent(V) == parent(W) && V.grading == W.grading
+    if base_ring(V) == base_ring(W) && V.grading == W.grading
         return true
     end
     return false
@@ -119,7 +149,7 @@ function spherical(V::GVSObject)
     DDV = dual(dual(V))
     C = parent(V)
     m = diagonal_matrix([C.spherical[g] for g ∈ grading(V)])
-    Morphism(V,DDV,m)
+    morphism(V,DDV,m)
 end
 
 function set_trivial_spherical!(C::GradedVectorSpaces)
@@ -143,11 +173,11 @@ function direct_sum(X::GVSObject, Y::GVSObject)
 
     Z = GVSObject(parent(X), W, grading)
 
-    ix = Morphism(X,Z,matrix(ix))
-    iy = Morphism(Y,Z,matrix(iy))
+    ix = morphism(X,Z,matrix(ix))
+    iy = morphism(Y,Z,matrix(iy))
 
-    px = Morphism(Z,X,matrix(px))
-    py = Morphism(Z,Y,matrix(py))
+    px = morphism(Z,X,matrix(px))
+    py = morphism(Z,Y,matrix(py))
 
     return Z, [ix,iy], [px,py]
 end
@@ -176,6 +206,13 @@ function tensor_product(X::GVSObject, Y::GVSObject)
     elems = elements(G)
     grading = vcat([[i*j for i ∈ Y.grading] for j ∈ X.grading]...)
     return GVSObject(parent(X), W, length(grading) == 0 ? elem_type(G)[] : grading)
+end
+
+function braiding(X::GVSObject, Y::GVSObject)
+    twist(parent(X)).m !== nothing && error("Braiding not implemented")
+    χ = parent(X).braiding
+    m = diagonal_matrix(base_ring(X),[χ(g,h) for g in grading(X), h ∈ grading(Y)][:])
+    morphism(X⊗Y,Y⊗X, m)
 end
 
 #-----------------------------------------------------------------
@@ -283,7 +320,7 @@ function associator(X::GVSObject, Y::GVSObject, Z::GVSObject)
         m[j,j] = twist(x,y,z)
         j = j+1
     end
-    return Morphism(dom,cod,m)
+    return morphism(dom,cod,m)
 end
 
 #-----------------------------------------------------------------
@@ -313,7 +350,7 @@ function ev(V::GVSObject)
     elems = elements(base_group(V))
     twist = parent(V).twist
     m = [i == j ? inv(twist(g,inv(g),g)) : 0 for (i,g) ∈ zip(1:int_dim(V), V.grading), j ∈ 1:int_dim(V)][:]
-    Morphism(dom,cod, matrix(base_ring(V), reshape(m,int_dim(dom),1)))
+    morphism(dom,cod, matrix(base_ring(V), reshape(m,int_dim(dom),1)))
 end
 
 #-----------------------------------------------------------------
@@ -376,7 +413,7 @@ Return the forgetful functor $Vec_G \to Vec$.
 """
 function Forgetful(C::GradedVectorSpaces, D::VectorSpaces)
     obj_map = x -> X.V
-    mor_map = f -> Morphism(domain(f).V, codomain(f).V, f.m)
+    mor_map = f -> morphism(domain(f).V, codomain(f).V, f.m)
     return Forgetful(C,D,obj_map, mor_map)
 end
 
@@ -385,7 +422,7 @@ end
 
 # description
 # """
-# id(X::GVSObject) = Morphism(X,X,one(matrix_space(base_ring(X),dim(X),dim(X))))
+# id(X::GVSObject) = morphism(X,X,one(matrix_space(base_ring(X),dim(X),dim(X))))
 
 #=----------------------------------------------------------
     Extension of scalars 
@@ -407,19 +444,19 @@ function extension_of_scalars(C::GradedVectorSpaces, L::Ring)
         f = L
     end
     
-    if C.twist === nothing 
+    if C.twist.m === nothing 
         c = trivial_3_cocycle(C.base_group, L)
     else
         c = Cocycle(C.base_group, Dict(g => f(k) for (g,k) ∈ C.twist.m))
     end
-    D = GradedVectorSpaces(L, C.base_group, c)
+    D = graded_vector_spaces(L, C.base_group, c)
 end
 
 function extension_of_scalars(X::GVSObject, L::Ring, parent = parent(X) ⊗ L)
-    GVSObject(parent, X.V, X.grading)
+    GVSObject(parent, X.V ⊗ L, X.grading)
 end
 
-function extension_of_scalars(m::GVSMorphism, L::Ring)
+function extension_of_scalars(m::VectorSpaceMorphism, L::Ring)
     
     K = base_ring(m)
     if K != QQ && characteristic(K) == 0 
@@ -437,7 +474,7 @@ function extension_of_scalars(m::GVSMorphism, L::Ring)
     end
 
     mat = matrix(L, size(matrix(m))..., f.(collect(matrix(m))))
-    Morphism(domain(m)⊗L, codomain(m)⊗L, mat)
+    morphism(domain(m)⊗L, codomain(m)⊗L, mat)
 end
 #-----------------------------------------------------------------
 #   Pretty Printing

@@ -16,21 +16,6 @@ mutable struct SixJCategory <: Category
     one::Vector{Int}
     name::String
     
-    function SixJCategory(F::Ring, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1,1,:])])
-        C = new(F, length(mult[1,1,:]), names)
-        set_tensor_product!(C,mult)
-        set_spherical!(C, [F(1) for _ ∈ names])
-                #C.ass = [id(⊗(X,Y,Z)) for X ∈ simples(C), Y ∈ simples(C), Z ∈ simples(C)]
-                return C
-    end
-
-    function SixJCategory(F::Ring, names::Vector{String})
-        C = new(F,length(names), names)
-                set_spherical!(C, [F(1) for _ ∈ names])
-        
-        (C)
-        return C
-    end
 
     function SixJCategory()
         new()
@@ -55,10 +40,32 @@ end
 #   Constructors
 #-------------------------------------------------------------------------------
 
-#SixJCategory(x...) = SixJCategory(x...)
+#six_j_category(x...) = six_j_category(x...)
 
-Morphism(X::SixJObject, Y::SixJObject, m) = SixJMorphism(X,Y,m)
+morphism(X::SixJObject, Y::SixJObject, m) = SixJMorphism(X,Y,m)
 
+
+function six_j_category(F::Ring, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1,1,:])])
+    C = SixJCategory()
+    C.base_ring = F
+    C.simples = length(mult[1,1,:])
+    C.simples_names = names
+    set_tensor_product!(C,mult)
+    set_spherical!(C, [F(1) for _ ∈ names])
+    #C.ass = [id(⊗(X,Y,Z)) for X ∈ simples(C), Y ∈ simples(C), Z ∈ simples(C)]
+    return C
+end
+
+function six_j_category(F::Ring, names::Vector{String})
+    C = SixJCategory()
+    C.base_ring = F
+    C.simples = length(names)
+    C.simples_names = names
+    
+    set_spherical!(C, [F(1) for _ ∈ names])
+    
+    return C
+end
 #-------------------------------------------------------------------------------
 #   Setters/Getters
 #-------------------------------------------------------------------------------
@@ -132,7 +139,7 @@ function braiding(X::SixJObject, Y::SixJObject)
     if is_simple(X) && is_simple(Y)
         i = findfirst(e -> e != 0, X.components)
         j = findfirst(e -> e != 0, Y.components)
-        return Morphism(X⊗Y,Y⊗X, parent(X).braiding[i,j,:])
+        return morphism(X⊗Y,Y⊗X, parent(X).braiding[i,j,:])
     end
 
     simple_objects = simples(parent(X))
@@ -180,7 +187,7 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
         i = findfirst(e -> e ≠ 0, X.components)
         j = findfirst(e -> e ≠ 0, Y.components)
         k = findfirst(e -> e ≠ 0, Z.components)
-        return Morphism(dom,dom, C_associator[i,j,k,:])
+        return morphism(dom,dom, C_associator[i,j,k,:])
 
     end
 
@@ -244,7 +251,7 @@ end
         i = findfirst(e -> e ≠ 0, X.components)
         j = findfirst(e -> e ≠ 0, Y.components)
         k = findfirst(e -> e ≠ 0, Z.components)
-        return inv(Morphism(dom,dom, C_associator[i,j,k,:]))
+        return inv(morphism(dom,dom, C_associator[i,j,k,:]))
 
     end
 
@@ -346,7 +353,7 @@ function vertical_direct_sum(f::Vector{SixJMorphism})
 
     mats = [hcat([g.m[i] for g ∈ f]...) for i ∈ 1:C.simples]
 
-    Morphism(domain(f[1]), cod, mats)
+    morphism(domain(f[1]), cod, mats)
 end
 
 function horizontal_direct_sum(f::Vector{SixJMorphism})
@@ -357,7 +364,7 @@ function horizontal_direct_sum(f::Vector{SixJMorphism})
 
     mats = [vcat([g.m[i] for g ∈ f]...) for i ∈ 1:C.simples]
 
-    Morphism(dom, codomain(f[1]), mats)
+    morphism(dom, codomain(f[1]), mats)
 end
 
 function +(f::SixJMorphism, g::SixJMorphism)
@@ -419,7 +426,7 @@ function coev(X::SixJObject)
         # cod = X ⊗ dual(X)
         # n = matrices(zero_morphism(𝟙, cod))
         # n[1] = m
-        # return Morphism(𝟙, cod, n)
+        # return morphism(𝟙, cod, n)
     end
 
     C = parent(X)
@@ -453,7 +460,7 @@ function ev(X::SixJObject)
         # dom = dual(X) ⊗ X
         # n = matrices(zero_morphism(dom, 𝟙))
         # n[1] = m
-        # return Morphism(dom, 𝟙, n)
+        # return morphism(dom, 𝟙, n)
     end
 
     summands = [x^k for (x,k) ∈ decompose(X)]
@@ -478,7 +485,7 @@ function simple_objects_coev(X::SixJObject)
 
     return basis(Hom(one(C), cod))[1]
     #mats = [diagonal_matrix(F(1),n,m) for (n,m) ∈ zip(C.one, cod.components)]
-    #return Morphism(one(C), cod, mats)
+    #return morphism(one(C), cod, mats)
 end
 
 function simple_objects_ev(X::SixJObject)
@@ -491,7 +498,7 @@ function simple_objects_ev(X::SixJObject)
     if sum(X.components) == 0 return zero_morphism(X,one(C)) end
 
     #mats = [diagonal_matrix(F(1),n,m) for (n,m) ∈ zip(dom.components, C.one)]
-    #unscaled_ev = Morphism(dom, one(C), mats)
+    #unscaled_ev = morphism(dom, one(C), mats)
     unscaled_ev = basis(Hom(dom, one(C)))[1]
 
     factor = F((id(X)⊗unscaled_ev)∘associator(X,DX,X)∘(coev(X)⊗id(X)))
@@ -505,7 +512,7 @@ function spherical(X::SixJObject)
     F = base_ring(C)
     sp = C.spherical
     mats = [diagonal_matrix(θ, k) for (θ,k) ∈ zip(sp, X.components)]
-    return Morphism(X,X,mats)
+    return morphism(X,X,mats)
 end
 
 
@@ -648,10 +655,10 @@ end
 #         end
 #     end
 
-#     ix = Morphism(X,S, ix_mats)
-#     px = Morphism(S,X, px_mats)
-#     iy = Morphism(Y,S, iy_mats)
-#     py = Morphism(S,Y, py_mats)
+#     ix = morphism(X,S, ix_mats)
+#     px = morphism(S,X, px_mats)
+#     iy = morphism(Y,S, iy_mats)
+#     py = morphism(S,Y, py_mats)
 
 #     return S,[ix,iy],[px,py]
 # end
@@ -676,8 +683,8 @@ function direct_sum(X::SixJObject...)
             end
         end
     end
-    inc = [Morphism(x,S,i) for (x,i) ∈ zip(X,inc)]
-    proj = [Morphism(S,x,p) for (x,p) ∈ zip(X,proj)]
+    inc = [morphism(x,S,i) for (x,i) ∈ zip(X,inc)]
+    proj = [morphism(S,x,p) for (x,p) ∈ zip(X,proj)]
 
     return S, inc, proj
 end
@@ -704,7 +711,7 @@ function direct_sum(f::SixJMorphism, g::SixJMorphism)
         m[i] = [f.m[i] z1; z2 g.m[i]]
     end
 
-    return Morphism(dom,cod, m)
+    return morphism(dom,cod, m)
 end
 
 # function vertical_direct_sum(f::Vector{SixJMorphism})
@@ -716,7 +723,7 @@ end
 
 #     ms = matrices.(f)
 #     m = [hcat([n[i] for n ∈ ms]...) for i ∈ 1:parent(f[1]).simples]
-#     return Morphism(domain(f[1]), ⊕(codomain.(f)...), m)
+#     return morphism(domain(f[1]), ⊕(codomain.(f)...), m)
 # end
 
 # function horizontal_direct_sum(f::Vector{SixJMorphism})
@@ -727,7 +734,7 @@ end
 
 #     ms = matrices.(f)
 #     m = [vcat([n[i] for n ∈ ms]...) for i ∈ 1:parent(f[1]).simples]
-#     return Morphism(⊕(domain.(f)...), codomain(f[1]), m)
+#     return morphism(⊕(domain.(f)...), codomain(f[1]), m)
 # end
 
 
@@ -763,7 +770,7 @@ function kernel(f::SixJMorphism)
     
     ker = SixJObject(C,[number_of_rows(k) for k ∈ kernels])
 
-    return ker, Morphism(ker, domain(f), [m for m ∈ kernels])
+    return ker, morphism(ker, domain(f), [m for m ∈ kernels])
 end
 
 function cokernel(f::SixJMorphism)
@@ -773,20 +780,20 @@ function cokernel(f::SixJMorphism)
     
     coker = SixJObject(C,[number_of_columns(k) for k ∈ cokernels])
 
-    return coker, Morphism(codomain(f),coker, [m for m ∈ cokernels])
+    return coker, morphism(codomain(f),coker, [m for m ∈ cokernels])
 end
 
 
 function left_inverse(f::SixJMorphism)
-     inverses = [left_inverse(Morphism(m)) for m ∈ matrices(f)]
+     inverses = [left_inverse(morphism(m)) for m ∈ matrices(f)]
     mats = [matrix(m) for m ∈ inverses]
-    return Morphism(codomain(f), domain(f), mats)
+    return morphism(codomain(f), domain(f), mats)
 end
 
 function right_inverse(f::SixJMorphism)
-    inverses = [right_inverse(Morphism(m)) for m ∈ matrices(f)]
+    inverses = [right_inverse(morphism(m)) for m ∈ matrices(f)]
     mats = [matrix(m) for m ∈ inverses]
-    return Morphism(codomain(f), domain(f), mats)
+    return morphism(codomain(f), domain(f), mats)
 end
 
 
@@ -909,7 +916,7 @@ function extension_of_scalars(C::SixJCategory, L::Field)
     end
 
     try
-        D = SixJCategory(L, C.tensor_product, simples_names(C))
+        D = six_j_category(L, C.tensor_product, simples_names(C))
 
         if isdefined(C, :ass)
             D.ass = [matrix(L, size(a)..., f.(collect(a))) for a ∈ C.ass]
@@ -969,7 +976,7 @@ function extension_of_scalars(m::SixJMorphism, L::Field)
     try
 
         mats = [matrix(L, size(m)..., f.(collect(m))) for m ∈ matrices(m)] 
-        g = Morphism(domain(m) ⊗ L, codomain(m) ⊗ L, mats)
+        g = morphism(domain(m) ⊗ L, codomain(m) ⊗ L, mats)
 
         return g
     catch

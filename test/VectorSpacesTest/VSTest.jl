@@ -1,6 +1,6 @@
 
 m = matrix(QQ, [1 -1 1; -1 1 -1; 1 -1 1])
-f = Morphism(m)
+f = morphism(m)
 
 @testset "Objects" begin
     V = VectorSpaceObject(QQ, 2)

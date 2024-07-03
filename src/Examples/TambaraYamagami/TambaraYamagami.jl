@@ -1,18 +1,3 @@
-#=------------------------------------------------
-    Construct arbitrary Tambara-Yamagami fusion
-    categories.
-------------------------------------------------=#
-
-struct BilinearForm 
-    group::GAPGroup
-    base_ring::Field
-    root_of_unity::FieldElem
-    map::Dict
-end
-
-function (B::BilinearForm)(x::GroupElem, y::GroupElem) 
-    B.map[x*y]*inv(B.map[x])*inv(B.map[y])
-end
 
 #=-------------------------------------------------
     ToDO: Centers of graded fusion categories (2009). Gelaki, Naidu, Nikhshych
@@ -21,71 +6,71 @@ end
 
 """ 
 
-    TambaraYamagami(A::GAPGroup)
+    tambara_yamagami(A::GAPGroup)
 
 Construct ``TY(A,τ,χ)`` over ℚ̅ where ``τ = √|A|`` and ``χ`` is a generic non-degenerate bilinear form.  
 """
-function TambaraYamagami(A::GAPGroup) 
+function tambara_yamagami(A::GAPGroup) 
     m = Int(exponent(A))
     _, x = QQ[:x]
     K = splitting_field([x^m + 1, x^2 - 2])
-    TambaraYamagami(K, A)
+    tambara_yamagami(K, A)
 end
 
-function TambaraYamagami(A::Int64...)
-    TambaraYamagami(abelian_group(PcGroup, collect(A)))
+function tambara_yamagami(A::Int64...)
+    tambara_yamagami(abelian_group(PcGroup, collect(A)))
 end
 
-function TambaraYamagami(K::Ring, A::Int64...)
-    TambaraYamagami(K, abelian_group(PcGroup, collect(A)))
+function tambara_yamagami(K::Ring, A::Int64...)
+    tambara_yamagami(K, abelian_group(PcGroup, collect(A)))
 end
 
 
 """ 
 
-    TambaraYamagami(K::ring, A::GAPGroup)
+    tambara_yamagami(K::ring, A::GAPGroup)
 
 Construct ``TY(A,τ,χ)`` over ``K`` where ``τ = √|A|`` and ``χ`` is a generic non-degenerate bilinear form.  
 """
-function TambaraYamagami(K::Ring, A::GAPGroup) 
+function tambara_yamagami(K::Ring, A::GAPGroup) 
     # n = Int(order(A))     
     m = Int(exponent(A))
     sqrt_n = sqrt(K(Int(order(A))))
     χ = nondegenerate_bilinear_form(A, K)
-    TambaraYamagami(K,A,sqrt_n,χ)
+    tambara_yamagami(K,A,sqrt_n,χ)
 end
 
 """ 
 
-    TambaraYamagami(K::Ring, A::GAPGroup, τ::RingElem)
+    tambara_yamagami(K::Ring, A::GAPGroup, τ::RingElem)
 
 Construct ``TY(A,τ,χ)`` over ``K`` where ``χ`` is a generic non-degenerate bilinear form.  
 """
-function TambaraYamagami(K::Ring, A::GAPGroup, sqrt_n::RingElem) 
+function tambara_yamagami(K::Ring, A::GAPGroup, sqrt_n::RingElem) 
     χ = nondegenerate_bilinear_form(A, K)
-    TambaraYamagami(K,A,sqrt_n,χ)
+    tambara_yamagami(K,A,sqrt_n,χ)
 end
 
 """ 
 
-    TambaraYamagami(K::Ring, A::GAPGroup, τ::RingElem)
+    tambara_yamagami(K::Ring, A::GAPGroup, τ::RingElem)
 
 Construct ``TY(A,τ,χ)`` over ``K`` where ``τ = √|A|``.  
 """
-function TambaraYamagami(K::Ring, A::GAPGroup, χ::BilinearForm)
+function tambara_yamagami(K::Ring, A::GAPGroup, χ::BilinearForm)
     # n = Int(order(A))     
     # m = Int(exponent(A))
     sqrt_n = sqrt(K(Int(order(A))))
-    TambaraYamagami(K,A,sqrt_n,χ)
+    tambara_yamagami(K,A,sqrt_n,χ)
 end
 
 """ 
 
-    TambaraYamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
+    tambara_yamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
 
 Construct the Category ``TY(A,τ,χ)``. 
 """
-function TambaraYamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
+function tambara_yamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
     n = Int(order(A))
     @assert is_abelian(A)
     
@@ -100,7 +85,7 @@ function TambaraYamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
     end
     a = τ 
     if χ === nothing
-        χ = nondegenerate_bilinear_form(A, root_of_unity(K,m))
+        χ = nondegenerate_bilinear_form(A, K)
     end
 
     els = elements(A)
@@ -119,7 +104,7 @@ function TambaraYamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
 
     mult[n+1,n+1,:] = [[1 for i ∈ 1:n]; 0]
 
-    TY = SixJCategory(K, mult, [["a$i" for i ∈ 1:n]; "m"])
+    TY = six_j_category(K, mult, [["a$i" for i ∈ 1:n]; "m"])
 
     zero_mat = matrix(K,0,0,[])
     for i ∈ 1:n
@@ -132,8 +117,8 @@ function TambaraYamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
     set_one!(TY, [1; [0 for _ ∈ 1:n]])
     set_spherical!(TY, [K(1) for _ ∈ 1:n+1])
 
-    # Try to set a braiding. 
-    # Ref: https://arxiv.org/pdf/2010.00847v1.pdf (Thm 4.9)
+    #Try to set a braiding. 
+    #Ref: https://arxiv.org/pdf/2010.00847v1.pdf (Thm 4.9)
     # try 
     #     braid = Array{MatElem,3}(undef, n+1, n+1, n+1)
     #     q = x -> sqrt(χ(x,inv(x)))
@@ -157,6 +142,7 @@ function TambaraYamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
     return TY
 end
 
+@alias TY tambara_yamagami
 
 #=------------------------------------------------
     Calculation taken from 
@@ -183,6 +169,12 @@ function nondegenerate_bilinear_form(G::GAPGroup, K::Field)
     
 
     return BilinearForm(G,K,root_of_unity(K,M),images)
+end
+
+function trivial_bilinear_form(G::GAPGroup, K::Field)
+    @assert is_abelian(G)
+
+    BilinearForm(G,K,root_of_unity(K,2), Dict(x => one(K) for x ∈ G))
 end
 
 #-------------------------------------------------------------------------------
@@ -241,7 +233,7 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
     #F,ξ = cyclotomic_field(16, "ξ₁₆")
 
     a = sqrt_2 
-    C = SixJCategory(F,["𝟙", "χ", "X"])
+    C = six_j_category(F,["𝟙", "χ", "X"])
     M = zeros(Int,3,3,3)
 
     M[1,1,:] = [1,0,0]
@@ -266,7 +258,7 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
     set_spherical!(C, [F(1) for s ∈ simples(C)])
 
     
-    # C = TambaraYamagami(G)
+    # C = tambara_yamagami(G)
 
     # set_simples_name!(C,["𝟙","χ","X"])
 

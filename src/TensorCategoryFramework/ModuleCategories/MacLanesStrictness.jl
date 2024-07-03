@@ -30,7 +30,7 @@ module_structure(F::FusionModuleEndoFunctor) = F.module_structure
 
 morphism(f::FusionModuleTransformation) = f.m
 
-Morphism(X::FusionModuleEndoFunctor, Y::FusionModuleEndoFunctor, f::Morphism) = FusionModuleTransformation(X,Y,f)
+morphism(X::FusionModuleEndoFunctor, Y::FusionModuleEndoFunctor, f::Morphism) = FusionModuleTransformation(X,Y,f)
 #=----------------------------------------------------------
     Functionality 
 ----------------------------------------------------------=#    
@@ -76,20 +76,20 @@ function direct_sum(f::FusionModuleTransformation...)
     return FusionModuleTransformation(dom, cod, direct_sum(morphism.(f)...))
 end
 
-+(f::FusionModuleTransformation...) = Morphism(domain(f[1]), domain(f[1]), +(morphism.(f)...))
++(f::FusionModuleTransformation...) = morphism(domain(f[1]), domain(f[1]), +(morphism.(f)...))
 
-*(λ::FieldElem, f::FusionModuleTransformation) = Morphism(domain(f), codomain(f), λ * morphism(f))
+*(λ::FieldElem, f::FusionModuleTransformation) = morphism(domain(f), codomain(f), λ * morphism(f))
 
 function kernel(f::FusionModuleTransformation)
     K,k = kernel(morphism(f))
     K = FusionModuleEndoFunctor(K)
-    return K, Morphism(K, domain(f), k)
+    return K, morphism(K, domain(f), k)
 end
 
 function cokernel(f::FusionModuleTransformation)
     C,c = cokernel(morphism(f))
     C = FusionModuleEndoFunctor(C)
-    return C, Morphism(codomain(f), C, c)
+    return C, morphism(codomain(f), C, c)
 end
 
 function zero(C::FusionModuleEndoFunctors)

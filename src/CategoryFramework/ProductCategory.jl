@@ -38,17 +38,17 @@ product_object(X::Object...) = ProductObject{length(X)}(ProductCategory(parent.(
 
 Construct the product morphism in the product category
 """
-product_morphism(f::Morphism...) = Morphism(f...)
+product_morphism(f::Morphism...) = morphism(f...)
 
 ×(C::Category, D::Category) = ProductCategory(C,D)
 
-function Morphism(f::Morphism...)
+function morphism(f::Morphism...)
     dom = ProductObject(domain.(f)...)
     cod = ProductObject(codomain.(f)...)
     ProductMorphism{length(X)}(dom,cod,f)
 end
 
-function Morphism(X::ProductObject{N}, Y::ProductObject{N}, f::NTuple{N,Morphism}) where N
+function morphism(X::ProductObject{N}, Y::ProductObject{N}, f::NTuple{N,Morphism}) where N
     ProductMorphism{N}(X,Y,f)
 end
 
@@ -158,7 +158,7 @@ function Hom(X::ProductObject{N}, Y::ProductObject{N}) where N
         for f ∈ Hom(X[i], Y[i])
             m_tuple = [zero_morphism(x,y) for (x,y) ∈ zip(X.factors, Y.factors)]
             m_tuple[i] = f
-            basis = [basis; Morphism(X,Y,Tuple(m_tuple))]
+            basis = [basis; morphism(X,Y,Tuple(m_tuple))]
         end
     end
     return HomSpace(X,Y,basis)

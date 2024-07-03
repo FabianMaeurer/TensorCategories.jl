@@ -9,7 +9,7 @@ function E6subfactor()
     r2 = sqrt(K(2))
     ξ = root_of_unity(K,24)
     i = sqrt(K(-1))
-    E6 = SixJCategory(K,["𝟙","x","y"])
+    E6 = six_j_category(K,["𝟙","x","y"])
 
     mult = Array{Int,3}(undef,3,3,3)
     mult[1,1,:] = [1,0,0]

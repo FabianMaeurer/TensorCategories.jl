@@ -5,13 +5,15 @@ isequal(f::Morphism, g::Morphism) = f == g
     Constructors 
 ----------------------------------------------------------=##
 
-function Morphism(X::T, Y::T, m...) where T <: Object 
+function morphism(X::T, Y::T, m...) where T <: Object 
     morphism_type(parent(X))(X,Y,m...)
 end
 
 #---------------------------------------------------------
 #   Direct Sums, Products, Coproducts
 #---------------------------------------------------------
+
+direct_sum(X::Vector{<:Object}) = direct_sum(X...)
 
 function ⊕(X::T,Y::T) where {T <: Object}
     return direct_sum(X,Y)[1]
@@ -107,6 +109,7 @@ Return the direct sum Object and arrays containing the injection and projection
 morphisms.
 """
 
+⊕(X::Vector{<:Object}) = direct_sum(X...)[1]
 ⊕(X::Object...) = direct_sum(X...)[1]
 
 ⊕(X::Morphism...) = direct_sum(X...)
@@ -178,6 +181,11 @@ compose(f::T...) where T <: Morphism = reduce(compose, f)
 getindex(C::Category, x::Int) = simples(C)[x]
 getindex(C::Category, x::Vector{Int}) = [C[i] for i ∈ x]
 
+function getindex(C::Category, x::Int...) 
+    S = simples(C)
+    direct_sum([S[i] for i ∈ x])[1]
+end
+
 #-------------------------------------------------------
 # Hom Spaces
 #-------------------------------------------------------
@@ -247,11 +255,11 @@ end
 ----------------------------------------------------------=#
 
 
-*(k, f::Morphism) = Morphism(domain(f), codomain(f), k*morphism(f))
+*(k, f::Morphism) = morphism(domain(f), codomain(f), k*morphism(f))
 
-+(f::T, g::T) where T <: Morphism = Morphism(domain(f), codomain(g), morphism(f) + morphism(g))
++(f::T, g::T) where T <: Morphism = morphism(domain(f), codomain(g), morphism(f) + morphism(g))
 
-compose(f::T, g::T) where T <: Morphism = Morphism(domain(f), codomain(g), compose(morphism(f), morphism(g)))
+compose(f::T, g::T) where T <: Morphism = morphism(domain(f), codomain(g), compose(morphism(f), morphism(g)))
 
 function matrix(f::Morphism) 
     try 

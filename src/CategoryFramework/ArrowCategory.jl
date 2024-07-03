@@ -35,11 +35,11 @@ left(f::ArrowMorphism) = f.left
 right(f::ArrowMorphism) = f.right
 
 function compose(f::ArrowMorphism...)
-    Morphism(domain(f[1]), codomain(f[end]), compose(left.(f)...), compose(right.(f)...))
+    morphism(domain(f[1]), codomain(f[end]), compose(left.(f)...), compose(right.(f)...))
 end
 
 function id(X::ArrowObject) 
-    Morphism(X,X, id(domain(X)), id(codomain(X)))
+    morphism(X,X, id(domain(X)), id(codomain(X)))
 end
 
 #=----------------------------------------------------------
@@ -69,15 +69,15 @@ function direct_sum(f::ArrowMorphism...)
     left = direct_sum([g.left for g ∈ f])
     right = direct_sum([g.right for g ∈ f])
 
-    return Morphism(dom, cod, left, right)
+    return morphism(dom, cod, left, right)
 end
 
 function *(λ, f::ArrowMorphism)
-    Morphism(domain(f),codomain(f), λ * f.left, λ * f.right)
+    morphism(domain(f),codomain(f), λ * f.left, λ * f.right)
 end
 
 function +(f::ArrowMorphism, g::ArrowMorphism)
-    Morphism(domain(f), codomain(f), f.left + g.left, f.right + g.right)
+    morphism(domain(f), codomain(f), f.left + g.left, f.right + g.right)
 end
 
 function kernel(f::ArrowMorphism)
@@ -85,7 +85,7 @@ function kernel(f::ArrowMorphism)
     _, k_right = kernel(f.right)
 
     K = ArrowObject(parent(f), left_inverse(k_right) ∘ morphism(domain(f)) ∘ k_left)
-    incl = Morphism(K, domain(f), k_left, k_right)
+    incl = morphism(K, domain(f), k_left, k_right)
 
     return K, incl
 end
@@ -95,7 +95,7 @@ function cokernel(f::ArrowMorphism)
     _, c_right = cokernel(f.right)
 
     C = ArrowObject(parent(f), c_right ∘ morphism(codomain(f)) ∘ right_inverse(c_left))
-    proj = Morphism(codomain(f), C, c_left, c_right)
+    proj = morphism(codomain(f), C, c_left, c_right)
 
     return C, proj
 end
@@ -145,7 +145,7 @@ end
 #         return false, nothing
 #     end
 
-#     return true, Morphism(X,Y, )
+#     return true, morphism(X,Y, )
 #=----------------------------------------------------------
     Monoidal structure 
 ----------------------------------------------------------=#
@@ -166,7 +166,7 @@ function tensor_product(f::ArrowMorphism, g::ArrowMorphism)
     base = basis(Hom(domain(dom), domain(cod)))
 
     if length(base) == 0 
-        return Morphism(dom, cod, zero_morphism(domain(dom), domain(cod)), right(f)⊗right(g))
+        return morphism(dom, cod, zero_morphism(domain(dom), domain(cod)), right(f)⊗right(g))
     end
 
     _,(cx,cy) = pushout(morphism(cod_f) ⊗ id(domain(cod_g)), id(domain(cod_f)) ⊗ morphism(cod_g))
@@ -205,7 +205,7 @@ function tensor_product(f::ArrowMorphism, g::ArrowMorphism)
 
     l = sum(collect(s)[:] .* base)
     
-    Morphism(dom,cod, l, right(f) ⊗ right(g))
+    morphism(dom,cod, l, right(f) ⊗ right(g))
 end
 
 one(C::ArrowCategory) = ArrowObject(C, zero_morphism(zero(category(C)), one(category(C))))
@@ -214,7 +214,7 @@ function associator(X::ArrowObject, Y::ArrowObject, Z::ArrowObject)
     ass_right = associator(codomain.((X,Y,Z))...)
 
     
-    Morphism((X⊗Y)⊗Z, X⊗(Y⊗Z), ass_left, ass_right)
+    morphism((X⊗Y)⊗Z, X⊗(Y⊗Z), ass_left, ass_right)
 end
 #=----------------------------------------------------------
     Hom spaces 
@@ -263,7 +263,7 @@ function Hom(X::ArrowObject, Y::ArrowObject)
         B = [(sum(s[1:n] .* base_dom), sum(s[n+1:n+m] .* base_cod)) for s ∈ sols]
     end
 
-    B = ArrowMorphism[Morphism(X,Y, l, r) for (l,r) ∈ B]
+    B = ArrowMorphism[morphism(X,Y, l, r) for (l,r) ∈ B]
 
     return HomSpace(X,Y, unique_without_hash(B))
 end

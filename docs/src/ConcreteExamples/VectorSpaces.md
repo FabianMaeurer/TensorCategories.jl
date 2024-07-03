@@ -59,7 +59,7 @@ VSMorphism <: Morphism
 and constructed giving a domain, codomain and matrix element.
 
 ```@docs 
-Morphism(::VectorSpaceObject, ::VectorSpaceObject, ::MatElem)
+morphism(::VectorSpaceObject, ::VectorSpaceObject, ::MatElem)
 ```
 
 ## Graded Vector Spaces
@@ -74,7 +74,7 @@ and they are constructed in straightforward manner
 
 ```@example VS
 G = symmetric_group(6)
-VecG = GradedVectorSpaces(G)
+VecG = graded_vector_spaces(G)
 ```
 
 To add a non-trivial associator (twist) there is another constructor. 
@@ -107,7 +107,7 @@ GVSMorphism <: Morphism
 The constructor is given by 
 
 ```@docs
-Morphism(::GVSObject, ::GVSObject,::MatElem)
+morphism(::GVSObject, ::GVSObject,::MatElem)
 ```
 
 

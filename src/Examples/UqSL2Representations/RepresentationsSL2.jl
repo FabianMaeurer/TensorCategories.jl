@@ -18,15 +18,15 @@ struct UqSl2repMorphism <: Morphism
     m::AbstractVector
 end
 
-function Morphism(X::UqSl2rep, Y::UqSl2rep, m::AbstractArray)
+function morphism(X::UqSl2rep, Y::UqSl2rep, m::AbstractArray)
     UqSl2repMorphism(X,Y,m)
 end
 
-function Morphism(X::UqSl2rep, Y::UqSl2rep, m::Dict{Int, <:MatElem}) 
+function morphism(X::UqSl2rep, Y::UqSl2rep, m::Dict{Int, <:MatElem}) 
     UqSl2repMorphism(X,Y, sparsevec(m))
 end
 
-function Morphism(X::UqSl2rep, Y::UqSl2rep, ms::Pair{Int, <:MatElem}...) 
+function morphism(X::UqSl2rep, Y::UqSl2rep, ms::Pair{Int, <:MatElem}...) 
     UqSl2repMorphism(X,Y, Dict(ms...))
 end
 
@@ -54,6 +54,15 @@ function getindex(C::UqSl2Representations, k::Int)
     UqSl2rep(C,sparsevec([k+1],[1])) 
 end
 
+function getindex(C::UqSl2Representations, k::Int...) 
+    direct_sum([UqSl2rep(C,sparsevec([i+1],[1])) for i ∈ k])[1] 
+end
+
+function ==(X::UqSl2rep, Y::UqSl2rep)
+    parent(X) != parent(Y) && return false
+    findnz(X.components) == findnz(Y.components)
+end
+
 ==(f::UqSl2repMorphism, g::UqSl2repMorphism) = 
     domain(f) == domain(g) &&
     codomain(f) == codomain(g) &&
@@ -70,6 +79,7 @@ Return the first ``n`` simple objects of ``C``.
 function simples(C::UqSl2Representations, n::Int)
     return [C[i] for i ∈ 0:n-1]
 end
+
 #=----------------------------------------------------------
     Functionality 
 ----------------------------------------------------------=#
@@ -83,14 +93,14 @@ end
 function id(X::UqSl2rep)
     ind, vals = findnz(X.components)
     mats = sparsevec(ind, [diagonal_matrix(base_ring(X)(1), v) for v ∈ vals])
-    Morphism(X,X,mats)
+    morphism(X,X,mats)
 end
 
 function zero_morphism(X::UqSl2rep, Y::UqSl2rep)
     if X == Y == zero(parent(X)) 
-        return Morphism(X,Y, sparsevec(MatElem[]))
+        return morphism(X,Y, sparsevec(MatElem[]))
     end
-    return Morphism(X,Y, Dict(k => zero_matrix(MatElem, base_ring(X), X[k-1], Y[k-1]) for k ∈ findnz(X.components)[1] ∪ findnz(Y.components)[1]))
+    return morphism(X,Y, Dict(k => zero_matrix(MatElem, base_ring(X), X[k-1], Y[k-1]) for k ∈ findnz(X.components)[1] ∪ findnz(Y.components)[1]))
 end
 
 zero(C::UqSl2Representations) = UqSl2rep(C,sparsevec([]))
@@ -127,10 +137,10 @@ function direct_sum(X::UqSl2rep, Y::UqSl2rep)
         end
     end
 
-    ix = Morphism(X,S, ix_mats)
-    px = Morphism(S,X, px_mats)
-    iy = Morphism(Y,S, iy_mats)
-    py = Morphism(S,Y, py_mats)
+    ix = morphism(X,S, ix_mats)
+    px = morphism(S,X, px_mats)
+    iy = morphism(Y,S, iy_mats)
+    py = morphism(S,Y, py_mats)
 
     return S,[ix,iy],[px,py]
 end
@@ -147,24 +157,24 @@ function direct_sum(f::UqSl2repMorphism, g::UqSl2repMorphism)
     length(not_in_f) ≠ 0 ? push!(mats, not_in_f...) : nothing
     length(not_in_g) ≠ 0 ? push!(mats, not_in_g...) : nothing
 
-    return Morphism(dom,cod, mats)
+    return morphism(dom,cod, mats)
 end
 
 function *(λ, f::UqSl2repMorphism)
     ind, vals = findnz(f.m)
-    Morphism(domain(f), codomain(f), sparsevec(ind, λ .* vals))
+    morphism(domain(f), codomain(f), sparsevec(ind, λ .* vals))
 end
 
 function +(f::UqSl2repMorphism, g::UqSl2repMorphism)
     @assert domain(f) == domain(g) && codomain(f) == codomain(g)
     mats = Dict(i => f[i-1] + g[i-1] for i ∈ findnz(f.m)[1])
-    return Morphism(domain(f), codomain(f), mats)
+    return morphism(domain(f), codomain(f), mats)
 end
 
 function compose(f::UqSl2repMorphism, g::UqSl2repMorphism)
 
     mats = Dict(k => f[k-1]*g[k-1] for k ∈ findnz(f.m)[1] ∪ findnz(g.m)[1])
-    Morphism(domain(f), codomain(g), mats)
+    morphism(domain(f), codomain(g), mats)
 end
 
 function is_simple(X::UqSl2rep)
@@ -178,7 +188,7 @@ end
 
 function inv(f::UqSl2repMorphism)
     mats = Dict(i => inv(m) for (i,m) ∈ zip(findnz(f.m)...))
-    return Morphism(codomain(f), domain(f), sparsevec(mats))
+    return morphism(codomain(f), domain(f), sparsevec(mats))
 end
 
 #=----------------------------------------------------------
@@ -217,7 +227,7 @@ function tensor_product(f::UqSl2repMorphism, g::UqSl2repMorphism)
             m = zero_morphism(C[k]^(d1),C[k]^(d2)).m
             m[k+1] = A
             
-            h = h ⊕ Morphism(C[k]^(d1),C[k]^(d2), m)
+            h = h ⊕ morphism(C[k]^(d1),C[k]^(d2), m)
         end
     end
     return h
@@ -244,7 +254,7 @@ function simples_associator(C::UqSl2Representations, i::Int, j::Int, k::Int)
         push!(mats, w+1 => matrix(K,gr,gr,[tl_six_j_symbol(q,j,i,w,k,n,m) for m in li, n in lj]))
     end
     dom = C[i] ⊗ C[j] ⊗ C[k]
-    return Morphism(dom,dom,sparsevec(Dict(mats...)))
+    return morphism(dom,dom,sparsevec(Dict(mats...)))
 end
 
 """
@@ -337,7 +347,7 @@ function Hom(X::UqSl2rep, Y::UqSl2rep)
             next = next + 1
         end
     end
-    basis_mors = [Morphism(X,Y,m) for m ∈ basis]
+    basis_mors = [morphism(X,Y,m) for m ∈ basis]
     return HomSpace(X,Y,basis_mors)
 end
 #=----------------------------------------------------------

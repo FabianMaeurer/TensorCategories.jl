@@ -44,7 +44,7 @@ end
 
 NonStrictSixJCategory(x...) = NonStrictSixJCategory(x...)
 
-Morphism(X::NonStrictSixJObject, Y::NonStrictSixJObject, m::MatElem) = NonStrictSixJMorphism(X,Y,m)
+morphism(X::NonStrictSixJObject, Y::NonStrictSixJObject, m::MatElem) = NonStrictSixJMorphism(X,Y,m)
 
 
 #-------------------------------------------------------------------------------
@@ -102,11 +102,11 @@ function associator(X::NonStrictSixJObject, Y::NonStrictSixJObject, Z::NonStrict
             cod_index = findall(e -> e == i, cod.components)
             mat[cod_index, dom_index] = C.ass[X.components[1], Y.components[1], Z.components[1], i]
         end
-        ass = Morphism(NonStrictSixJObject(C, dom.components), NonStrictSixJObject(C, cod.components ), mat)
+        ass = morphism(NonStrictSixJObject(C, dom.components), NonStrictSixJObject(C, cod.components ), mat)
         return ass
     end
 
-    return  Morphism((X ⊗ Y) ⊗ Z, X ⊗ (Y ⊗ Z), diagonal_matrix([matrix(associator(C[i],C[j],C[k])) for k ∈ Z.components, j ∈ Y.components, i ∈ X.components][:]))
+    return  morphism((X ⊗ Y) ⊗ Z, X ⊗ (Y ⊗ Z), diagonal_matrix([matrix(associator(C[i],C[j],C[k])) for k ∈ Z.components, j ∈ Y.components, i ∈ X.components][:]))
 end
 
 
@@ -197,7 +197,7 @@ function coev(X::NonStrictSixJObject) where T
     mats = matrices(zero_morphism(one(C), X⊗DX))
     M = parent(mats[1])
     mats[1] = M(F.(m))
-    return Morphism(one(C), X⊗DX, mats)
+    return morphism(one(C), X⊗DX, mats)
 end
 
 function ev(X::NonStrictSixJObject)
@@ -229,7 +229,7 @@ function ev(X::NonStrictSixJObject)
     mats = matrices(zero_morphism(X⊗DX, one(C)))
     M = parent(mats[1])
     mats[1] = M(F.(m))
-    return Morphism(X⊗DX,one(C),mats)
+    return morphism(X⊗DX,one(C),mats)
 end
 
 
@@ -321,7 +321,7 @@ function tensor_product(f::NonStrictSixJMorphism, g::NonStrictSixJMorphism)
         mat = [mat; temp_mat]
     end
 
-    return Morphism(dom, cod, mat)
+    return morphism(dom, cod, mat)
  
 end
 
@@ -349,10 +349,10 @@ function direct_sum(X::NonStrictSixJObject, Y::NonStrictSixJObject)
         py_mat[length(X.components) + i,i] = 1
     end
 
-    ix = Morphism(X,S, ix_mat)
-    px = Morphism(S,X, px_mat)
-    iy = Morphism(Y,S, iy_mat)
-    py = Morphism(S,Y, py_mat)
+    ix = morphism(X,S, ix_mat)
+    px = morphism(S,X, px_mat)
+    iy = morphism(Y,S, iy_mat)
+    py = morphism(S,Y, py_mat)
 
     return S,[ix,iy],[px,py]
 end
@@ -361,7 +361,7 @@ function direct_sum(f::NonStrictSixJMorphism, g::NonStrictSixJMorphism)
     dom = domain(f) ⊕ domain(g)
     cod = codomain(f) ⊕ codomain(g)
     m = diagonal_matrix(f.m, g.m)
-    return Morphism(dom,cod,m)
+    return morphism(dom,cod,m)
 end
 
 
@@ -379,7 +379,7 @@ function is_isomorphic(X::NonStrictSixJObject, Y::NonStrictSixJObject)
     σ₁ = sortperm(X.components)
     σ₂ = sortperm(Y.components)
     permutation = permutation_matrix(F,σ₁)*inv(permutation_matrix(F,σ₂))
-        return true, Morphism(X,Y,permutation)
+        return true, morphism(X,Y,permutation)
     end
 end
 #-------------------------------------------------------------------------------
@@ -401,18 +401,18 @@ end
 
 function kernel(f::NonStrictSixJMorphism)
     C = parent(domain(f))
-    kernels = [kernel(Morphism(m)) for m ∈ f.m]
+    kernels = [kernel(morphism(m)) for m ∈ f.m]
     mats = [matrix(m) for (k,m) ∈ kernels]
     ker = NonStrictSixJObject(C,[dim(k) for (k,m) ∈ kernels])
 
-    return ker, Morphism(ker, domain(f), mats)
+    return ker, morphism(ker, domain(f), mats)
 end
 
 
 function left_inverse(f::NonStrictSixJMorphism)
-    inverses = [left_inverse(Morphism(m)) for m ∈ matrices(f)]
+    inverses = [left_inverse(morphism(m)) for m ∈ matrices(f)]
     mats = [matrix(m) for m ∈ inverses]
-    return Morphism(codomain(f), domain(f), mats)
+    return morphism(codomain(f), domain(f), mats)
 end
 
 #-------------------------------------------------------------------------------

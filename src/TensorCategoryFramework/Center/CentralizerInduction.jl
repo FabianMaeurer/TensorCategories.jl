@@ -105,7 +105,7 @@ function end_of_induction(X::Object, simpls::Vector{<:Object}, IX = relative_ind
 
     ind_B = [m ∘ induction_restriction(f, simpls) for f ∈ B]
 
-    ind_B = [Morphism(IX,IX, f) for f ∈ ind_B]
+    ind_B = [morphism(IX,IX, f) for f ∈ ind_B]
 
     return HomSpace(IX,IX,ind_B)
 end
@@ -130,7 +130,7 @@ function induction_right_adjunction(H::AbstractHomSpace, Y::CentralizerObject, I
     #     (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
     # ) for xi ∈ simples(parent(f))]
 
-    base = [Morphism(Y, IX, induction_restriction(f, simpls) ∘ vertical_direct_sum(ind_f)) for f ∈ H]
+    base = [morphism(Y, IX, induction_restriction(f, simpls) ∘ vertical_direct_sum(ind_f)) for f ∈ H]
 
     HomSpace(Y, IX, base)
 end
@@ -154,8 +154,8 @@ function induction_adjunction(H::AbstractHomSpace, Y::CentralizerObject, IX = re
     #     (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
     # ) for xi ∈ simples(parent(f))]
 
-    mors = [Morphism(IX, Y, horizontal_direct_sum(ind_f) ∘ induction_restriction(f,simpls)) for f ∈ H]
+    mors = [morphism(IX, Y, horizontal_direct_sum(ind_f) ∘ induction_restriction(f,simpls)) for f ∈ H]
 
     return HomSpace(IX, Y, mors)
-    # Morphism(IX,Y, horizontal_direct_sum([sqrt(dim(xi))*((ev(dual(xi)) ∘(spherical(xi)⊗id(dual(xi))))⊗id(object(IX))) ∘ (id(xi)⊗half_braiding(Y,dual(xi))) ∘ associator(xi,object(Y),dual(xi)) ∘ ((id(xi)⊗f)⊗id(dual(xi))) for xi in simples(parent(X))]))
+    # morphism(IX,Y, horizontal_direct_sum([sqrt(dim(xi))*((ev(dual(xi)) ∘(spherical(xi)⊗id(dual(xi))))⊗id(object(IX))) ∘ (id(xi)⊗half_braiding(Y,dual(xi))) ∘ associator(xi,object(Y),dual(xi)) ∘ ((id(xi)⊗f)⊗id(dual(xi))) for xi in simples(parent(X))]))
 end

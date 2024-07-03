@@ -170,3 +170,19 @@ end
 function show(io::IO, H::HomFunctor)
     print(io,"$(typeof(H.domain) == OppositeCategory ? "Contravariant" : "Covariant") Hom-functor in $(H.domain)")
 end
+
+#=------------------------------------------------
+    Construct arbitrary Tambara-Yamagami fusion
+    categories.
+------------------------------------------------=#
+
+struct BilinearForm 
+    group::GAPGroup
+    base_ring::Field
+    root_of_unity::FieldElem
+    map::Dict
+end
+
+function (B::BilinearForm)(x::GroupElem, y::GroupElem) 
+    B.map[x*y]*inv(B.map[x])*inv(B.map[y])
+end

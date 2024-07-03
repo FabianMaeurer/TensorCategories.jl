@@ -70,3 +70,18 @@ function print_sum(facs::Vector{T}, names::Vector{String}) where T <: Union{Int,
     end
     return str
 end
+
+
+#=----------------------------------------------------------
+    print module action 
+----------------------------------------------------------=#
+
+function print_module_action(M::T, names = nothing) where T <: Union{RightModuleCategory, LeftModuleCategory}
+    @assert is_semisimple(M)
+
+    simples_C = simples(category(M))
+    simples_M = simples(M)
+    names = names === nothing ? ["m$i" for i ∈ 1:length(simples_M)] : names
+
+    reshape(vcat([[print_sum(collect(r), names) for r ∈ eachrow(action_matrix(X,M))] for X ∈ simples_C]...), length(simples_C), length(simples_M))
+end

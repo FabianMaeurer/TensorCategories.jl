@@ -87,7 +87,7 @@ We can compute now the ``S``-matrix of for the representations.
 ```@example Ex
 G = symmetric_group(3)
 F = GF(5)
-Rep = RepresentationCategory(G,F)
+Rep = representation_category(F,G)
 
 smatrix(Rep)
 ```
