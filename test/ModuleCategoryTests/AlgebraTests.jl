@@ -19,5 +19,5 @@ I = Ising()
 
     algs2 = algebra_structures(I[1,3])
     @test all(is_algebra.(algs2))
-    @test all(!.(is_separable.(algs2)))
+    @test !any(is_separable.(algs2))
 end

@@ -2,16 +2,16 @@ using TensorCategories
 using Oscar,Test
 
 
-# @testset "Test Examples" begin
-#     include("VectorSpacesTest/VSTest.jl")
-#     include("GroupRepresentationTests/GroupRepresentationTests.jl")
-#     include("SixJCategoryTests/Examples.jl")
-#     include("UqSl2.jl")
-# end
+@testset "Test Examples" begin
+    include("VectorSpacesTest/VSTest.jl")
+    include("GroupRepresentationTests/GroupRepresentationTests.jl")
+    include("SixJCategoryTests/Examples.jl")
+    include("UqSl2.jl")
+end
 
 @testset "Test Center/Centralizer" begin
-    #include("CenterTests/InductionTest.jl")
-    #include("CenterTests/RepCenterTest.jl")
+    include("CenterTests/InductionTest.jl")
+    include("CenterTests/RepCenterTest.jl")
     include("CentralizerTests/CentralizerVec.jl")
 end
 

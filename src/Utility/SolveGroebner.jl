@@ -6,13 +6,15 @@ function recover_solutions(p::Tuple, K::Field)
     rs = roots(K,f)
     solutions = []
 
-    perm = sortperm(p.vars)
-    @show length(perm) == length(v) + 1
+    
+
     if length(p.lf_cfs) == 0
+        perm = sortperm(p.vars)
         for r ∈ rs
             solutions = [solutions; Tuple([[vi(r)*inv(g(r)) for vi ∈ v];r])[perm]]
         end
     else
+        perm = sortperm(p.vars[1:end-1])
         for r ∈ rs
             solutions = [solutions; Tuple([vi(r)*inv(g(r)) for vi ∈ v])[perm]]
         end

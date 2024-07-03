@@ -6,11 +6,11 @@ I = Ising()
 
 𝟙,χ,X = simples(I)
 
-A = separable_algebra_structures(𝟙 ⊕ χ)
+A = separable_algebra_structures(𝟙 ⊕ χ)[1]
 
-M1 = category_of_right_modules(𝟙 ⊕ χ)
+M1 = category_of_right_modules(A)
 
-Funcs = category_of_bimodules(𝟙 ⊕ χ)
+Funcs = category_of_bimodules(A)
 
 @testset "Modules in Ising" begin
     @test length(simples(M1)) == 3

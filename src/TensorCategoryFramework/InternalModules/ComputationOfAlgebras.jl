@@ -41,9 +41,6 @@ function _algebra_structures(structure_ideal::Function, X::Object, unit = Hom(on
 
     length(sols) == 0 && error("Algebras exist but non found")
 
-    @show length(gens(base_ring(I)))
-    @show length(sols[1])
-    
     ms = [sum(s .* mult_base) for s ∈ sols]
 
     [AlgebraObject(parent(X), X, m, unit) for m ∈ ms]
