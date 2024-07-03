@@ -28,7 +28,7 @@ CohSheaves <: MultiTensorCategory
 and can be constructed via
 
 ```@docs
-CohSheaves
+coherent_sheaves
 ```
 
 Morphisms are given by morphisms of representations of the stalks and are of type
@@ -74,7 +74,7 @@ ConvolutionCategory <: MultiTensorCategory
 and can be constructed by
 
 ```@docs
-ConvolutionCategory
+convolution_category
 ```
 
 Morphisms are just morphisms of coherent sheaves with the new tensor product.

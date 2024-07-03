@@ -24,11 +24,11 @@ end
 is_multitensor(::ConvolutionCategory) = true
 is_fusion(C::ConvolutionCategory) = mod(order(C.group),characteristic(base_ring(C))) != 0
 """
-    ConvolutionCategory(X::GSet, K::Field)
+    convolution_category( K::Field, X::GSet)
 
 Return the category of equivariant coherent sheaves on ``X`` with convolution product.
 """
-function convolution_category(X::GSet, K::Field)
+function convolution_category(K::Field, X::GSet)
     G = X.group
     sqX = gset(G,(x,g) -> Tuple(X.action_function(xi,g) for xi ∈ x), [(x,y) for x ∈ X.seeds, y ∈ X.seeds][:])
     cuX = gset(G,(x,g) -> Tuple(X.action_function(xi,g) for xi ∈ x), [(x,y,z) for x ∈ X.seeds, y ∈ X.seeds, z ∈ X.seeds][:])
@@ -46,17 +46,17 @@ function convolution_category(X::GSet, K::Field)
 end
 
 """
-    ConvolutionCategory(X, K::Field)
+    convolution_category(K::Field, X)
 
 Return the category of coherent sheaves on ``X`` with convolution product.
 """
-function convolution_category(X, K::Field)
+function convolution_category(K::Field, X)
     G = symmetric_group(1)
-    return ConvolutionCategory(gset(G,X), K)
+    return convolution_category(gset(G,X), K)
 end
 
-function convolution_category(X, G::GAPGroup, K::Field)
-    ConvolutionCategory(gset(G,X), K)
+function convolution_category(K::Field, G::GAPGroup, X)
+    convolution_category(gset(G,X), K)
 end
 
 morphism(D::ConvolutionObject, C::ConvolutionObject, m:: CohSheafMorphism) = ConvolutionMorphism(D,C,m)

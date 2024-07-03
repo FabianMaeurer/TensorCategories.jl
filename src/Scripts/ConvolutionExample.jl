@@ -13,7 +13,7 @@ end
 
 X = gset(G,act,Ω)
 
-Conv = ConvolutionCategory(X,F)
+Conv = convolution_category(F,X)
 
 e,triv,e21,e12,d,c = simples(Conv)
 
@@ -29,6 +29,6 @@ using Revise,JuCat, Oscar
     Ω = [i for i in 1:n+1]
     X = gset(G,Ω)
 
-    Conv = ConvolutionCategory(X,F)
+    Conv = convolution_category(F,X)
     A,f = groethendieck_ring(Conv)
 end

@@ -21,7 +21,7 @@ commutes for all ``Y,Z \in \mathcal C`` and ``\gamma_{\mathbb 1} = \mathrm{id}_X
 # Computing the Center
 
 The Drinfeld center can be computed explicitely for reasonably small
-fusion categories. Any fusion category implementing the corresponding 
+fusion categories using the algorithm described in [maurer2024computing](@cite). Any fusion category implementing the corresponding 
 interface is supported. 
 
 

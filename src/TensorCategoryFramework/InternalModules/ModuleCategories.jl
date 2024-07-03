@@ -83,13 +83,24 @@ end
     Getter/Setter 
 ----------------------------------------------------------=#
 
+@doc raw""" 
+
+    left_action(M::ModuleObject)
+
+Return the left action morphism ``A⊗M → M``
+"""
 function left_action(M::ModuleObject) 
     !isdefined(M, :left_action) && error("Not a left module")
 
     M.left_action
 end
 
+@doc raw""" 
 
+    right_action(M::ModuleObject)
+
+Return the right action morphism ``M⊗A → M``
+"""
 function right_action(M::ModuleObject)
     !isdefined(M, :right_action) && error("Not a right module")
 
@@ -157,26 +168,56 @@ morphism_type(C::BiModuleCategory) = ModuleMorphism{BiModuleObject}
     Constructors 
 ----------------------------------------------------------=#
 
+@doc raw""" 
+
+    left_module(A::AlgebraObject)
+
+Return ``A`` as the trivial left module
+"""
 function left_module(A::AlgebraObject)
     C = LeftModuleCategory(parent(A), A)
     LeftModuleObject(C, object(A), multiplication(A))
 end
 
+@doc raw""" 
+
+    right_module(A::AlgebraObject)
+
+Return ``A`` as the trivial right module
+"""
 function right_module(A::AlgebraObject)
     C = RightModuleCategory(parent(A), A)
     RightModuleObject(C, object(A), multiplication(A))
 end
 
+@doc raw""" 
+
+    bimodule(A::AlgebraObject)
+
+Return ``A`` as the trivial bimodule
+"""
 function bimodule(A::AlgebraObject)
     C = BiModuleCategory(parent(A), A,A)
     BiModuleObject(C, object(A), multiplication(A), multiplication(A))
 end
 
+@doc raw""" 
+
+    right_module(M::BiModuleObject)
+
+Return ``M`` as a right module forgetting the left module structure
+"""
 function right_module(M::BiModuleObject)
     C = RightModuleCategory(category(parent(M)), right_algebra(parent(M)))
     RightModuleObject(C, object(M), right_action(M))
 end
 
+@doc raw""" 
+
+    left_module(M::BiModuleObject)
+
+Return ``M`` as a left module forgetting the right module structure
+"""
 function left_module(M::BiModuleObject)
     C = LeftModuleCategory(category(parent(M)), left_algebra(parent(M)))
     LeftModuleObject(C, object(M), left_action(M))
@@ -292,6 +333,12 @@ end
     Free modules   
 ----------------------------------------------------------=#
 
+@doc raw""" 
+
+    free_left_module(X::Object, A::AlgebraObject)
+
+Return the free left module ``A⊗X``
+"""
 function free_left_module(X::Object, A::AlgebraObject, parent = LeftModuleCategory(parent(X), A))
     AA = object(A)
     M = AA ⊗ X
@@ -302,6 +349,12 @@ function free_left_module(X::Object, A::AlgebraObject, parent = LeftModuleCatego
     LeftModuleObject(parent, M, l)
 end
 
+@doc raw""" 
+
+    free_right_module(X::Object, A::AlgebraObject)
+
+Return the free right module ``X⊗A``
+"""
 function free_right_module(X::Object, A::AlgebraObject, parent = RightModuleCategory(parent(X), A))
     AA = object(A)
     M = X ⊗ AA
@@ -312,10 +365,22 @@ function free_right_module(X::Object, A::AlgebraObject, parent = RightModuleCate
     RightModuleObject(parent, M, l)
 end
 
+@doc raw""" 
+
+    free_bimodule(X::Object, A::AlgebraObject)
+
+Return the free ``A-A`` bimodule ``A⊗X⊗A``
+"""
 function free_bimodule(X::Object, A::AlgebraObject, parent = BiModuleCategory(parent(X), A, A))
     free_bimodule(X,A,A,parent)
 end
 
+@doc raw""" 
+
+    free_bimodule(X::Object, A::AlgebraObject, B::AlgebraObject)
+
+Return the free ``A-B`` bimodule ``A⊗X⊗B``
+"""
 function free_bimodule(X::Object, A::AlgebraObject, B::AlgebraObject, parent = BiModuleCategory(parent(X), A, B))
     AA = object(A)
     BB = object(B)
@@ -343,7 +408,13 @@ function free_bimodule(X::Object, A::AlgebraObject, B::AlgebraObject, parent = B
     BiModuleObject(parent, M, l, r)
 end
 
-function free_module(M::ModuleCategory, X::Object)
+@doc raw""" 
+
+    free_module(X::Object, M::ModuleCategory)
+
+Return the free module of ``X`` in ``M``
+"""
+function free_module(X::Object, M::ModuleCategory)
     if typeof(M) == LeftModuleCategory
         return free_left_module(X,left_algebra(M), M)
     elseif typeof(M) == RightModuleCategory
@@ -1056,18 +1127,42 @@ end
 is_semisimple(M::LeftModuleCategory) = is_separable(left_algebra(M))
 is_semisimple(M::RightModuleCategory) = is_separable(right_algebra(M))
 
+@doc raw""" 
+
+    category_of_right_modules(A::AlgebraObject)
+
+Return the category of right ``A`` modules in parent(A).
+"""
 function category_of_right_modules(A::AlgebraObject)
     M = RightModuleCategory(parent(object(A)), A)
 end
 
+@doc raw""" 
+
+    category_of_left_modules(A::AlgebraObject)
+
+Return the category of left ``A`` modules in parent(A)
+"""
 function category_of_left_modules(A::AlgebraObject)
     M = LeftModuleCategory(parent(object(A)), A)
 end
 
+@doc raw""" 
+
+    category_of_bimodules(A::AlgebraObject, B::AlgebraObject)
+
+Return the category of ``A-B`` bimodules in parent(A)
+"""
 function category_of_bimodules(A::AlgebraObject, B::AlgebraObject)
     M = BiModuleCategory(parent(object(A)), A,B)
 end
 
+@doc raw""" 
+
+    category_of_bimodules(A::AlgebraObject)
+
+Return the category of ``A-A`` bimodules in parent(A)
+"""
 function category_of_bimodules(A::AlgebraObject)
     category_of_bimodules(A,A)
 end
@@ -1079,7 +1174,7 @@ function simples(M::ModuleCategory)
 
     C = category(M)
 
-    free_objects = [free_module(M,s) for s ∈ simples(C)]
+    free_objects = [free_module(s,M) for s ∈ simples(C)]
 
     simpls = unique_simples(vcat([simple_subobjects(x) for x ∈ free_objects]...))
 

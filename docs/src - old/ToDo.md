@@ -37,7 +37,7 @@ using TensorCategories, Oscar
 G = symmetric_group(2)
 X = gset(G, [1,2,3])
 F = GF(5)
-Conv = ConvolutionCategory(X,F)
+Conv = convolution_category(F,X)
 
 R,f = grothendieck_ring(Conv)
 ```

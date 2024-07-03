@@ -53,7 +53,7 @@ Following the definition we need the following methods.
 - `one(C::YourCategory)::YourObject` returning the monoidal unit.
 - `associator(X::YourObject, Y::YourObject, Z::YourObject)`.
 
-# Rigidity
+## Rigidity
 
 Whenever there are objects which admit duals it is feasible to acces them.
 
@@ -69,6 +69,16 @@ left_dual(::Morphism)
 ```
 
 Note that `dual` will always call `left_dual`.
+
+## Checks
+
+To verify for oneself the pentagon and hexagon axioms can be checked.
+
+```@docs
+pentagon_axiom
+hexagon_axiom
+```
+
 
 
 

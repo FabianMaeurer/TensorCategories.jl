@@ -18,7 +18,7 @@ for ``a,b \in G``. The non-trivial associativity constraints are given by
 Those categories can be constructed with a generic symmetric bilinear form or with a custom bilinear form and over arbitrary fields.
 
 ```@docs
-TambaraYamagami
+tambara_yamagami
 ```
 
 Tambara-Yamagami categories are implemented as an instance of `SixJCategory` and hence all functionality follows from there.
@@ -53,7 +53,7 @@ In the Morita equivalence class of the Haagerup subfactor lie three categories. 
 We implement the category ``\mathcal H_3`` as an instance of `SixJCategory`. The other two will follow as soon as we know the proper ``6j``-symbols.
 
 ```@docs
-HaagerupH3
+haagerup_H3
 ```
 
 # Fusion Categories From Truncated Hecke Categories

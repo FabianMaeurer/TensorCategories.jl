@@ -31,7 +31,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     number_of_rows, number_of_columns, is_squarefree, is_commutative,
     gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra,
     radical, is_zero, minimal_submodules, representation_matrix, QQBarField,
-    is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars
+    is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module
 
 
 
@@ -103,16 +103,10 @@ export codomain
 export coefficients
 export coequilizer
 export coev 
-export CohSfHomSpace 
-export CohSheafMorphism 
-export CohSheafObject 
-export CohSheaves 
+export coherent_sheaves 
 export cokernel 
 export compose 
-export ConvHomSpace 
-export ConvolutionCategory 
-export ConvolutionMorphism 
-export ConvolutionObject 
+export convolution_category 
 export coproduct 
 export cyclic_group_3cocycle 
 export decompose 
@@ -149,6 +143,7 @@ export extension_of_scalars
 export factor 
 export free_bimodule
 export free_left_module
+export free_module
 export free_right_module
 export Fibonacci 
 export Forgetful 
@@ -370,7 +365,7 @@ export tr
 export trivial_3_cocylce 
 export twist
 export twisted_graded_vector_spaces
-export TwistedGradedVectorSpaces 
+export twisted_graded_vector_spaces 
 export twisted_group_algebra
 export unit
 export unitary_cocycle

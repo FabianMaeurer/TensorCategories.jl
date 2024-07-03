@@ -80,7 +80,7 @@ VecG = graded_vector_spaces(G)
 To add a non-trivial associator (twist) there is another constructor. 
 
 ```@docs
-TwistedGradedVectorSpaces
+twisted_graded_vector_spaces
 ```
 
 Graded vector spaces decompose into direct sums of vector spaces for each element in

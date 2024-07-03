@@ -2,20 +2,47 @@
     Find structures of Algebra objects in fiat categories 
 ----------------------------------------------------------=#
 
+@doc raw""" 
+
+    algebra_structures(X::Object)
+    algebra_structures(X::Object, unit::Morphism)
+
+Return a set of algebra objects over ``X``. An empty array is returned only if there are no algebra structures. If the algebr is not connected, i.e. ``Hom(𝟙,X) ≠ k``, then a unit should be provided.
+"""
 function algebra_structures(X::Object, unit = Hom(one(parent(X)), X)[1]; show_dimension = false)
     _algebra_structures(_algebra_structure_ideal, X, unit, show_dimension = show_dimension)
 end
 
+@doc raw""" 
+
+    separable_algebra_structures(X::Object)
+    separable_algebra_structures(X::Object, unit::Morphism)
+
+Return a set of separable algebra objects over ``X``. An empty array is returned only if there are no algebra structures. If the algebr is not connected, i.e. ``Hom(𝟙,X) ≠ k``, then a unit should be provided.
+"""
 function separable_algebra_structures(X::Object, unit = Hom(one(parent(X)), X)[1]; show_dimension = false)
     [A for A ∈ algebra_structures(X, unit, show_dimension = show_dimension) if is_separable(A)]
 end
 
+@doc raw""" 
 
+    commutative_algebra_structures(X::Object)
+    commutative_algebra_structures(X::Object, unit::Morphism)
+
+Return a set of commutative algebra objects over ``X``. An empty array is returned only if there are no algebra structures. If the algebr is not connected, i.e. ``Hom(𝟙,X) ≠ k``, then a unit should be provided.
+"""
 function commutative_algebra_structures(X::Object, unit = Hom(one(parent(X)), X)[1]; show_dimension = false)
 
     _algebra_structures(_commutative_algebra_structure_ideal, X, unit, show_dimension = show_dimension)
 end 
 
+@doc raw""" 
+
+    etale_algebra_structures(X::Object)
+    etale_algebra_structures(X::Object, unit::Morphism)
+
+Return a set of separable algebra objects over ``X``. An empty array is returned only if there are no algebra structures. If the algebr is not connected, i.e. ``Hom(𝟙,X) ≠ k``, then a unit should be provided.
+"""
 function etale_algebra_structures(X::Object, unit = Hom(one(parent(X)), X)[1]; show_dimension = false)
     [A for A ∈ commutative_algebra_structures(X, unit, show_dimension = show_dimension) if is_separable(A)]
 end

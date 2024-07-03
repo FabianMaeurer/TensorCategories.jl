@@ -46,7 +46,11 @@ makedocs(
         #     "ℤ₊-Rings" => "ZPlusRings.md"
         # ],
        #"Multitensor Category Interface" => "Multitensor.md",
-        "The Center Construction" => "Center.md",
+        "Categorical Constructions" => [
+            "The Drinfeld Center" => "Constructions/Center.md",
+            "The Drinfeld Centralizer" => "Constructions/Centralizer.md",
+            "Internal Module Categories" => "Constructions/ModuleCategories.md"
+        ],
         "References" => "References.md"
     ],
 )

@@ -23,7 +23,7 @@ using TensorCategories, Oscar;
 F = GF(5)
 G = symmetric_group(2)
 X = gset(G,[1,2,3])
-C = ConvolutionCategory(X,F)
+C = convolution_category(F,X)
 simples(C)
 grothendieck_ring(C)
 ```
