@@ -7,7 +7,7 @@
     reduce to a_{X,Xᵢ,Xⱼ} for simple objects Xᵢ
 ----------------------------------------------------------=#
 
-struct FusionModuleEndoFunctors :> Category
+struct FusionModuleEndoFunctors <: Category
     category::Category
 end
 

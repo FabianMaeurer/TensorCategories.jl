@@ -7,7 +7,7 @@ jobs:
       matrix:
         julia-version: ['1.9', '1.10']
         julia-arch: [x64]
-        os: [macOS-latest] # [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ubuntu-latest, macOS-latest] # [ubuntu-latest, windows-latest, macOS-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@latest
