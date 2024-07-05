@@ -24,7 +24,7 @@ makedocs(
                 "6j-Symbols" => "SixJCategories/SixJCategories.md"
             ],
             "Genericity" => "Interface/Generic.md",
-            "Basic Consttructions" => "Interface/BasicConstructions.md"
+            "Basic Constructions" => "Interface/BasicConstructions.md"
         ],
         "Examples" => [
             "Graded Vector Spaces" => "ConcreteExamples/VectorSpaces.md",

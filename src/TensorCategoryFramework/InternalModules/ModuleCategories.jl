@@ -689,6 +689,16 @@ function tr(f::ModuleMorphism{BiModuleObject})
     t * id(one(parent(f)))
 end
 
+function tr(f::ModuleMorphism{T}) where T <: Union{RightModuleObject, LeftModuleObject}
+    C = parent(f)
+    A = algebra(C)
+
+    d = dim(object(A))
+
+    t = base_ring(f)(tr(morphism(f)))*inv(d) 
+    t * id(free_module(one(category(C)), parent(f)))
+end
+
 #=----------------------------------------------------------
     Direct sum 
 ----------------------------------------------------------=#
@@ -1109,14 +1119,21 @@ end
 ----------------------------------------------------------=#
 
 function is_isomorphic(M::ModuleObject, N::ModuleObject)
-    if is_simple(M) && is_simple(N)
+    if is_semisimple(parent(M)) && is_simple(M) && is_simple(N)
         H = Hom(M,N)
         return int_dim(H) ≥ 1 ? (true, basis(Hom(M,N))[1]) : (false,nothing)
-    elseif int_dim(End(M)) != int_dim(End(N))
-        return false, nothing
-    else
-        error("not implemented yet")
     end
+    H = Hom(M,N)
+    
+    (int_dim(H) == 0 || !is_square(int_dim(H))) && return false
+    
+    f = H[1]
+
+    has_right_inverse(f) && has_left_inverse(f) && return true, f
+
+    int_dim(H) == 1 && return false, nothing
+
+    error("not implemented yet")
 end
 
 
@@ -1126,6 +1143,8 @@ end
 
 is_semisimple(M::LeftModuleCategory) = is_separable(left_algebra(M))
 is_semisimple(M::RightModuleCategory) = is_separable(right_algebra(M))
+
+# is_abelian(M::ModuleCategory) = is_abelian(category(M))
 
 @doc raw""" 
 
@@ -1172,6 +1191,10 @@ function simples(M::ModuleCategory)
         return M.simples
     end
 
+    if !is_semisimple(M)
+        return _non_semisimple_simples(M)
+    end
+
     C = category(M)
 
     free_objects = [free_module(s,M) for s ∈ simples(C)]
@@ -1181,6 +1204,22 @@ function simples(M::ModuleCategory)
     M.simples = simpls
 end
 
+
+function _non_semisimple_simples(M::ModuleCategory)
+    free_objects = [free_module(s,M) for s ∈ simples(category(M))]
+
+    simpls = unique_indecomposables(vcat([[v for (v,_) ∈ decompose(x)] for x ∈ free_objects]...))
+
+    others = vcat([basis(Hom(s,t)) for s ∈ simpls, t ∈ simpls][:]...)
+
+    simpls = unique_indecomposables(vcat(simpls, [image(f)[1] for f ∈ others]...))
+
+    ret = typeof(simpls[1])[]
+
+    error("todo")
+
+    M.simples = simpls[ind[1]]
+end
 #=----------------------------------------------------------
     action matrices 
 ----------------------------------------------------------=#

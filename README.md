@@ -2,7 +2,7 @@
 
 [![][docs-dev-img]][docs-dev-url][![][ga-img]][ga-url] [![][codecov_img]][codecov_url]
 
-TensorCategories is a package under development with the intention to provide a framework as well a examples for computations in the realm of categories.
+TensorCategories is a package under development with the intention to provide a framework as well as examples for computations in the realm of categories.
 
 ## Installation
 
@@ -16,7 +16,7 @@ julia> Pkg.add("TensorCategories")
 
 ## Usage
 
-TensorCategories relies on the algebraic structures from the [OSCAR-System](https://github.com/oscar-system/Oscar.jl). Here a minimal usage Example.
+TensorCategories relies on the algebraic structures from the [OSCAR-System](https://github.com/oscar-system/Oscar.jl). Here is a minimal usage Example.
 
 ```@repl
 using TensorCategories, Oscar;

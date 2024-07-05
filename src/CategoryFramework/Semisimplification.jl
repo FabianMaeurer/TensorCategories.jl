@@ -60,6 +60,7 @@ end
 is_semisimple(C::Semisimplification) = true
 is_multiring(C::Semisimplification) = is_multiring(category(C))
 is_multifusion(C::Semisimplification) = is_multiring(category(C)) && is_rigid(category(C))
+is_abelian(C::Semisimplification) = is_abelian(category(C))
 
 semisimplify(C::Category) = Semisimplification(C)
 semisimplify(X::Object) = SemisimplifiedObject(Semisimplification(parent(X)), X)

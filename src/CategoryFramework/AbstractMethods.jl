@@ -188,23 +188,46 @@ function decompose_by_endomorphism_ring(X::Object, E = End(X))
 
     _images = [image(f)[1] for f ∈ idems]
 
-    # Check for matrix algebras
-    images = hcat([simple_subobjects(i, End(i), true) for i ∈ _images]...)
     
+    if is_semisimple(parent(X))
+         # Check for matrix algebras
+        tuples = Tuple{typeof(X), Int}[]
 
-    tuples = Tuple{typeof(X), Int}[]
-
-    for Y ∈ images
-        i = findfirst(Z -> is_isomorphic(Z[1],Y)[1], tuples)
-        k = div(int_dim(Hom(Y,X)), int_dim(End(Y)))
-        if i === nothing
-            push!(tuples, (Y,k))
-        else
-            tuples[i] = (Y, tuples[i][2] + k)
+        images = hcat([simple_subobjects(i, End(i), true) for i ∈ _images]...)
+        for Y ∈ images
+            i = findfirst(Z -> is_isomorphic(Z[1],Y)[1], tuples)
+            k = div(int_dim(Hom(Y,X)), int_dim(End(Y)))
+            if i === nothing
+                push!(tuples, (Y,k))
+            else
+                tuples[i] = (Y, tuples[i][2] + k)
+            end
         end
+        return tuples
+    elseif characteristic(base_ring(X)) == 0
+        tuples = Tuple{SemisimplifiedObject, Int}[]
+
+        _images = semisimplify.(_images)
+        SX = semisimplify(X)
+        images = hcat([simple_subobjects(i, End(i), true) for i ∈ _images]...)
+        for Y ∈ images
+            i = findfirst(Z -> is_isomorphic(Z[1], Y)[1], tuples)
+            k = div(int_dim(Hom(Y,SX)), int_dim(End(Y)))
+            if i === nothing
+                push!(tuples, (Y,k))
+            else
+                tuples[i] = (Y, tuples[i][2] + k)
+            end
+        end
+        return Tuple{typeof(X),Int}[(object(x),k) for (x,k) ∈ tuples]
+    else
+        error("Not implemented")
     end
 
-    return tuples
+
+
+
+    
 end
 
 
@@ -538,7 +561,7 @@ function unique_indecomposables(simples::Vector{<:Object})
     end
     uniques = simples[1:1]
     for s ∈ simples[2:end]
-        if *([!is_isomorphic(s,u)[1] for u ∈ uniques]...)
+        if all([!is_isomorphic(s,u)[1] for u ∈ uniques])
             uniques = [uniques; s]
         end
     end
@@ -659,6 +682,15 @@ end
 function has_right_inverse(f::Morphism)
     try 
         right_inverse(f)
+        true
+    catch
+        false
+    end
+end
+
+function has_left_inverse(f::Morphism)
+    try 
+        left_inverse(f)
         true
     catch
         false

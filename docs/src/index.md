@@ -14,7 +14,7 @@ julia> Pkg.add(url = "https://github.com/FabianMaeurer/TensorCategories.jl")
 
 ## Usage
 
-To use TensorCategories the structures from the [OSCAR-System](https://github.com/oscar-system/Oscar.jl) are required. Here a minimal usage example.
+To use TensorCategories the structures from the [OSCAR-System](https://github.com/oscar-system/Oscar.jl) are required. Here is a minimal usage example.
 
 ```@repl
 using TensorCategories;
