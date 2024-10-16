@@ -3,7 +3,7 @@ module TensorCategories
 import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show,div, rand, split
 
 import Oscar.AbstractAlgebra.Generic: Poly
-import Oscar.Hecke: RelSimpleNumField, regular_module
+import Oscar.Hecke: RelSimpleNumField, regular_module, meataxe
 import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAlgebra, AssociativeAlgebraElem,
     cyclotomic_field, Fac, Field, FieldElem, FinField, GF, GAP, GAPGroup,
     GAPGroupHomomorphism, GL, GSet, GroupElem, Hecke.AbstractAssociativeAlgebra,
@@ -31,7 +31,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     number_of_rows, number_of_columns, is_squarefree, is_commutative,
     gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra,
     radical, is_zero, minimal_submodules, representation_matrix, QQBarField,
-    is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module
+    is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module, perm
 
 
 
@@ -252,6 +252,9 @@ export left_trace
 export load 
 export matrices 
 export matrix 
+export meataxe
+export minimal_subquotients
+export minimal_subquotients_with_multiplicity
 export ModuleCategory
 export ModuleMorphism
 export ModuleObject
@@ -385,6 +388,7 @@ export ZPlusRingElem, ℕRingElem, ℤ₊RingElem
 
 include("CategoryFramework/AbstractTypes.jl")
 include("CategoryFramework/AbstractMethods.jl")
+include("CategoryFramework/DecompositionInAbelianCategories.jl")
 include("CategoryFramework/FrameworkChecks.jl")
 include("CategoryFramework/ProductCategory.jl")
 include("CategoryFramework/Fallbacks.jl")
@@ -436,6 +440,7 @@ include("TensorCategoryFramework/Center/CenterChecks.jl")
 include("TensorCategoryFramework/InternalModules/InternalAlgebras.jl")
 include("TensorCategoryFramework/InternalModules/ModuleCategories.jl")
 include("TensorCategoryFramework/InternalModules/ComputationOfAlgebras.jl")
+include("TensorCategoryFramework/InternalModules/MeatAxe.jl")
 include("TensorCategoryFramework/ModuleCategories/MonadModules.jl")
 
 include("DecategorifiedFramework/multiplication_table.jl")

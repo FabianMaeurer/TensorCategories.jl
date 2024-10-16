@@ -35,8 +35,31 @@ function pretty_print_decomposable(m::Object,indecomposables::Vector{<:Object},n
     return str
 end
 
+function pretty_print_decomposable(facs::Vector{Int}, names::Vector{String})
+    
+    str = ""
+    
+    for (k,s) ∈ zip(facs, names)
+        
+        k == 0 && continue
+        str = length(str) > 0 ? str*" ⊕ "* (k > 1 ? "$k⋅$(s)" : "$(s)") : (k > 1 ? str*"$k⋅$(s)" : str*"$(s)")
+    end
+    return str
+end
 
 function coefficients(X::T, indecomposables::Vector{T} = indecomposables(parent(X))) where {T <: Object}
+    if is_semisimple(parent(X))
+        return fusion_coefficients(X, indecomposables)
+    else
+        return _coefficients(X, indecomposables)
+    end
+end
+
+function fusion_coefficients(X::T, simpls::Vector{T} = simples(parent(X))) where {T <: Object}
+    [int_dim(Hom(s,X)) for s ∈ simpls]
+end
+
+function _coefficients(X::T, indecomposables::Vector{T} = indecomposables(parent(X))) where {T <: Object}
     facs = decompose(X)
     coeffs = [0 for i ∈ 1:length(indecomposables)]
     for (x,k) ∈ facs
@@ -84,4 +107,35 @@ function print_module_action(M::T, names = nothing) where T <: Union{RightModule
     names = names === nothing ? ["m$i" for i ∈ 1:length(simples_M)] : names
 
     reshape(vcat([[print_sum(collect(r), names) for r ∈ eachrow(action_matrix(X,M))] for X ∈ simples_C]...), length(simples_C), length(simples_M))
+end
+
+#=----------------------------------------------------------
+    Live progress 
+----------------------------------------------------------=#
+
+function multiplication_table_with_progress(C::Category, indecs::Vector{<:Object} = indecomposables(C); symmetric::Bool = false, names = simples_names(C))
+
+    n = length(indecs)
+    m = Array{Int}(undef,n,n,n)
+
+    displ = ["⋅" for _ ∈ 1:n, _ ∈ 1:n]
+
+    for i ∈ 1:n, j ∈ (symmetric ? i : 1):n
+        m[i,j,:] = coefficients(indecs[i] ⊗ indecs[j])
+        if symmetric m[j,i] = m[i,j] end
+
+        displ[i,j] = pretty_print_decomposable(m[i,j,:], names)
+        if symmetric displ[j,i] = displ[i,j] end
+
+        if i*j != 1 
+            for _ ∈ 1:n+1
+                print("\e[A\e[2K")
+            end
+        end
+
+        display(displ)
+    end
+
+    println("")
+    return m
 end

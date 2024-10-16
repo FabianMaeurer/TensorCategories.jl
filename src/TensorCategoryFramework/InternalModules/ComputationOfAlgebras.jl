@@ -55,7 +55,7 @@ function _algebra_structures(structure_ideal::Function, X::Object, unit = Hom(on
     d = dim(I)
 
     show_dimension && @info "Dimension of solution set: $d"
-
+    
     if d < 0 
         return AlgebraObject[]
     elseif d == 0

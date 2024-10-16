@@ -468,55 +468,6 @@ end
 #     _indecomposable_subobjects(X,E)
 # end
 
-function simple_subobjects(X::Object, E = End(X), is_simple = false)
-    if base_ring(X) == QQBar
-        return simple_subobjects_over_qqbar(X,E)
-    end
-
-    if length(basis(E)) == 1
-        return [X]
-    end
-
-    if is_simple && is_squarefree(dim(E)) 
-        #A simple algebra of squarefree dimension is a division algebra
-        return [X]
-    end
-
-    R = endomorphism_ring(X,E)
-
-    i = findfirst(f -> !is_irreducible(f), minpoly.(basis(E)))
-
-    if !is_simple && is_semisimple(endomorphism_ring(X,E))
-        img = [image(i)[1] for i ∈ central_primitive_idempotents(E)]
-        return vcat([simple_subobjects(i, End(i), true) for i in img]...)
-    end
-
-    if i !== nothing && is_semisimple(R)
-        f = E[i]
-        l = roots(minpoly(f))[1]
-        K = kernel(f - l*id(X))[1]
-        I = image(f - l*id(X))[1]
-        K = simple_subobjects(K, End(K), true)
-        I = simple_subobjects(I, End(I), true)
-
-        return unique_simples([K;I])
-    end
-
-
-    M = regular_module(R)
-    M.action_of_gens = [representation_matrix(g) for g ∈ gens(R)]
-  
-    submods = minimal_submodules(M)
-    fi = [sum(collect(s)[1,:] .* basis(E)) for s in submods]
-
-    unique_simples([image(f)[1] for f ∈ fi])
-    # indecomposables = indecomposable_subobjects(X, E)
-    # if is_semisimple(parent(X))
-    #     return indecomposables
-    # else
-    #     return indecomposables[is_simple.(indecomposables)]
-    # end
-end
 
 is_isomorphic_simples(X::Object, Y::Object) = is_isomorphic(X,Y)
 
@@ -692,6 +643,8 @@ zero_morphism(X::Object) = zero_morphism(X,X)
 zero_morphism(C::Category) = zero_morphism(zero(C))
 
 is_zero(f::Morphism) = f == zero_morphism(domain(f), codomain(f))
+
+is_zero(X::Object) = int_dim(End(X)) == 0
 
 function ==(f::Morphism, x::T) where T <: Union{RingElem, Int} 
     if x == 0 

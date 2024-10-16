@@ -142,4 +142,4 @@ function verlinde_category(K::Ring, m::Int, l::Int = 1, k::Int = 1)
    	return C
 end
 
-verlinde_category(m::Int, l::Int = 1, k::Int = 1) = verlinde_category(cyclotomic_field(2*m+2)[1],m, l, k)
+verlinde_category(m::Int, l::Int = 1, k::Int = 1) = verlinde_category(cyclotomic_field(4*m+4)[1],m, l, k)

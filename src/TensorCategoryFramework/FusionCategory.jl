@@ -148,13 +148,17 @@ function braiding(X::SixJObject, Y::SixJObject)
     X_summands = vcat([[s for l ∈ 1:X.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
     Y_summands = vcat([[s for l ∈ 1:Y.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
 
-    braid = direct_sum([braiding(x,y) for x ∈ X_summands, y ∈ Y_summands][:])
+    braid = direct_sum([braiding(x,y) for y ∈ Y_summands, x ∈ X_summands][:])
 
-    return braid 
+    distr_before = compose(
+        distribute_left(X_summands,Y), 
+        direct_sum([distribute_right(x,Y_summands) for x ∈ X_summands]) 
+    )
+    distr_after = compose( 
+        distribute_right(Y,X_summands),
+        direct_sum([distribute_left(Y_summands, x) for x ∈ X_summands])
+    )
 
-    distr_before = direct_sum([distribute_right(x,Y_summands) for x ∈ X_summands]) ∘ distribute_left(X_summands,Y) 
-    distr_after = direct_sum([distribute_left(X_summands,Y) for y ∈ Y_summands]) ∘ distribute_right(Y_summands,X)
-    
     return inv(distr_after) ∘ braid ∘ distr_before
 end
 
@@ -308,6 +312,7 @@ end
 #-------------------------------------------------------------------------------
 is_semisimple(::SixJCategory) = true
 is_multiring(::SixJCategory) = true
+is_braided(C::SixJCategory) = isdefined(C, :braiding)
 
 function is_multifusion(C::SixJCategory)
     try 

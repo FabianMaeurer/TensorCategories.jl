@@ -51,6 +51,10 @@ function is_separable(A::AlgebraObject)
     has_right_inverse(m)
 end
 
+function is_commutative(A::AlgebraObject)
+    m = multiplication(A)
+    m == m ∘ braiding(object(A),object(A))
+end
 #=----------------------------------------------------------
     Group Algebras
 ----------------------------------------------------------=#

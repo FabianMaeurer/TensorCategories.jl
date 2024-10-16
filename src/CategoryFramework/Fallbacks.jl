@@ -119,7 +119,8 @@ morphisms.
 
 Return the tensor product object.
 """
-⊗(X::Object...) = tensor_product(X...)
+⊗(X::T...) where T <: Object = tensor_product(X...)
+⊗(X::Object, Y::Object) = tensor_product(X,Y)
 
 ⊗(C::Category, K::Field) = extension_of_scalars(C,K)
 ⊗(X::Object, K::Field) = extension_of_scalars(X,K)

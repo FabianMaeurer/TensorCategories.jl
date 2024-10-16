@@ -42,7 +42,7 @@ function six_j_category(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:
 end
 
 function six_j_symbols(C::Category, S = simples(C))
-    @assert is_multifusion(C)
+    @assert is_fusion(C)
 
     N = length(S)
     C_morphism_type = morphism_type(C)
@@ -68,7 +68,8 @@ function six_j_symbols(C::Category, S = simples(C))
 
             H_XY_V = if (XYV = (X⊗Y,V)) ∈ keys(homs) 
                         homs[XYV] 
-                    elseif !isempty([i,j] ∩ one_indices) && n ∈ [i,j] && (n ∉ one_indices || i == j)
+                    elseif (i ∈ one_indices && n == j) ||
+                            (j ∈ one_indices && n == i) 
                         push!(homs, XYV => [id(XYV[1])])[XYV]
                     else
                         push!(homs, XYV => basis(Hom(XYV[1], V)))[XYV]
@@ -76,7 +77,8 @@ function six_j_symbols(C::Category, S = simples(C))
 
             H_VZ_W = if (VZW = (V⊗Z,W)) ∈ keys(homs) 
                         homs[VZW] 
-                    elseif !isempty([n,k] ∩ one_indices) && l ∈ [n,k] && (l ∉ one_indices || n == k)
+                    elseif (n ∈ one_indices && l == k) ||
+                        (k ∈ one_indices && l == n) 
                         push!(homs, VZW => [id(VZW[1])])[VZW]
                     else
                         push!(homs, VZW => basis(Hom(VZW[1], W)))[VZW]
@@ -94,7 +96,8 @@ function six_j_symbols(C::Category, S = simples(C))
 
             H_YZ_V = if (YZV = (Y⊗Z,V)) ∈ keys(homs)
                         homs[YZV]
-                    elseif !isempty([j,k] ∩ one_indices) && n ∈ [j,k] && (n ∉ one_indices || j == k)
+                    elseif (j ∈ one_indices && n == k) ||
+                        (k ∈ one_indices && n == j) 
                         push!(homs, YZV => [id(YZV[1])])[YZV]
                     else
                         push!(homs, YZV => basis(Hom(YZV[1], V)))[YZV]
@@ -102,7 +105,8 @@ function six_j_symbols(C::Category, S = simples(C))
 
             H_XV_W = if (XVW = (X⊗V,W)) ∈ keys(homs)
                         homs[XVW]
-                    elseif !isempty([i,n] ∩ one_indices) && l ∈ [i,n] && (l ∉ one_indices || i == n)
+                    elseif (i ∈ one_indices && l == n) ||
+                        (n ∈ one_indices && l == i) 
                         push!(homs, XVW => [id(XVW[1])])[XVW]
                     else
                         push!(homs, XVW => basis(Hom(XVW[1], W)))[XVW]
@@ -114,9 +118,9 @@ function six_j_symbols(C::Category, S = simples(C))
         end
         
         # Express the asociator in the corresponding basis
-        a = inv_associator(X,Y,Z)
+        a = associator(X,Y,Z)
 
-        associator_XYZ_W = hcat([express_in_basis(f ∘ a, B_X_YZ_W) for f ∈ B_XY_Z_W]...)
+        associator_XYZ_W = hcat([express_in_basis(f ∘ a, B_XY_Z_W) for f ∈ B_X_YZ_W]...)
 
         ass[i,j,k,l] = matrix(F, length(B_X_YZ_W), length(B_XY_Z_W), associator_XYZ_W)
             

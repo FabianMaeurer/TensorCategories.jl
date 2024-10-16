@@ -6,23 +6,48 @@
 abstract type ModuleCategory <: Category end
 abstract type ModuleObject <: Object end
 
-struct LeftModuleObject <: ModuleObject
+@attributes mutable struct LeftModuleObject <: ModuleObject
     parent::ModuleCategory
     object::Object
     left_action::Morphism
+
+    function LeftModuleObject(C::ModuleCategory, X::Object, l::Morphism)
+        M = new()
+        M.parent = C
+        M.object = X
+        M.left_action = l
+        return M
+    end
 end
 
-struct RightModuleObject <: ModuleObject
+@attributes mutable struct RightModuleObject <: ModuleObject
     parent::ModuleCategory
     object::Object
     right_action::Morphism 
+
+    function RightModuleObject(C::ModuleCategory, X::Object, r::Morphism)
+        M = new()
+        M.parent = C
+        M.object = X
+        M.right_action = r
+        return M
+    end
 end
 
-struct BiModuleObject <: ModuleObject
+@attributes mutable struct BiModuleObject <: ModuleObject
     parent::ModuleCategory
     object::Object
     left_action::Morphism
     right_action::Morphism
+
+    function BiModuleObject(C::ModuleCategory, X::Object, l::Morphism, r::Morphism)
+        M = new()
+        M.parent = C
+        M.object = X
+        M.left_action = l
+        M.right_action = r
+        return M
+    end
 end
 
 mutable struct LeftModuleCategory <: ModuleCategory
@@ -222,6 +247,34 @@ function left_module(M::BiModuleObject)
     C = LeftModuleCategory(category(parent(M)), left_algebra(parent(M)))
     LeftModuleObject(C, object(M), left_action(M))
 end
+
+function bimodule(X::RightModuleObject)
+    M = parent(X)
+    C = category(M)
+    !is_braided(C) && error("No canonnical left module structure")
+
+    A = right_algebra(M)
+
+    !is_commutative(A) && error("Algebra is not commutative")
+
+    l = right_action(X) ∘ braiding(object(A), object(X))
+
+    M2 = BiModuleCategory(C,A,A)
+
+    BiModuleObject(M2, object(X), l, right_action(X))
+end
+
+
+function left_module(M::RightModuleObject)
+    A = algebra(parent(M))
+    @assert is_commutative(A)
+
+    LeftModuleObject(
+        category_of_left_modules(A), 
+        object(M), 
+        right_action(M) ∘ braiding(object(A), object(M))
+    )
+end
 #=----------------------------------------------------------
     Functionality 
 ----------------------------------------------------------=#
@@ -285,26 +338,26 @@ function cokernel(f::ModuleMorphism)
 end
 
 function left_module_cokernel(f::ModuleMorphism)
-    X = domain(f)
-    A = object(algebra(parent(X)))
-    l = left_action(X)
+    Y = codomain(f)
+    A = object(algebra(parent(Y)))
+    l = left_action(Y)
     C,c = cokernel(morphism(f))
     inv_c = right_inverse(c)
     coker_action = c ∘ l ∘ (id(A) ⊗ inv_c)
     coker = LeftModuleObject(parent(f), C, coker_action)
-    return coker, ModuleMorphism(X, coker, c)
+    return coker, ModuleMorphism(Y, coker, c)
 end
 
 
 function right_module_cokernel(f::ModuleMorphism)
-    X = domain(f)
-    A = object(algebra(parent(X)))
-    r = right_action(X)
+    Y = codomain(f)
+    A = object(algebra(parent(Y)))
+    r = right_action(Y)
     C,c = cokernel(morphism(f))
     inv_c = right_inverse(c)
     coker_action = c ∘ r ∘ (inv_c ⊗ id(A))
     coker = RightModuleObject(parent(f), C, coker_action)
-    return coker, ModuleMorphism(X, coker, c)
+    return coker, ModuleMorphism(Y, coker, c)
 end
 
 function bimodule_cokernel(f::ModuleMorphism)
@@ -427,11 +480,11 @@ end
 
 @doc raw""" 
 
-    left_module(M::RightModuleObject)
+    transposed_module(M::RightModuleObject)
 
 Construct the left module ``(∗M, q)`` from ``(M,p)``. 
 """
-function left_module(N::RightModuleObject)
+function transposed_module(N::RightModuleObject)
     p = right_action(N)
     M = object(N)
     dM = dual(M)
@@ -468,7 +521,7 @@ function left_module(N::RightModuleObject)
     LeftModuleObject(C, dM, q)
 end
 
-function right_module(N::LeftModuleObject)
+function transposed_module(N::LeftModuleObject)
     q = left_action(N)
     M = object(N)
     dM = dual(M)
@@ -532,6 +585,31 @@ function _tensor_product(M::RightModuleObject, N::LeftModuleObject)
     return C,c
 end
 
+function tensor_product(M::RightModuleObject, N::RightModuleObject)
+    right_module_tensor_product(M,N)[1]
+end
+
+function right_module_tensor_product(M::RightModuleObject, N::RightModuleObject)
+    A = algebra(parent(M))
+    @assert is_commutative(A)
+    
+    N2 = left_module(N)
+
+    MN,c = _tensor_product(M, N2)
+    inv_c = right_inverse(c)
+    RightModuleObject(
+        parent(M),
+        MN,
+        compose(
+            inv_c ⊗ id(object(A)),
+            associator(object(M), object(N), object(A)),
+            id(object(M)) ⊗ right_action(N),
+            c 
+        )
+    ), c
+end
+         
+
 function tensor_product(M::BiModuleObject, N::BiModuleObject)
     bimodule_tensor_product(M,N)[1]
 end
@@ -584,21 +662,78 @@ function bimodule_tensor_product(M::BiModuleObject, N::BiModuleObject)
     BiModuleObject(C, P, left, right), c
 end
 
-function tensor_product(f::ModuleMorphism{BiModuleObject}, g::ModuleMorphism{BiModuleObject})
-    dom, p_dom = bimodule_tensor_product(domain(f), domain(g))
-    cod, p_cod = bimodule_tensor_product(codomain(f), codomain(g))
+# function tensor_product(X::RightModuleObject, Y::RightModuleObject)
+#     right_module_tensor_product(X,Y)[1]
+# end
+
+# function right_module_tensor_product(X::RightModuleObject, Y::RightModuleObject)
+#     !(parent(X) == parent(Y)) && error("Mismatching parents")
+
+#     M = parent(X) 
+
+#     !is_braided(category(M)) && error("Category is not braided")
+
+#     A = object(right_algebra(M))
+
+#     ass = associator(object(X), object(Y), A)
+
+#     top = compose(
+#         ass,
+#         id(object(X)) ⊗ right_action(Y)
+#     )
+
+#     bottom = compose(
+#         ass,
+#         id(object(X)) ⊗ braiding(object(Y), A),
+#         inv_associator(object(X), A, object(Y)),
+#         right_action(X) ⊗ id(object(Y))
+#     )
+
+#     Z, c = coequilizer(
+#         top, bottom
+#     )
+
+#     inv_c = right_inverse(c)
+
+#     right = compose(
+#         inv_c ⊗ id(A),
+#         top,
+#         c
+#     )
+    
+#     RightModuleObject(M, Z, right), c
+# end
+
+# function right_module_tensor_product(X::RightModuleObject, Y::RightModuleObject)
+#     S = object(X) ⊗ Y
+#     S, morphism(id(S))
+# end
+
+function tensor_product(f::ModuleMorphism{T}, g::ModuleMorphism{T}) where T <: ModuleObject
+    T == BiModuleObject && (mod_tensor = bimodule_tensor_product)
+    T == RightModuleObject && (mod_tensor = right_module_tensor_product)
+    T == LeftModuleObject && (mod_tensor = left_module_tensor_product)
+
+    dom, p_dom = mod_tensor(domain(f), domain(g))
+    cod, p_cod = mod_tensor(codomain(f), codomain(g))
 
     inv_p_dom = right_inverse(p_dom)
 
     ModuleMorphism(dom, cod, p_cod ∘ (morphism(f) ⊗ morphism(g)) ∘ inv_p_dom)
 end
 
-function associator(X::BiModuleObject, Y::BiModuleObject, Z::BiModuleObject)
-    XY, p_XY = bimodule_tensor_product(X,Y)
-    XY_Z, p_XY_Z = bimodule_tensor_product(XY, Z)
 
-    YZ, p_YZ = bimodule_tensor_product(Y, Z)
-    X_YZ, p_X_YZ = bimodule_tensor_product(X, YZ)
+function associator(X::T, Y::T, Z::T) where T <: ModuleObject
+    
+    T == BiModuleObject && (mod_tensor = bimodule_tensor_product)
+    T == RightModuleObject && (mod_tensor = right_module_tensor_product)
+    T == LeftModuleObject && (mod_tensor = left_module_tensor_product)
+
+    XY, p_XY = mod_tensor(X,Y)
+    XY_Z, p_XY_Z = mod_tensor(XY, Z)
+
+    YZ, p_YZ = mod_tensor(Y, Z)
+    X_YZ, p_X_YZ = mod_tensor(X, YZ)
 
     before = compose(
         right_inverse(p_XY_Z),
@@ -626,8 +761,8 @@ end
 function dual(M::BiModuleObject)
     #@assert left_algebra(parent(M)) == right_algebra(parent(M))
 
-    lM = left_module(right_module(M))
-    rM = right_module(left_module(M))
+    lM = transposed_module(right_module(M))
+    rM = transposed_module(left_module(M))
     A = left_algebra(parent(M))
     B = right_algebra(parent(M))
 
@@ -740,24 +875,33 @@ function direct_sum(f::ModuleMorphism...)
     cod = direct_sum(codomain.(f)...)[1]
     morphism(dom, cod, direct_sum(morphism.(f)...))
 end
+
+function decompose(M::ModuleObject)
+    A = algebra(parent(M))
+    if is_separable(A)
+        return minimal_subquotients_with_multiplicity(M)
+    else
+        return decompose_by_endomorphism_ring(M)
+    end
+end
 #=----------------------------------------------------------
     Internal Hom 
 ----------------------------------------------------------=#
 
 function internal_hom(M::RightModuleObject, N::RightModuleObject)
-    dual(M ⊗ left_module(N))
+    dual(M ⊗ transposed_module(N))
 end
 
 function internal_hom_adjunction(X::Object, M::RightModuleObject, N::RightModuleObject, f::Morphism)
 
     A = algebra(parent(M))
     p = right_action(M)
-    dN = left_module(N)
+    dN = transposed_module(N)
     q = left_action(dN)
     
     # Build the internal hom with the projection 
     # M ⊗ ∗N → M ⊗ₐ ∗N 
-    H,h = _tensor_product(M, left_module(N))
+    H,h = _tensor_product(M, transposed_module(N))
 
     # Internal Hom is given by (M ⊗ₐ ∗N)∗
     H = dual(H)
@@ -780,7 +924,7 @@ function inverse_internal_hom_adjunction(X::Object, M::RightModuleObject, N::Rig
 
     A = algebra(parent(M))
     p = right_action(M)
-    dN = left_module(N)
+    dN = transposed_module(N)
     q = left_action(dN)
     
     # Build the internal hom manually to obtain the projection 
@@ -867,8 +1011,15 @@ function module_action(X::Object, M::T)  where T <: Union{LeftModuleObject, Righ
     end
 end
 
-⊗(X::Object, M::RightModuleObject) = left_module_action(X, M)
-⊗(M::LeftModuleObject, X::Object) = right_module_action(X, M)
+function ⊗(X::Object, M::ModuleObject) 
+    if parent(X) == parent(M) 
+        return tensor_product(X,M) 
+    end
+    left_module_action(X, M)
+end
+
+⊗(M::ModuleObject, N::ModuleObject) = tensor_product(M,N)
+⊗(M::ModuleObject, X::Object) = right_module_action(X, M)
 
 
 #=----------------------------------------------------------
@@ -925,6 +1076,13 @@ end
 
 function is_bimodule_morphism(f::ModuleMorphism{BiModuleObject})
     is_bimodule_morphism(morphism(f), domain(f), codomain(f))
+end
+
+function is_simple(M::ModuleObject)
+    has_attribute(M, :is_simple) && return get_attribute(M, :is_simple)
+    bool = length(minimal_subquotients(M)) == 1
+    set_attribute!(M, :is_simple, bool)
+    return bool
 end
 
 #=----------------------------------------------------------
@@ -1176,7 +1334,7 @@ function simples(M::ModuleCategory)
 
     free_objects = [free_module(s,M) for s ∈ simples(C)]
 
-    simpls = unique_simples(vcat([simple_subobjects(x) for x ∈ free_objects]...))
+    simpls = unique_simples(vcat([minimal_subquotients(x) for x ∈ free_objects]...))
 
     M.simples = simpls
 end
