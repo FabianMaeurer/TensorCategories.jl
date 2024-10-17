@@ -121,7 +121,7 @@ function multiplication_table_with_progress(C::Category, indecs::Vector{<:Object
     displ = ["⋅" for _ ∈ 1:n, _ ∈ 1:n]
 
     for i ∈ 1:n, j ∈ (symmetric ? i : 1):n
-        m[i,j,:] = coefficients(indecs[i] ⊗ indecs[j])
+        m[i,j,:] = coefficients(indecs[i] ⊗ indecs[j], indecs)
         if symmetric m[j,i] = m[i,j] end
 
         displ[i,j] = pretty_print_decomposable(m[i,j,:], names)

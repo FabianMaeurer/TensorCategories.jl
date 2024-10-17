@@ -1267,9 +1267,18 @@ end
 ----------------------------------------------------------=#
 
 function is_isomorphic(M::ModuleObject, N::ModuleObject)
+    if !is_isomorphic(object(M), object(N))[1]
+        return false, nothing
+    end
+    H = Hom(M,N)
+
+    for f ∈ H
+        if is_invertible(f)
+            return true, f
+        end
+    end
     if is_simple(M) && is_simple(N)
-        H = Hom(M,N)
-        return int_dim(H) ≥ 1 ? (true, basis(Hom(M,N))[1]) : (false,nothing)
+        return int_dim(H) ≥ 1 ? (true, basis(H)[1]) : (false,nothing)
     elseif int_dim(End(M)) != int_dim(End(N))
         return false, nothing
     else

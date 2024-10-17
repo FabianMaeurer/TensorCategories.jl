@@ -79,6 +79,10 @@ function meataxe(M::RightModuleObject, incl::Vector{T}, proj::Vector{T}) where T
     C = category(parent(M))
     A = algebra(parent(M))
 
+    if is_simple(object(M))
+        return true, M, id(M)
+    end
+    
     local kernel_of_a, kernel_inclusion
     # Dummy for now 
     
@@ -87,7 +91,6 @@ function meataxe(M::RightModuleObject, incl::Vector{T}, proj::Vector{T}) where T
             id(object(M)) ⊗ i,
             right_action(M)
         )
-
         kernel_of_a, kernel_inclusion = kernel(action_of_a)
         if kernel_of_a != zero(C)
             break
@@ -106,10 +109,10 @@ function meataxe(M::RightModuleObject, incl::Vector{T}, proj::Vector{T}) where T
     end
 
     f = Hom(dual(kernel_of_a), dual(object(M)))[1]
-    N, inclusion = spin_submodule(left_module(M), f) 
+    N, inclusion = spin_submodule(transposed_module(M), f) 
 
     if !is_invertible(inclusion) && int_dim(End(N)) != 0
-        N = right_module(N)
+        N = transposed_module(N)
         return false, N, morphism(N,M,right_inverse(dual(inclusion)))
     end
 
