@@ -288,7 +288,7 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
         braid[3,3,:] = α .* matrices((id(C[1]) ⊕ (inv(ξ) * id(C[2]))))
 
         set_braiding!(C,braid)
-    catch 
+    catch e
     end
     return C
 end

@@ -1,20 +1,19 @@
-function recover_solutions(p::Tuple, K::Field)
+function recover_solutions(p::Tuple, K::Field, var_order)
     p = p[2]
     f = p.elim
     g = p.denom
     v = p.param
     rs = roots(K,f)
     solutions = []
-
     
 
     if length(p.lf_cfs) == 0
-        perm = sortperm(p.vars)
+        perm = indexin(var_order, p.vars)
         for r ∈ rs
             solutions = [solutions; Tuple([[vi(r)*inv(g(r)) for vi ∈ v];r])[perm]]
         end
     else
-        perm = sortperm(p.vars[1:end-1])
+        perm = indexin(var_order, p.vars[1:end-1])
         for r ∈ rs
             solutions = [solutions; Tuple([vi(r)*inv(g(r)) for vi ∈ v])[perm]]
         end
@@ -31,23 +30,25 @@ function real_solutions_over_base_field(I::MPolyIdeal)
     K = base_ring(base_ring(I))
 
     if is_finite(K)
-        return recover_solutions(real_solutions(I), K)
+        return recover_solutions(real_solutions(I), K, symbols(base_ring(I)))
     end
 
     if K == QQ
-        return recover_solutions(real_solutions(I), K)
+        return recover_solutions(real_solutions(I), K, symbols(base_ring(I)))
     end
 
     G = gens(I)
 
     try 
         I = ideal([change_base_ring(QQ, f) for f ∈ gens(I)])
-        S = recover_solutions(real_solutions(I), K)
+        S = recover_solutions(real_solutions(I), K, symbols(base_ring(I)))
         return [s for s ∈ S if all([g(s...) == 0 for g ∈ G])]
     catch
     end
 
-    S = recover_solutions(real_solutions(rational_lift(I)), K)
+    QI = rational_lift(I)
+
+    S = recover_solutions(real_solutions(QI), K, symbols(base_ring(QI)))
     
     [s[1:end-1] for s ∈ S if all([g(s[1:end-1]...) == 0 for g ∈ G])]
 end
@@ -63,13 +64,15 @@ function guess_real_solutions_over_base_field(I::MPolyIdeal)
     
     y = [y for y ∈ x if sum([degree(G[j], y) for j ∈ i]) == 0]
 
-    J = I
+    sort!(y, by = x -> sum([degree(g, x) for g ∈ G]))
+    
+    J = ideal(G)
     while d > 0 && length(y) > 0
         z = pop!(y)
         J2 = ideal([gens(J); z*(z^2 - 1)])
 
-        d2 = dim(J)
-        if d2 ≥ 0
+        d2 = dim(J2)
+        if d2 ≥ 0 && d2 < d
             J = J2
             d = d2
         end

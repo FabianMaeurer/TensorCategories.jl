@@ -201,18 +201,23 @@ end
 Return the tensor product ``V⊗W``.
 """
 function tensor_product(X::GVSObject, Y::GVSObject)
-    W = X.V ⊗ Y.V
+    W = VectorSpaceObject(parent(X.V), int_dim(X)*int_dim(Y))
     G = base_group(X)
     elems = elements(G)
-    grading = vcat([[i*j for i ∈ Y.grading] for j ∈ X.grading]...)
+    grading = [i*j for i ∈ Y.grading, j ∈ X.grading][:]
     return GVSObject(parent(X), W, length(grading) == 0 ? elem_type(G)[] : grading)
 end
 
 function braiding(X::GVSObject, Y::GVSObject)
     twist(parent(X)).m !== nothing && error("Braiding not implemented")
     χ = parent(X).braiding
-    m = diagonal_matrix(base_ring(X),[χ(g,h) for g in grading(X), h ∈ grading(Y)][:])
-    morphism(X⊗Y,Y⊗X, m)
+    K = base_ring(X)
+    m = diagonal_matrix(K,elem_type(K)[χ(g,h) for g in grading(X), h ∈ grading(Y)][:])
+
+    # permutation
+    p = permutation_matrix(K, perm(sortperm([(i,j) for i ∈ 1:int_dim(X), j ∈ 1:int_dim(Y)][:])))
+    
+    morphism(X⊗Y,Y⊗X, p * m)
 end
 
 #-----------------------------------------------------------------
