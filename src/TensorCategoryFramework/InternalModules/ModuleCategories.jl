@@ -50,7 +50,7 @@ end
     end
 end
 
-mutable struct LeftModuleCategory <: ModuleCategory
+@attributes mutable struct LeftModuleCategory <: ModuleCategory
     category::Category
     left_algebra::AlgebraObject
     simples::Vector{LeftModuleObject}
@@ -63,7 +63,7 @@ mutable struct LeftModuleCategory <: ModuleCategory
     end
 end
 
-mutable struct RightModuleCategory <: ModuleCategory
+@attributes mutable struct RightModuleCategory <: ModuleCategory
     category::Category
     right_algebra::AlgebraObject
     simples::Vector{RightModuleObject}
@@ -76,7 +76,7 @@ mutable struct RightModuleCategory <: ModuleCategory
     end
 end
 
-mutable struct BiModuleCategory <: ModuleCategory
+@attributes mutable struct BiModuleCategory <: ModuleCategory
     category::Category
     left_algebra::AlgebraObject
     right_algebra::AlgebraObject
@@ -876,7 +876,7 @@ function direct_sum(f::ModuleMorphism...)
     morphism(dom, cod, direct_sum(morphism.(f)...))
 end
 
-function decompose(M::ModuleObject)
+function decompose(M::Union{LeftModuleObject,RightModuleObject})
     A = algebra(parent(M))
     if is_separable(A)
         return minimal_subquotients_with_multiplicity(M)
@@ -1293,6 +1293,7 @@ end
 
 is_semisimple(M::LeftModuleCategory) = is_separable(left_algebra(M))
 is_semisimple(M::RightModuleCategory) = is_separable(right_algebra(M))
+is_semisimple(M::BiModuleCategory) = is_separable(right_algebra(M)) && is_separable(left_algebra(M))
 
 @doc raw""" 
 

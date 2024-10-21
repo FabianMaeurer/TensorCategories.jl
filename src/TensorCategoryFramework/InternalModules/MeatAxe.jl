@@ -122,6 +122,14 @@ end
 
 function minimal_subquotients_with_multiplicity(M::ModuleObject)
 
+    if typeof(M) == BiModuleObject 
+        if is_semisimple(parent(M))
+            return decompose(M)
+        else
+            @error "Not implemented"
+        end
+    end
+
     M == zero(parent(M)) && return Tuple{typeof(M), Int}[]
     if has_attribute(M, :is_simple)
         get_attribute(M, :is_simple) && return [(M,1)]

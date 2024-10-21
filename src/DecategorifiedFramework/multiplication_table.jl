@@ -1,8 +1,20 @@
 function multiplication_table(C::Category, indecomposables::Vector{<:Object} = indecomposables(C))
     #@assert is_multitensor(C) "Category needs to be multitensor"
     #m = [s⊗t for s ∈ indecomposables, t ∈ indecomposables]
+    
+    if has_attribute(C, :multiplication_table)
+        return get_attribute(C, :multiplication_table)
+    end
+    
     coeffs = [coefficients(s⊗t, indecomposables) for s ∈ indecomposables, t ∈ indecomposables]
-    return [c[k] for c ∈ coeffs, k ∈ 1:length(indecomposables)]
+
+        
+    mult = [c[k] for c ∈ coeffs, k ∈ 1:length(indecomposables)]
+    if hasfield(typeof(C), :__attrs)
+        return set_attribute!(C, :multiplication_table, mult)
+    else 
+        return mult
+    end
 end
 
 function multiplication_table(indecomposables::Vector{<:Object})
