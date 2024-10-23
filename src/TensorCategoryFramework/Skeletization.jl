@@ -1,11 +1,16 @@
 function six_j_category(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:length(simples(C))])
+    six_j_category(simples(C), names)
+end
+
+function six_j_category(S::Vector{<:Object}, names::Vector{String} = ["X$i" for i ∈ 1:length(S)])
+    C = parent(S[1])
     @assert is_multifusion(C)
 
     if typeof(C) == SixJCategory 
         return C
     end
     
-    S = simples(C)
+    #S = simples(C)
     n = length(S)
     F = base_ring(C)
 

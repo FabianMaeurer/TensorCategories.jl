@@ -33,7 +33,22 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     radical, is_zero, minimal_submodules, representation_matrix, QQBarField,
     is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module, perm
 
-
+using Serialization
+import Oscar: @register_serialization_type,
+                save_data_dict,
+                save_data_array,
+                save_object,
+                save_type_params,
+                save_typed_object,
+                load_object,
+                load_type_params,
+                load_typed_object,
+                SerializerState,
+                DeserializerState,
+                encode_type,
+                register_serialization_type,
+                load_array_node,
+                serialize_with_params
 
 using InteractiveUtils
 using Memoization
@@ -388,9 +403,6 @@ export zero_morphism
 export ZPlusRing, ℕRing, ℤ₊Ring
 export ZPlusRingElem, ℕRingElem, ℤ₊RingElem
 
-@register_serialization_type SixJCategory
-
-
 include("CategoryFramework/AbstractTypes.jl")
 include("CategoryFramework/AbstractMethods.jl")
 include("CategoryFramework/DecompositionInAbelianCategories.jl")
@@ -463,7 +475,8 @@ include("Examples/VercleyenSingerland/FR_9143/fr_9143.jl")
 include("Examples/E6Subfactor/E6subfactor.jl")
 include("Examples/Haagerup/HaagerupH3.jl")
 
-include("Serialization/SetUp.jl")
+@register_serialization_type SixJCategory
+
 include("Serialization/SixJSerialization.jl")
 include("SixJCategoryDatabase/main.jl")
 
