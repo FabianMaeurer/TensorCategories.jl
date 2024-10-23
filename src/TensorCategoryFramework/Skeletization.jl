@@ -1,5 +1,7 @@
 function six_j_category(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:length(simples(C))])
-    six_j_category(simples(C), names)
+    F = six_j_category(simples(C), names)
+    set_name!(F, "Skeletization of $C")
+    return F
 end
 
 function six_j_category(S::Vector{<:Object}, names::Vector{String} = ["X$i" for i ∈ 1:length(S)])
@@ -40,8 +42,6 @@ function six_j_category(S::Vector{<:Object}, names::Vector{String} = ["X$i" for 
         set_braiding!(skel_C, skeletal_braiding(C,S))
     end
     set_one!(skel_C, [int_dim(Hom(one(C), s)) for s ∈ S])
-
-    set_name!(skel_C, "Skeletization of $C")
 
     return skel_C
 end
