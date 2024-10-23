@@ -122,12 +122,8 @@ end
 
 function minimal_subquotients_with_multiplicity(M::ModuleObject)
 
-    if typeof(M) == BiModuleObject 
-        if is_semisimple(parent(M))
-            return decompose(M)
-        else
-            @error "Not implemented"
-        end
+    if is_semisimple(parent(M))
+        return decompose(M)
     end
 
     M == zero(parent(M)) && return Tuple{typeof(M), Int}[]

@@ -4,11 +4,15 @@
     Reference: https://math.mit.edu/~etingof/egnobookfinal.pdf
 ----------------------------------------------------------=#
 
-struct AlgebraObject <: Object
+@attributes mutable struct AlgebraObject <: Object
     parent::Category
     object::Object
     multiplication::Morphism
     unit::Morphism
+
+    function AlgebraObject(C::Category, X::Object, m::Morphism, u::Morphism)
+        new(C,X,m,u)
+    end
 end
 
 struct AlgebraMorphism <: Morphism 
@@ -40,20 +44,24 @@ end
 is_algebra(X::AlgebraObject) = is_algebra(object(X), multiplication(X), unit(X))
 
 function is_separable(A::AlgebraObject)
-    C = parent(A)
-    m = multiplication(A)
+    get_attribute!(A, :is_separable) do
+        C = parent(A)
+        m = multiplication(A)
 
-    # Define the multiplication as a bimodule morphism
-    AA = free_bimodule(one(C), A)
-    m = morphism(AA, bimodule(A), multiplication(A))
+        # Define the multiplication as a bimodule morphism
+        AA = free_bimodule(one(C), A)
+        m = morphism(AA, bimodule(A), multiplication(A))
 
-    # A is seperable if m has a right inverse as bimodule morphism
-    has_right_inverse(m)
+        # A is seperable if m has a right inverse as bimodule morphism
+        has_right_inverse(m)
+    end
 end
 
 function is_commutative(A::AlgebraObject)
-    m = multiplication(A)
-    m == m ∘ braiding(object(A),object(A))
+    get_attribute!(A, :is_commutative) do 
+        m = multiplication(A)
+        m == m ∘ braiding(object(A),object(A))
+    end
 end
 #=----------------------------------------------------------
     Group Algebras

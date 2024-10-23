@@ -147,7 +147,10 @@ matrix(f::ModuleMorphism) = matrix(morphism(f))
 
 is_abelian(C::ModuleCategory) = is_abelian(category(C))
 
-is_multitensor(C::BiModuleCategory) = true
+is_multiring(C::BiModuleCategory) = true
+
+is_multiring(C::RightModuleCategory) = is_commutative(algebra(C))
+is_multiring(C::LeftModuleCategory) = is_commutative(algebra(C))
 
 is_tensor(C::BiModuleCategory) = int_dim(End(one(C))) == 1
 
@@ -589,11 +592,21 @@ function tensor_product(M::RightModuleObject, N::RightModuleObject)
     right_module_tensor_product(M,N)[1]
 end
 
-function right_module_tensor_product(M::RightModuleObject, N::RightModuleObject)
+@memoize Dict function right_module_tensor_product(M::RightModuleObject, N::RightModuleObject)
     A = algebra(parent(M))
     @assert is_commutative(A)
     
+    one_C = free_right_module(one(category(parent(M))), A)
+
+    if N == one_C
+        return M, right_action(M)
+    end 
+
     N2 = left_module(N)
+
+    if M == one_C
+        return N, left_action(N2)
+    end
 
     MN,c = _tensor_product(M, N2)
     inv_c = right_inverse(c)
@@ -724,6 +737,10 @@ end
 
 
 function associator(X::T, Y::T, Z::T) where T <: ModuleObject
+
+    if one(parent(X)) ∈ [X,Y,Z]
+        return id(X ⊗ Y ⊗ Z)
+    end
     
     T == BiModuleObject && (mod_tensor = bimodule_tensor_product)
     T == RightModuleObject && (mod_tensor = right_module_tensor_product)
@@ -756,6 +773,11 @@ function one(C::BiModuleCategory)
     @assert left_algebra(C) == right_algebra(C)
     A = left_algebra(C)
     bimodule(A)
+end
+
+function one(C::Union{RightModuleCategory, LeftModuleCategory})
+    @assert is_commutative(algebra(C))
+    return free_module(one(category(C)), C)
 end
 
 function dual(M::BiModuleObject)
@@ -878,11 +900,11 @@ end
 
 function decompose(M::Union{LeftModuleObject,RightModuleObject})
     A = algebra(parent(M))
-    if is_separable(A)
-        return minimal_subquotients_with_multiplicity(M)
-    else
+    # if is_separable(A)
+    #     return minimal_subquotients_with_multiplicity(M)
+    # else
         return decompose_by_endomorphism_ring(M)
-    end
+   # end
 end
 #=----------------------------------------------------------
     Internal Hom 

@@ -477,7 +477,11 @@ function simples(Rep::GroupRepresentationCategory)
 
         #gap_field = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
         gap_field = codomain(iso_oscar_gap(F))
-        gap_reps = GAP.Globals.IrreducibleRepresentations(grp.X,gap_field)
+        gap_reps = if is_finite(F) 
+            GAP.Globals.IrreducibleRepresentations(grp.X,gap_field)
+        else
+            GAP.Globals.IrreducibleRepresentations(grp.X)
+        end
 
         int_dims = [GAP.Globals.DimensionOfMatrixGroup(GAP.Globals.Range(m)) for m ∈ gap_reps]
     

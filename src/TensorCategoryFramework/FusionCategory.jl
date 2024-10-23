@@ -170,7 +170,7 @@ associator(C::SixJCategory) = C.ass
 
 Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 """
- #= @memoize Dict =# function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
+ @memoize Dict  function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)
@@ -183,6 +183,10 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     dom = X⊗Y⊗Z
 
     C_associator = C.ass
+
+    if one(C) ∈ [X,Y,Z]
+        return id(X ⊗ Y ⊗ Z)
+    end
 
     #---------------------------------
     # associators on simple objects
@@ -233,7 +237,7 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     return inv(distr_after) ∘ m ∘ distr_before
 end
 
-#= @memoize Dict =# function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
+@memoize Dict function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)

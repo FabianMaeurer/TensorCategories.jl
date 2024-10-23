@@ -61,3 +61,4 @@ function Base.getindex(D::Dict{<:Object,<:Any}, X::Object)
 
     return collect(values(D))[i]
 end
+

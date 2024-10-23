@@ -57,6 +57,7 @@ export AbstractHomSpace
 export action
 export action_matrix
 export add_simple! 
+export add_to_local_database
 export algebra
 export algebras
 export algebra_structures
@@ -250,6 +251,7 @@ export left_module
 export left_module_category
 export left_trace 
 export load 
+export load_fusion_category
 export matrices 
 export matrix 
 export meataxe
@@ -326,6 +328,7 @@ export Semisimplification
 export SemisimplifiedObject
 export SemisimplifiedMorphism
 export semisimplify
+export six_j_category
 export SixJCategory 
 export SixJObject 
 export separable_algebra_structures
@@ -384,6 +387,8 @@ export zero
 export zero_morphism 
 export ZPlusRing, ℕRing, ℤ₊Ring
 export ZPlusRingElem, ℕRingElem, ℤ₊RingElem
+
+@register_serialization_type SixJCategory
 
 
 include("CategoryFramework/AbstractTypes.jl")
@@ -457,6 +462,10 @@ include("Examples/VercleyenSingerland/FR_8211/fr_8211.jl")
 include("Examples/VercleyenSingerland/FR_9143/fr_9143.jl")
 include("Examples/E6Subfactor/E6subfactor.jl")
 include("Examples/Haagerup/HaagerupH3.jl")
+
+include("Serialization/SetUp.jl")
+include("Serialization/SixJSerialization.jl")
+include("SixJCategoryDatabase/main.jl")
 
 
 

@@ -361,7 +361,7 @@ end
 -------------------------------------------------=#
 
 function fpdim(X::Object)
-    @assert is_weakly_multifusion(parent(X))
+    @assert is_semisimple(parent(X))
     S = simples(parent(X))
     n = length(S)
 
@@ -375,20 +375,13 @@ function fpdim(X::Object)
         A[:,i] = [length(basis(Hom(X⊗Y,S[j])))//end_dims[i] for j ∈ 1:n]
     end
 
-    λ = eigenvalues(K, matrix(QQ,A))
+    return fp_eigenvalue(matrix(QQ, A))
+end
+
+function fp_eigenvalue(m::MatrixElem)
+    λ = eigenvalues(QQBar, m)
     filter!(e -> isreal(e), λ)
     return findmax(e -> abs(e), λ)[1]
-
-
-
-    # f = complex_embeddings(K)[1]
-
-    # λ = [k for (k,_) ∈ eigenspaces(matrix(K,A))]
-    
-    # filter!(e -> real(f(e)) > 0, λ)
-
-    # _,i = findmax(e -> abs(f(e)), λ)
-    # return λ[i]
 end
 
 function fpdim(C::Category)

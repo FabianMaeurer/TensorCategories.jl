@@ -68,7 +68,7 @@ function guess_real_solutions_over_base_field(I::MPolyIdeal)
     
     J = ideal(G)
     while d > 0 && length(y) > 0
-        z = pop!(y)
+        z = popfirst!(y)
         J2 = ideal([gens(J); z*(z^2 - 1)])
 
         d2 = dim(J2)

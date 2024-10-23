@@ -48,6 +48,9 @@ end
 
 is_multifusion(C::CenterCategory) = is_multifusion(category(C))
 
+is_modular(C::CenterCategory) = true 
+is_braided(C::CenterCategory) = true
+
 function induction_generators(C::CenterCategory) 
     if isdefined(C, :induction_gens)
         return C.induction_gens

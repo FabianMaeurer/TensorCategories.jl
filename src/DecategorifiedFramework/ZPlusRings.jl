@@ -115,6 +115,19 @@ end
 
 ⊗(A::ℕRing, K::Field) = extension_of_scalars(A,K)
 
+
+function fpdim(x::ℕRingElem)
+    R = parent(x)
+    K = base_ring(R)
+
+    dims = get_attribute!(R, :fpdims) do 
+        m = multiplication_table(R)
+        [fp_eigenvalue(matrix(K,m[i,:,:])) for i ∈ 1:length(basis(R))]
+    end
+
+    sum(coefficients(x) .* dims)
+end
+
 #=----------------------------------------------------------
     Fusion Rings 
 ----------------------------------------------------------=#
