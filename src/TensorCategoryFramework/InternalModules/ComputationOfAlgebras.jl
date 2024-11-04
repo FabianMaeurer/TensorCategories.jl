@@ -55,7 +55,7 @@ function _algebra_structures(structure_ideal::Function, X::Object, unit = Hom(on
     m = length(mult_base)
     I = structure_ideal(X, mult_base, unit)
 
-    @show d = dim(I)
+    d = dim(I)
 
     if d > 0
         # get rid of isomorphic algebras
@@ -96,7 +96,7 @@ function _algebra_structures(structure_ideal::Function, X::Object, unit = Hom(on
 
         # get coefficients of the image multiplication
         image_mult = phi_squared_mat * mult_mat * inv(phi_mat)
-        @show image_coeffs = express_in_basis(morphism(image_mult), morphism.(matrix.(mult_base)))
+        image_coeffs = express_in_basis(morphism(image_mult), morphism.(matrix.(mult_base)))
 
         # Find a coefficient that is linear in a for every a in iso_vars
         free_indices = []
@@ -104,7 +104,6 @@ function _algebra_structures(structure_ideal::Function, X::Object, unit = Hom(on
             i = findfirst(c -> c ∉ free_indices && degree(numerator(image_coeffs[c]), a) == 1, 1:length(image_coeffs)) 
             push!(free_indices, i) 
         end
-        @show free_indices
 
         # set free coefficients to 1
         y = gens(base_ring(I))
