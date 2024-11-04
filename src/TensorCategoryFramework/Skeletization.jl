@@ -6,7 +6,7 @@ end
 
 function six_j_category(S::Vector{<:Object}, names::Vector{String} = ["X$i" for i ∈ 1:length(S)])
     C = parent(S[1])
-    @assert is_multifusion(C)
+    @assert is_ring(C)
 
     if typeof(C) == SixJCategory 
         return C
@@ -18,16 +18,26 @@ function six_j_category(S::Vector{<:Object}, names::Vector{String} = ["X$i" for 
 
     mult = Array{Int,3}(undef,n,n,n)
 
-    for i ∈ 1:n, j ∈ 1:n
-        mult[i,j,:] = [int_dim(Hom(S[k],S[i]⊗S[j])) for k ∈ 1:n]
-    end
+    # prods = [X ⊗ Y for X ∈ S, Y ∈ S]
+    # homs = [basis(Hom(prods[i,j],Z)) for i ∈ 1:length(S), j ∈ 1:length(S), Z ∈ S]
+    # for i ∈ 1:n, j ∈ 1:n
+    #     mult[i,j,:] = [length(homs[i,j,k]) for k ∈ 1:n]
+    # end
 
     # Define SixJCategory
     skel_C = six_j_category(F,names)
 
+    # Extract 6j-Symbols
+    ass = six_j_symbols(C, S)
+
+    # Recover multiplication table 
+    one_index = findfirst(s -> int_dim(Hom(one(C),s)) > 0, S)
+    set_one!(skel_C, [i == one_index for i ∈ 1:n])
+    mult = [size(ass[i,j,one_index,k], 1) for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n]
+
     set_tensor_product!(skel_C,mult)
 
-    set_associator!(skel_C, six_j_symbols(C, S))
+    set_associator!(skel_C, ass)
 
     if multiplicity(C) > 1
         @warn "6j-Symbols might be wrong since multiplicity is greater than one"
@@ -41,7 +51,7 @@ function six_j_category(S::Vector{<:Object}, names::Vector{String} = ["X$i" for 
     if is_braided(C)
         set_braiding!(skel_C, skeletal_braiding(C,S))
     end
-    set_one!(skel_C, [int_dim(Hom(one(C), s)) for s ∈ S])
+    
 
     return skel_C
 end
@@ -58,12 +68,14 @@ function six_j_symbols(C::Category, S = simples(C))
     one_indices = findall(s -> int_dim(Hom(s,one(C))) > 0 , S)
     one_components = simple_subobjects(one(C))
 
+    # Set unitors to identity
+    S[one_indices] = one_components
+
     prods = [X ⊗ Y for X ∈ S, Y ∈ S]
     homs = [basis(Hom(prods[i,j],Z)) for i ∈ 1:N, j ∈ 1:N, Z ∈ S]
     associators = [associator(X,Y,Z) for X ∈ S, Y ∈ S, Z ∈ S]
 
-    # Set unitors to identity
-    S[one_indices] = one_components
+
 
     for (i,j,k,l) ∈ Base.product(1:N, 1:N, 1:N, 1:N)
 

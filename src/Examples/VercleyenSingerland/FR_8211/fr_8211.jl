@@ -10,7 +10,7 @@ Categorification of fusion ring FR8211. `n` chooses one of 96 possibily
 equivalent sets of associators.
 """
 function cat_fr_8122(n::Int) #n gives the number of associator
-    K = QQBar
+    K,ξ = cyclotomic_field(24)
     
     #(1,7,8) are class of one in D3/Z3; (2,3,4) are other class (5) is element t_1, (6) is other one
     C = six_j_category(K,["e", "a", "b", "aba", "t", "s", "ba", "ab"])
@@ -81,7 +81,7 @@ function cat_fr_8122(n::Int) #n gives the number of associator
 
     set_tensor_product!(C,M)
 
-    ζ = root_of_unity(QQBar, 24)
+    ζ = root_of_unity(K, 24)
 
     function modifier(x::Expr)
         replace!(x, :ζ, ζ)
@@ -119,7 +119,7 @@ function cat_fr_8122(n::Int) #n gives the number of associator
 
     set_one!(C,[1,0,0,0,0,0,0,0])
 
-    set_canonical_spherical!(C)
+    #set_canonical_spherical!(C)
 
     return C
 end

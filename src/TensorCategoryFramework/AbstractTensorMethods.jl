@@ -385,7 +385,7 @@ function fp_eigenvalue(m::MatrixElem)
 end
 
 function fpdim(C::Category)
-    @assert is_weakly_multifusion(C)
+    @assert is_semisimple(C)
     S = simples(C)
     d = int_dim(End(one(C)))
     sum(d .* fpdim.(S).^2 .// (int_dim.(End.(S))))

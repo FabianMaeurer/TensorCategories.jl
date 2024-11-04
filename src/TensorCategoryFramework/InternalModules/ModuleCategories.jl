@@ -148,6 +148,7 @@ matrix(f::ModuleMorphism) = matrix(morphism(f))
 is_abelian(C::ModuleCategory) = is_abelian(category(C))
 
 is_multiring(C::BiModuleCategory) = true
+is_ring(C::BiModuleCategory) = is_multiring(C) &&  int_dim(End(one(C))) == 1
 
 is_multiring(C::RightModuleCategory) = is_commutative(algebra(C))
 is_multiring(C::LeftModuleCategory) = is_commutative(algebra(C))
@@ -163,6 +164,8 @@ is_weak_fusion(C::BiModuleCategory) = is_weak_multifusion(C) &&
 
 is_multifusion(C::BiModuleCategory) = is_weak_multifusion(C) &&
                                     all(int_dim(End(s)) == 1 for s ∈ simples(C))
+
+is_fusion(C::BiModuleCategory) = is_multifusion(C) && int_dim(End(one(C))) == 1
 
 function ==(M::ModuleCategory, N::ModuleCategory)
     typeof(M) != typeof(N) && return false
@@ -429,6 +432,16 @@ Return the free ``A-A`` bimodule ``A⊗X⊗A``
 """
 function free_bimodule(X::Object, A::AlgebraObject, parent = BiModuleCategory(parent(X), A, A))
     free_bimodule(X,A,A,parent)
+end
+
+function free_bimodule(X::RightModuleObject, A::AlgebraObject, parent_cat = BiModuleCategory(category(parent(X)), A, right_algebra(parent(X))))
+    LX = free_left_module(object(X), A)
+    B = right_algebra(parent(X))
+    right = compose(
+        associator(object(A), object(X), object(B)),
+        id(object(A)) ⊗ right_action(X)
+    )
+    BiModuleObject(parent_cat, object(LX), left_action(LX), right)
 end
 
 @doc raw""" 
@@ -1207,8 +1220,8 @@ end
 
 function Hom(X::BiModuleObject, Y::BiModuleObject)
     @assert parent(X) == parent(Y)
-    H = Hom(object(X), object(Y))
-    B_H = basis(H)
+    H = Hom(right_module(X), right_module(Y))
+    B_H = morphism.(basis(H))
     F = base_ring(X)
     n = length(basis(H))
 
@@ -1261,6 +1274,26 @@ function Hom(X::BiModuleObject, Y::BiModuleObject)
 
     return HomSpace(X,Y,module_hom_basis)
 end
+
+
+function free_adjunction(X::Object, M::RightModuleObject, hom::Vector{<:Morphism} = basis(Hom(X, object(M))))
+
+    A = algebra(parent(M))
+    base = [right_action(M) ∘ (f ⊗ id(object(A))) for f ∈ hom]
+    IX = free_right_module(X,A, parent(M))
+    base = [morphism(IX,M, f) for f ∈ base]
+    HomSpace(IX , M, base)
+end
+
+function free_adjunction(X::RightModuleObject, M::BiModuleObject, hom::Vector{<:Morphism} = basis(Hom(X, right_module(M))))
+
+    A = left_algebra(parent(M))
+    base = [left_action(M) ∘ (id(object(A)) ⊗ morphism(f)) for f ∈ hom]
+    IX = free_bimodule(X,A, parent(M))
+    base = [morphism(IX,M, f) for f ∈ base]
+    HomSpace(IX , M, base)
+end
+
 
 function end_of_free_bimodule(X::Object, A::AlgebraObject, B::AlgebraObject)
     M = free_bimodule(X, A, B)
@@ -1364,6 +1397,12 @@ function simples(M::ModuleCategory)
 
     C = category(M)
 
+    if typeof(M) == BiModuleCategory && is_semisimple(M)
+        simpls = bimodule_simples(M)
+        M.simples = simpls
+        return simpls
+    end
+
     free_objects = [free_module(s,M) for s ∈ simples(C)]
 
     simpls = unique_simples(vcat([minimal_subquotients(x) for x ∈ free_objects]...))
@@ -1371,6 +1410,24 @@ function simples(M::ModuleCategory)
     M.simples = simpls
 end
 
+function bimodule_simples(M::BiModuleCategory)
+    A = left_algebra(M)
+    B = right_algebra(M)
+
+    right_modules = category_of_right_modules(B)
+    simple_right_modules = simples(right_modules)
+
+    free_bimodules = [free_bimodule(x, A, M) for x ∈ simple_right_modules]
+    homs = [free_adjunction(x, Ix) for (x,Ix) ∈ zip(simple_right_modules, free_bimodules)]
+
+    simpls = vcat([simple_subobjects(m, H) for (m,H) in zip(free_bimodules, homs)]...)
+
+    if A == B
+        return unique_simples([one(M); simpls])
+    else
+        return unique_simples(simpls)
+    end
+end
 #=----------------------------------------------------------
     action matrices 
 ----------------------------------------------------------=#

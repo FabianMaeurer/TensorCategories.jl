@@ -126,7 +126,7 @@ end
     Live progress 
 ----------------------------------------------------------=#
 
-function multiplication_table_with_progress(C::Category, indecs::Vector{<:Object} = indecomposables(C); symmetric::Bool = false, names = simples_names(C))
+function multiplication_table_with_progress(C::Category, indecs::Vector{<:Object} = indecomposables(C); symmetric::Bool = false, names = simples_names(C), one = nothing)
 
     n = length(indecs)
     m = Array{Int}(undef,n,n,n)
@@ -134,8 +134,14 @@ function multiplication_table_with_progress(C::Category, indecs::Vector{<:Object
     displ = ["⋅" for _ ∈ 1:n, _ ∈ 1:n]
 
     for i ∈ 1:n, j ∈ (symmetric ? i : 1):n
-        m[i,j,:] = coefficients(indecs[i] ⊗ indecs[j], indecs)
-        if symmetric m[j,i] = m[i,j] end
+
+        if one != nothing && (i ∈ one || j in one)
+            k = i ∈ one ? j : i
+            m[i,j,:] = m[j,i,:] = [l == k for l ∈ 1:n]
+        else
+            m[i,j,:] = coefficients(indecs[i] ⊗ indecs[j], indecs)
+            if symmetric m[j,i] = m[i,j] end
+        end
 
         displ[i,j] = pretty_print_decomposable(m[i,j,:], names)
         if symmetric displ[j,i] = displ[i,j] end

@@ -122,7 +122,7 @@ end
 
 Return a vector of coefficients expressing ``f: X → Y`` in the basis o f ``\mathrm{Hom}(X,Y)``.
 """
-function express_in_basis(f::Morphism, H = Hom(domain(f), codomain(f)))
+function express_in_basis(f::Morphism, H::AbstractHomSpace = Hom(domain(f), codomain(f)))
     express_in_basis(f, basis(H))
 end
 

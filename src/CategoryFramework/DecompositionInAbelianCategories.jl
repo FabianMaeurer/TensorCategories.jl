@@ -33,6 +33,9 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false)
 
     if !is_simple && is_semisimple(endomorphism_ring(X,E))
         img = [image(i)[1] for i ∈ central_primitive_idempotents(E)]
+        if length(img) == int_dim(E)
+            return img
+        end
         return vcat([simple_subobjects(i, End(i), true) for i in img]...)
     end
 

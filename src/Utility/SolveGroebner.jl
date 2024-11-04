@@ -67,8 +67,10 @@ function guess_real_solutions_over_base_field(I::MPolyIdeal)
     sort!(y, by = x -> sum([degree(g, x) for g ∈ G]))
     
     J = ideal(G)
+
     while d > 0 && length(y) > 0
-        z = popfirst!(y)
+        z = pop!(y)
+
         J2 = ideal([gens(J); z*(z^2 - 1)])
 
         d2 = dim(J2)
@@ -77,5 +79,20 @@ function guess_real_solutions_over_base_field(I::MPolyIdeal)
             d = d2
         end
     end
+
+    # y2 = collect(Base.product(y2,y2))[:]
+    # filter!(e -> e[1]==e[2], y2)
+    # groebner_basis(J)
+    # while d > 0 && length(y2) > 0
+    #     z1,z2 = popfirst!(y2)
+    #     J2 = ideal([gens(J); [z1*(z1^2 - 1), z2*(z2^2 - 1)]])
+
+    #     d2 = dim(J2)
+    #     if d2 ≥ 0 && d2 < d
+    #         J = J2
+    #         d = d2
+    #     end 
+    # end
+
     real_solutions_over_base_field(J)
 end

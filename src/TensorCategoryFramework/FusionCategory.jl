@@ -170,7 +170,7 @@ associator(C::SixJCategory) = C.ass
 
 Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 """
- @memoize Dict  function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
+function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)
@@ -213,31 +213,39 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
     -------------------------------------------------=#
 
     # Before
-    distr_before = distribute_left(X_summands, Y) ⊗ id(Z)
-    distr_before = (direct_sum([distribute_right(Xᵢ,Y_summands) for Xᵢ ∈ X_summands]...)⊗id(Z)) ∘ distr_before
-    distr_before = distribute_left([Xᵢ⊗Yⱼ for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:], Z) ∘ distr_before
-    distr_before = direct_sum([distribute_right(Xᵢ⊗Yⱼ,Z_summands) for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:]...) ∘ distr_before
-    
-    # After
-    distr_after = id(X)⊗distribute_left(Y_summands, Z)
-    distr_after = (id(X)⊗direct_sum([distribute_right(Yⱼ,Z_summands) for Yⱼ ∈ Y_summands]...)) ∘ distr_after
-    distr_after = distribute_left(X_summands, Y⊗Z) ∘ distr_after
-    YZ_arr = [Yⱼ⊗Zₖ for  Zₖ ∈ Z_summands, Yⱼ ∈ Y_summands][:]
-    distr_after = direct_sum([distribute_right(Xᵢ, YZ_arr) for Xᵢ ∈ X_summands]) ∘ distr_after
+    # distr_before = distribute_left(X_summands, Y) ⊗ id(Z)
+    # distr_before = (direct_sum([distribute_right(Xᵢ,Y_summands) for Xᵢ ∈ X_summands]...)⊗id(Z)) ∘ distr_before
+    # distr_before = distribute_left([Xᵢ⊗Yⱼ for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:], Z) ∘ distr_before
+    # distr_before = direct_sum([distribute_right(Xᵢ⊗Yⱼ,Z_summands) for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:]...) ∘ distr_before
 
+    # # After
+    # distr_after = id(X)⊗distribute_left(Y_summands, Z)
+    # distr_after = (id(X)⊗direct_sum([distribute_right(Yⱼ,Z_summands) for Yⱼ ∈ Y_summands]...)) ∘ distr_after
+    # distr_after = distribute_left(X_summands, Y⊗Z) ∘ distr_after
+    # YZ_arr = [Yⱼ⊗Zₖ for  Zₖ ∈ Z_summands, Yⱼ ∈ Y_summands][:]
+    # distr_after = direct_sum([distribute_right(Xᵢ, YZ_arr) for Xᵢ ∈ X_summands]) ∘ distr_after
 
+    _,ix,px = direct_sum(X_summands)
+    _,iy,py = direct_sum(Y_summands)
+    _,iz,pz = direct_sum(Z_summands)
+
+    distr_before = vertical_direct_sum([(f⊗g)⊗h for f ∈ px, g ∈ py, h ∈ pz][:])
+    #distr_after = vertical_direct_sum([f⊗(g⊗h) for f ∈ px, g ∈ py, h ∈ pz][:])
+
+    distr_after = horizontal_direct_sum([f⊗(g⊗h) for f ∈ ix, g ∈ iy, h ∈ iz][:])
     #-----------------------------------
     # Associator morphism
     #-----------------------------------
     m = zero_morphism(zero(C),zero(C))
-    for x ∈ X_summands, y ∈ Y_summands, z ∈ Z_summands
-        m = m ⊕ associator(x,y,z)
-    end
-
-    return inv(distr_after) ∘ m ∘ distr_before
+    # for x ∈ X_summands, y ∈ Y_summands, z ∈ Z_summands
+    #     m = m ⊕ associator(x,y,z)
+    # end
+    m = direct_sum([associator(x,y,z) for x ∈ X_summands, y ∈ Y_summands, z ∈ Z_summands][:])
+    
+    return compose(distr_before, m , distr_after)
 end
 
-@memoize Dict function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
+function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)
@@ -277,27 +285,37 @@ end
     -------------------------------------------------=#
 
     # Before
-    distr_before = distribute_left(X_summands, Y) ⊗ id(Z)
-    distr_before = (direct_sum([distribute_right(Xᵢ,Y_summands) for Xᵢ ∈ X_summands]...)⊗id(Z)) ∘ distr_before
-    distr_before = distribute_left([Xᵢ⊗Yⱼ for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:], Z) ∘ distr_before
-    distr_before = direct_sum([distribute_right(Xᵢ⊗Yⱼ,Z_summands) for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:]...) ∘ distr_before
+    # distr_before = distribute_left(X_summands, Y) ⊗ id(Z)
+    # distr_before = (direct_sum([distribute_right(Xᵢ,Y_summands) for Xᵢ ∈ X_summands]...)⊗id(Z)) ∘ distr_before
+    # distr_before = distribute_left([Xᵢ⊗Yⱼ for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:], Z) ∘ distr_before
+    # distr_before = direct_sum([distribute_right(Xᵢ⊗Yⱼ,Z_summands) for Yⱼ ∈ Y_summands, Xᵢ ∈ X_summands][:]...) ∘ distr_before
     
-    # After
-    distr_after = id(X)⊗distribute_left(Y_summands, Z)
-    distr_after = (id(X)⊗direct_sum([distribute_right(Yⱼ,Z_summands) for Yⱼ ∈ Y_summands]...)) ∘ distr_after
-    distr_after = distribute_left(X_summands, Y⊗Z) ∘ distr_after
-    YZ_arr = [Yⱼ⊗Zₖ for  Zₖ ∈ Z_summands, Yⱼ ∈ Y_summands][:]
-    distr_after = direct_sum([distribute_right(Xᵢ, YZ_arr) for Xᵢ ∈ X_summands]) ∘ distr_after
+    # # After
+    # distr_after = id(X)⊗distribute_left(Y_summands, Z)
+    # distr_after = (id(X)⊗direct_sum([distribute_right(Yⱼ,Z_summands) for Yⱼ ∈ Y_summands]...)) ∘ distr_after
+    # distr_after = distribute_left(X_summands, Y⊗Z) ∘ distr_after
+    # YZ_arr = [Yⱼ⊗Zₖ for  Zₖ ∈ Z_summands, Yⱼ ∈ Y_summands][:]
+    # distr_after = direct_sum([distribute_right(Xᵢ, YZ_arr) for Xᵢ ∈ X_summands]) ∘ distr_after
 
+    _,ix,px = direct_sum(X_summands)
+    _,iy,py = direct_sum(Y_summands)
+    _,iz,pz = direct_sum(Z_summands)
+
+    distr_before= horizontal_direct_sum([(f⊗g)⊗h for f ∈ ix, g ∈ iy, h ∈ iz][:])
+    distr_after = vertical_direct_sum([f⊗(g⊗h) for f ∈ px, g ∈ py, h ∈ pz][:])
+
+    #distr_after = horizontal_direct_sum([f⊗(g⊗h) for f ∈ ix, g ∈ iy, h ∈ iz][:])
     #-----------------------------------
     # Associator morphism
     #-----------------------------------
     m = zero_morphism(zero(C),zero(C))
-    for x ∈ X_summands, y ∈ Y_summands, z ∈ Z_summands
-        m = m ⊕ inv(associator(x,y,z))
-    end
+    # for x ∈ X_summands, y ∈ Y_summands, z ∈ Z_summands
+    #     m = m ⊕ inv(associator(x,y,z))
+    # end
 
-    return inv(distr_before) ∘ m ∘ distr_after
+    m = direct_sum([inv_associator(x,y,z) for x ∈ X_summands, y ∈ Y_summands, z ∈ Z_summands][:])
+
+    return compose(distr_after, m, distr_before)
 end
 
 function vector_permutation(A::Vector,B::Vector)
@@ -348,10 +366,10 @@ inv(f::SixJMorphism) = SixJMorphism(codomain(f),domain(f), inv.(f.m))
 id(X::SixJObject) = SixJMorphism(X,X, [one(matrix_space(base_ring(X),d,d)) for d ∈ X.components])
 
 
-function compose(f::SixJMorphism, g::SixJMorphism)
-    @assert codomain(f) == domain(g) "Morphisms not compatible"
+function compose(f::SixJMorphism...)
+    @assert all([codomain(f[i]) == domain(f[i+1]) for i ∈ 1:length(f)-1]) "Morphisms not compatible"
 
-    return SixJMorphism(domain(f), codomain(g), [m*n for (m,n) ∈ zip(f.m,g.m)])
+    return SixJMorphism(domain(f[1]), codomain(f[end]), [*(m...) for m ∈ zip(matrices.(f)...)])
 end
 
 function vertical_direct_sum(f::Vector{SixJMorphism})
@@ -707,20 +725,14 @@ function ^(X::SixJObject, k::Int)
     SixJObject(parent(X), k.*(X.components))
 end
 
-function direct_sum(f::SixJMorphism, g::SixJMorphism)
-    dom = domain(f) ⊕ domain(g)
-    cod = codomain(f) ⊕ codomain(g)
+function direct_sum(f::SixJMorphism...)
+    dom = ⊕(domain.(f)...)
+    cod = ⊕(codomain.(f)...)
     F = base_ring(dom)
-    m = zero_morphism(dom,cod).m
-    for i ∈ 1:parent(dom).simples
-        mf,nf = size(f.m[i])
-        mg,ng = size(g.m[i])
-        z1 = zero(matrix_space(F,mf,ng))
-        z2 = zero(matrix_space(F,mg,nf))
-        m[i] = [f.m[i] z1; z2 g.m[i]]
-    end
 
-    return morphism(dom,cod, m)
+    mats = [diagonal_matrix([g.m[i] for g ∈ f]) for i ∈ 1:parent(dom).simples]
+
+    return morphism(dom,cod, mats)
 end
 
 # function vertical_direct_sum(f::Vector{SixJMorphism})
@@ -767,6 +779,19 @@ end
 function simples(C::SixJCategory)
     n = C.simples
     [SixJObject(C, [i == j ? 1 : 0 for j ∈ 1:n]) for i ∈ 1:n]
+end
+
+
+function sort_simples!(C::SixJCategory, order::Vector{Int})
+    C.tensor_product = [C.tensor_product[i,j,k] for i ∈ order, j ∈ order, k ∈ order]
+    C.ass = [C.ass[i,j,k,l] for i ∈ order, j ∈ order, k ∈ order, l ∈ order]
+    C.simples_names = C.simples_names[order]
+
+    isdefined(C, :one) && (C.one = C.one[order])
+    isdefined(C, :spherical) && (C.spherical = C.spherical[order])
+    isdefined(C, :braiding) && (C.braiding = [C.braiding[i,j,k] for i ∈ order, j ∈ order, k ∈ order])
+    isdefined(C, :twist) && (C.twist = C.twist[order])
+    return C
 end
 
 #-------------------------------------------------------------------------------
@@ -924,6 +949,8 @@ function extension_of_scalars(C::SixJCategory, L::Field)
         f = L
     end
 
+    set_name!(D, C.name)
+
     try
         D = six_j_category(L, C.tensor_product, simples_names(C))
 
@@ -942,6 +969,8 @@ function extension_of_scalars(C::SixJCategory, L::Field)
         if isdefined(C, :twist) 
             D.twist = f.(C.twist)
         end
+        set_name!(D, C.name)
+
         return D
     catch 
         error("Extension of scalars not possible")

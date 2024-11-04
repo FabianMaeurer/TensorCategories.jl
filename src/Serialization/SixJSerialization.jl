@@ -77,7 +77,9 @@ function load_object(s::DeserializerState, ::Type{SixJCategory})
     C.ass = reshape(
         load_array_node(s, :ass) do (i,m)
             m = load_object(s, Matrix, (elem_type(base_ring(C)), base_ring(C)))
-            matrix(base_ring(C), size(m,1),size(m,2), m)
+            a = size(m,1)
+            b = length(size(m)) == 2 ? size(m,2) : 0
+            matrix(base_ring(C), a, b, m)
         end,
         n,n,n,n
     )

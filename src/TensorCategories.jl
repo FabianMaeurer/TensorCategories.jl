@@ -11,7 +11,8 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     MatrixGroup, matrix_space, ModuleIsomorphism, number_field, PcGroup, PolyRingElem,
     polynomial_ring, QQ, QQBar, QQField, QQFieldElem, QQMPolyRingElem, Ring, RingElem, ZZ, QQBarFieldElem,
     ZZRingElem, abelian_closure, abelian_group, absolute_simple_field, action, base_field,
-    base_ring, basis, central_primitive_idempotents, change_base_ring, characteristic,
+    base_ring, basis, central_primitive_idempotents, change_base_ring, 
+     characteristic,
     charpoly, codomain, coeff, coefficients, cokernel, complex_embeddings, compose, centralizer,
     cyclotomic_field, decompose, degree, det, diagonal_matrix, dim, direct_sum, divisors,
     domain, dual, eigenspace, eigenspaces, eigenvalues, elem_type, elements, exponent,
@@ -31,7 +32,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     number_of_rows, number_of_columns, is_squarefree, is_commutative,
     gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra,
     radical, is_zero, minimal_submodules, representation_matrix, QQBarField,
-    is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module, perm
+    is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module, perm, fraction_field
 
 using Serialization
 import Oscar: @register_serialization_type,
