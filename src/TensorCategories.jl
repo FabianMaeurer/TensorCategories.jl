@@ -2,6 +2,7 @@ module TensorCategories
 
 import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show,div, rand, split
 
+import Oscar
 import Oscar.AbstractAlgebra.Generic: Poly
 import Oscar.Hecke: RelSimpleNumField, regular_module, meataxe
 import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAlgebra, AssociativeAlgebraElem,
