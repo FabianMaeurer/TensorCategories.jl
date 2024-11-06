@@ -91,7 +91,7 @@ function meataxe(M::RightModuleObject, incl::Vector{T}, proj::Vector{T}) where T
             id(object(M)) ⊗ i,
             right_action(M)
         )
-        kernel_of_a, kernel_inclusion = kernel(action_of_a)
+        @show kernel_of_a, kernel_inclusion = kernel(action_of_a)
         if kernel_of_a != zero(C)
             break
         end
@@ -132,7 +132,7 @@ function minimal_subquotients_with_multiplicity(M::ModuleObject)
     end
     
     # Check M for simplicity
-    irred, N, incl = meataxe(M)
+    @show irred, N, incl = meataxe(M)
 
     if irred
         set_attribute!(M, :is_simple, true)
