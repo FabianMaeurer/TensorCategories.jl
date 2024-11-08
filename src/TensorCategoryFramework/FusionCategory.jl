@@ -952,11 +952,11 @@ function extension_of_scalars(C::SixJCategory, L::Field)
         f = L
     end
 
-    set_name!(D, C.name)
-
     try
         D = six_j_category(L, C.tensor_product, simples_names(C))
 
+        set_name!(D, C.name)
+        
         if isdefined(C, :ass)
             D.ass = [matrix(L, size(a)..., f.(collect(a))) for a ∈ C.ass]
         end
