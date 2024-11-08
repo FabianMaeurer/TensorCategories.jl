@@ -414,6 +414,14 @@ function minpoly(f::Morphism)
     end
 end 
 
+function subst(f::PolyRingElem{T}, m::Morphism) where T <: FieldElem
+    @assert domain(m) == codomain(m)
+
+    R = parent(f)
+
+    return sum([c * compose([id(domain(m)); [m for _ ∈ 1:d]]...) for (c,d) ∈ zip(coefficients(f), 0:degree(f))])
+end
+
 function _decompose_by_simple_endomorphism_ring(X::Object, E = End(X))
 
     K = base_ring(X)

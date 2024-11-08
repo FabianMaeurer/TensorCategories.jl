@@ -224,8 +224,8 @@ Check whether σ and τ are isomorphic. If true return the isomorphism.
     gap_F = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
 
     #Build the modules from σ and τ
-    mats_σ = GAP.GapObj([GAP.julia_to_gap(σ(g)) for g ∈ gens(grp)])
-    mats_τ = GAP.GapObj([GAP.julia_to_gap(τ(g)) for g ∈ gens(grp)])
+    mats_σ = GAP.GapObj([GAP.GapObj(σ(g)) for g ∈ gens(grp)])
+    mats_τ = GAP.GapObj([GAP.GapObj(τ(g)) for g ∈ gens(grp)])
 
 
     Mσ = GAP.Globals.GModuleByMats(mats_σ, gap_F)
@@ -576,8 +576,8 @@ Return the hom-space of the representations as a vector space.
     generators = order(grp) == 1 ? elements(grp) : gens(grp)
 
     #Build the modules from σ and τ
-    mats_σ = GAP.GapObj([GAP.julia_to_gap(σ(g)) for g ∈ generators])
-    mats_τ = GAP.GapObj([GAP.julia_to_gap(τ(g)) for g ∈ generators])
+    mats_σ = GAP.GapObj([GAP.GapObj(σ(g)) for g ∈ generators])
+    mats_τ = GAP.GapObj([GAP.GapObj(τ(g)) for g ∈ generators])
     Mσ = GAP.Globals.GModuleByMats(mats_σ, gap_F)
     Mτ = GAP.Globals.GModuleByMats(mats_τ, gap_F)
 
@@ -752,7 +752,7 @@ end
 function to_gap_module(σ::GroupRepresentation,F::Field)
     grp = σ.group
     gap_F = codomain(iso_oscar_gap(F))
-    mats_σ = GAP.GapObj([GAP.julia_to_gap(σ(g)) for g ∈ gens(grp)])
+    mats_σ = GAP.GapObj([GAP.GapObj(σ(g)) for g ∈ gens(grp)])
     Mσ = GAP.Globals.GModuleByMats(mats_σ, gap_F)
 end
 

@@ -39,7 +39,7 @@ function spin_submodule(M::LeftModuleObject, u::Morphism)
     # until the image is isomorphic to U
     # (Analog to the spinning algorithm for modules over an
     # algebra)
-
+    @show parent(M)
     A = object(algebra(parent(M)))
     
     action_on_U = compose(
@@ -83,19 +83,47 @@ function meataxe(M::RightModuleObject, incl::Vector{T}, proj::Vector{T}) where T
         return true, M, id(M)
     end
     
-    local kernel_of_a, kernel_inclusion
+    kernel_of_a = zero(C)
+    kernel_inclusion = zero_morphism(zero(C),zero(C))
     # Dummy for now 
     
-    for (i,p) ∈ zip(incl,proj)
-        action_of_a = compose(
-            id(object(M)) ⊗ i,
-            right_action(M)
-        )
-        @show kernel_of_a, kernel_inclusion = kernel(action_of_a)
-        if kernel_of_a != zero(C)
-            break
+    n = length(incl)
+    K = base_ring(C)
+    θ = sum(K.(rand(Int,n)) .* [i ∘ p for (i,p) ∈ zip(incl, proj)])
+    kernel_non_zero = false
+
+    while !kernel_non_zero
+        polys = [k for (k,v) ∈ collect(factor(minpoly(θ)))]
+        polys = sort(polys, by = degree)
+        for p ∈ polys 
+            p(0) == 0 && continue 
+            ξ = p(θ)
+
+            action_of_a = compose(
+                id(object(M)) ⊗ ξ,
+                right_action(M)
+            )
+
+            kernel_of_a, kernel_inclusion = kernel(action_of_a)
+
+            if !is_zero(int_dim(Hom(kernel_of_a, object(M))))
+                kernel_non_zero = true
+                break
+            end
         end
+        θ = sum(rand(Bool,n) .* [i ∘ p for (i,p) ∈ zip(incl, proj)])
     end
+
+    # for (i,p) ∈ zip(incl,proj)
+    #     action_of_a = compose(
+    #         id(object(M)) ⊗ i,
+    #         right_action(M)
+    #     )
+    #     @show kernel_of_a, kernel_inclusion = kernel(action_of_a)
+    #     if !is_zero(kernel_of_a)
+    #         break
+    #     end
+    # end
 
     if is_zero(kernel_of_a)
         return true, M, id(M)
@@ -110,7 +138,7 @@ function meataxe(M::RightModuleObject, incl::Vector{T}, proj::Vector{T}) where T
 
     f = Hom(dual(kernel_of_a), dual(object(M)))[1]
     N, inclusion = spin_submodule(transposed_module(M), f) 
-
+    
     if !is_invertible(inclusion) && int_dim(End(N)) != 0
         N = transposed_module(N)
         return false, N, morphism(N,M,right_inverse(dual(inclusion)))
@@ -118,6 +146,8 @@ function meataxe(M::RightModuleObject, incl::Vector{T}, proj::Vector{T}) where T
 
     return true, M, id(M)
 end
+
+
 
 
 function minimal_subquotients_with_multiplicity(M::ModuleObject)
@@ -132,7 +162,7 @@ function minimal_subquotients_with_multiplicity(M::ModuleObject)
     end
     
     # Check M for simplicity
-    @show irred, N, incl = meataxe(M)
+    irred, N, incl = meataxe(M)
 
     if irred
         set_attribute!(M, :is_simple, true)

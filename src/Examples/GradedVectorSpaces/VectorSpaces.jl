@@ -288,6 +288,9 @@ end
 #-----------------------------------------------------------------
 
 function compose(f::VectorSpaceMorphism...)
+    if length(f) == 1
+        return f[1]
+    end
     @assert all([is_isomorphic(domain(f[i]), codomain(f[i-1]))[1] for i ∈ 2:length(f)])  "Morphisms not compatible"
 
     return morphism(domain(f[1]),codomain(f[end]),*([g.m for g ∈ f]...))

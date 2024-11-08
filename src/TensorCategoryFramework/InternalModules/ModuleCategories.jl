@@ -529,7 +529,7 @@ function transposed_module(N::RightModuleObject)
         (ev(dA) ∘ (spherical(A) ⊗ id(dA))) ⊗ id(dM)
     )
 
-    C = RightModuleCategory(
+    C = LeftModuleCategory(
         parent(M),
         algebra(parent(N))
     )
@@ -568,7 +568,7 @@ function transposed_module(N::LeftModuleObject)
         id(dM) ⊗ ev(A)
     ) 
 
-    C = LeftModuleCategory(
+    C = RightModuleCategory(
         parent(N),
         algebra(parent(N))
     )

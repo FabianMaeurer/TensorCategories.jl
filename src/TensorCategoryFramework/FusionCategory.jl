@@ -367,6 +367,9 @@ id(X::SixJObject) = SixJMorphism(X,X, [one(matrix_space(base_ring(X),d,d)) for d
 
 
 function compose(f::SixJMorphism...)
+    if length(f) == 1 
+        return f[1]
+    end
     @assert all([codomain(f[i]) == domain(f[i+1]) for i ∈ 1:length(f)-1]) "Morphisms not compatible"
 
     return SixJMorphism(domain(f[1]), codomain(f[end]), [*(m...) for m ∈ zip(matrices.(f)...)])

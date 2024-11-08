@@ -26,7 +26,7 @@ end
 
 function print_multiplication_table(indecomposables::Vector{<:Object}, names::Vector{String} = ["v$i" for i ∈ 1:length(indecomposables)])
     @assert length(indecomposables) == length(names) "Invalid input"
-    mult_table = multiplication_table(parent(indecomposables[1]), indecomposables)
+    #mult_table = multiplication_table(parent(indecomposables[1]), indecomposables)
 
     return [pretty_print_decomposable(s⊗t,indecomposables,names) for s ∈ indecomposables, t ∈ indecomposables]
 end
@@ -34,7 +34,7 @@ end
 print_multiplication_table(C::Category) = print_multiplication_table(indecomposables(C), indecomposables_names(C))
 
 function pretty_print_decomposable(m::Object,indecomposables::Vector{<:Object},names::Vector{String})
-    facs = decompose(m, indecomposables)
+    facs = is_semisimple(parent(m)) ? decompose(m, indecomposables) : decompose(m)
 
     if length(facs) == 0 return "0" end
 
