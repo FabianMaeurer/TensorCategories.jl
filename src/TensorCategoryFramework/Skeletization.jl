@@ -128,6 +128,9 @@ function six_j_symbols(C::Category, S = simples(C))
     return ass           
 end
 
+function skeletal_spherical(C::Category, Homs)
+end
+
 function skeletal_braiding(C::Category, S = simples(C))
     @assert is_braided(C)
     

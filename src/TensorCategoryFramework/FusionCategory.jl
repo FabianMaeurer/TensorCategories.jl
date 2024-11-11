@@ -1025,6 +1025,12 @@ function extension_of_scalars(m::SixJMorphism, L::Field)
     end
 end
 
+
+
+function simplify(C::SixJCategory)
+    K = base_ring(C)
+end
+
 #=----------------------------------------------------------
     Reverse braided  
 ----------------------------------------------------------=#
