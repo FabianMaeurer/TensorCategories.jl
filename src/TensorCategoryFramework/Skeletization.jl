@@ -44,7 +44,9 @@ function six_j_category(S::Vector{<:Object}, names::Vector{String} = ["X$i" for 
     end
     # Try to set spherical
     try 
-        set_spherical!(skel_C,[F(spherical(s)) for s ∈ S])
+        set_spherical!(skel_C,[F(1) for s ∈ S])
+        sp = [dim(S[i]) * inv(dim(skel_C[i])) for i ∈ 1:length(S)]
+        set_spherical!(Skel_C, sp)
     catch
     end
 
