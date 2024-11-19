@@ -1,10 +1,15 @@
-function eigenvalues(M::MatElem{QQBarFieldElem})
+function eigenvalues(M::MatElem{QQBarFieldElem}) 
     p = minpoly(M)
 
     rs = roots(p)
 end
 
-function factor(p::PolyRingElem{QQBarFieldElem})
+function eigenvalues(M::MatElem{CalciumFieldElem})
+    m = change_base_ring(QQBar,M)
+    base_ring(M).(eigenvalues(m))
+end
+
+function factor(p::PolyRingElem{T}) where T <: Union{QQBarFieldElem, CalciumFieldElem}
 
     u = leading_coefficient(p)
 
@@ -17,6 +22,11 @@ end
 # function roots(p::PolyRingElem{QQBarFieldElem})
 #     rs = [r for r in roots(rational_lift(p), base_ring(p)) if p(r) == 0]
 # end
+
+function roots(p::PolyRingElem{CalciumFieldElem})
+    rs = roots(change_base_ring(QQBar, p))
+    return [base_ring(p)(r) for r in rs]
+end
 
 function roots(p::PolyRingElem{QQBarFieldElem})
     coef_deg = maximum([degree(c) for c in coefficients(p)])

@@ -13,7 +13,8 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false)
     =#
 
     # Over QQBar it's easier
-    if base_ring(X) == QQBar
+    K = base_ring(X)
+    if K == QQBar || typeof(K) == CalciumField
         return simple_subobjects_over_qqbar(X,E)
     end
 

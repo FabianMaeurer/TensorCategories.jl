@@ -936,13 +936,18 @@ end
 
 Return the category ``C⊗K``.
 """
-function extension_of_scalars(C::SixJCategory, L::Field)
+function extension_of_scalars(C::SixJCategory, L::Ring)
     K = base_ring(C)
-    if K != QQ && characteristic(K) == 0 
+
+    if typeof(L) == CalciumField || L == QQBar
+        x = roots(L,K.pol)[1]
+        f = hom(K,L,x)
+
+    elseif K != QQ && characteristic(K) == 0 
         if K isa AbsSimpleNumField && L isa RelSimpleNumField
             f = L
         else
-            if base_field(K) == base_field(L)
+            if typeof(L) <: Union{AbsSimpleNumField, QQField, RelSimpleNumField} && (base_field(K) == base_field(L))
                 _,f = is_subfield(K,L)
             else
                 f = L
@@ -980,13 +985,14 @@ function extension_of_scalars(C::SixJCategory, L::Field)
     end
 end
 
+
 """ 
 
     extension_of_scalars(X::SixJObject, K::Field)
 
 Return the object ``X`` as an object of the category ``C⊗K``.
 """
-function extension_of_scalars(X::SixJObject, L::Field, CL = parent(X) ⊗ L)
+function extension_of_scalars(X::SixJObject, L::Ring, CL = parent(X) ⊗ L)
     SixJObject(CL, X.components)
 end
 
@@ -996,13 +1002,13 @@ end
 
 Return the category ``C⊗K``.
 """
-function extension_of_scalars(m::SixJMorphism, L::Field)
+function extension_of_scalars(m::SixJMorphism, L::Ring)
     K = base_ring(m)
     if K != QQ && characteristic(K) == 0 
         if K isa AbsSimpleNumField && L isa RelSimpleNumField
             f = L
         else
-            if base_field(K) == base_field(L)
+            if  typeof(L) <: Union{AbsSimpleNumField, QQField, RelSimpleNumField} && base_field(K) == base_field(L)
                 _,f = is_subfield(K,L)
             else
                 f = L

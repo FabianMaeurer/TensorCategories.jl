@@ -17,10 +17,15 @@ mutable struct CenterCategory <: Category
     end
 end
 
-struct CenterObject <: Object
+@attributes mutable struct CenterObject <: Object
     parent::CenterCategory
     object::Object
     γ::Vector{M} where M <: Morphism
+
+    function CenterObject(parent::CenterCategory, object::Object,
+        γ::Vector{<: Morphism})
+        new(parent, object, γ)
+    end
 end
 
 struct CenterMorphism <: Morphism
@@ -60,11 +65,12 @@ function induction_generators(C::CenterCategory)
 
     ind_gens = object_type(category(C))[]
 
-    indicies = eachindex(simpls)
-    while !isempty(indicies)
-        x = simpls[indicies[1]]
+    indices = collect(eachindex(simpls))
+    while !isempty(indices)
+        i = popfirst!(indices)
+        x = simpls[i]
         push!(ind_gens, x)
-        indicies = [s for s ∈ indicies if all([!is_isomorphic(simpls[s], i ⊗ x ⊗ dual(i))[1] for i ∈ invertibls])]
+        indices = [s for s ∈ indices if all([!is_isomorphic(simpls[s], i ⊗ x ⊗ dual(i))[1] for i ∈ invertibls])]
     end
     C.induction_gens = ind_gens
 end
@@ -639,6 +645,11 @@ end
 
 function decompose(X::CenterObject)
     C = parent(X)
+    K = base_ring(X)
+
+    if K == QQBar || typeof(K) == CalciumField
+        return decompose_over_qqbar(X)
+    end
 
     if isdefined(C, :simples) && is_semisimple(C)
         return decompose_by_simples(X,simples(C))
@@ -919,7 +930,17 @@ end
 
 
 function Hom(X::CenterObject, Y::CenterObject) 
-    if is_zero(dim(category(parent(X)))) 
+
+    alg_closed = (base_ring(X) == QQBar || typeof(base_ring(X)) == CalciumField)
+
+    if alg_closed && has_attribute(X, :is_simple) && 
+        get_attribute(X, :is_simple) &&
+        has_attribute(Y, :is_simple) &&
+        get_attribute(Y, :is_simple) &&
+        return hom_by_linear_equations(X,Y)
+    end
+
+    if is_zero(dim(category(parent(X)))) || alg_closed
         return hom_by_linear_equations(X,Y)
     else 
         return hom_by_adjunction(X,Y)
@@ -1034,19 +1055,21 @@ function simples_by_induction!(C::CenterCategory, log = true)
 
         Z = induction(s, simpls, parent_category = C)
 
-        if base_ring(C) == QQBar
-            #factor out all already known simples
-            for (t,k) ∈ S_in_Z
-                for i ∈ 1:k
-                    incl = basis(Hom(t,Z))[1]
-                    @show Z = cokernel(incl)[1]
-                end
-            end
-            H = End(Z)
-        else
-            H = end_of_induction(s, Z)
-        end
-        
+        # if base_ring(C) == QQBar
+        #     #factor out all already known simples
+        #     for (t,k) ∈ S_in_Z
+        #         for i ∈ 1:k
+        #             incl = basis(Hom(t,Z))[1]
+        #             @show Z = cokernel(incl)[1]
+        #         end
+        #     end
+        #     H = End(Z)
+        # else
+        #     H = end_of_induction(s, Z)
+        # end
+
+        H = end_of_induction(s, Z)
+
         #contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
         # if length(contained_simples) > 0
         #     if is_isomorphic(Is, direct_sum(object.(contained_simples))[1])[1]

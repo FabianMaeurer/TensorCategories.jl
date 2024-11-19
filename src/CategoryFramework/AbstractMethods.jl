@@ -133,6 +133,23 @@ end
 Check whether ``X`` is a simple object.  
 """
 function is_simple(X::Object)
+    if hasfield(typeof(X), :__attrs)
+        get_attribute!(X, :is_simple) do
+            B = basis(End(X))
+            if length(B) == 0
+                return false
+            elseif length(B) == 1
+                return true
+            end
+            
+            try 
+                is_simple(endomorphism_ring(X, B))
+            catch
+                false
+            end
+        end
+    end
+
     B = basis(End(X))
     if length(B) == 0
         return false
@@ -178,7 +195,8 @@ decompose(X::T, S::Vector{T}) where T <: Object = decompose_by_simples(X,S)
 # end
 
 function decompose_by_endomorphism_ring(X::Object, E = End(X))
-    if base_ring(X) == QQBar
+    K = base_ring(X)
+    if K == QQBar || typeof(K) == CalciumField
         return decompose_over_qqbar(X, E)
     end
 
@@ -211,23 +229,23 @@ end
 function decompose_over_qqbar(X::Object, E = End(X))
     @assert is_semisimple(parent(X))
     if int_dim(E) == 1
+        try 
+            set_attribute!(X, :is_simple, true)
+        catch 
+        end
         return [(X,1)]
-    end
-    subs = simple_subobjects_over_qqbar(X,E)
-
-    [(s, int_dim(Hom(s, X))) for s ∈ subs]
-end
-
-function simple_subobjects_over_qqbar(X::Object, E = End(X))
-    if int_dim(E) == 1 
-        return [X]
     end
 
     f = [f for f ∈ basis(E) if degree(minpoly(f)) > 1][1]
     
     K = collect(values(eigenvalues(f)))
-    
-    return unique_simples(vcat([simple_subobjects_over_qqbar(k) for k ∈ K]...))
+    subs = vcat([decompose_over_qqbar(k) for k ∈ K]...)
+    subs = [s for (s,_) ∈ subs]
+    unique_simples_with_multiplicity(subs)
+end
+
+function simple_subobjects_over_qqbar(X::Object, E = End(X))
+    return [s for (s,_) ∈ decompose_over_qqbar(X,E)]
 end
 
 
@@ -242,7 +260,7 @@ function direct_sum_decomposition(X::Object, S = simples(parent(X)))
     C = parent(X)
     @assert is_semisimple(C) "Semisimplicity required"
     
-    if X == zero(C) return id(X), [], [] end
+    if X == zero(C) return X, id(X), [], [] end
 
     components = decompose(X,S)
     Z, incl, proj = direct_sum(vcat([[s for _ ∈ 1:d] for (s,d) ∈ components]...)...)
@@ -408,6 +426,9 @@ function minpoly(f::Morphism)
     @assert domain(f) == codomain(f) "Not an edomorphism"
     
     if hasmethod(matrix, Tuple{typeof(f)})
+        if typeof(base_ring(f)) == CalciumField
+            return change_base_ring(base_ring(f), minpoly(change_base_ring(QQBar, matrix(f))))
+        end
         return minpoly(matrix(f))
     else
         error("Generic minpoly coming soon")
@@ -488,6 +509,19 @@ function unique_simples(simples::Vector{<:Object})
         end
     end
 
+    return unique_simples
+end
+
+function unique_simples_with_multiplicity(simples::Vector{<:Object})
+    unique_simples = [(simples[1], 1)]
+    for s ∈ simples[2:end]
+        i = findfirst(u -> is_isomorphic_simples(s,u[1])[1], unique_simples)
+        if i === nothing
+            unique_simples = [unique_simples; (s, 1)]
+        else
+            unique_simples[i] = (unique_simples[i][1], unique_simples[i][2] + 1)
+        end
+    end
     return unique_simples
 end
 

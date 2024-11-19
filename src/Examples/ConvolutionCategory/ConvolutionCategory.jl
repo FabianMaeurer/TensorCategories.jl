@@ -14,7 +14,7 @@ struct ConvolutionObject <: Object
     parent::ConvolutionCategory
 end
 
-convolution_object = ConvolutionObject
+ConvolutionObject = ConvolutionObject
 
 struct ConvolutionMorphism <: Morphism
     domain::ConvolutionObject
@@ -32,8 +32,8 @@ function convolution_category(K::Field, X::GSet)
     G = X.group
     sqX = gset(G,(x,g) -> Tuple(X.action_function(xi,g) for xi ∈ x), [(x,y) for x ∈ X.seeds, y ∈ X.seeds][:])
     cuX = gset(G,(x,g) -> Tuple(X.action_function(xi,g) for xi ∈ x), [(x,y,z) for x ∈ X.seeds, y ∈ X.seeds, z ∈ X.seeds][:])
-    sqCoh = coherent_sheaves(sqX,K)
-    cuCoh = coherent_sheaves(cuX,K)
+    sqCoh = coherent_sheaves(K, sqX)
+    cuCoh = coherent_sheaves(K, cuX)
 
     p12 = x -> (x[1],x[2])
     p13 = x -> (x[1],x[3])
@@ -56,7 +56,7 @@ function convolution_category(K::Field, X)
 end
 
 function convolution_category(K::Field, G::GAPGroup, X)
-    convolution_category(gset(G,X), K)
+    convolution_category(K, gset(G,X))
 end
 
 morphism(D::ConvolutionObject, C::ConvolutionObject, m:: CohSheafMorphism) = ConvolutionMorphism(D,C,m)
@@ -136,7 +136,7 @@ documentation
 function direct_sum(X::ConvolutionObject, Y::ConvolutionObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
     Z,ix,px = direct_sum(X.sheaf,Y.sheaf)
-    Z = Convolution_object(Z,parent(X))
+    Z = ConvolutionObject(Z,parent(X))
 
 
     ix = [ConvolutionMorphism(x,Z,i) for (x,i) ∈ zip([X,Y],ix)]
@@ -171,14 +171,14 @@ zero(C::ConvolutionCategory) = ConvolutionObject(zero(C.squaredCoh),C)
 
 function kernel(f::ConvolutionMorphism)
     K,k = kernel(f.m)
-    Conv_K = Convolution_object(K,parent(f))
-    return Convolution_object(K,parent(domain(f))), morphism(Conv_K, domain(f), k)
+    Conv_K = ConvolutionObject(K,parent(f))
+    return ConvolutionObject(K,parent(domain(f))), morphism(Conv_K, domain(f), k)
 end
 
 function cokernel(f::ConvolutionMorphism)
     C,c = cokernel(f.m)
-    Conv_C = Convolution_object(C,parent(f))
-    return Convolution_object(C, parent(domain(f))), morphism(codomain(f), Conv_C, c)
+    Conv_C = ConvolutionObject(C,parent(f))
+    return ConvolutionObject(C, parent(domain(f))), morphism(codomain(f), Conv_C, c)
 end
 
 #-----------------------------------------------------------------
@@ -194,7 +194,7 @@ function tensor_product(X::ConvolutionObject, Y::ConvolutionObject)
     @assert parent(X) == parent(Y) "Mismatching parents"
     p12,p13,p23 = parent(X).projectors
 
-    return Convolution_object(p13(p12(X.sheaf)⊗p23(Y.sheaf)),parent(X))
+    return ConvolutionObject(p13(p12(X.sheaf)⊗p23(Y.sheaf)),parent(X))
 end
 
 """
@@ -224,7 +224,7 @@ function one(C::ConvolutionCategory)
     for i ∈ [orbit_index(C,d) for d ∈ diag]
         stlks[i] = one(representation_category(F,orbit_stabilizers(C)[i]))
     end
-    return Convolution_object(CohSheafObject(C.squaredCoh, stlks), C)
+    return ConvolutionObject(CohSheafObject(C.squaredCoh, stlks), C)
 end
 
 function dual(X::ConvolutionObject)
@@ -232,7 +232,7 @@ function dual(X::ConvolutionObject)
     GSet = parent(X).squaredCoh.GSet
     perm = [findfirst(e -> e ∈ orbit(GSet, (y,x)), orbit_reps) for (x,y) ∈ orbit_reps]
     reps = [dual(ρ) for ρ ∈ stalks(X)][perm]
-    return Convolution_object(CohSheafObject(parent(X.sheaf), reps), parent(X))
+    return ConvolutionObject(CohSheafObject(parent(X.sheaf), reps), parent(X))
 end
 
 spherical(X::ConvolutionObject) = id(X)
@@ -277,7 +277,7 @@ left_inverse(f::ConvolutionMorphism) = morphism(codomain(f),domain(f), left_inve
 Return a list of simple objects in Conv(``X``).
 """
 #= @memoize Dict =# function simples(C::ConvolutionCategory)
-    return [Convolution_object(sh,C) for sh ∈ simples(C.squaredCoh)]
+    return [ConvolutionObject(sh,C) for sh ∈ simples(C.squaredCoh)]
 end
 
 """
@@ -287,7 +287,7 @@ Decompose ``X`` into a direct sum of simple objects with multiplicities.
 """
 function decompose(X::ConvolutionObject)
     facs = decompose(X.sheaf)
-    return [(Convolution_object(sh,parent(X)),d) for (sh,d) ∈ facs]
+    return [(ConvolutionObject(sh,parent(X)),d) for (sh,d) ∈ facs]
 end
 
 function is_simple(X::ConvolutionObject)

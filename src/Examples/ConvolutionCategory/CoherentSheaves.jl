@@ -29,12 +29,12 @@ is_multifusion(C::CohSheaves) = mod(order(C.group),characteristic(base_ring(C)))
 
 The category of ``G``-equivariant coherent sheafes on ``X``.
 """
-function coherent_sheaves(X::GSet, F::Field)
+function coherent_sheaves(F::Field, X::GSet)
     G = X.group
     orbit_reps = [O.seeds[1] for O ∈ orbits(X)]
     orbit_stabilizers = [stabilizer(G,x,X.action_function)[1] for x ∈ orbit_reps]
     RepCats = [representation_category(F,H) for H ∈ orbit_stabilizers]
-    return coherent_sheaves(G, F, X, orbit_reps, orbit_stabilizers, RepCats)
+    return CohSheaves(G, F, X, orbit_reps, orbit_stabilizers, RepCats)
 end
 
 """
@@ -42,9 +42,9 @@ end
 
 The category of coherent sheafes on ``X``.
 """
-function coherent_sheaves(X,F::Field)
+function coherent_sheaves(F::Field, X)
     G = symmetric_group(1)
-    return coherent_sheaves(gset(G,X), F)
+    return coherent_sheaves(F, gset(G,X))
 end
 
 morphism(X::CohSheafObject, Y::CohSheafObject, m::Vector) = CohSheafMorphism(X,Y,m)

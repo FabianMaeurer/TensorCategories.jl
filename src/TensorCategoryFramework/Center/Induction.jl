@@ -37,13 +37,12 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
                 
                 #_,_,_,p = direct_sum_decomposition(dual(S)⊗W, dual.(simples))
 
-                basis_dual = transform_dual_basis(dual_basis, S,W,T)
-
                 if length(_basis) == 0 
                     γ_i_temp = vertical_direct_sum(γ_i_temp, zero_morphism(dom_i, W⊗((T⊗X)⊗dual(T)))) 
                     continue
                 end
 
+                basis_dual = transform_dual_basis(dual_basis, S,W,T)
 
                 #_basis, basis_dual = adjusted_dual_basis(_basis, basis_dual, S, W, T)
 
@@ -123,6 +122,10 @@ function end_of_induction(X::Object, IX = induction(X))
     @assert is_split_semisimple(parent(X))
 
     B = basis(Hom(X,object(IX)))
+
+    if length(B) == 0 
+        return HomSpace(IX, IX, morphism_type(parent(IX))[])
+    end
     simpls = simples(parent(X))
 
     m = [zero_morphism(X,X) for _ in 1:length(simpls)]
@@ -130,11 +133,20 @@ function end_of_induction(X::Object, IX = induction(X))
     @threads for i ∈ 1:length(simpls)
         xi = simpls[i]
         dxi = dual(xi)
-        m[i] = (dim(xi))*compose(
-        inv(half_braiding(IX, xi)) ⊗ id(dxi),
-        associator(object(IX), xi, dual(xi)),
-        id(object(IX)) ⊗ (ev(dxi) ∘ (spherical(xi) ⊗ id(dxi)))
-        ) 
+        if typeof(base_ring(X)) == CalciumField #|| base_ring(X) == QQBar
+            m[i] = (dim(xi))*compose(
+                associator(xi, object(IX), dxi),
+                id(xi) ⊗ half_braiding(IX, dxi),
+                inv_associator(xi, dxi, object(IX)),
+                (ev(dxi) ∘ (spherical(xi) ⊗ id(dxi))) ⊗ id(object(IX))
+            ) 
+        else
+            m[i] = (dim(xi))*compose(
+                inv(half_braiding(IX, xi)) ⊗ id(dxi),
+                associator(object(IX), xi, dxi),
+                id(object(IX)) ⊗ (ev(dxi) ∘ (spherical(xi) ⊗ id(dxi)))
+            ) 
+        end
     end
 
     m = horizontal_direct_sum(m)
@@ -150,13 +162,20 @@ function induction_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = inducti
     @assert is_split_semisimple(parent(H[1]))
 
     simpls = simples(parent(H[1]))
-
-    ind_f = [dim(xi) * compose(
-        inv(half_braiding(Y, xi)) ⊗ id(dual(xi)),
-        associator(object(Y), xi, dual(xi)),
-        id(object(Y)) ⊗ (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi))))
-    ) for xi ∈ simpls]
-
+    if typeof(base_ring(Y)) == CalciumField()
+        ind_f = [dim(xi) * compose(
+            associator(xi, object(Y), dual(xi)),
+            id(xi) ⊗ half_braiding(Y, dual(xi)),
+            inv_associator(xi, dual(xi), object(IX)),
+            (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(IX))
+        ) for xi ∈ simpls]
+    else
+        ind_f = [dim(xi) * compose(
+            inv(half_braiding(Y, xi)) ⊗ id(dual(xi)),
+            associator(object(Y), xi, dual(xi)),
+            id(object(Y)) ⊗ (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi))))
+        ) for xi ∈ simpls]
+    end
     # ind_f = [(dim(xi))*compose(
     #     (id(xi) ⊗ f) ⊗ id(dual(xi)),
     #     associator(xi, object(Y), dual(xi)),
