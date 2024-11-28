@@ -370,6 +370,7 @@ function compose(f::SixJMorphism...)
     if length(f) == 1 
         return f[1]
     end
+    #@show [(codomain(f[i]), domain(f[i+1])) for i ∈ 1:length(f)-1]
     @assert all([codomain(f[i]) == domain(f[i+1]) for i ∈ 1:length(f)-1]) "Morphisms not compatible"
 
     return SixJMorphism(domain(f[1]), codomain(f[end]), [*(m...) for m ∈ zip(matrices.(f)...)])

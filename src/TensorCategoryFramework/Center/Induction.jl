@@ -162,12 +162,12 @@ function induction_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = inducti
     @assert is_split_semisimple(parent(H[1]))
 
     simpls = simples(parent(H[1]))
-    if typeof(base_ring(Y)) == CalciumField()
+    if typeof(base_ring(Y)) == CalciumField() || base_ring(Y) == QQBar
         ind_f = [dim(xi) * compose(
             associator(xi, object(Y), dual(xi)),
             id(xi) ⊗ half_braiding(Y, dual(xi)),
-            inv_associator(xi, dual(xi), object(IX)),
-            (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(IX))
+            inv_associator(xi, dual(xi), object(Y)),
+            (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
         ) for xi ∈ simpls]
     else
         ind_f = [dim(xi) * compose(

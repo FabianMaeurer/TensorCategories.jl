@@ -913,7 +913,7 @@ function extension_of_scalars(C::CentralizerCategory, L::Field)
 end
 
 function _extension_of_scalars(C::CentralizerCategory, L::Field, cL = category(C)⊗L)
-    CentralizerCategory(cL)
+    centralizer(cL, [extension_of_scalars(x,L, cL) for x ∈ C.subcategory_simples])
 end
 
 function extension_of_scalars(X::CentralizerObject, L::Field, CL = _extension_of_scalars(parent(X),L))

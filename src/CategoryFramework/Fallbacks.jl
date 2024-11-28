@@ -206,6 +206,9 @@ Base.eltype(H::Type{T}) where T <: AbstractHomSpace = fieldtype(H, :basis).param
 (R::QQBarField)(f::Morphism) = morphism_to_scalar(R,f)
 
 function morphism_to_scalar(R::Ring, f::Morphism)  
+    if is_zero(f)
+        return zero(R)
+    end
     B = basis(Hom(domain(f), codomain(f)))
     if length(B) == 0 
         return 0
@@ -231,7 +234,7 @@ function morphism_to_scalar(R::Ring, f::Morphism)
     # if size(m) == (1,)
     #     return F(m[1,1])
     # end
-    throw(ErrorException("Cannot convert to element of $F"))
+    throw(ErrorException("Cannot convert to element of $R"))
 end
 
 function is_scalar_multiple(M::MatElem,N::MatElem)

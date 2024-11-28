@@ -623,6 +623,13 @@ Return the categorical dimension of ```X```.
 dim(X::CenterObject) = dim(X.object)
 
 """
+    fpdim(X::CenterObject)
+
+Return the Frobenius-Perron dimension of ```X```.
+"""
+fpdim(X::CenterObject) = fpdim(object(X))
+
+"""
     simples(C::CenterCategory)
 
 Return a vector containing the simple objects of ```C```. 
@@ -940,7 +947,7 @@ function Hom(X::CenterObject, Y::CenterObject)
         return hom_by_linear_equations(X,Y)
     end
 
-    if is_zero(dim(category(parent(X)))) || alg_closed
+    if is_zero(dim(category(parent(X))))
         return hom_by_linear_equations(X,Y)
     else 
         return hom_by_adjunction(X,Y)
@@ -1045,30 +1052,42 @@ function simples_by_induction!(C::CenterCategory, log = true)
             #Test which simples in S are included
             multiplicities = K == QQBar ? [int_dim(Hom(object(t),s)) for t ∈ S] : [div(int_dim(Hom(object(t),s)), int_dim(End(t))) for t ∈ S]
 
-            S_in_Z = [(t, k) for (t,k) ∈ zip(S, multiplicities) if k != 0]
+            @show S_in_Z = [(t, k) for (t,k) ∈ zip(S, multiplicities) if k != 0]
 
-            if !isempty(S_in_Z) && sum([dim(t)*k for (t,k) ∈ S_in_Z]) == dim(Is)
+            if !isempty(S_in_Z) && sum([fpdim(t)*k for (t,k) ∈ S_in_Z]) == fpdim(Is)
                 push!(remove_gens, s)
                 continue
             end
         end
 
-        Z = induction(s, simpls, parent_category = C)
+        @show Z = induction(s, simpls, parent_category = C)
 
-        # if base_ring(C) == QQBar
-        #     #factor out all already known simples
-        #     for (t,k) ∈ S_in_Z
-        #         for i ∈ 1:k
-        #             incl = basis(Hom(t,Z))[1]
-        #             @show Z = cokernel(incl)[1]
-        #         end
-        #     end
-        #     H = End(Z)
-        # else
-        #     H = end_of_induction(s, Z)
-        # end
+        if !isempty(S_in_Z)
+            #factor out all already known simples
 
-        H = end_of_induction(s, Z)
+            incl_basis = vcat([basis(induction_right_adjunction(Hom(object(t),s), t, Z)) for (t,_) ∈ S_in_Z]...)
+
+            incl = horizontal_direct_sum(incl_basis)
+            
+            Q, proj = cokernel(incl)
+
+            @show Z 
+
+            H = induction_right_adjunction(Hom(object(Q), s), Q, Z)
+            
+            H = HomSpace(Q,Q, [proj ∘ f for f ∈ basis(H)])
+
+            Z = Q
+            # for (t,k) ∈ S_in_Z
+            #     incl = horizontal_direct_sum(basis(Hom(t,Z))...)
+            #     @show Z = cokernel(incl)[1]
+            # end
+            # H = End(Z)
+        else
+            H = end_of_induction(s, Z)
+        end
+
+        #H = end_of_induction(s, Z)
 
         #contained_simples = filter(x -> int_dim(Hom(object(x),s)) != 0, S)
         # if length(contained_simples) > 0

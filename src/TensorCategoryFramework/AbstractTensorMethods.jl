@@ -207,7 +207,7 @@ function dim(X::Object)
     C = parent(X)
     if is_tensor(C)
         return base_ring(X)(tr(id(X)))
-    elseif is_multi_tensor(C)
+    elseif is_multitensor(C)
         𝟙 = simple_subobjects(one(C))
         incls = [basis(Hom(𝟙ᵢ, one(C)))[1] for 𝟙ᵢ ∈ 𝟙]
         projs = [basis(Hom(one(C), 𝟙ᵢ))[1] for 𝟙ᵢ ∈ 𝟙]

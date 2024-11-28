@@ -154,6 +154,7 @@ is_multiring(C::RightModuleCategory) = is_commutative(algebra(C))
 is_multiring(C::LeftModuleCategory) = is_commutative(algebra(C))
 
 is_tensor(C::BiModuleCategory) = int_dim(End(one(C))) == 1
+is_tensor(C::RightModuleCategory) = is_commutative(algebra(C)) && int_dim(End(one(C))) == 1
 
 is_weak_multifusion(C::BiModuleCategory) = is_weak_multifusion(category(C)) &&
                                     left_algebra(C) == right_algebra(C) && 
@@ -666,7 +667,7 @@ function bimodule_tensor_product(M::BiModuleObject, N::BiModuleObject)
 
     P,c = coequilizer(
         p ⊗ id(object(N)),
-        (id(object(M)) ⊗ q) ∘ associator(object(M), object(A), object(N))
+        (id(object(M)) ⊗ q) ∘ associator(object(M), object(B), object(N))
     )
 
     inv_c = right_inverse(c)
@@ -680,7 +681,7 @@ function bimodule_tensor_product(M::BiModuleObject, N::BiModuleObject)
 
     right = compose(
         inv_c ⊗ id(object(D)),
-        associator(object(M), object(N), object(B)),
+        associator(object(M), object(N), object(D)),
         id(object(M)) ⊗ right_action(N),
         c
     )
@@ -855,6 +856,15 @@ function tr(f::ModuleMorphism{BiModuleObject})
 
     d = sqrt(dim(object(A))*dim(object(B)))
 
+    t = base_ring(f)(tr(morphism(f)))*inv(d) 
+    t * id(one(parent(f)))
+end
+
+function tr(f::ModuleMorphism{RightModuleObject})
+    C = parent(f)
+    A = algebra(C)
+
+    d = dim(object(A))
     t = base_ring(f)(tr(morphism(f)))*inv(d) 
     t * id(one(parent(f)))
 end

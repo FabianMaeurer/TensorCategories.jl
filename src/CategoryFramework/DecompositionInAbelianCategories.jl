@@ -14,7 +14,7 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false)
 
     # Over QQBar it's easier
     K = base_ring(X)
-    if K == QQBar || typeof(K) == CalciumField
+    if K == QQBar || typeof(K) == CalciumField || typeof(K) <: FlintLocalField
         return simple_subobjects_over_qqbar(X,E)
     end
 

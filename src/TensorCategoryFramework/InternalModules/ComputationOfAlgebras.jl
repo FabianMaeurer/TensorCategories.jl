@@ -96,23 +96,29 @@ function _algebra_structures(structure_ideal::Function, X::Object, unit = Hom(on
 
         # get coefficients of the image multiplication
         image_mult = phi_squared_mat * mult_mat * inv(phi_mat)
-        image_coeffs = express_in_basis(morphism(image_mult), morphism.(matrix.(mult_base)))
+        @show image_coeffs = express_in_basis(morphism(image_mult), morphism.(matrix.(mult_base)))
 
         # Find a coefficient that is linear in a for every a in iso_vars
         free_indices = []
         for a ∈ iso_vars 
-            i = findfirst(c -> c ∉ free_indices && degree(numerator(image_coeffs[c]), a) == 1, 1:length(image_coeffs)) 
-            push!(free_indices, i) 
+            i = findall(c -> c ∉ free_indices && degree(numerator(image_coeffs[c]), a) ≥ 1, 1:length(image_coeffs)) 
+
+            i = argmin(k -> degree(numerator(image_coeffs[k]), a), i)
+
+            i !== nothing && push!(free_indices, (i,a)) 
         end
 
+        @show free_indices
         # set free coefficients to 1
         y = gens(base_ring(I))
-        free_coeffs = [y[i] - 1 for i ∈ free_indices if i !== nothing]
+        free_coeffs = [(y[i] - 1) for (i,_) ∈ free_indices[1:d]]
 
         I = ideal([gens(I); free_coeffs])
     end
 
-    show_dimension && @info "Dimension of solution set: $(dim(I))"
+    d = dim(I)
+
+    show_dimension && @info "Dimension of solution set: $(d)"
     
     if d < 0 
         return AlgebraObject[]

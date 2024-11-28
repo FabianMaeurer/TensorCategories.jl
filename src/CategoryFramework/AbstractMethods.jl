@@ -426,9 +426,9 @@ function minpoly(f::Morphism)
     @assert domain(f) == codomain(f) "Not an edomorphism"
     
     if hasmethod(matrix, Tuple{typeof(f)})
-        if typeof(base_ring(f)) == CalciumField
-            return change_base_ring(base_ring(f), minpoly(change_base_ring(QQBar, matrix(f))))
-        end
+        # if typeof(base_ring(f)) == CalciumField
+        #     return change_base_ring(base_ring(f), minpoly(change_base_ring(QQBar, matrix(f))))
+        # end
         return minpoly(matrix(f))
     else
         error("Generic minpoly coming soon")

@@ -19,6 +19,27 @@ function factor(p::PolyRingElem{T}) where T <: Union{QQBarFieldElem, CalciumFiel
     return Fac(parent(p)(u), Dict(y - r => count(==(r), rs) for r ∈ rs))
 end
 
+function factor(p::Poly{<:FlintLocalFieldElem})
+    rs = roots(p)
+    u = leading_coefficient(p)
+
+    if length(rs) == 0 
+        return Fac(parent(p)(u), Dict(p => 1))
+    end
+
+    y = gen(parent(p))
+
+    if length(rs) == degree(p)
+        return Fac(parent(p)(u), Dict(y - r => count(==(r), rs) for r ∈ rs))
+    end
+
+    residue = divexact(p, *([y - r for r ∈ rs]...))
+
+    return Fac(parent(p)(u), Dict([residue; [y - r => count(==(r), rs) for r ∈ rs]]...))
+end
+
+
+
 # function roots(p::PolyRingElem{QQBarFieldElem})
 #     rs = [r for r in roots(rational_lift(p), base_ring(p)) if p(r) == 0]
 # end
