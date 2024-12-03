@@ -122,3 +122,17 @@ function induction_mor_map(f::Morphism)
 
     return direct_sum([id(s)⊗f⊗id(dual(s)) for s ∈ S])
 end
+
+
+#=----------------------------------------------------------
+    Inner Endofunctors
+----------------------------------------------------------=#
+
+abstract type MonoidalFunctor <: AbstractFunctor end 
+
+mutable struct InnerAutoequivalence <: MonoidalFunctor 
+    domain::Category
+    object::Object 
+end 
+
+    

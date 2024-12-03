@@ -24,7 +24,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     is_rational, is_semisimple, is_simple, is_square, is_subfield, is_subgroup,
     is_independent, is_invertible, iso_oscar_gap,
     jordan_normal_form, kernel, kronecker_product, lcm, leading_coefficient,
-    leading_monomial, left_transversal, lex, load, matrix, matrix_algebra, minpoly,
+    leading_monomial, left_transversal, lex, load, matrix, matrix_algebra, minpoly, quo,
     monomials, multiplication_table, multiplicity, nullspace, nvars, one, orbit,
     orbits, order, parent, permutation_matrix, preimage, primary_decomposition, product, rank, real_solutions, resultant, root_of_unity, roots, rref, save,
     set_attribute!, size, solve, sparse_matrix, splitting_field,
@@ -34,7 +34,9 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra,
     radical, is_zero, minimal_submodules, representation_matrix, QQBarField,
     is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module, perm, fraction_field, simplify, CalciumField, CalciumFieldElem, FracFieldElem, PadicField, PadicFieldElem,
-    QadicField, QadicFieldElem, FlintLocalField, FlintLocalFieldElem
+    QadicField, QadicFieldElem, FlintLocalField, FlintLocalFieldElem,
+    MultTableGroup, is_isomorphic_with_map, subgroup_classes, representative,
+    pc_group, permutation_group
 
 using Serialization
 import Oscar: @register_serialization_type,
@@ -71,6 +73,7 @@ export ⊕
 export ⊗ 
 export ⊠ 
 export ⋆
+export ⋊
 export AbstractHomSpace 
 export action
 export action_matrix
@@ -170,6 +173,7 @@ export fpdim
 export Functor 
 export FusionCategory 
 export fusion_coefficient
+export gcrossed_product
 export generic_algebra
 export getindex 
 export graded_vector_spaces
@@ -185,6 +189,8 @@ export GroupRepresentation
 export GroupRepresentationCategory 
 export GroupRepresentationCategory 
 export GroupRepresentationMorphism 
+export gtensor_action
+export GTensorAction
 export GVSHomSpace 
 export GVSMorphism 
 export GVSObject 
@@ -216,6 +222,7 @@ export inv
 export inv_associator 
 export inverse_induction_adjunction
 export inverse_internal_hom_adjunction
+export invertibles
 export involution
 export is_abelian 
 export is_abelian 
@@ -440,12 +447,12 @@ include("CategoryFramework/NaturalTransformations.jl")
 
 
 include("TensorCategoryFramework/AbstractTensorMethods.jl")
-include("TensorCategoryFramework/FusionCategory.jl")
+include("TensorCategoryFramework/SixJCategory/FusionCategory.jl")
 #include("structures/MultiFusionCategories/FusionCategoryExperimental.jl")
 include("TensorCategoryFramework/6j-Solver.jl")
 include("TensorCategoryFramework/Skeletization.jl")
-include("TensorCategoryFramework/PentagonAxiom.jl")
-include("TensorCategoryFramework/HexagonAxion.jl")
+include("TensorCategoryFramework/TensorAxioms/PentagonAxiom.jl")
+include("TensorCategoryFramework/TensorAxioms/HexagonAxion.jl")
 include("TensorCategoryFramework/RingSubcategories.jl")
 include("TensorCategoryFramework/TensorPowerCategory.jl")
 include("TensorCategoryFramework/TensorFunctors.jl")
@@ -455,6 +462,8 @@ include("TensorCategoryFramework/Center/InductionMonad.jl")
 include("TensorCategoryFramework/Center/Centralizer.jl")
 include("TensorCategoryFramework/Center/CentralizerInduction.jl")
 include("TensorCategoryFramework/Center/CenterChecks.jl")
+include("TensorCategoryFramework/GTensorAction.jl")
+include("TensorCategoryFramework/SixJCategory/GCrossedFusion.jl")
 
 
 include("TensorCategoryFramework/InternalModules/InternalAlgebras.jl")

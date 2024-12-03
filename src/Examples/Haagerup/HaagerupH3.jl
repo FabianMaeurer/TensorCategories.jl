@@ -8,7 +8,7 @@ https://arxiv.org/pdf/1906.01322
 
 where p1,p2 = ±1 are parameters for the different possible sets of associators.
 """
-function haagerup_H3(K::Field = QQ; p1 = 1, p2 = 1)
+function haagerup_H3(K::Ring = QQ; p1 = 1, p2 = 1)
     _,x = QQ["x"]
     if K == QQ
         K,_ = number_field(x^16 - 4*x^14 + 13*x^12 + 4*x^10 + 53*x^8 + 4*x^6 + 13*x^4 - 4*x^2 + 1)

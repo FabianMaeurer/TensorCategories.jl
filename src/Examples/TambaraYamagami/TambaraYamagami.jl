@@ -13,7 +13,7 @@ Construct ``TY(A,τ,χ)`` over ℚ̅ where ``τ = √|A|`` and ``χ`` is a gener
 function tambara_yamagami(A::GAPGroup) 
     m = Int(exponent(A))
     _, x = QQ[:x]
-    K = splitting_field([x^m + 1, x^2 - 2])
+    K = splitting_field([x^m + 1, x^2 - order(A)])
     tambara_yamagami(K, A)
 end
 
