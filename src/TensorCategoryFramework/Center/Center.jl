@@ -1050,7 +1050,7 @@ function simples_by_induction!(C::CenterCategory, log = true)
 
         if dim(category(C)) != 0
             #Test which simples in S are included
-            multiplicities = K == QQBar ? [int_dim(Hom(object(t),s)) for t ∈ S] : [div(int_dim(Hom(object(t),s)), int_dim(End(t))) for t ∈ S]
+            multiplicities = K == QQBar || typeof(K) == CalciumField ? [int_dim(Hom(object(t),s)) for t ∈ S] : [div(int_dim(Hom(object(t),s)), int_dim(End(t))) for t ∈ S]
 
             @show S_in_Z = [(t, k) for (t,k) ∈ zip(S, multiplicities) if k != 0]
 

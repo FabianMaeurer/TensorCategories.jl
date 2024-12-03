@@ -46,7 +46,7 @@ end
 
 function roots(p::PolyRingElem{CalciumFieldElem})
     rs = roots(change_base_ring(QQBar, p))
-    return [base_ring(p)(r) for r in rs]
+    return base_ring(p).(rs)
 end
 
 function roots(p::PolyRingElem{QQBarFieldElem})

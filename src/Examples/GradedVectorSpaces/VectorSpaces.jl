@@ -409,3 +409,5 @@ function express_in_basis(f::VectorSpaceMorphism, B::Vector{<:VectorSpaceMorphis
 end
 
 (F::Field)(f::VectorSpaceMorphism) = F(matrix(f)[1,1])
+(F::QQBarField)(f::VectorSpaceMorphism) = F(matrix(f)[1,1])
+(F::CalciumField)(f::VectorSpaceMorphism) = F(matrix(f)[1,1])
