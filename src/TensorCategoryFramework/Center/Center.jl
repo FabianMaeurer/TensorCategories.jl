@@ -1052,7 +1052,7 @@ function simples_by_induction!(C::CenterCategory, log = true)
             #Test which simples in S are included
             multiplicities = K == QQBar || typeof(K) == CalciumField ? [int_dim(Hom(object(t),s)) for t ∈ S] : [div(int_dim(Hom(object(t),s)), int_dim(End(t))) for t ∈ S]
 
-            @show S_in_Z = [(t, k) for (t,k) ∈ zip(S, multiplicities) if k != 0]
+            S_in_Z = [(t, k) for (t,k) ∈ zip(S, multiplicities) if k != 0]
 
             if !isempty(S_in_Z) && sum([fpdim(t)*k for (t,k) ∈ S_in_Z]) == fpdim(Is)
                 push!(remove_gens, s)
@@ -1060,7 +1060,7 @@ function simples_by_induction!(C::CenterCategory, log = true)
             end
         end
 
-        @show Z = induction(s, simpls, parent_category = C)
+        Z = induction(s, simpls, parent_category = C)
 
         if !isempty(S_in_Z)
             #factor out all already known simples

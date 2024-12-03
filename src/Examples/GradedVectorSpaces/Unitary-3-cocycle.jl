@@ -22,27 +22,27 @@ function unitary_cocycle(G::GAPGroup, K::Field, k::Int, i::Int = 2)
 	ρ = root_of_unity(K,Int(n))
 	
 	x = gens(symmetric_group(Int(n)))[1]  #We create a cyclic group of order n
-	B,g=sub(x)
+	B,g = sub(x)
 	D = Dict{NTuple{k,elem_type(G)},elem_type(parent(ρ))}()
 
-	A=GAP.Globals.TrivialGModuleAsGOuterGroup(G.X,B.X) #This is the cyclic group encoded as a trivial G-module;We need this weird G.X notation to get GAP elements; Need GAP.Globals because tehre is no wrapper for HAP
-	R=GAP.Globals.ResolutionFiniteGroup(G.X,k+1)
-	C=GAP.Globals.HomToGModule(R,A)
-	CH=GAP.Globals.CohomologyModule(C,k)
-	classes=GAP.Globals.Elements(GAP.Globals.ActedGroup(CH)) #This is the list of cohomoogy classes
+	A = GAP.Globals.TrivialGModuleAsGOuterGroup(G.X,B.X) #This is the cyclic group encoded as a trivial G-module;We need this weird G.X notation to get GAP elements; Need GAP.Globals because tehre is no wrapper for HAP
+	R = GAP.Globals.ResolutionFiniteGroup(G.X,k+1)
+	C = GAP.Globals.HomToGModule(R,A)
+	CH = GAP.Globals.CohomologyModule(C,k)
+	classes = GAP.Globals.Elements(GAP.Globals.ActedGroup(CH)) #This is the list of cohomoogy classes
 	if length(classes)<i
 		println("We have only $(length(classes)) many classes of cocycles")
 		return D
 	end
 	get_representativeCocycle = GAP.evalstr("x -> x!.representativeCocycle")
-    	c = get_representativeCocycle(CH)(classes[i])
-	f=GAP.Globals.Mapping(c)
-	Elts=GAP.Globals.Elements(B.X)
+    c = get_representativeCocycle(CH)(classes[i])
+	f = GAP.Globals.Mapping(c)
+	Elts = GAP.Globals.Elements(B.X)
 	
 	for g in Base.product([elements(G) for _ ∈ 1:k]...)
 				#print(f(g.X,h.X,k.X))
-				exponent=GAP.Globals.Position(Elts,f([h.X for h ∈ g]...))-1
-				push!(D, g => ρ^exponent)
+				exponent = GAP.Globals.Position(Elts,f([h.X for h ∈ g]...))-1
+				push!(D, reverse(g) => ρ^exponent)
 				end
 	return Cocycle(G,D)
 end
