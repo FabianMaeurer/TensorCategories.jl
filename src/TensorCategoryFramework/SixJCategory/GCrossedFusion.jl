@@ -34,11 +34,21 @@ function gcrossed_product(C::SixJCategory, T::GTensorAction)
     for i1 ∈ 1:m, j1 ∈ 1:n, i2 ∈ 1:m, j2 ∈ 1:n, i3 ∈ 1:m, j3 ∈ 1:n
         g1,g2,g3 = elements_of_G[[j1,j2,j3]]
 
-        X = S[i1] ⊗ (T(g1)(S[i2])) ⊗ (T(g1*g2)(S[i3]))
+        TgY = T(g1)(S[i2])
+        TghZ = T(g1*g2)(S[i3])
+        X = S[i1] ⊗ (TgY) ⊗ (TghZ)
         Y = g1 * g2 * g3
 
-        for k ∈ 1:m, l ∈ 1:n
-            ass[(i1-1)*n + j1, (i2-1)*n + j2, (i3-1)*n + j3, (k-1)*n + l] = C.ass[i1,i2,i3,k]
+        a = matrices((id(S[i1]) ⊗ monoidal_structure(T(g1), S[i2], T(g2)(S[i3]))) ∘ associator(S[i1], TgY, TghZ))
+
+        l = findfirst(==(Y), elements_of_G)
+        for k ∈ 1:m, l2 ∈ 1:n
+            ass[(i1-1)*n + j1, (i2-1)*n + j2, (i3-1)*n + j3, (k-1)*n + l2] = 
+                if l == l2 
+                    a[k]
+                else
+                    zero_matrix(K,0,0)
+                end            
         end
     end
 

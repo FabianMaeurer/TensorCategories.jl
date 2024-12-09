@@ -3,7 +3,7 @@
 ----------------------------------------------------------=#
 abstract type NaturalTransformation <: Morphism end
 
-struct AdditiveNaturalTransformation <: NaturalTransformation
+mutable struct AdditiveNaturalTransformation <: NaturalTransformation
     domain::AbstractFunctor 
     codomain::AbstractFunctor 
     indecomposables::Vector{<:Object}
@@ -44,13 +44,13 @@ function inv(η::AdditiveNaturalTransformation)
     end
 end
 
-function getindex(η::AdditiveNaturalTransformation, X::Object)
-    if X ∈ keys(η.maps)
-        return η.maps[X]
-    end
+# function getindex(η::AdditiveNaturalTransformation, X::Object)
+#     if X ∈ keys(η.maps)
+#         return η.maps[X]
+#     end
 
-    return zero_morphism(domain(η)(X), codomain(η(X)))
-end
+#     return zero_morphism(domain(η)(X), codomain(η(X)))
+# end
 
 function indecomposables(η::AdditiveNaturalTransformation)
     η.indecomposables

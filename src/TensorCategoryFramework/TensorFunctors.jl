@@ -130,9 +130,49 @@ end
 
 abstract type MonoidalFunctor <: AbstractFunctor end 
 
-mutable struct InnerAutoequivalence <: MonoidalFunctor 
+struct InnerAutoequivalence <: MonoidalFunctor 
     domain::Category
     object::Object 
+    dual_object::Object
+
+    monoidal_structure::Dict
 end 
+
+
+
+function inner_autoequivalence(C::Category, X::Object) 
+    InnerAutoequivalence(C,X,dual(X), Dict())
+end
+
+inner_autoequivalence(X::Object) = new(parent(X), X)
+
+function inner_autoequivalence(X::Object) 
+    @req is_invertible(X) "Object has to be invertible"
+    InnerAutoequivalence(X)
+end
+
+(F::InnerAutoequivalence)(X::Object) = (F.object ⊗ X) ⊗ F.dual_object 
+(F::InnerAutoequivalence)(f::Morphism) = (id(F.object) ⊗ f) ⊗ id(F.dual_object)
+
+function monoidal_structure(F::InnerAutoequivalence, S::Object, T::Object) 
+    get(F.monoidal_structure, (S,T)) do 
+        X = F.object 
+        dX = F.dual_object
+
+        F.monoidal_structure[(S,T)] = compose(
+            associator(X⊗S, dX, (X⊗T)⊗dX),
+            id(X⊗S) ⊗ compose(
+                (id(dX) ⊗ associator(X,T,dX)),
+                inv_associator(dX,X,T⊗dX),
+                ev(X) ⊗ id(T⊗dX)
+            ),
+            inv_associator(X⊗S,T,dX),
+            associator(X,S,T) ⊗ id(dX)
+        )
+    end
+end
+    
+
+
 
     

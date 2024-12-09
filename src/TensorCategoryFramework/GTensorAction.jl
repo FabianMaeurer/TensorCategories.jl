@@ -16,7 +16,7 @@ function gtensor_action(C::Category, G::GAPGroup, images::Vector{<:Functor})
 end
 
 function gtensor_action(C::Category, G::GAPGroup, images::Vector{<:Object})
-    GTensorAction(C,G,[(X ⊗ -) for X ∈ images])
+    GTensorAction(C,G,[inner_autoequivalence(C,X) for X ∈ images])
 end
 
 function (T::GTensorAction)(g::GroupElem)
