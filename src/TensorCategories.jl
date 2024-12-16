@@ -289,6 +289,7 @@ export Monad
 export MonadModule
 export MonadModuleMorphism
 export MonadModules
+export monoidal_structures  
 export Morphism, morphism 
 export multiplication
 export multiplication_table 
@@ -456,6 +457,7 @@ include("TensorCategoryFramework/TensorAxioms/HexagonAxion.jl")
 include("TensorCategoryFramework/RingSubcategories.jl")
 include("TensorCategoryFramework/TensorPowerCategory.jl")
 include("TensorCategoryFramework/TensorFunctors.jl")
+include("TensorCategoryFramework/MonoidalFunctors/MonoidalFunctors.jl")
 include("TensorCategoryFramework/Center/Center.jl")
 include("TensorCategoryFramework/Center/Induction.jl")
 include("TensorCategoryFramework/Center/InductionMonad.jl")

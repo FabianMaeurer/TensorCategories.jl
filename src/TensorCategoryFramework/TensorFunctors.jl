@@ -20,6 +20,22 @@ end
 ⊗(C::Category) = TensorProductFunctor(C)
 
 #=----------------------------------------------------------
+    identity 
+----------------------------------------------------------=#
+
+struct IdentityFunctor <: AbstractFunctor 
+    C::Category
+end
+
+domain(F::IdentityFunctor) = F.C
+codomain(F::IdentityFunctor) = F.C 
+
+(::IdentityFunctor)(X::Object) = X
+(::IdentityFunctor)(f::Morphism) = f
+
+id(C::Category) = IdentityFunctor(C)
+
+#=----------------------------------------------------------
     Functor  X ⊗ - : C → C 
 ----------------------------------------------------------=#
 
