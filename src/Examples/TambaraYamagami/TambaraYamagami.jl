@@ -117,6 +117,12 @@ function tambara_yamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
     set_one!(TY, [1; [0 for _ ∈ 1:n]])
     set_spherical!(TY, [K(1) for _ ∈ 1:n+1])
 
+    set_attribute!(TY, :classification, ["Tambara-Yamagami"])
+
+    set_attribute!(TY, :group, A)
+
+    set_attribute!(TY, :bilinear_form, χ)
+
     #Try to set a braiding. 
     #Ref: https://arxiv.org/pdf/2010.00847v1.pdf (Thm 4.9)
     # try 
@@ -163,9 +169,9 @@ function nondegenerate_bilinear_form(G::GAPGroup, K::Field)
     
     M = Int(exponent(G))
     
-    roots = [root_of_unity(K, χ(n)*n) for n ∈ m] 
+    roots = [root_of_unity(K, n) for n ∈ m] 
 
-    images = Dict(x => ((prod([r^aₖ^2 for (r,mₖ,aₖ) ∈ zip(roots,m,c)]))) for (x,c) ∈ zip(G, x_exp))
+    images = Dict(x => ((prod([r^aₖ^div(2,χ(n)) for (r,mₖ,aₖ,n) ∈ zip(roots,m,c,[1; m])]))) for (x,c) ∈ zip(G, x_exp))
     
 
     return BilinearForm(G,K,root_of_unity(K,M),images)
@@ -257,6 +263,13 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
 
     set_spherical!(C, [F(1) for s ∈ simples(C)])
 
+    set_attribute!(C, :classification, ["Ising", "Tambara-Yamagami"])
+
+    G = abelian_group(PcGroup, [2])
+    set_attribute!(C, :group, G)
+
+    χ = nondegenerate_bilinear_form(G,F)
+    set_attribute!(C, :bilinear_form, χ)
     
     # C = tambara_yamagami(G)
 
@@ -269,9 +282,7 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
     
     try 
 
-        G = abelian_group(PcGroup, [2])
-        χ = nondegenerate_bilinear_form(G,F)
-
+        
         ξ = q * root_of_unity(F,4)
 
         α = sqrt(inv(a)*(1 + ξ)) 
@@ -307,4 +318,54 @@ function root_of_unity(K::Field, n::Int)
         end
     end
     error("There is no $n-th root of unity in the field")
+end
+
+
+#=----------------------------------------------------------
+    Fusion Autoequivalences 
+----------------------------------------------------------=#
+
+function tambara_yamagami_tensor_autoequivalences(TY::SixJCategory)
+    A = get_attribute(TY, :group)
+    χ = get_attribute(TY, :bilinear_form)
+
+    aut = automorphism_group(A)
+
+    invariant_automorphisms = []
+
+    for a ∈ aut
+        keep = true
+        for g ∈ A, h ∈ A 
+            if χ(a(g),a(h)) != χ(g,h) 
+                keep = false 
+                break
+            end 
+        end
+
+        keep && push!(invariant_automorphisms, a)
+    end
+
+    funcs = SixJFunctor[]
+
+    n = Int(order(A)) 
+
+    for ϕ ∈ invariant_automorphisms 
+        perm = [findfirst(==(ϕ(g)), elements(A)) for g ∈ A]
+        images = [TY[perm]; TY[n+1]]
+        η = Dict([
+            (i,j) => id(images[i]⊗images[j]) for i ∈ 1:n+1, j ∈ 1:n+1];
+        )
+        push!(funcs, SixJFunctor(TY,TY,images,η))
+    end
+
+    return funcs
+end
+
+function is_tambara_yamagami(C::SixJCategory)
+    if has_attribute(C, :classification)
+        if "Tambara-Yamagami" ∈ get_attribute(C, :classification)
+            return true
+        end
+    end
+    false
 end

@@ -175,6 +175,8 @@ end
 
 compose(f::T...) where T <: Morphism = reduce(compose, f)
 ∘(f::Morphism...) = compose(reverse(f)...)
+∘(f::AbstractFunctor...) = compose(reverse(f)...)
+
 
 -(f::Morphism, g::Morphism) = f + (-1)*g
 -(f::Morphism) = (-1)*f

@@ -517,7 +517,7 @@ function is_isomorphic(X::CentralizerObject, Y::CentralizerObject)
 
     if [dim(Hom(X,s)) for s ∈ S] == [dim(Hom(Y,s)) for s ∈ S]
         _, iso = is_isomorphic(X.object, Y.object)
-        return true, morphism(X,Y,central_projection(X,Y,iso))
+        return true, morphism(X,Y,central_projection(X,Y,iso).m)
     else
         return false, nothing
     end

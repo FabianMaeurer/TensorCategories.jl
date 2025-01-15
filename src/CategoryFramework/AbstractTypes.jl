@@ -109,6 +109,7 @@ struct Functor <: AbstractFunctor
     mor_map
 end
 
+tensor_product(F::T...) where T <: AbstractFunctor = compose(F...)
 #-------------------------------------------------------------------------------
 #   Forgetful Functors
 #-------------------------------------------------------------------------------

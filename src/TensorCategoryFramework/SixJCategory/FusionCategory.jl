@@ -4,7 +4,7 @@
     Category defined by 6j-Symbols with finitely many
     simple objects 
 ----------------------------------------------------------=#
-mutable struct SixJCategory <: Category
+@attributes mutable struct SixJCategory <: Category
     base_ring::Ring
     simples::Int64
     simples_names::Vector{String}
@@ -1039,6 +1039,17 @@ function simplify(C::SixJCategory)
 end
 
 #=----------------------------------------------------------
+    Endofunctors    
+----------------------------------------------------------=#
+
+function autoequivalences(C::SixJCategory)
+    if is_tambara_yamagami(C)
+        return tambara_yamagami_tensor_autoequivalences(C)
+    end
+    error("Not implemented")
+end
+
+#=----------------------------------------------------------
     Reverse braided  
 ----------------------------------------------------------=#
 
@@ -1053,4 +1064,14 @@ function reverse_braiding(C::SixJCategory)
 
     set_name!(D, "$(C.name) with reversed braiding")
     D
+end
+
+function trivial_fusion_category(K::Field)
+    C = six_j_category(K, [1 for _ ∈ 1:1, _ ∈ 1:1, _ ∈ 1:1], ["1"])
+
+    C.spherical = [1]
+    C.one = [1]
+    C.name = "Trivial fusion category over $K"
+
+    return C
 end

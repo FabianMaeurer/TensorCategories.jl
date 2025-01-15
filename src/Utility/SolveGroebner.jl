@@ -19,6 +19,10 @@ function recover_solutions(p::Tuple, K::Field, var_order)
         end
     end
 
+    if length(rs) < degree(f)
+        @info "More solutions over splitting field of $f"
+    end
+
     # for r ∈ rs
     #     solutions = [solutions; Tuple([[vi(r)*inv(g(r)) for vi ∈ v];r])[perm]]
     # end
@@ -50,7 +54,7 @@ function real_solutions_over_base_field(I::MPolyIdeal)
 
     S = recover_solutions(real_solutions(QI), K, symbols(base_ring(QI)))
     
-    [s[1:end-1] for s ∈ S if all([g(s[1:end-1]...) == 0 for g ∈ G])]
+    unique([s[1:end-1] for s ∈ S if all([g(s[1:end-1]...) == 0 for g ∈ G])])
 end
 
 function guess_real_solutions_over_base_field(I::MPolyIdeal)

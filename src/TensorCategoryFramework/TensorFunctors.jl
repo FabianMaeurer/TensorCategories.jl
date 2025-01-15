@@ -11,7 +11,7 @@ struct TensorProductFunctor <: AbstractFunctor
 end
 
 function TensorProductFunctor(C::Category)
-    domain = ProductCategory(C,C)
+    domain = product_category(C,C)
     obj_map = X -> X[1]⊗X[2]
     mor_map = f -> f[1]⊗f[2]
     return TensorProductFunctor(domain, C, obj_map, mor_map)
@@ -34,6 +34,8 @@ codomain(F::IdentityFunctor) = F.C
 (::IdentityFunctor)(f::Morphism) = f
 
 id(C::Category) = IdentityFunctor(C)
+
+compose(F::IdentityFunctor...) = IdentityFunctor(F[1].C)
 
 #=----------------------------------------------------------
     Functor  X ⊗ - : C → C 
@@ -144,9 +146,9 @@ end
     Inner Endofunctors
 ----------------------------------------------------------=#
 
-abstract type MonoidalFunctor <: AbstractFunctor end 
+abstract type AbstractMonoidalFunctor <: AbstractFunctor end 
 
-struct InnerAutoequivalence <: MonoidalFunctor 
+struct InnerAutoequivalence <: AbstractMonoidalFunctor 
     domain::Category
     object::Object 
     dual_object::Object
@@ -190,5 +192,85 @@ end
     
 
 
+#=----------------------------------------------------------
+    TensorFunctors 
+----------------------------------------------------------=#
 
-    
+mutable struct MonoidalFunctor <: AbstractMonoidalFunctor
+    F::AbstractFunctor 
+    indecomposables::Vector{<:Object}
+    monoidal_structure::Dict
+end
+
+(F::MonoidalFunctor)(X::Object) = F.F(X)
+(F::MonoidalFunctor)(f::Morphism) = F.F(f)
+
+
+domain(F::MonoidalFunctor) = domain(F.F)
+codomain(F::MonoidalFunctor) = codomain(F.F)
+indecomposables(F) = F.indecomposables
+
+function monoidal_functor(F::AbstractFunctor, S::Vector{<:Object}, nats::Dict)
+    MonoidalFunctor(F,S,nats)
+end
+
+function compose(F::MonoidalFunctor, G::MonoidalFunctor)
+    S = indecomposables(F)
+    MonoidalFunctor(
+        compose(F.F, G.F),
+        S,
+        Dict((i,j) => compose(
+                monoidal_structure(G, F(S[i]), F(S[j])),
+                G(monoidal_structure(F, S[i], S[j]))
+            ) for i ∈ 1:length(S), j ∈ 1:length(S)
+        )            
+    )
+end
+
+
+function show(io::IO, F::MonoidalFunctor)
+    print(io, """Tensor functor with 
+    domain:   $(domain(F))
+    codomain: $(codomain(F))""")
+end
+
+function monoidal_structure(F::AbstractMonoidalFunctor, X::Object, Y::Object) 
+    S = indecomposables(F)
+
+    if is_indecomposable(X) && is_indecomposable(Y) 
+        local iso_X
+        local iso_Y
+        local i,j
+
+        if X ∈ S 
+            iso_X = id(X)
+            i = findfirst(==(X), S)
+        else
+            i = findfirst(x -> is_isomorphic(x,X)[1], S)
+            _,iso_X = is_isomorphic(X, S[i])
+        end
+
+        if Y ∈ S
+            iso_Y = id(Y)
+            j = findfirst(==(Y), S)
+        else
+            j = findfirst(x -> is_isomorphic(x,Y)[1], S)
+            _,iso_Y = is_isomorphic(Y, S[j])
+        end
+
+        return compose(
+            F(iso_X) ⊗ F(iso_Y),
+            F.monoidal_structure[(i,j)],
+            F(inv(iso_X) ⊗ inv(iso_Y))
+        )
+    end
+
+    _,_,ix,px = direct_sum_decomposition(X,S)
+    _,_,iy,py = direct_sum_decomposition(Y,S)
+
+    sum([compose(
+        F(p)⊗F(q),
+        monoidal_structure(F,codomain(p), codomain(q)),
+        F(i ⊗ j)
+    ) for (p,i) ∈ zip(px,ix), (q,j) ∈ zip(py,iy)])
+end

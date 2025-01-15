@@ -36,7 +36,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module, perm, fraction_field, simplify, CalciumField, CalciumFieldElem, FracFieldElem, PadicField, PadicFieldElem,
     QadicField, QadicFieldElem, FlintLocalField, FlintLocalFieldElem,
     MultTableGroup, is_isomorphic_with_map, subgroup_classes, representative,
-    pc_group, permutation_group, @req
+    pc_group, permutation_group, @req, is_constant, automorphism_group
 
 using Serialization
 import Oscar: @register_serialization_type,
@@ -155,6 +155,10 @@ export end_of_free_right_module
 export end_of_induction
 export endomorphism_ring 
 export equilizer
+export equivariant_induction
+export EquivariantInduction
+export Equivariantization
+export equivariantization
 export etale_algebra_structures
 export etale_algebras
 export ev 
@@ -233,6 +237,7 @@ export is_braided
 export is_central
 export is_epimorphism
 export is_equivalent
+export is_equivariant
 export is_finite 
 export is_fusion 
 export is_half_braiding
@@ -289,7 +294,10 @@ export Monad
 export MonadModule
 export MonadModuleMorphism
 export MonadModules
+export monoidal_structure
 export monoidal_structures  
+export monoidal_functor
+export MonoidalFunctor
 export Morphism, morphism 
 export multiplication
 export multiplication_table 
@@ -395,6 +403,7 @@ export TensorPowerObject
 export tmatrix 
 export tr 
 export trivial_3_cocylce 
+export trivial_fusion_category
 export twist
 export twisted_graded_vector_spaces
 export twisted_graded_vector_spaces 
@@ -466,7 +475,10 @@ include("TensorCategoryFramework/Center/CentralizerInduction.jl")
 include("TensorCategoryFramework/Center/CenterChecks.jl")
 include("TensorCategoryFramework/GTensorAction.jl")
 include("TensorCategoryFramework/SixJCategory/GCrossedFusion.jl")
-
+include("TensorCategoryFramework/Equivariantization/Equivariantization.jl")
+include("TensorCategoryFramework/Equivariantization/EquivariantInduction.jl")
+include("TensorCategoryFramework/Equivariantization/EquivariantCheck.jl")
+include("TensorCategoryFramework/SixJCategory/SixJFunctors.jl")
 
 include("TensorCategoryFramework/InternalModules/InternalAlgebras.jl")
 include("TensorCategoryFramework/InternalModules/ModuleCategories.jl")

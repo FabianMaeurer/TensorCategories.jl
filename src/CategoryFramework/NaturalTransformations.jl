@@ -28,7 +28,13 @@ end
 ----------------------------------------------------------=#
 
 function compose(η::AdditiveNaturalTransformation...)
-
+    length(η) == 1 && return η[1]
+    AdditiveNaturalTransformation(
+        domain(η[1]),
+        codomain(η[end]),
+        indecomposables(η[1]),
+        [compose([e.maps[i] for e ∈ η]...) for i ∈ 1:length(indecomposables(η[1]))]
+    )
 end
 
 function inv(η::AdditiveNaturalTransformation)
@@ -56,6 +62,16 @@ function indecomposables(η::AdditiveNaturalTransformation)
     η.indecomposables
 end
 
+function id(F::AbstractFunctor)
+    indecs = indecomposables(domain(F))
+    AdditiveNaturalTransformation(
+        F,
+        F,
+        indecs,
+        [id(F(x)) for x ∈ indecs]
+    )
+end
+
 function (η::AdditiveNaturalTransformation)(X::Object)
     indecs = indecomposables(η)
  
@@ -69,7 +85,30 @@ function (η::AdditiveNaturalTransformation)(X::Object)
     sum([G(iᵢ) ∘ η(domain(iᵢ)) ∘ F(pᵢ) for (iᵢ,pᵢ) ∈ zip(i,p)])
 end
 
+function *(x, η::AdditiveNaturalTransformation)
+    AdditiveNaturalTransformation(
+        domain(η),
+        codomain(η),
+        indecomposables(η),
+        x .* η.maps
+    )
+end
 
+function +(η::AdditiveNaturalTransformation, ν::AdditiveNaturalTransformation)
+    S = indecomposables(η)
+    T = indecomposables(ν)
+
+    if S == T
+        return AdditiveNaturalTransformation(
+            domain(η),
+            codomain(η),
+            S,
+            η.maps .- ν.maps
+        )
+    end
+
+    error("Not implemented")
+end
 
 #=----------------------------------------------------------
     Compute natural transformations 

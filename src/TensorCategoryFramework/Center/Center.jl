@@ -873,7 +873,9 @@ function kernel(f::CenterMorphism)
         return zero(parent(f)), zero_morphism(zero(parent(f)), domain(f))
     end
 
-    braiding = [id(s)⊗left_inverse(incl)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), domain(f).γ)]
+    inv_incl = left_inverse(incl)
+
+    braiding = [id(s)⊗inv_incl∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), domain(f).γ)]
 
     Z = CenterObject(parent(domain(f)), ker, braiding)
     return Z, morphism(Z,domain(f), incl)
@@ -892,7 +894,8 @@ function cokernel(f::CenterMorphism)
         return zero(parent(f)), zero_morphism(codomain(f), zero(parent(f)))
     end
 
-    braiding = [(id(s)⊗proj)∘γ∘(right_inverse(proj)⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), codomain(f).γ)]
+    inv_proj = right_inverse(proj)
+    braiding = [(id(s)⊗proj)∘γ∘(inv_proj⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), codomain(f).γ)]
 
     Z = CenterObject(parent(domain(f)), coker, braiding)
     return Z, morphism(codomain(f),Z, proj)
@@ -1070,8 +1073,6 @@ function simples_by_induction!(C::CenterCategory, log = true)
             incl = horizontal_direct_sum(incl_basis)
             
             Q, proj = cokernel(incl)
-
-            @show Z 
 
             H = induction_right_adjunction(Hom(object(Q), s), Q, Z)
             

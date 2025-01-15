@@ -164,6 +164,11 @@ function is_simple(X::Object)
     end
 end
 
+function is_indecomposable(X::Object)
+    dec = decompose(X)
+    length(dec) == 1 && dec[1][2] == 1
+end
+
 @doc raw""" 
 
     decompose(X::Object)
