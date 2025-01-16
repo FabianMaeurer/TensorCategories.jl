@@ -41,4 +41,11 @@ end
 indecomposables(F::SixJFunctor) = simples(domain(F))
 
 
+function compose(F::SixJFunctor, G::SixJFunctor)
+    images = G.(F.images)
+    S = indecomposables(G)
 
+    monoidal = Dict((X,Y) => G(monoidal_structure(F, X,Y)) ∘ monoidal_structure(G,F(X),F(Y)) for X ∈ S, Y ∈ S)
+
+    SixJFunctor(domain(F), codomain(G), images, monoidal)
+end

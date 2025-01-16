@@ -103,7 +103,7 @@ function +(η::AdditiveNaturalTransformation, ν::AdditiveNaturalTransformation)
             domain(η),
             codomain(η),
             S,
-            η.maps .- ν.maps
+            η.maps .+ ν.maps
         )
     end
 

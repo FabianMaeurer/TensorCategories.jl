@@ -129,11 +129,10 @@ end
 
 function monoidal_natural_transformations(F::AbstractMonoidalFunctor, G::AbstractMonoidalFunctor)
 
-    S = F.indecomposables
+    S = indecomposables(F)
 
     # Natural transformtions between F,G
-    Nats = additive_natural_transformations(F.F, G.F, S)
-
+    Nats = additive_natural_transformations(F, G, S)
 
     K = base_ring(domain(F))
     n = length(Nats)
@@ -158,7 +157,7 @@ function monoidal_natural_transformations(F::AbstractMonoidalFunctor, G::Abstrac
         for (a,η) ∈ zip(x, Nats)
             right = (η(X ⊗ Y)) ∘ monoidal_structure(F,X,Y) 
             coeffs = express_in_basis(right, eq_basis)
-            eqs = eqs .+ ((a) .* coeffs)
+            eqs = eqs .- ((a) .* coeffs)
         end
 
         equations = [equations; eqs]
