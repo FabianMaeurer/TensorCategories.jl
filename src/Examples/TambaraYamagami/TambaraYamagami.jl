@@ -6,11 +6,11 @@
 
 """ 
 
-    tambara_yamagami(A::GAPGroup)
+    tambara_yamagami(A::Group)
 
 Construct ``TY(A,τ,χ)`` over ℚ̅ where ``τ = √|A|`` and ``χ`` is a generic non-degenerate bilinear form.  
 """
-function tambara_yamagami(A::GAPGroup) 
+function tambara_yamagami(A::Group) 
     m = Int(exponent(A))
     _, x = QQ[:x]
     K = splitting_field([x^m + 1, x^2 - order(A)])
@@ -28,11 +28,11 @@ end
 
 """ 
 
-    tambara_yamagami(K::ring, A::GAPGroup)
+    tambara_yamagami(K::ring, A::Group)
 
 Construct ``TY(A,τ,χ)`` over ``K`` where ``τ = √|A|`` and ``χ`` is a generic non-degenerate bilinear form.  
 """
-function tambara_yamagami(K::Ring, A::GAPGroup) 
+function tambara_yamagami(K::Ring, A::Group) 
     # n = Int(order(A))     
     m = Int(exponent(A))
     sqrt_n = sqrt(K(Int(order(A))))
@@ -42,22 +42,22 @@ end
 
 """ 
 
-    tambara_yamagami(K::Ring, A::GAPGroup, τ::RingElem)
+    tambara_yamagami(K::Ring, A::Group, τ::RingElem)
 
 Construct ``TY(A,τ,χ)`` over ``K`` where ``χ`` is a generic non-degenerate bilinear form.  
 """
-function tambara_yamagami(K::Ring, A::GAPGroup, sqrt_n::RingElem) 
+function tambara_yamagami(K::Ring, A::Group, sqrt_n::RingElem) 
     χ = nondegenerate_bilinear_form(A, K)
     tambara_yamagami(K,A,sqrt_n,χ)
 end
 
 """ 
 
-    tambara_yamagami(K::Ring, A::GAPGroup, τ::RingElem)
+    tambara_yamagami(K::Ring, A::Group, τ::RingElem)
 
 Construct ``TY(A,τ,χ)`` over ``K`` where ``τ = √|A|``.  
 """
-function tambara_yamagami(K::Ring, A::GAPGroup, χ::BilinearForm)
+function tambara_yamagami(K::Ring, A::Group, χ::BilinearForm)
     # n = Int(order(A))     
     # m = Int(exponent(A))
     sqrt_n = sqrt(K(Int(order(A))))
@@ -66,11 +66,11 @@ end
 
 """ 
 
-    tambara_yamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
+    tambara_yamagami(K::Ring, A::Group, τ::RingElem, χ::BilinearForm)
 
 Construct the Category ``TY(A,τ,χ)``. 
 """
-function tambara_yamagami(K::Ring, A::GAPGroup, τ::RingElem, χ::BilinearForm)
+function tambara_yamagami(K::Ring, A::Group, τ::RingElem, χ::BilinearForm)
     n = Int(order(A))
     @assert is_abelian(A)
     
@@ -155,7 +155,7 @@ end
     https://mathoverflow.net/questions/374021/is-there-a-non-degenerate-quadratic-form-on-every-finite-abelian-group
 ------------------------------------------------=#
 
-function nondegenerate_bilinear_form(G::GAPGroup, K::Field)
+function nondegenerate_bilinear_form(G::Group, K::Field)
     @assert is_abelian(G)
 
     if order(G) == 1
@@ -177,7 +177,7 @@ function nondegenerate_bilinear_form(G::GAPGroup, K::Field)
     return BilinearForm(G,K,root_of_unity(K,M),images)
 end
 
-function trivial_bilinear_form(G::GAPGroup, K::Field)
+function trivial_bilinear_form(G::Group, K::Field)
     @assert is_abelian(G)
 
     BilinearForm(G,K,root_of_unity(K,2), Dict(x => one(K) for x ∈ G))

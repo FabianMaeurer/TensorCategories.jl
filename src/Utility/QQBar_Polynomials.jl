@@ -9,7 +9,7 @@ function eigenvalues(M::MatElem{CalciumFieldElem})
     base_ring(M).(eigenvalues(m))
 end
 
-function factor(p::PolyRingElem{T}) where T <: Union{QQBarFieldElem, CalciumFieldElem}
+function factor(p::PolyRingElem{T}) where T <: Union{CalciumFieldElem}
 
     u = leading_coefficient(p)
 
@@ -49,33 +49,33 @@ function roots(p::PolyRingElem{CalciumFieldElem})
     return base_ring(p).(rs)
 end
 
-function roots(p::PolyRingElem{QQBarFieldElem})
-    coef_deg = maximum([degree(c) for c in coefficients(p)])
-    deg = degree(p)
-    max_deg = coef_deg * deg
-    typeof(max_deg)
-    max_height = maximum([height_bits(c) for c in coefficients(p)])
+# function roots(p::PolyRingElem{QQBarFieldElem})
+#     coef_deg = maximum([degree(c) for c in coefficients(p)])
+#     deg = degree(p)
+#     max_deg = coef_deg * deg
+#     typeof(max_deg)
+#     max_height = maximum([height_bits(c) for c in coefficients(p)])
     
-    # Set the nessecary prescision to find roots
-    prec = 8*(max_height*max_deg)
-    prec == 0 ? 2^62 - 1 : prec
-    CC = AcbField(prec == 0 ? typemax(Int) >> 4 - 1 : prec)
+#     # Set the nessecary prescision to find roots
+#     prec = 8*(max_height*max_deg)
+#     prec == 0 ? 2^62 - 1 : prec
+#     CC = AcbField(prec == 0 ? typemax(Int) >> 4 - 1 : prec)
 
-    cp = change_base_ring(CC,p)
+#     cp = change_base_ring(CC,p)
 
-    rs = roots(cp, initial_prec = prec)
+#     rs = roots(cp, initial_prec = prec)
 
-    QQBar_roots = QQBarFieldElem[]
+#     QQBar_roots = QQBarFieldElem[]
 
-    for r ∈ rs
-        try 
-            push!(QQBar_roots, guess(QQBar, r, max_deg))
-        catch
-            @warn "Maximal precision not high enough to recover root $r"
-        end
-    end
-    return QQBar_roots 
-end
+#     for r ∈ rs
+#         try 
+#             push!(QQBar_roots, guess(QQBar, r, max_deg))
+#         catch
+#             @warn "Maximal precision not high enough to recover root $r"
+#         end
+#     end
+#     return QQBar_roots 
+# end
 
 function rational_lift(p::T) where T <: Union{PolyRingElem, MPolyRingElem}
     K = base_ring(p)

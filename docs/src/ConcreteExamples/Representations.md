@@ -23,7 +23,7 @@ GroupRepresentationCategory <: RepresentationCategory
 Build it with the constructor
 
 ```@docs; canonical = false
-representation_category(::Field, ::GAPGroup)
+representation_category(::Field, ::Group)
 ```
 
 A group representation is defined by a group homomorphism from ``G`` into a
@@ -36,8 +36,8 @@ GroupRepresentationObject <: RepresentationObject
 They are constructed in one of two ways, either by images of generators or by a function
 
 ```@docs; canonical = false
-Representation(::GAPGroup,::Vector,::Vector)
-Representation(::GAPGroup,::Function)
+Representation(::Group,::Vector,::Vector)
+Representation(::Group,::Function)
 ```
 
 where in both cases the images are required to be fitting MatrixElem objects.

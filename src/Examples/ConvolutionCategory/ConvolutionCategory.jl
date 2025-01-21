@@ -1,5 +1,5 @@
 struct ConvolutionCategory <: Category
-    group::GAPGroup
+    group::Group
     base_ring::Field
     GSet::GSet
     squaredGSet::GSet
@@ -55,7 +55,7 @@ function convolution_category(K::Field, X)
     return convolution_category(gset(G,X), K)
 end
 
-function convolution_category(K::Field, G::GAPGroup, X)
+function convolution_category(K::Field, G::Group, X)
     convolution_category(K, gset(G,X))
 end
 

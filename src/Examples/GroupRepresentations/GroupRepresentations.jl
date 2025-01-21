@@ -1,8 +1,8 @@
 @attributes mutable struct GroupRepresentationCategory <: RepresentationCategory
-    group::GAPGroup
+    group::Group
     base_ring::Field
 
-    function GroupRepresentationCategory(G::GAPGroup, F::Field) 
+    function GroupRepresentationCategory(G::Group, F::Field) 
         C = new(G,F)
         if characteristic(F) !== 0 && rem(order(G), characteristic(F)) == 0 
             set_attribute!(C, :semisimple, false)
@@ -16,7 +16,7 @@ end
 
 struct GroupRepresentation <: RepresentationObject
     parent::GroupRepresentationCategory
-    group::GAPGroup
+    group::Group
     m
     base_ring::Ring
     int_dim::Int
@@ -44,24 +44,24 @@ int_dim(ρ::GroupRepresentation) = ρ.int_dim
 #   Constructors
 #-------------------------------------------------------------------------
 """
-    representation_category(F::Field, G::GAPGroup)
+    representation_category(F::Field, G::Group)
 
 Category of finite dimensonal group representations of ``G``.
 """
-function representation_category(F::Field, G::GAPGroup)
+function representation_category(F::Field, G::Group)
     return GroupRepresentationCategory(G,F)
 end
 
-function representation_category(G::GAPGroup)
+function representation_category(G::Group)
     return representation_category(abelian_closure(QQ)[1], G)
 end
 
 """
-    Representation(G::GAPGroup, pre_img::Vector, img::Vector)
+    Representation(G::Group, pre_img::Vector, img::Vector)
 
 Group representation defined by the images of generators of G.
 """
-function Representation(G::GAPGroup, pre_img::Vector, img::Vector; check::Bool = true)
+function Representation(G::Group, pre_img::Vector, img::Vector; check::Bool = true)
     F = base_ring(img[1])
     Representation(representation_category(F, G),pre_img, img, check = check)
 end
@@ -76,11 +76,11 @@ function Representation(C::GroupRepresentationCategory, pre_img::Vector, img::Ve
 end
 
 """
-    Representation(G::GAPGroup, m::Function)
+    Representation(G::Group, m::Function)
 
 Group representation defined by m:G -> Mat_n.
 """
-function Representation(G::GAPGroup, m::Function)
+function Representation(G::Group, m::Function)
     F = order(G) == 1 ? base_ring(parent(m(elements(G)[1]))) : base_ring(parent(m(G[1])))
     Representation(representation_category(F,G),m)
 end
@@ -615,7 +615,7 @@ function restriction(ρ::GroupRepresentation, C::GroupRepresentationCategory)
     GroupRepresentation(C, res.group, res.m, res.base_ring, res.int_dim)
 end
 
-function restriction(ρ::GroupRepresentation, H::GAPGroup)
+function restriction(ρ::GroupRepresentation, H::Group)
     b,f = is_subgroup(H, ρ.group)
     RepH = representation_category(base_ring(ρ),H)
     if b == false throw(ErrorException("Not a sub")) end
@@ -630,7 +630,7 @@ function restriction(f::GroupRepresentationMorphism, C::GroupRepresentationCateg
     return morphism(restriction(domain(f),C), restriction(codomain(f),C), matrix(f), check = false)
 end
 
-function restriction(f::GroupRepresentationMorphism, H::GAPGroup)
+function restriction(f::GroupRepresentationMorphism, H::Group)
     restriction(f, GroupRepresentationCategory(H, base_ring(f)))
 end
 
@@ -640,7 +640,7 @@ function induction(ρ::GroupRepresentation, C::GroupRepresentationCategory)
     GroupRepresentation(C,ind.group, ind.m, ind.base_ring, ind.int_dim)
 end
 
-function induction(ρ::GroupRepresentation, G::GAPGroup)
+function induction(ρ::GroupRepresentation, G::Group)
     H = ρ.group
 
     if H == G return ρ end
@@ -679,7 +679,7 @@ function induction(f::GroupRepresentationMorphism, C::GroupRepresentationCategor
     return morphism(dom,codom, direct_sum([morphism(matrix(f)) for i ∈ 1:Int64(index(G,domain(f).group))]).m, check = false)
 end
 
-function induction(f::GroupRepresentationMorphism, G::GAPGroup)
+function induction(f::GroupRepresentationMorphism, G::Group)
     induction(f, GroupRepresentationCategory(G,base_ring(f)))
 end
 

@@ -1,20 +1,20 @@
 
 struct Cocycle{N}
-    group::GAPGroup
+    group::Group
     F::Field
     m::Union{Nothing,Dict{NTuple{N,G},T}} where {G<:GroupElem,T<:FieldElem}
 end
 
 """
-    Cocylce(G::GAPGroup, m::Dict{NTuple{N,G}, T})
+    Cocylce(G::Group, m::Dict{NTuple{N,G}, T})
 
 Return a ```N```-cocylce of ```G```. By now the condition is not checked.
 """
-function Cocycle(G::GAPGroup, m::Dict{NTuple{N,S},T}) where {S<:GroupElem,T<:FieldElem,N}
+function Cocycle(G::Group, m::Dict{NTuple{N,S},T}) where {S<:GroupElem,T<:FieldElem,N}
     return Cocycle(G,parent(collect(values(m))[1]),m)
 end
 
-function Cocycle(G::GAPGroup, N::Int, f::Function)
+function Cocycle(G::Group, N::Int, f::Function)
     Cocycle(G,Dict(x => f(x...) for x ∈ Base.product([G for i ∈ 1:N]...)))
 end
 
@@ -23,7 +23,7 @@ trivial_cocycle(G,F,k) = Cocycle{k}(G,F,nothing)
 
 (c::Cocycle{N})(x...) where N = c.m === nothing ? c.F(1) : c.m[x]
 
-function cyclic_group_3cocycle(G::GAPGroup, F::Field, ξ::FieldElem)
+function cyclic_group_3cocycle(G::Group, F::Field, ξ::FieldElem)
     g = G[1]
     n = order(G)
     D = Dict((g^i,g^j,g^k) => ξ^(div(i*(j+k - rem(j+k,n)),n)) for i ∈ 0:n-1, j ∈ 0:n-1, k ∈ 0:n-1)

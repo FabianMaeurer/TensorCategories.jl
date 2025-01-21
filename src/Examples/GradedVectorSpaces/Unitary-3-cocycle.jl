@@ -10,7 +10,7 @@ function exponent_of_homology(G,k)
 	return length(torsion_coefficients) != 0 ? lcm(torsion_coefficients) : 1
 end
 
-function unitary_cocycle(G::GAPGroup, K::Field, k::Int, i::Int = 2) 
+function unitary_cocycle(G::Group, K::Field, k::Int, i::Int = 2) 
 	GAP.Packages.install("HAP")
 	GAP.Packages.load("HAP") 
 
@@ -49,11 +49,11 @@ end
 
 """ 
 
-	twisted_graded_vector_spaces(G::GAPGroup, i::Int)
+	twisted_graded_vector_spaces(G::Group, i::Int)
 
 Construct the category of twisted graded vectorspaces with the i-th 3-cocycle.
 """
-function twisted_graded_vector_spaces(K::Field, G::GAPGroup, i::Int = 2, j::Int = 1) #Inputs finite group G and the number of Cocycle we want in the twisted_graded_vector_spaces
+function twisted_graded_vector_spaces(K::Field, G::Group, i::Int = 2, j::Int = 1) #Inputs finite group G and the number of Cocycle we want in the twisted_graded_vector_spaces
 	GAP.Packages.install("HAP")
 	GAP.Packages.load("HAP") 
     
@@ -65,6 +65,6 @@ function twisted_graded_vector_spaces(K::Field, G::GAPGroup, i::Int = 2, j::Int 
 end
 
 
-function twisted_graded_vector_spaces(G::GAPGroup, i::Int = 2, j::Int = 1)
+function twisted_graded_vector_spaces(G::Group, i::Int = 2, j::Int = 1)
 	twisted_graded_vector_spaces(G, QQBar, i, j)
 end

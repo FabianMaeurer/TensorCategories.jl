@@ -80,7 +80,7 @@ function ⋊(C::SixJCategory, G)
     gcrossed_product(C,G)
 end
 
-function gcrossed_product(C::SixJCategory, G::GAPGroup)
+function gcrossed_product(C::SixJCategory, G::Group)
     # Define a canonical G-action on C. Might be trivial
 
     action = gtensor_action(C,G)

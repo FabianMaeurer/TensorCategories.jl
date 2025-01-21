@@ -4,14 +4,14 @@
 
 mutable struct Equivariantization <: Category 
     category::Category 
-    group::GAPGroup 
+    group::Group 
     gens::Vector{<:GroupElem}
     action::GTensorAction 
 
     simples::Vector{<:Object}
 
     function Equivariantization(category::Category, 
-        group::GAPGroup, 
+        group::Group, 
         gens::Vector{<:GroupElem},
         action::GTensorAction)
 
@@ -35,7 +35,7 @@ struct EquivariantMorphism <: Morphism
     morphism::Morphism 
 end
 
-function equivariantization(C::Category, G::GAPGroup, T::GTensorAction)
+function equivariantization(C::Category, G::Group, T::GTensorAction)
     Equivariantization(C,G,gens(G),T)
 end
 

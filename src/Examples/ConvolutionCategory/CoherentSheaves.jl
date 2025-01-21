@@ -1,5 +1,5 @@
 struct CohSheaves <: Category
-    group::GAPGroup
+    group::Group
     base_ring::Field
     GSet::GSet
     orbit_reps

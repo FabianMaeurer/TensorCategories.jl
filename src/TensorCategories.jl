@@ -4,9 +4,10 @@ import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, lengt
 
 import Oscar
 import Oscar.AbstractAlgebra.Generic: Poly
+import Oscar.AbstractAlgebra: Group
 import Oscar.Hecke: RelSimpleNumField, regular_module, meataxe
 import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAlgebra, AssociativeAlgebraElem,
-    cyclotomic_field, Fac, Field, FieldElem, FinField, GF, GAP, GAPGroup,
+    cyclotomic_field, Fac, Field, FieldElem, FinField, GF, GAP,
     GAPGroupHomomorphism, GL, GSet, GroupElem, Hecke.AbstractAssociativeAlgebra,
     Hecke.AbstractAssociativeAlgebraElem, Ideal, MPolyRingElem, MPolyIdeal, Map, MatElem, MatrixElem,
     MatrixGroup, matrix_space, ModuleIsomorphism, number_field, PcGroup, PolyRingElem,

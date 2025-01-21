@@ -15,6 +15,14 @@ function (F::SixJFunctor)(X::SixJObject)
     direct_sum([F.images[i]^X.components[i] for i ∈ 1:n]...)[1]
 end
 
+function ==(F::SixJFunctor, G::SixJFunctor)
+    domain(F) == domain(G) && 
+    codomain(F) == codomain(G) &&
+    F.images == G.images &&
+    all([F.monoidal_structure[k] == G.monoidal_structure[k] for k ∈ keys(F.monoidal_structure)])
+end
+
+
 function (F::SixJFunctor)(f::SixJMorphism)
 
     dom = domain(f)
@@ -44,8 +52,19 @@ indecomposables(F::SixJFunctor) = simples(domain(F))
 function compose(F::SixJFunctor, G::SixJFunctor)
     images = G.(F.images)
     S = indecomposables(G)
-
-    monoidal = Dict((X,Y) => G(monoidal_structure(F, X,Y)) ∘ monoidal_structure(G,F(X),F(Y)) for X ∈ S, Y ∈ S)
+    n = length(S)
+    monoidal = Dict((i,j) => G(monoidal_structure(F, S[i],S[j])) ∘ monoidal_structure(G,F(S[i]),F(S[j])) for i ∈ 1:n, j ∈ 1:n)
 
     SixJFunctor(domain(F), codomain(G), images, monoidal)
+end
+
+#=----------------------------------------------------------
+    pretty print 
+----------------------------------------------------------=#
+
+
+function show(io::IO, F::SixJFunctor)
+    print(io, """Semisimple Monoidal Functor with 
+    domain: $(domain(F))
+    codomain: $(codomain(F))""")
 end

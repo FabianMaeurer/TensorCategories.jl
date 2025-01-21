@@ -1,11 +1,11 @@
 struct GroupRepresentationCategory <: RepresentationCategory
-    group::GAPGroup
+    group::Group
     base_ring::Field
 end
 
 struct GroupRepresentation <: RepresentationObject
     parent::GroupRepresentationCategory
-    group::GAPGroup
+    group::Group
     M::Union{GModule, Nothing}
     intdim::Int
 end
@@ -30,24 +30,24 @@ end
 #   Constructors
 #-------------------------------------------------------------------------
 """
-    representation_category(F::Field, G::GAPGroup)
+    representation_category(F::Field, G::Group)
 
 Category of finite dimensonal group representations of ``G``.
 """
-function representation_category(F::Field, G::GAPGroup)
+function representation_category(F::Field, G::Group)
     return GroupRepresentationCategory(G,F)
 end
 
-function representation_category(G::GAPGroup)
+function representation_category(G::Group)
     return representation_category(abelian_closure(QQ)[1],G)
 end
 
 """
-    Representation(G::GAPGroup, pre_img::Vector, img::Vector)
+    Representation(G::Group, pre_img::Vector, img::Vector)
 
 Group representation defined by the images of generators of G.
 """
-function Representation(G::GAPGroup, img::Vector)
+function Representation(G::Group, img::Vector)
     F = base_ring(img[1])
     d = size(img[1])[1]
     M = gmodule(G,img)
@@ -56,11 +56,11 @@ end
 
 
 """
-    Representation(G::GAPGroup, m::Function)
+    Representation(G::Group, m::Function)
 
 Group representation defined by m:G -> Mat_n.
 """
-function Representation(G::GAPGroup, m::Function)
+function Representation(G::Group, m::Function)
     @assert order(G) > 1
     F = base_ring(parent(m(G[1])))
     d = size(m(G[1]))[1]
@@ -544,7 +544,7 @@ end
 #   Restriction and Induction Functor
 #-------------------------------------------------------------------------
 
-function restriction(ρ::GroupRepresentation, H::GAPGroup)
+function restriction(ρ::GroupRepresentation, H::Group)
     b,f = issubgroup(ρ.group, H)
     RepH = representation_category(base_ring(ρ),H)
     if b == false throw(ErrorException("Not a sub")) end
@@ -553,12 +553,12 @@ function restriction(ρ::GroupRepresentation, H::GAPGroup)
     return GroupRepresentation(RepH, H, h, base_ring(ρ), intdim(ρ))
 end
 
-function restriction(f::GroupRepresentationMorphism, H::GAPGroup)
+function restriction(f::GroupRepresentationMorphism, H::Group)
     if domain(f).group == H return f end
     return morphism(restriction(domain(f),H), restriction(codomain(f),H), matrix(f))
 end
 
-function induction(ρ::GroupRepresentation, G::GAPGroup)
+function induction(ρ::GroupRepresentation, G::Group)
     H = ρ.group
 
     if H == G return ρ end
@@ -590,7 +590,7 @@ function induction(ρ::GroupRepresentation, G::GAPGroup)
     return Representation(G, g, images)
 end
 
-function induction(f::GroupRepresentationMorphism, G::GAPGroup)
+function induction(f::GroupRepresentationMorphism, G::Group)
     dom = induction(domain(f), G)
     codom = induction(codomain(f), G)
     return morphism(dom,codom, direct_sum([morphism(matrix(f)) for i ∈ 1:Int64(index(G,domain(f).group))]).m)

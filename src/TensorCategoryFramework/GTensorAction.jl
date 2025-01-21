@@ -5,7 +5,7 @@
 
 struct GTensorAction <: AbstractFunctor
     category::Category
-    G::GAPGroup
+    G::Group
     images::Vector{<:AbstractFunctor}
 end
 
@@ -13,15 +13,15 @@ group(T::GTensorAction) = T.G
 
 @doc raw""" 
 
-    gtensor_action(C::Category, G::GAPGroup, images::Vector{<:AbstractFunctor})
+    gtensor_action(C::Category, G::Group, images::Vector{<:AbstractFunctor})
 
 Define an action of ```G``` on ```C``` by providing an image functor for every element in ```G```.
 """
-function gtensor_action(C::Category, G::GAPGroup, images::Vector{<:AbstractFunctor})
+function gtensor_action(C::Category, G::Group, images::Vector{<:AbstractFunctor})
     GTensorAction(C,G,images)
 end
 
-function gtensor_action(C::Category, G::GAPGroup, images::Vector{<:Object})
+function gtensor_action(C::Category, G::Group, images::Vector{<:Object})
     GTensorAction(C,G,[inner_autoequivalence(C,X) for X ∈ images])
 end
 
@@ -37,7 +37,7 @@ monoidal_structure(T::GTensorAction, g::GroupElem, h::GroupElem) = id(T(g*h))
     Cannonical G-action
 ----------------------------------------------------------=#
 
-# function gtensor_action(C::Category, G::GAPGroup)
+# function gtensor_action(C::Category, G::Group)
 
 #     C₁ = invertibles(C)
 #     n = length(C₁)

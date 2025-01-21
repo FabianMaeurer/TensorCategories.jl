@@ -178,7 +178,7 @@ end
 ------------------------------------------------=#
 
 struct BilinearForm 
-    group::GAPGroup
+    group::Group
     base_ring::Field
     root_of_unity::FieldElem
     map::Dict

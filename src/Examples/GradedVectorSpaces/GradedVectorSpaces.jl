@@ -1,7 +1,7 @@
 
 mutable struct GradedVectorSpaces <: Category
     base_ring::Field
-    base_group::GAPGroup
+    base_group::Group
     twist::Cocycle{3}
     spherical::Dict{<:GroupElem, <:FieldElem}
     braiding
@@ -20,17 +20,17 @@ struct GVSMorphism <: VectorSpaceMorphism
 end
 
 """
-    graded_vector_spaces(F::Field, G::GAPGroup)
+    graded_vector_spaces(F::Field, G::Group)
 
 The category of ```G```-graded vector spaces.
 """
-function graded_vector_spaces(F::Field, G::GAPGroup)
+function graded_vector_spaces(F::Field, G::Group)
     c = trivial_3_cocycle(G,F)
 
     graded_vector_spaces(F,G,c)
 end
 
-function graded_vector_spaces(F::Field, G::GAPGroup, χ::BilinearForm)
+function graded_vector_spaces(F::Field, G::Group, χ::BilinearForm)
     @assert is_abelian(G)
 
     c = trivial_3_cocycle(G,F)
@@ -39,7 +39,7 @@ function graded_vector_spaces(F::Field, G::GAPGroup, χ::BilinearForm)
 end
 
 
-function graded_vector_spaces(F::Field, G::GAPGroup, c::Cocycle)
+function graded_vector_spaces(F::Field, G::Group, c::Cocycle)
     χ = nothing
     try
         χ = trivial_bilinear_form(G,F)
@@ -48,7 +48,7 @@ function graded_vector_spaces(F::Field, G::GAPGroup, c::Cocycle)
     GradedVectorSpaces(F,G,c, Dict([g => inv(c(g,inv(g),g)) for g ∈ G]), χ)
 end
 
-function graded_vector_spaces(G::GAPGroup)
+function graded_vector_spaces(G::Group)
     graded_vector_spaces(QQBar, G)
 end
 """

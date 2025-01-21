@@ -67,7 +67,7 @@ end
     Group Algebras
 ----------------------------------------------------------=#
 
-function group_algebra(C::Category, G::GAPGroup)
+function group_algebra(C::Category, G::Group)
     @assert is_multitensor(C)
     KG = QQ[G]
     S,i,p = direct_sum([one(C) for _ ∈ 1:dim(KG)])
