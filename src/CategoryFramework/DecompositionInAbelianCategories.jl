@@ -11,7 +11,8 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false)
 
         The approach is the MeatAxe algorithm. 
     =#
-
+    @show X
+    @show is_semisimple(endomorphism_ring(X,E))
 
     # Over QQBar it's easier
     K = base_ring(X)
@@ -31,8 +32,7 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false)
 
     R = endomorphism_ring(X,E)
 
-    i = findfirst(f -> !is_irreducible(f), minpoly.(basis(E)))
-
+   
     if !is_simple && is_semisimple(endomorphism_ring(X,E))
         img = [image(i)[1] for i ∈ central_primitive_idempotents(E)]
         if length(img) == int_dim(E)
@@ -40,6 +40,8 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false)
         end
         return vcat([simple_subobjects(i, End(i), true) for i in img]...)
     end
+
+    i = findfirst(f -> !is_irreducible(f), minpoly.(basis(E)))
 
     if i !== nothing && is_semisimple(R)
         f = E[i]
