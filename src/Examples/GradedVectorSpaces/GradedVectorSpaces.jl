@@ -481,6 +481,36 @@ function extension_of_scalars(m::VectorSpaceMorphism, L::Ring)
     mat = matrix(L, size(matrix(m))..., f.(collect(matrix(m))))
     morphism(domain(m)⊗L, codomain(m)⊗L, mat)
 end
+
+#=----------------------------------------------------------
+    As SixJCategory 
+----------------------------------------------------------=#
+
+function six_j_category(V::GradedVectorSpaces)
+    G = base_group(V)
+    n = Int(order(G))
+    elems = elements(G)
+    K = base_ring(V)
+
+    mult = Int[g*h == s for  g ∈ elems, h ∈ elems, s ∈ elems]
+
+    C = six_j_category(K, mult, ["$g" for g ∈ elems])
+
+    set_one!(C, [g == one(G) for g ∈ elems])
+
+    for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n
+        a = [zero_matrix(K,0,0) for _ ∈ 1:n]
+        x = *(elems[[i,j,k]]...)
+        l = findfirst(==(x), elems)
+        a[l] = matrix(K,1,1,[V.twist(elems[[i,j,k]]...)])
+        set_associator!(C,i,j,k,a)
+    end
+
+    set_name!(C, "Graded vector spaces over $K with simple objects in $G")
+
+    C.spherical = [V.spherical[g] for g ∈ elems]
+    return C
+end
 #-----------------------------------------------------------------
 #   Pretty Printing
 #-----------------------------------------------------------------

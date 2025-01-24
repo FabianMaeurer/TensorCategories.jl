@@ -11,8 +11,6 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false)
 
         The approach is the MeatAxe algorithm. 
     =#
-    @show X
-    @show is_semisimple(endomorphism_ring(X,E))
 
     # Over QQBar it's easier
     K = base_ring(X)

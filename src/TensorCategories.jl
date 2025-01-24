@@ -5,7 +5,7 @@ import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, lengt
 import Oscar
 import Oscar.AbstractAlgebra.Generic: Poly
 import Oscar.AbstractAlgebra: Group
-import Oscar.Hecke: RelSimpleNumField, regular_module, meataxe
+import Oscar.Hecke: RelSimpleNumField, regular_module, meataxe, NumFieldEmb
 import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAlgebra, AssociativeAlgebraElem,
     cyclotomic_field, Fac, Field, FieldElem, FinField, GF, GAP,
     GAPGroupHomomorphism, GL, GSet, GroupElem, Hecke.AbstractAssociativeAlgebra,
@@ -319,6 +319,7 @@ export pairing
 export parent 
 export pentagon_axiom 
 export pentagon_equations
+export preimage
 export print_multiplication_table 
 export print_multiplication_table 
 export product 
@@ -443,6 +444,7 @@ include("Utility/QQBar_Polynomials.jl")
 include("Utility/SolveGroebner.jl")
 include("Utility/QuantumIntegers.jl")
 include("Utility/Technicallities.jl")
+include("Utility/QQBarToNumberfield.jl")
 
 
 include("Examples/GradedVectorSpaces/VectorSpaces.jl")

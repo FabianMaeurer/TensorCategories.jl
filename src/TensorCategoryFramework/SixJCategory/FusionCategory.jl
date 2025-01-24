@@ -788,7 +788,14 @@ end
 
 function sort_simples!(C::SixJCategory, order::Vector{Int})
     C.tensor_product = [C.tensor_product[i,j,k] for i ∈ order, j ∈ order, k ∈ order]
-    C.ass = [C.ass[i,j,k,l] for i ∈ order, j ∈ order, k ∈ order, l ∈ order]
+    n = C.simples
+    ass = C.ass
+
+    for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n, l ∈ 1:n 
+        ass[i,j,k,l] = C.ass[order[[i,j,k,l]]...]
+    end
+    C.ass = ass 
+    
     C.simples_names = C.simples_names[order]
 
     isdefined(C, :one) && (C.one = C.one[order])
