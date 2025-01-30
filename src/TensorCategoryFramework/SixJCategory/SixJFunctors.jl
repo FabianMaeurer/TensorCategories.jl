@@ -7,7 +7,6 @@ struct SixJFunctor <: AbstractMonoidalFunctor
     domain::SixJCategory
     codomain::SixJCategory 
     images::Vector{SixJObject}
-    monoidal_structure::Dict
 end
 
 function (F::SixJFunctor)(X::SixJObject)
@@ -18,10 +17,12 @@ end
 function ==(F::SixJFunctor, G::SixJFunctor)
     domain(F) == domain(G) && 
     codomain(F) == codomain(G) &&
-    F.images == G.images &&
-    all([F.monoidal_structure[k] == G.monoidal_structure[k] for k ∈ keys(F.monoidal_structure)])
+    F.images == G.images 
 end
 
+function functor(C::SixJCategory,D::SixJCategory,images::Vector{SixJObject})
+    SixJFunctor(C,D,images)
+end
 
 function (F::SixJFunctor)(f::SixJMorphism)
 
@@ -51,11 +52,8 @@ indecomposables(F::SixJFunctor) = simples(domain(F))
 
 function compose(F::SixJFunctor, G::SixJFunctor)
     images = G.(F.images)
-    S = indecomposables(G)
-    n = length(S)
-    monoidal = Dict((i,j) => G(monoidal_structure(F, S[i],S[j])) ∘ monoidal_structure(G,F(S[i]),F(S[j])) for i ∈ 1:n, j ∈ 1:n)
 
-    SixJFunctor(domain(F), codomain(G), images, monoidal)
+    SixJFunctor(domain(F), codomain(G), images)
 end
 
 #=----------------------------------------------------------

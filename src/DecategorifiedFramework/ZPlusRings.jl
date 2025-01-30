@@ -72,6 +72,8 @@ function ==(x::ℕRingElem, y::ℕRingElem)
     parent(x) == parent(y) && coefficients(x) == coefficients(y)
 end
 
+elem_type(T::Type{ZPlusRing}) = ZPlusRingElem
+
 #=----------------------------------------------------------
     ℤ₊RingElem Operations 
 ----------------------------------------------------------=#
@@ -93,6 +95,8 @@ function ^(x::ℕRingElem, k::Int)
     end
     *([x for i ∈ 1:k]...)
 end
+
+dim(A::ℕRing) = dim(A.algebra)
 
 #=----------------------------------------------------------
     Based Rings 
@@ -177,4 +181,50 @@ function show(io::IO, x::ℕRingElem)
     end
 
     print(io, str[1:end-2])
+end
+
+
+#=----------------------------------------------------------
+    ℤ₊-Automorphisms         
+----------------------------------------------------------=#
+
+struct ZPlusRingMorphism
+    domain::ZPlusRing
+    codomain::ZPlusRing 
+    images::Vector{ZPlusRingElem}
+end
+
+function hom(domain::ZPlusRing,
+    codomain::ZPlusRing ,
+    images::Vector{ZPlusRingElem};
+    check = true)
+
+    @req is_zplus_ring_morphism(basis,images) "Not a ℤ₊-Ring morphism"
+
+    ZPlusRingMorphism(domain,codomain,basis(domain),images)
+end
+
+function is_zplus_ring_morphism(basis::Vector{ZPlusRingElem}, images::Vector{ZPlusRingElem})
+    n = length(basis)
+    for i ∈ 1:n, j ∈ 1:n 
+        a,b = basis[[i,j]]
+        ab = a*b
+       
+        image_ab = sum(c*v for (v,c) ∈ zip(images, coefficients(ab)))
+
+        image_ab != images[i] * images[j] && return false
+    end
+    true
+end
+
+function automorphisms(R::ℕRing)
+    B = basis(R) 
+    G = symmetric_group(length(B))
+
+    fpdims = fpdim.(B)
+    perms = [g for g ∈ G if permuted(fpdims, g) == fpdims]
+
+    automorphism_perms = [p for p ∈ perms if is_zplus_ring_morphism(B,permuted(B,p))]
+
+    [ZPlusRingMorphism(R,R,permuted(B,p)) for p ∈ automorphism_perms]
 end

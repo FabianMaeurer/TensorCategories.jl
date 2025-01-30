@@ -37,7 +37,8 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module, perm, fraction_field, simplify, CalciumField, CalciumFieldElem, FracFieldElem, PadicField, PadicFieldElem,
     QadicField, QadicFieldElem, FlintLocalField, FlintLocalFieldElem,
     MultTableGroup, is_isomorphic_with_map, subgroup_classes, representative,
-    pc_group, permutation_group, @req, is_constant, automorphism_group
+    pc_group, permutation_group, @req, is_constant, automorphism_group,
+    permuted
 
 using Serialization
 import Oscar: @register_serialization_type,
@@ -88,6 +89,7 @@ export AlgebraMorphism
 export ArrowCategory
 export ArrowObject
 export ArrowMorphism
+export automorphisms
 export associator 
 export base_ring 
 export base_group
@@ -176,6 +178,7 @@ export Fibonacci
 export Forgetful 
 export fpdim 
 export Functor 
+export functor
 export FusionCategory 
 export fusion_coefficient
 export gcrossed_product
@@ -220,6 +223,7 @@ export induction_monad
 export induction_restriction
 export induction_right_adjunction
 export InductionMonad
+export inner_autoequivalence
 export int_dim 
 export internal_hom
 export internal_hom_adjunction
@@ -295,6 +299,7 @@ export Monad
 export MonadModule
 export MonadModuleMorphism
 export MonadModules
+export monoidal_natural_transformations
 export monoidal_structure
 export monoidal_structures  
 export monoidal_functor

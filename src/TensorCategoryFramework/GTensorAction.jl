@@ -3,36 +3,38 @@
 ----------------------------------------------------------=#
 
 
-struct GTensorAction <: AbstractFunctor
+struct GTensorAction <: AbstractMonoidalFunctor
     category::Category
     G::Group
+    elements::Vector{<:GroupElem}
     images::Vector{<:AbstractFunctor}
+    monoidal_structure::Dict
 end
 
 group(T::GTensorAction) = T.G
 
 @doc raw""" 
 
-    gtensor_action(C::Category, G::Group, images::Vector{<:AbstractFunctor})
+    gtensor_action(C::Category, elems::Vector{<:GroupElem}, images::Vector{<:AbstractFunctor}, monoidal_structure::Dict)
 
 Define an action of ```G``` on ```C``` by providing an image functor for every element in ```G```.
 """
-function gtensor_action(C::Category, G::Group, images::Vector{<:AbstractFunctor})
-    GTensorAction(C,G,images)
+function gtensor_action(C::Category, elems::Vector{<:GroupElem}, images::Vector{<:AbstractFunctor}, monoidal_structure::Dict)
+    GTensorAction(C, parent(elems[1]), elems, images, monoidal_structure)
 end
 
-function gtensor_action(C::Category, G::Group, images::Vector{<:Object})
-    GTensorAction(C,G,[inner_autoequivalence(C,X) for X ∈ images])
-end
+# function gtensor_action(C::Category, G::Group, images::Vector{<:Object})
+#     GTensorAction(C,G,[inner_autoequivalence(C,X) for X ∈ images])
+# end
 
 function (T::GTensorAction)(g::GroupElem)
-    i = findfirst(==(g), elements(group(T)))
+    i = findfirst(==(g), T.elements)
     return T.images[i]
 end
 
 images(T::GTensorAction) = T.images
 category(T::GTensorAction) = T.category
-monoidal_structure(T::GTensorAction, g::GroupElem, h::GroupElem) = id(T(g*h))
+monoidal_structure(T::GTensorAction, g::GroupElem, h::GroupElem) = T.monoidal_structure[(g,h)]
 #=----------------------------------------------------------
     Cannonical G-action
 ----------------------------------------------------------=#

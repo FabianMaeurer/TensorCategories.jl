@@ -162,12 +162,16 @@ function inner_autoequivalence(C::Category, X::Object)
     InnerAutoequivalence(C,X,dual(X), Dict())
 end
 
+indecomposables(F::InnerAutoequivalence) = indecomposables(domain(F))
+
 inner_autoequivalence(X::Object) = new(parent(X), X)
 
 function inner_autoequivalence(X::Object) 
     @req is_invertible(X) "Object has to be invertible"
-    InnerAutoequivalence(X)
+    inner_autoequivalence(parent(X),X)
 end
+
+codomain(F::InnerAutoequivalence) = domain(F)
 
 (F::InnerAutoequivalence)(X::Object) = (F.object ⊗ X) ⊗ F.dual_object 
 (F::InnerAutoequivalence)(f::Morphism) = (id(F.object) ⊗ f) ⊗ id(F.dual_object)
@@ -189,8 +193,29 @@ function monoidal_structure(F::InnerAutoequivalence, S::Object, T::Object)
         )
     end
 end
-    
 
+function compose(F::InnerAutoequivalence, G::InnerAutoequivalence)
+    X,dX = F.object, F.dual_object
+    Y,dY = G.object, G.dual_object
+    FG = Functor(
+        domain(F),
+        codomain(G),
+        V -> (Y ⊗ ((X ⊗ V) ⊗ dX)) ⊗ dY,
+        f -> (id(Y) ⊗ ((id(X) ⊗ f) ⊗ id(dX))) ⊗ id(dY)
+    )
+
+    S = indecomposables(domain(F))
+
+    MonoidalFunctor(
+        FG,
+        S,
+        Dict((i,j) => compose(
+                monoidal_structure(G, F(S[i]), F(S[j])),
+                G(monoidal_structure(F, S[i], S[j]))
+            ) for i ∈ 1:length(S), j ∈ 1:length(S)
+        )   
+    )
+end
 
 #=----------------------------------------------------------
     TensorFunctors 

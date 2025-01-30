@@ -345,7 +345,7 @@ function tambara_yamagami_tensor_autoequivalences(TY::SixJCategory)
         keep && push!(invariant_automorphisms, a)
     end
 
-    funcs = SixJFunctor[]
+    funcs = MonoidalFunctor[]
 
     n = Int(order(A)) 
 
@@ -355,7 +355,7 @@ function tambara_yamagami_tensor_autoequivalences(TY::SixJCategory)
         η = Dict([
             (i,j) => id(images[i]⊗images[j]) for i ∈ 1:n+1, j ∈ 1:n+1];
         )
-        push!(funcs, SixJFunctor(TY,TY,images,η))
+        push!(funcs, monoidal_functor(SixJFunctor(TY,TY,images),simples(TY),η))
     end
 
     return funcs

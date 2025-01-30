@@ -26,6 +26,9 @@ function monoidal_structures(F::AbstractFunctor)
         if one_index ∈ [i,j]
             bases[(i,j)] = [id(F(X ⊗ Y))]
             var_numbers[(i,j)] = 0
+        elseif is_isomorphic(X⊗Y, one(C))[1]
+            bases[(i,j)] = [id(F(X ⊗ Y))]
+            var_numbers[(i,j)] = 0
         else
             bases[(i,j)] = basis(Hom(F(X)⊗F(Y), F(X⊗Y)))
             var_numbers[(i,j)] = length(bases[(i,j)])
@@ -45,7 +48,7 @@ function monoidal_structures(F::AbstractFunctor)
 
         X,Y,Z = S[[i,j,k]]
 
-        eq_basis = basis(Hom(F((X) ⊗ F(Y)) ⊗ F(Z), F(X ⊗ (Y ⊗ Z))))
+        eq_basis = basis(Hom((F(X) ⊗ F(Y)) ⊗ F(Z), F(X ⊗ (Y ⊗ Z))))
         eq = [zero(R) for _ ∈ length(eq_basis)]
 
         # Decompose X⊗Y and Y⊗Z
@@ -55,7 +58,6 @@ function monoidal_structures(F::AbstractFunctor)
         # Equations for J_XY,Z ∘ (J_X,Y ⊗ id_Z) = J_X,YZ ∘ (id_X ⊗ J_Y,Z)
         # First iterate over X,Y , then Y,Z
         
-       
         for (a, J_XY) ∈ zip(vars[(i,j)], bases[(i,j)])
             # Iterate over factors of XY and YZ 
 
@@ -64,12 +66,12 @@ function monoidal_structures(F::AbstractFunctor)
 
                 for (c,t) ∈ zip(vars[(V,k)], bases[(V,k)])
                     J_XY_Z = (F(ic ⊗ id(Z))) ∘ t ∘ (F(p) ⊗ id(F(Z)))
+                    
                     coeffs = express_in_basis(compose(
                         J_XY ⊗ id(F(Z)),
                         J_XY_Z,
                         F(associator(X,Y,Z))),
                         eq_basis)
-                    
                     
                     eq = eq .+ ((a*c) .* coeffs)
                 end
@@ -100,27 +102,29 @@ function monoidal_structures(F::AbstractFunctor)
     unique!(equations)
     filter!(!iszero, equations)
 
-    # Equations for invertibility
-    iso_mats = [sum([v .* matrix(f) for (v,f) ∈ zip(vars[(x,y)], bases[(x,y)])]) for (x,y) ∈ keys(vars) if !isempty(vars[(x,y)])]
+    # # Equations for invertibility
+    # iso_mats = [sum([v .* matrix(f) for (v,f) ∈ zip(vars[(x,y)], bases[(x,y)])]) for (x,y) ∈ keys(vars) if !isempty(vars[(x,y)])]
 
-    KR = fraction_field(R)
-    inv_iso_mats = [inv(change_base_ring(KR, m)) for m ∈ iso_mats]
+    # KR = fraction_field(R)
+    # inv_iso_mats = [inv(change_base_ring(KR, m)) for m ∈ iso_mats]
 
-    # Require det = 1
+    # Require det ≠ 0
     mats = [sum([a .* matrix(f) for (a,f) ∈ zip(vars[(x,y)], bases[(x,y)])]) for (x,y) ∈ keys(vars) if !isempty(vars[(x,y)])]
 
     filter!(m -> !is_constant(det(m)), mats) 
     dets = [det(m) for m ∈ mats]
 
+    N = length(x)
+    S,y = polynomial_ring(K, N + length(dets))
 
-    I = ideal(equations)
+    equations = [[e(y[1:N]...) for e ∈ equations]; [d(y[1:N]...)*t - 1 for (d,t) ∈ zip(dets, y[N+1:end])]]
+
+    return I = ideal(equations)
+
     @show dim(I)
 
-    equations = [equations; dets .- 1]
-
-
-
     sols = real_solutions_over_base_field(ideal(equations))
+    sols = [s[1:N] for s ∈ sols]
 
     nats = [Dict((x,y) => sum([v(s...) * t for (v,t) ∈ zip(vars[(x,y)], bases[(x,y)])]) for (x,y) ∈ Base.product(1:n,1:n)) for s ∈ sols]
 

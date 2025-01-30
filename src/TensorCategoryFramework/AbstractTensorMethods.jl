@@ -195,6 +195,10 @@ function invertibles(C::Category)
     return [s for s ∈ simples(C) if int_dim(End(s ⊗ dual(s))) == 1]
 end
 
+function is_invertible(X::Object)
+    is_isomorphic(X ⊗ dual(X), one(parent(X)))[1]
+end
+
 #-------------------------------------------------------
 # Spherical structure
 #-------------------------------------------------------
