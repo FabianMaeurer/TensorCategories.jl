@@ -9,7 +9,7 @@
 
 Return a set of algebra objects over ``X``. An empty array is returned only if there are no algebra structures. If the algebr is not connected, i.e. ``Hom(𝟙,X) ≠ k``, then a unit should be provided.
 """
-function algebra_structures(X::Object, unit = Hom(one(parent(X)), X)[1]; show_dimension = false)
+function algebra_structures(X::Object, unit = sum(basis(Hom(one(parent(X))), X)); show_dimension = false)
     _algebra_structures(_algebra_structure_ideal, X, unit, show_dimension = show_dimension)
 end
 
@@ -39,7 +39,7 @@ end
     commutative_algebra_structures(X::Object)
     commutative_algebra_structures(X::Object, unit::Morphism)
 
-Return a set of commutative algebra objects over ``X``. An empty array is returned only if there are no algebra structures. If the algebr is not connected, i.e. ``Hom(𝟙,X) ≠ k``, then a unit should be provided.
+Return a set of commutative algebra objects over ``X``. An empty array is returned only if there are no algebra structures. If the algebra is not connected, i.e. ``Hom(𝟙,X) ≠ k``, then a unit should be provided.
 """
 function commutative_algebra_structures(X::Object, unit = Hom(one(parent(X)), X)[1]; show_dimension = false)
 
@@ -193,7 +193,7 @@ function fix_unit(base::Vector{<:Morphism}, unit::Morphism)
     # extract coeffs as matrix 
     M = matrix(K, n, m, vcat([[coeff(e,a) for a ∈ vars] for e ∈ eqs]...))
 
-    sol = solve(M,unit_coeffs)
+    sol = solve(M,transpose(unit_coeffs))
     _,nullsp = nullspace(transpose(M))
 
     fixed_sol = sum(collect(sol)[:] .* base)
