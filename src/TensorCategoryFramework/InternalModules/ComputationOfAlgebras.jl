@@ -111,9 +111,11 @@ function _algebra_structures(structure_ideal::Function, X::Object, unit = Hom(on
         @show free_indices
         # set free coefficients to 1
         y = gens(base_ring(I))
+       
+        return I, sum([change_base_ring(Q,f) for f in [a .* n for (a,n) in zip(m_vars, matrix.(mult_base))]]), sum([phi_squared_mat*change_base_ring(Q,f)*inv(phi_mat) for f in [a .* n for (a,n) in zip(m_vars, matrix.(mult_base))]])
 
         free_coeffs = [y[i]*(y[i] - 1) for (i,_) ∈ free_indices[1:d]]
-
+        
         I = ideal([gens(I); free_coeffs])
     end
 

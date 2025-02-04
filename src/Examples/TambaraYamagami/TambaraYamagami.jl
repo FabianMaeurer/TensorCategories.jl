@@ -163,15 +163,15 @@ function nondegenerate_bilinear_form(G::Group, K::Field)
     end
 
     m = Int.(GAP.gap_to_julia(GAP.Globals.AbelianInvariants(G.X)))
-    χ(m::Int) = isodd(m) ? 1 : 2
+    χ(m::Int) = isodd(m) ? 2 : 1
     
     x_exp = [GAP.gap_to_julia(GAP.Globals.IndependentGeneratorExponents(G.X, x.X)) for x ∈ G]
     
     M = Int(exponent(G))
     
-    roots = [root_of_unity(K, n) for n ∈ m] 
+    roots = [root_of_unity(K, 2*n) for n ∈ m] 
 
-    images = Dict(x => ((prod([r^aₖ^div(2,χ(n)) for (r,mₖ,aₖ,n) ∈ zip(roots,m,c,[1; m])]))) for (x,c) ∈ zip(G, x_exp))
+    images = Dict(x => ((prod([r^(χ(n)*aₖ^2) for (r,n,aₖ) ∈ zip(roots,m,c)]))) for (x,c) ∈ zip(G, x_exp))
     
 
     return BilinearForm(G,K,root_of_unity(K,M),images)
