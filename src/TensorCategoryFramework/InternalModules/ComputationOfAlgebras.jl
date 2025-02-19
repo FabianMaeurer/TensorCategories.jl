@@ -96,7 +96,7 @@ function _algebra_structures(structure_ideal::Function, X::Object, unit = Hom(on
 
         # get coefficients of the image multiplication
         image_mult = phi_squared_mat * mult_mat * inv(phi_mat)
-        @show image_coeffs = express_in_basis(morphism(image_mult), morphism.(matrix.(mult_base)))
+        image_coeffs = express_in_basis(morphism(image_mult), morphism.(matrix.(mult_base)))
 
         # Find a coefficient that is linear in a for every a in iso_vars
         free_indices = []
@@ -108,11 +108,10 @@ function _algebra_structures(structure_ideal::Function, X::Object, unit = Hom(on
             i !== nothing && push!(free_indices, (i,a)) 
         end
 
-        @show free_indices
+        free_indices
         # set free coefficients to 1
         y = gens(base_ring(I))
        
-        return I, sum([change_base_ring(Q,f) for f in [a .* n for (a,n) in zip(m_vars, matrix.(mult_base))]]), sum([phi_squared_mat*change_base_ring(Q,f)*inv(phi_mat) for f in [a .* n for (a,n) in zip(m_vars, matrix.(mult_base))]])
 
         free_coeffs = [y[i]*(y[i] - 1) for (i,_) ∈ free_indices[1:d]]
         
@@ -128,7 +127,7 @@ function _algebra_structures(structure_ideal::Function, X::Object, unit = Hom(on
     elseif d == 0
         sols = real_solutions_over_base_field(I)
     else
-        sols = guess_real_solutions_over_base_field(I)
+        sols = witness_set(I)
     end
 
     unique!(sols)
