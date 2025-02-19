@@ -115,21 +115,45 @@ function monoidal_structures(F::AbstractFunctor)
     dets = [det(m) for m ∈ mats]
 
     N = length(x)
-    S,y = polynomial_ring(K, N + length(dets))
+    #S,y = polynomial_ring(K, N + length(dets))
 
-    equations = [[e(y[1:N]...) for e ∈ equations]; [d(y[1:N]...)*t - 1 for (d,t) ∈ zip(dets, y[N+1:end])]]
+    # equations = [[e(y[1:N]...) for e ∈ equations]; [d(y[1:N]...)*t - 1 for (d,t) ∈ zip(dets, y[N+1:end])]]
 
-    return I = ideal(equations)
+    # return I = ideal(equations)
 
-    @show dim(I)
-
-    sols = real_solutions_over_base_field(ideal(equations))
-    sols = [s[1:N] for s ∈ sols]
+    # @show dim(I)
+    I = ideal(equations)
+    sols = dim(I) > 0 ? witness_set(I) : real_solutions_over_base_field(I)
+   # sols = [s[1:N] for s ∈ sols]
 
     nats = [Dict((x,y) => sum([v(s...) * t for (v,t) ∈ zip(vars[(x,y)], bases[(x,y)])]) for (x,y) ∈ Base.product(1:n,1:n)) for s ∈ sols]
 
-    [monoidal_functor(F, S, n) for n ∈ nats]
+    mon_structures = filter(e -> all(is_invertible.(values(e.monoidal_structure))), [monoidal_functor(F, S, n) for n ∈ nats])
+
+    unique_structures = MonoidalFunctor[]
+    if F == id(C) 
+        unique_structures =[identity_as_monoidal_functor(C)]
+    end
+
+    for G ∈ mon_structures 
+        if sum(length(monoidal_natural_transformations(r,G)) for r ∈ unique_structures) == 0 
+            push!(unique_structures,G)
+        end
+    end
+
+    unique_structures
 end
+
+function identity_as_monoidal_functor(C::Category)
+    indecs = indecomposables(C)
+    n = length(indecs)
+    MonoidalFunctor(id(C), indecs, Dict((i,j) => id(X⊗Y) for (i,X) ∈ zip(1:n,indecs), (j,Y) ∈ zip(1:n, indecs)))
+end
+
+function gauge_group(C::Category)
+    monoidal_structures(id(C))
+end
+
 
 function monoidal_natural_transformations(F::AbstractMonoidalFunctor, G::AbstractMonoidalFunctor)
 
@@ -166,7 +190,7 @@ function monoidal_natural_transformations(F::AbstractMonoidalFunctor, G::Abstrac
 
         equations = [equations; eqs]
     end
-
+    
     sols = real_solutions_over_base_field(ideal(equations))
     filter!(s -> !all(iszero.(s)), sols)
 

@@ -13,7 +13,7 @@ Construct ``TY(A,τ,χ)`` over ℚ̅ where ``τ = √|A|`` and ``χ`` is a gener
 function tambara_yamagami(A::Group) 
     m = Int(exponent(A))
     _, x = QQ[:x]
-    K = splitting_field([x^m + 1, x^2 - order(A)])
+    K = splitting_field([x^m - 1, x^2 - order(A)])
     tambara_yamagami(K, A)
 end
 
@@ -169,9 +169,10 @@ function nondegenerate_bilinear_form(G::Group, K::Field)
     
     M = Int(exponent(G))
     
-    roots = [root_of_unity(K, 2*n) for n ∈ m] 
+    roots = [root_of_unity(K, n) for n ∈ m] 
 
-    images = Dict(x => ((prod([r^(χ(n)*aₖ^2) for (r,n,aₖ) ∈ zip(roots,m,c)]))) for (x,c) ∈ zip(G, x_exp))
+
+    images = Dict((x,y) => ((prod([r^(χ(n)*aₖ*bₖ) for (r,n,aₖ,bₖ) ∈ zip(roots,m,c,d)]))) for (x,c) ∈ zip(G, x_exp), (y,d) ∈ zip(G,x_exp))
     
 
     return BilinearForm(G,K,root_of_unity(K,M),images)

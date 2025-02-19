@@ -245,7 +245,7 @@ function decompose_over_qqbar(X::Object, E = End(X))
     
     K = collect(values(eigenvalues(f)))
     subs = vcat([decompose_over_qqbar(k) for k ∈ K]...)
-    subs = [s for (s,_) ∈ subs]
+    subs = typeof(X)[s for (s,_) ∈ subs]
     unique_simples_with_multiplicity(subs)
 end
 

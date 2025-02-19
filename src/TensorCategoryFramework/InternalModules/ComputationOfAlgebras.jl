@@ -281,6 +281,9 @@ function non_degenerate_condition(A::Object, mult_basis::Vector{<:Morphism}, var
     # Add equations for m ∘ Δ = id 
     eqs = sum(a*b*change_base_ring(QKx, matrix(m ∘ d)) for  (a,m) ∈ zip(vars, mult_basis), (b,d) ∈ zip(comult_coeffs, comult_basis)) .- matrix(id(A))
 
+    number_of_new_variables = sum(!isconstant.(denominator.(eqs)))
+    
+    R,x = polymomial_ring(K, )
     eqs = [numerator(denominator(e) * e) for e ∈ eqs]
     return collect(eqs)[:]
 end

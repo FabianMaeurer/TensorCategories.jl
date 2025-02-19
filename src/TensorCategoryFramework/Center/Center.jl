@@ -1302,17 +1302,19 @@ end
 ----------------------------------------------------------=#    
 
 function extension_of_scalars(C::CenterCategory, L::Field)
-    CL = _extension_of_scalars(C,L, category(C)⊗L)
+    emb = embedding(base_ring(C),L)
 
-    CL.simples = vcat([[x for (x,_) ∈ decompose(extension_of_scalars(s, L, CL))] for s ∈ simples(C)]...)
+    CL = _extension_of_scalars(C,L, extension_of_scalars(category(C), L, embedding = emb))
+
+    CL.simples = vcat([[x for (x,_) ∈ decompose(extension_of_scalars(s, L, CL, embedding = emb))] for s ∈ simples(C)]...)
 
     if isdefined(C, :inductions)
-        CL.inductions = Dict(extension_of_scalars(x, L, category(CL)) =>
-                        extension_of_scalars(Ix, L, CL) for (x,Ix) ∈ C.inductions)
+        CL.inductions = Dict(extension_of_scalars(x, L, category(CL), embedding = emb) =>
+                        extension_of_scalars(Ix, L, CL, embedding = emb) for (x,Ix) ∈ C.inductions)
     end
 
     if isdefined(C, :induction_gens)
-        CL.induction_gens = [extension_of_scalars(is, L, category(CL)) for is ∈ C.induction_gens]
+        CL.induction_gens = [extension_of_scalars(is, L, category(CL),  embedding = emb) for is ∈ C.induction_gens]
     end
 
     return CL
@@ -1322,14 +1324,14 @@ function _extension_of_scalars(C::CenterCategory, L::Field, cL = category(C)⊗L
     CenterCategory(L,cL)
 end
 
-function extension_of_scalars(X::CenterObject, L::Field, CL = _extension_of_scalars(parent(X),L))
-    CenterObject(CL, extension_of_scalars(object(X), L, category(CL)), [f ⊗ L for f ∈ half_braiding(X)])
+function extension_of_scalars(X::CenterObject, L::Field, CL = _extension_of_scalars(parent(X),L);  embedding = embedding(base_ring(X), L))
+    CenterObject(CL, extension_of_scalars(object(X), L, category(CL),  embedding = embedding), [extension_of_scalars(f, L, category(CL),  embedding = embedding) for f ∈ half_braiding(X)])
 end
 
-function extension_of_scalars(f::CenterMorphism, L::Field, CL = _extension_of_scalars(parent(f),L))
-    dom = extension_of_scalars(domain(f), L, CL)
-    cod = extension_of_scalars(codomain(f), L, CL)
-    m = extension_of_scalars(morphism(f), L)
+function extension_of_scalars(f::CenterMorphism, L::Field, CL = _extension_of_scalars(parent(f),L),  embedding = embedding(base_ring(f), L))
+    dom = extension_of_scalars(domain(f), L, CL,  embedding = embedding)
+    cod = extension_of_scalars(codomain(f), L, CL,  embedding = embedding)
+    m = extension_of_scalars(morphism(f), L, category(CL),  embedding = embedding)
     CenterMorphism(dom, cod, m)
 end
 

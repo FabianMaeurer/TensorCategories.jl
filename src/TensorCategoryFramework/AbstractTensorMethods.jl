@@ -159,7 +159,7 @@ tr(f::Morphism) = left_trace(f)
     left_trace(f::Morphism)
 
 Compute the left trace of a morphism ``X → X∗∗`` or if the category is
-spherical of a morphism ``X → X``.
+pivotal of a morphism ``X → X``.
 """
 function left_trace(f::Morphism)
     V = domain(f)
@@ -179,9 +179,11 @@ end
     right_trace(f::Morphism)
 
 Compute the right trace of a morphism ``X → ∗∗X`` or if the category is
-spherical of a morphism ``X → X``.
+pivotal of a morphism ``X → X``.
 """
 function right_trace(f::Morphism)
+    return left_trace(dual(f))
+
     V = domain(f)
     W = codomain(f)
     dV = right_dual(V)

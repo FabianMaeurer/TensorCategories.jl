@@ -6,7 +6,7 @@ function is_equivariant(X::EquivariantObject, Y::EquivariantObject, f::Morphism)
 
     T = gaction(parent(X))
     G = group(T)
-    for (g,u,v) ∈ zip(elements(G), X.structure_maps, Y.structure_maps)
+    for (g,u,v) ∈ zip(T.elements, X.structure_maps, Y.structure_maps)
         f ∘ u != v ∘ T(g)(f) && return false
     end
     
@@ -20,13 +20,15 @@ function is_equivariant(X::Object, T::GTensorAction, structure::Vector{<:Morphis
 
     G = group(T)
 
-    elems = elements(G)
+    elems = T.elements
 
     for (g,u) ∈ zip(elems,structure), (h,v) ∈ zip(elems, structure)
         i = findfirst(==(g*h), elems)
 
         uv = structure[i]
         γ = monoidal_structure(T,g,h)(X)
+        @show u ∘ T(g)(v)
+        @show uv ∘ γ
         (u ∘ T(g)(v) != uv ∘ γ) && return false        
     end
 

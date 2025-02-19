@@ -6,20 +6,22 @@ function equivariant_induction(X::Object, T::GTensorAction, parent::Equivarianti
 
     G = group(T)
 
-    elems = elements(G)
+    elems = T.elements
 
-    object_IX, incl, _ = direct_sum([T(g)(X) for g ∈ elems])
+    object_IX, incl, proj = direct_sum([T(g)(X) for g ∈ elems])
 
     structure_maps = Morphism[]
 
     for g ∈ elems
-        _,_,proj = direct_sum([T(g)(T(h)(X)) for h ∈ elems])
+        #_,_,proj = direct_sum([T(g)(T(h)(X)) for h ∈ elems])
 
         permutation = [findfirst(==(g*h), elems) for h ∈ elems]
 
         matched_incl = incl[permutation]
 
-        u = sum([i ∘ monoidal_structure(T,g,h)(X) ∘ p for (h,i,p) ∈ zip(elements(G), matched_incl, proj)])
+        @show [monoidal_structure(T,g,h)(X) == monoidal_structure(T,h,g)(X) for h in elems]
+
+        u = sum([i ∘ monoidal_structure(T,g,h)(X) ∘ T(g)(p) for (h,i,p) ∈ zip(elems, matched_incl, proj)])
 
         push!(structure_maps, u)
     end

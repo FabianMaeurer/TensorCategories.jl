@@ -152,36 +152,22 @@ struct InnerAutoequivalence <: AbstractMonoidalFunctor
     domain::Category
     object::Object 
     dual_object::Object
-
+    indecomposables::Vector{<:Object}
     monoidal_structure::Dict
 end 
 
 
 
 function inner_autoequivalence(C::Category, X::Object) 
-    InnerAutoequivalence(C,X,dual(X), Dict())
-end
+    dX = dual(X)
 
-indecomposables(F::InnerAutoequivalence) = indecomposables(domain(F))
+    indecs = indecomposables(C) 
+    n = length(indecs) 
 
-inner_autoequivalence(X::Object) = new(parent(X), X)
-
-function inner_autoequivalence(X::Object) 
-    @req is_invertible(X) "Object has to be invertible"
-    inner_autoequivalence(parent(X),X)
-end
-
-codomain(F::InnerAutoequivalence) = domain(F)
-
-(F::InnerAutoequivalence)(X::Object) = (F.object ⊗ X) ⊗ F.dual_object 
-(F::InnerAutoequivalence)(f::Morphism) = (id(F.object) ⊗ f) ⊗ id(F.dual_object)
-
-function monoidal_structure(F::InnerAutoequivalence, S::Object, T::Object) 
-    get(F.monoidal_structure, (S,T)) do 
-        X = F.object 
-        dX = F.dual_object
-
-        F.monoidal_structure[(S,T)] = compose(
+    mon_structure = Dict()
+    for i ∈ 1:n, j ∈ 1:n
+        S,T = indecs[[i,j]]
+        mon_structure[(i,j)] = compose(
             associator(X⊗S, dX, (X⊗T)⊗dX),
             id(X⊗S) ⊗ compose(
                 (id(dX) ⊗ associator(X,T,dX)),
@@ -192,7 +178,46 @@ function monoidal_structure(F::InnerAutoequivalence, S::Object, T::Object)
             associator(X,S,T) ⊗ id(dX)
         )
     end
+    InnerAutoequivalence(C,X, dX, indecs, mon_structure)
 end
+
+indecomposables(F::InnerAutoequivalence) = indecomposables(domain(F))
+
+
+function inner_autoequivalence(X::Object) 
+    @req is_invertible(X) "Object has to be invertible"
+    inner_autoequivalence(parent(X),X)
+end
+
+codomain(F::InnerAutoequivalence) = domain(F)
+
+function functor(F::InnerAutoequivalence) 
+    functor(
+        domain(F),
+        codomain(F),
+        X -> F(X),
+        f -> F(f)
+    )
+end
+
+(F::InnerAutoequivalence)(X::Object) = (F.object ⊗ X) ⊗  F.dual_object
+(F::InnerAutoequivalence)(f::Morphism) = (id(F.object) ⊗ f) ⊗ id( F.dual_object)
+
+# function monoidal_structure(F::InnerAutoequivalence, S::Object, T::Object)  
+#     X = F.object 
+#     dX = F.dual_object
+
+#     compose(
+#         associator(X⊗S, dX, (X⊗T)⊗dX),
+#         id(X⊗S) ⊗ compose(
+#             (id(dX) ⊗ associator(X,T,dX)),
+#             inv_associator(dX,X,T⊗dX),
+#             ev(X) ⊗ id(T⊗dX)
+#         ),
+#         inv_associator(X⊗S,T,dX),
+#         associator(X,S,T) ⊗ id(dX)
+#     )
+# end
 
 function compose(F::InnerAutoequivalence, G::InnerAutoequivalence)
     X,dX = F.object, F.dual_object
@@ -217,6 +242,10 @@ function compose(F::InnerAutoequivalence, G::InnerAutoequivalence)
     )
 end
 
+function show(io::IO, F::InnerAutoequivalence)
+    print(io, "Inner autoequivalence defined by $(F.object)")
+end
+
 #=----------------------------------------------------------
     TensorFunctors 
 ----------------------------------------------------------=#
@@ -230,6 +259,7 @@ end
 (F::MonoidalFunctor)(X::Object) = F.F(X)
 (F::MonoidalFunctor)(f::Morphism) = F.F(f)
 
+functor(F::MonoidalFunctor) = F.F
 
 domain(F::MonoidalFunctor) = domain(F.F)
 codomain(F::MonoidalFunctor) = codomain(F.F)
@@ -239,10 +269,10 @@ function monoidal_functor(F::AbstractFunctor, S::Vector{<:Object}, nats::Dict)
     MonoidalFunctor(F,S,nats)
 end
 
-function compose(F::MonoidalFunctor, G::MonoidalFunctor)
+function compose(F::AbstractMonoidalFunctor, G::AbstractMonoidalFunctor)
     S = indecomposables(F)
     MonoidalFunctor(
-        compose(F.F, G.F),
+        compose(functor(F), functor(G)),
         S,
         Dict((i,j) => compose(
                 monoidal_structure(G, F(S[i]), F(S[j])),

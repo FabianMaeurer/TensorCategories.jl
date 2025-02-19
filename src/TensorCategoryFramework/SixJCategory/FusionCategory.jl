@@ -944,26 +944,8 @@ end
 
 Return the category ``C⊗K``.
 """
-function extension_of_scalars(C::SixJCategory, L::Ring)
-    K = base_ring(C)
+function extension_of_scalars(C::SixJCategory, L::Ring; embedding = embedding(base_ring(C), L))
 
-    if typeof(L) == CalciumField || L == QQBar
-        x = roots(L,K.pol)[1]
-        f = hom(K,L,x)
-
-    elseif K != QQ && characteristic(K) == 0 
-        if K isa AbsSimpleNumField && L isa RelSimpleNumField
-            f = L
-        else
-            if typeof(L) <: Union{AbsSimpleNumField, QQField, RelSimpleNumField} && (base_field(K) == base_field(L))
-                _,f = is_subfield(K,L)
-            else
-                f = L
-            end
-        end
-    else
-        f = L
-    end
 
     try
         D = six_j_category(L, C.tensor_product, simples_names(C))
@@ -971,16 +953,16 @@ function extension_of_scalars(C::SixJCategory, L::Ring)
         set_name!(D, C.name)
         
         if isdefined(C, :ass)
-            D.ass = [matrix(L, size(a)..., f.(collect(a))) for a ∈ C.ass]
+            D.ass = [matrix(L, size(a)..., embedding.(collect(a))) for a ∈ C.ass]
         end
         if isdefined(C, :one)
             D.one = C.one
         end
         if isdefined(C, :spherical)
-            D.spherical = f.(C.spherical)
+            D.spherical = embedding.(C.spherical)
         end
         if  isdefined(C, :braiding)
-            D.braiding = [matrix(L, size(a)..., f.(collect(a))) for a ∈ C.braiding]
+            D.braiding = [matrix(L, size(a)..., embedding.(collect(a))) for a ∈ C.braiding]
         end
         if isdefined(C, :twist) 
             D.twist = f.(C.twist)
@@ -1000,7 +982,7 @@ end
 
 Return the object ``X`` as an object of the category ``C⊗K``.
 """
-function extension_of_scalars(X::SixJObject, L::Ring, CL = parent(X) ⊗ L)
+function extension_of_scalars(X::SixJObject, L::Ring, CL = parent(X) ⊗ L;embedding = nothing)
     SixJObject(CL, X.components)
 end
 
@@ -1010,28 +992,13 @@ end
 
 Return the category ``C⊗K``.
 """
-function extension_of_scalars(m::SixJMorphism, L::Ring)
-    K = base_ring(m)
-    if K != QQ && characteristic(K) == 0 
-        if K isa AbsSimpleNumField && L isa RelSimpleNumField
-            f = L
-        else
-            if  typeof(L) <: Union{AbsSimpleNumField, QQField, RelSimpleNumField} && base_field(K) == base_field(L)
-                _,f = is_subfield(K,L)
-            else
-                f = L
-            end
-        end
-    else
-        f = L
-    end
-
-
-
+function extension_of_scalars(m::SixJMorphism, L::Ring, CL = parent(m) ⊗ L; embedding = embedding(base_ring(m), L))
     try
 
-        mats = [matrix(L, size(m)..., f.(collect(m))) for m ∈ matrices(m)] 
-        g = morphism(domain(m) ⊗ L, codomain(m) ⊗ L, mats)
+        mats = [matrix(L, size(m)..., embedding.(collect(m))) for m ∈ matrices(m)] 
+        g = morphism(extension_of_scalars(domain(m), L, CL),
+                    extension_of_scalars(codomain(m), L, CL), 
+                    mats)
 
         return g
     catch

@@ -109,7 +109,20 @@ struct Functor <: AbstractFunctor
     mor_map
 end
 
+functor(C::Category,D::Category,obj_map,mor_map) = Functor(C,D,obj_map,mor_map)
+
 tensor_product(F::T...) where T <: AbstractFunctor = compose(F...)
+
+function compose(F::AbstractFunctor, G::AbstractFunctor)
+    @req codomain(F) == domain(G) "Not compatible"
+    functor(
+        domain(F),
+        codomain(G),
+        X -> G(F(X)),
+        f -> G(F(f))
+    )
+end
+
 #-------------------------------------------------------------------------------
 #   Forgetful Functors
 #-------------------------------------------------------------------------------
@@ -185,5 +198,5 @@ struct BilinearForm
 end
 
 function (B::BilinearForm)(x::GroupElem, y::GroupElem) 
-    B.map[x*y]*inv(B.map[x])*inv(B.map[y])
+    B.map[(x,y)]
 end

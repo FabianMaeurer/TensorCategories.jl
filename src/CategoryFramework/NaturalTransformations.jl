@@ -110,6 +110,10 @@ function +(η::AdditiveNaturalTransformation, ν::AdditiveNaturalTransformation)
     error("Not implemented")
 end
 
+function ==(η::AdditiveNaturalTransformation, ν::AdditiveNaturalTransformation)
+    all(is_zero.(f-g for (f,g) ∈ zip(η.maps, ν.maps)))
+end
+
 #=----------------------------------------------------------
     Compute natural transformations 
 ----------------------------------------------------------=#
@@ -222,32 +226,26 @@ end
     Monoidal structures     
 ----------------------------------------------------------=#
 
-function lax_monoidal_structures(F::AbstractFunctor)
-    @assert is_additive(F)
+function horizontal_composition(η::AdditiveNaturalTransformation, ν::AdditiveNaturalTransformation)
+    F,F2 = domain.([η, ν])
+    G,G2 = codomain.([η, ν])
 
-    C = domain(F)
-    D = codomain(F)
+    FF = compose(F,F2)
+    GG = compose(G,G2)
 
-    S = indecomposables(C)
+    indecs = indecomposables(η)
 
-    F1 = Functor(
-        C×C,
-        D,
-        X -> F(X[1]) ⊗ F(X[2]),
-        f -> F(f[1]) ⊗ F(f[2])
+    maps = [ν(G(x)) ∘ F2(η(x)) for x ∈ indecs]
+
+    AdditiveNaturalTransformation(
+        FF,
+        GG,
+        indecs,
+        maps
     )
-
-    F2 = Functor(
-        C × C,
-        C,
-        X -> F(X[1] ⊗ X[2]),
-        f -> F(f[1] ⊗ f[2])
-    )
-
-    indecs = [ProductObject(s,t) for s ∈ S, t ∈ S][:]
-    nats = additive_natural_transformations(F1,F2,indecs)
-        
 end
+
+tensor_product(η::AdditiveNaturalTransformation, ν::AdditiveNaturalTransformation) = horizontal_composition(η,ν)
 #=----------------------------------------------------------
     Pretty Printing 
 ----------------------------------------------------------=#
