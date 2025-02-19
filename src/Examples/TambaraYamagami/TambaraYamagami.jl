@@ -181,7 +181,7 @@ end
 function trivial_bilinear_form(G::Group, K::Field)
     @assert is_abelian(G)
 
-    BilinearForm(G,K,root_of_unity(K,2), Dict(x => one(K) for x ∈ G))
+    BilinearForm(G,K,root_of_unity(K,2), Dict((x,y) => one(K) for x ∈ G, y ∈ G))
 end
 
 #-------------------------------------------------------------------------------

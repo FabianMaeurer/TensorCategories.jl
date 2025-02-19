@@ -66,5 +66,5 @@ end
 
 
 function twisted_graded_vector_spaces(G::Group, i::Int = 2, j::Int = 1)
-	twisted_graded_vector_spaces(G, QQBar, i, j)
+	twisted_graded_vector_spaces(G, QQBarField(), i, j)
 end

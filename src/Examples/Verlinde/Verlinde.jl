@@ -92,7 +92,7 @@ end
 #furthermore for the braiding k we use even higher roots of unity,  but also need (m+1, k) coprime
 #Formulas come from "Temperley-Lieb Recoupling theory"
 function verlinde_category(K::Ring, m::Int, l::Int = 1, k::Int = 1)
-	#K=Oscar.QQBar
+	#K=Oscar.QQBarField()
 	z = root_of_unity(K, 2*m+2)
    	q = quantum(z^l+z^-l, 2*m+2)
 	

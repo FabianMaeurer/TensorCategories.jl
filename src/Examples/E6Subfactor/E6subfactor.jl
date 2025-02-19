@@ -4,7 +4,7 @@
 
 function E6subfactor()
     #K,ξ = cyclotomic_field(24,"ξ₂₄") 
-    K = QQBar
+    K = QQBarField()
     r3 = sqrt(K(3))
     r2 = sqrt(K(2))
     ξ = root_of_unity(K,24)

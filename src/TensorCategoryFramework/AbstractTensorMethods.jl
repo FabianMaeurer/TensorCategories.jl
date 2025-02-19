@@ -371,7 +371,7 @@ function fpdim(X::Object)
     S = simples(parent(X))
     n = length(S)
 
-    K = QQBar
+    K = QQBarField()
 
  
     A = Array{Int,2}(undef,n,n)
@@ -385,7 +385,7 @@ function fpdim(X::Object)
 end
 
 function fp_eigenvalue(m::MatrixElem)
-    λ = eigenvalues(QQBar, m)
+    λ = eigenvalues(QQBarField(), m)
     filter!(e -> isreal(e), λ)
     return findmax(e -> abs(e), λ)[1]
 end

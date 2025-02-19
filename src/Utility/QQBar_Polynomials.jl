@@ -5,7 +5,7 @@ function eigenvalues(M::MatElem{QQBarFieldElem})
 end
 
 function eigenvalues(M::MatElem{CalciumFieldElem})
-    m = change_base_ring(QQBar,M)
+    m = change_base_ring(QQBarField(),M)
     base_ring(M).(eigenvalues(m))
 end
 
@@ -45,7 +45,7 @@ end
 # end
 
 function roots(p::PolyRingElem{CalciumFieldElem})
-    rs = roots(change_base_ring(QQBar, p))
+    rs = roots(change_base_ring(QQBarField(), p))
     return base_ring(p).(rs)
 end
 
@@ -69,7 +69,7 @@ end
 
 #     for r ∈ rs
 #         try 
-#             push!(QQBar_roots, guess(QQBar, r, max_deg))
+#             push!(QQBar_roots, guess(QQBarField(), r, max_deg))
 #         catch
 #             @warn "Maximal precision not high enough to recover root $r"
 #         end
@@ -181,5 +181,5 @@ function (::QQField)(x::QQBarFieldElem)
 end
 
 function rand(::QQBarField, I::UnitRange)
-    return QQBar(rand(ZZ, I))
+    return QQBarField()(rand(ZZ, I))
 end

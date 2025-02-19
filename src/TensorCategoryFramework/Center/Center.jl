@@ -654,7 +654,7 @@ function decompose(X::CenterObject)
     C = parent(X)
     K = base_ring(X)
 
-    if K == QQBar || typeof(K) == CalciumField
+    if K == QQBarField() || typeof(K) == CalciumField
         return decompose_over_qqbar(X)
     end
 
@@ -941,7 +941,7 @@ end
 
 function Hom(X::CenterObject, Y::CenterObject) 
 
-    alg_closed = (base_ring(X) == QQBar || typeof(base_ring(X)) == CalciumField)
+    alg_closed = (base_ring(X) == QQBarField() || typeof(base_ring(X)) == CalciumField)
 
     if alg_closed && has_attribute(X, :is_simple) && 
         get_attribute(X, :is_simple) &&
@@ -1053,7 +1053,7 @@ function simples_by_induction!(C::CenterCategory, log = true)
 
         if dim(category(C)) != 0
             #Test which simples in S are included
-            multiplicities = K == QQBar || typeof(K) == CalciumField ? [int_dim(Hom(object(t),s)) for t ∈ S] : [div(int_dim(Hom(object(t),s)), int_dim(End(t))) for t ∈ S]
+            multiplicities = K == QQBarField() || typeof(K) == CalciumField ? [int_dim(Hom(object(t),s)) for t ∈ S] : [div(int_dim(Hom(object(t),s)), int_dim(End(t))) for t ∈ S]
 
             S_in_Z = [(t, k) for (t,k) ∈ zip(S, multiplicities) if k != 0]
 

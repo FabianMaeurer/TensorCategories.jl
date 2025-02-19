@@ -133,7 +133,7 @@ function end_of_induction(X::Object, IX = induction(X))
     @threads for i ∈ 1:length(simpls)
         xi = simpls[i]
         dxi = dual(xi)
-        if typeof(base_ring(X)) == CalciumField #|| base_ring(X) == QQBar
+        if typeof(base_ring(X)) == CalciumField #|| base_ring(X) == QQBarField()
             m[i] = (dim(xi))*compose(
                 associator(xi, object(IX), dxi),
                 id(xi) ⊗ half_braiding(IX, dxi),
@@ -162,7 +162,7 @@ function induction_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = inducti
     @assert is_split_semisimple(parent(H[1]))
 
     simpls = simples(parent(H[1]))
-    if typeof(base_ring(Y)) == CalciumField() || base_ring(Y) == QQBar
+    if typeof(base_ring(Y)) == CalciumField() || base_ring(Y) == QQBarField()
         ind_f = [dim(xi) * compose(
             associator(xi, object(Y), dual(xi)),
             id(xi) ⊗ half_braiding(Y, dual(xi)),

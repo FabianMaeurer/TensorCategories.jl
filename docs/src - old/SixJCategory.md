@@ -11,7 +11,7 @@ They are constructed by setting the multiplication table for the monoidal produc
 As an example we will construct the Ising fusion category. This is a fusion category with three simple objects ``1``, ``\chi`` and ``X``. The multiplication is given by ``\chi \otimes \chi = 1``, ``\chi \otimes X = X \otimes \chi = X`` and ``X \otimes X = 1 \oplus \chi``. There are precisely 3 non-trivial 6j-symbols ``\Phi_X^{\chi\,X\,\chi} = -1``, ``\Phi_{\chi}^{X\,\chi\,X} = -1`` und ``\Phi_X^{X\,X\,X} = \frac{1}{\sqrt 2}\begin{pmatrix} 1 & 1 \\ 1 & -1\end{pmatrix}``.
 
 ```@example FC
-F = QQBar
+F = QQBarField()
 I = six_j_category(F,["𝟙", "χ", "X"])
 
 M = zeros(Int,3,3,3)

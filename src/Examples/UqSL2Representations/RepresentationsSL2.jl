@@ -39,7 +39,7 @@ Construct a skeletal category equivalent to the category of representations of `
 """
 sl2_representations(F::Ring) = sl2_representations(F,F(1))
 sl2_representations(F::Ring, x::RingElem) = UqSl2Representations(F,F(x))
-sl2_representations() = UqSl2Representations(QQBar, QQBar(1))
+sl2_representations() = UqSl2Representations(QQBarField(), QQBarField()(1))
 
 is_tensor(C::UqSl2Representations) = true
 

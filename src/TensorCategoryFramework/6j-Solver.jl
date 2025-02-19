@@ -2,7 +2,7 @@
     Very crude attempt to solve pentagon equations 
 ----------------------------------------------------------=#
 
-function six_j_symbols(mult::Array{Int,3}, one::Vector{Int}, K::Field = QQBar)
+function six_j_symbols(mult::Array{Int,3}, one::Vector{Int}, K::Field = QQBarField())
     C,eqs = pentagon_equations(mult, one)
 
     sols = recover_solutions(real_solutions(ideal(eqs)), K)
@@ -136,8 +136,8 @@ function _solve_fewnomial_system(I::Ideal, i::Int = 1)
     sols = _solve_fewnomial_system(ideal([Bi;Ci]), i+1)
 
     S = []
-    R,x = QQBar[:x]
-    B = [change_base_ring(QQBar, f) for f ∈ B]
+    R,x = QQBarField()[:x]
+    B = [change_base_ring(QQBarField(), f) for f ∈ B]
     for s ∈ sols
 
         D = [f([R(1) for _ ∈ 1:i-1]...,x,R.(s)...) for f ∈ B]
@@ -145,7 +145,7 @@ function _solve_fewnomial_system(I::Ideal, i::Int = 1)
         unique!(D)
     
         if length(D) == 0 
-            S = [S;(QQBar(1),s...)]
+            S = [S;(QQBarField()(1),s...)]
         else
             rs = roots(gcd(D))
             S = [S;[(r,s...) for r ∈ rs]]

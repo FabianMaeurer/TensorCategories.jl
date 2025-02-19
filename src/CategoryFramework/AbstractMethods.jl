@@ -201,7 +201,7 @@ decompose(X::T, S::Vector{T}) where T <: Object = decompose_by_simples(X,S)
 
 function decompose_by_endomorphism_ring(X::Object, E = End(X))
     K = base_ring(X)
-    if K == QQBar || typeof(K) == CalciumField
+    if K == QQBarField() || typeof(K) == CalciumField
         return decompose_over_qqbar(X, E)
     end
 
@@ -432,7 +432,7 @@ function minpoly(f::Morphism)
     
     if hasmethod(matrix, Tuple{typeof(f)})
         # if typeof(base_ring(f)) == CalciumField
-        #     return change_base_ring(base_ring(f), minpoly(change_base_ring(QQBar, matrix(f))))
+        #     return change_base_ring(base_ring(f), minpoly(change_base_ring(QQBarField(), matrix(f))))
         # end
         return minpoly(matrix(f))
     else

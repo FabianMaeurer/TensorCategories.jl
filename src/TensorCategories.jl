@@ -11,7 +11,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     GAPGroupHomomorphism, GL, GSet, GroupElem, Hecke.AbstractAssociativeAlgebra,
     Hecke.AbstractAssociativeAlgebraElem, Ideal, MPolyRingElem, MPolyIdeal, Map, MatElem, MatrixElem,
     MatrixGroup, matrix_space, ModuleIsomorphism, number_field, PcGroup, PolyRingElem,
-    polynomial_ring, QQ, QQBar, QQField, QQFieldElem, QQMPolyRingElem, Ring, RingElem, ZZ, QQBarFieldElem,
+    polynomial_ring, QQ, QQBarField, QQField, QQFieldElem, QQMPolyRingElem, Ring, RingElem, ZZ, QQBarFieldElem,
     ZZRingElem, abelian_closure, abelian_group, absolute_simple_field, action, base_field,
     base_ring, basis, central_primitive_idempotents, change_base_ring, 
      characteristic,
@@ -40,7 +40,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     pc_group, permutation_group, @req, is_constant, automorphism_group,
     permuted
 
-using Serialization
+# using Serialization
 import Oscar: @register_serialization_type,
                 save_data_dict,
                 save_data_array,
@@ -338,7 +338,6 @@ export Pushforward
 export PushforwardFunctor 
 export pushout
 export pushout_product
-export QQBar
 export QuantumZZRing
 export QuantumZZRingElem
 export QZZ

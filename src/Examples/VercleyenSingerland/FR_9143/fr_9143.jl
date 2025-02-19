@@ -5,7 +5,7 @@
 Categorification of fusion ring FR9143. 
 """
 function cat_fr_9143() 
-    K = QQBar
+    K = QQBarField()
     r2 = sqrt(K(2))
     z6 = root_of_unity(K,6) #6th root of unity
 

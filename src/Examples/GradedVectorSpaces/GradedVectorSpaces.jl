@@ -49,7 +49,7 @@ function graded_vector_spaces(F::Field, G::Group, c::Cocycle)
 end
 
 function graded_vector_spaces(G::Group)
-    graded_vector_spaces(QQBar, G)
+    graded_vector_spaces(QQBarField(), G)
 end
 """
     VectorSpaceObject(V::Pair{<:GroupElem, <:VectorSpaceObject}...)
