@@ -1301,8 +1301,7 @@ end
     extension_of_scalars 
 ----------------------------------------------------------=#    
 
-function extension_of_scalars(C::CenterCategory, L::Field)
-    emb = embedding(base_ring(C),L)
+function extension_of_scalars(C::CenterCategory, L::Field, emb = is_subfield(base_ring(C), L)[2])
 
     CL = _extension_of_scalars(C,L, extension_of_scalars(category(C), L, embedding = emb))
 

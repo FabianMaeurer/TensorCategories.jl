@@ -16,7 +16,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     base_ring, basis, central_primitive_idempotents, change_base_ring, 
      characteristic,
     charpoly, codomain, coeff, coefficients, cokernel, complex_embeddings, compose, centralizer, embedding,
-    cyclotomic_field, decompose, degree, det, diagonal_matrix, dim, direct_sum, divisors,
+    cyclotomic_field, decompose, degree, det, diagonal_matrix, dim, direct_sum, divisors, set_name!,
     domain, dual, eigenspace, eigenspaces, eigenvalues, elem_type, elements, exponent,
     exponents, factor, QQFieldElem, QQPolyRingElem, ZZRingElem, gcd, gen, gens, get_attribute, get_attribute!,
     gmodule, groebner_basis, group_algebra, gset, guess, has_attribute, height_bits, hnf,
@@ -224,6 +224,7 @@ export induction_restriction
 export induction_right_adjunction
 export InductionMonad
 export inner_autoequivalence
+export inner_autoequivalences
 export int_dim 
 export internal_hom
 export internal_hom_adjunction
@@ -375,6 +376,7 @@ export separable_algebra_structures
 export set_associator! 
 export set_braiding! 
 export set_canonical_spherical! 
+export set_name!
 export set_one! 
 export set_spherical! 
 export set_tensor_product! 

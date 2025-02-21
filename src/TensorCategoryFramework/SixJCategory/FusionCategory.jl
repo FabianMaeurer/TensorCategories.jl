@@ -1006,7 +1006,27 @@ function extension_of_scalars(m::SixJMorphism, L::Ring, CL = parent(m) ⊗ L; em
     end
 end
 
+function restriction_of_scalars(C::SixJCategory, K::Ring)
+    b,f = is_subfield(K,base_ring(C))
 
+    !b && error("Restriction not possible")
+
+    D = six_j_category(K, multiplication_table(C), simples_names(C))
+
+    D.ass = [matrix(K, size(m)..., [preimage(f, a) for a ∈ m]) for m ∈ C.ass]
+
+    isdefined(C, :spherical) && set_spherical!(D, [preimage(f, a) for a ∈ C.spherical])
+
+    try 
+        D.braiding = [matrix(K, size(m)..., [preimage(f, a) for a ∈ m]) for m ∈ C.braiding]
+    catch 
+    end
+
+    D.one = C.one 
+    D.name = C.name 
+
+    D 
+end
 
 function simplify(C::SixJCategory)
     K = base_ring(C)
