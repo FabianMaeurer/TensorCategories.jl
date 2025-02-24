@@ -190,7 +190,7 @@ function I2subcategory(m, F::Ring = cyclotomic_field(2*m)[1])
 	A=[0 for s in simples(C)]::Vector{Int64}
 	A[1]=1
 	set_one!(C,A)
-	set_spherical!(C, [F(1) for s ∈ simples(C)])
+	set_pivotal!(C, [F(1) for s ∈ simples(C)])
 	set_name!(C, "Fusion subcategory of I₂($m)")
 	return C
 end

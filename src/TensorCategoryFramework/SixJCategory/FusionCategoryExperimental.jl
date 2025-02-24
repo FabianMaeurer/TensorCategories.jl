@@ -69,7 +69,7 @@ function set_associator!(F::NonStrictSixJCategory, i::Int, j::Int, k::Int, ass::
 end
 
 
-function set_spherical!(F::NonStrictSixJCategory, sp::Vector)
+function set_pivotal!(F::NonStrictSixJCategory, sp::Vector)
     F.spherical = sp
 end
 
@@ -443,7 +443,7 @@ function NonStrictIsing()
     z = zero(matrix_space(F,0,0))
     set_associator!(C,3,3,3, [z, z, inv(a)*matrix(F,[1 1; 1 -1])])
 
-    set_spherical!(C, [F(1) for s ∈ simples(C)])
+    set_pivotal!(C, [F(1) for s ∈ simples(C)])
 
 
     return C

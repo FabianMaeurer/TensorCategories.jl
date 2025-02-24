@@ -12,7 +12,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     Hecke.AbstractAssociativeAlgebraElem, Ideal, MPolyRingElem, MPolyIdeal, Map, MatElem, MatrixElem,
     MatrixGroup, matrix_space, ModuleIsomorphism, number_field, PcGroup, PolyRingElem,
     polynomial_ring, QQ, QQBarField, QQField, QQFieldElem, QQMPolyRingElem, Ring, RingElem, ZZ, QQBarFieldElem,
-    ZZRingElem, abelian_closure, abelian_group, absolute_simple_field, action, base_field,
+    ZZRingElem, abelian_closure, abelian_group, absolute_simple_field, action, base_field, defining_polynomial,
     base_ring, basis, central_primitive_idempotents, change_base_ring, 
      characteristic,
     charpoly, codomain, coeff, coefficients, cokernel, complex_embeddings, compose, centralizer, embedding,
@@ -86,6 +86,7 @@ export algebras
 export algebra_structures
 export AlgebraObject
 export AlgebraMorphism
+export anyonwiki
 export ArrowCategory
 export ArrowObject
 export ArrowMorphism
@@ -325,6 +326,7 @@ export pairing
 export parent 
 export pentagon_axiom 
 export pentagon_equations
+export pivotal
 export preimage
 export print_multiplication_table 
 export print_multiplication_table 
@@ -378,7 +380,8 @@ export set_braiding!
 export set_canonical_spherical! 
 export set_name!
 export set_one! 
-export set_spherical! 
+export set_pivotal! 
+export set_spherical!
 export set_tensor_product! 
 export set_trivial_spherical!
 export SetHomSet 
@@ -515,7 +518,7 @@ include("Examples/Haagerup/ExtendedHaagerup.jl")
 
 include("Serialization/SixJSerialization.jl")
 include("SixJCategoryDatabase/main.jl")
-
+include("AnyonWiki/AnyonWiki.jl")
 
 
 

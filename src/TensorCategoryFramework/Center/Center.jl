@@ -115,7 +115,7 @@ Return the image under the forgetful functor.
 """
 morphism(f::CenterMorphism) = f.m
 
-is_weakly_fusion(C::CenterCategory) = true
+is_weakly_fusion(C::CenterCategory) = dim(category(C)) != 0
 is_fusion(C::CenterCategory) = all([int_dim(End(s)) == 1 for s ∈ simples(C)])
 is_abelian(C::CenterCategory) = true
 is_linear(C::CenterCategory) = true
@@ -1022,7 +1022,13 @@ function add_induction!(C::CenterCategory, X::Object, IX::CenterObject)
 end
 
 function simples_by_induction!(C::CenterCategory, log = true)
-    S = CenterObject[]
+    S = CenterObject[one(C)]
+
+    if rank(category(C)) == 1
+        C.simples = S
+        return S 
+    end
+
     d = dim(C.category)^2
     C.induction_gens = induction_generators(C)
     simpls = simples(C.category)
@@ -1145,6 +1151,25 @@ function split(X::CenterObject, E = End(X))
 
     L = splitting_field(minpoly(f))
     collect(values(eigenvalues(f ⊗ L)))
+end
+
+function split(C::CenterCategory)
+    ends = End.(simples(C))
+
+    non_split = filter(e -> int_dim(e) > 1, ends)
+
+    length(non_split) == 0 && return C 
+
+    minpolys = [minpoly.(basis(e)) for e ∈ non_split]
+
+    K = base_ring(C) 
+    _,x = K[:x]
+    minpolys = [B[findfirst(f -> degree(f) == length(B), B)](x) for B ∈ minpolys]
+
+    L = simplify(absolute_simple_field(splitting_field(minpolys))[1])[1]
+
+    incl = K == QQ ? L : is_subfield(K,L)[2]
+    extension_of_scalars(C, L, incl)
 end
 
 

@@ -154,6 +154,8 @@ spherical of a morphism ``X → X``.
 """
 tr(f::Morphism) = left_trace(f)
 
+pivotal(X::Object) = spherical(X::Object)
+
 """ 
 
     left_trace(f::Morphism)
@@ -169,7 +171,7 @@ function left_trace(f::Morphism)
     if V == zero(C) || W == zero(C) return zero_morphism(one(C),one(C)) end
     
     if V == W
-        return ev(left_dual(V)) ∘ ((spherical(V)∘f) ⊗ id(left_dual(V))) ∘ coev(V)
+        return ev(left_dual(V)) ∘ ((pivotal(V)∘f) ⊗ id(left_dual(V))) ∘ coev(V)
     end
     return ev(left_dual(V)) ∘ (f ⊗ id(left_dual(V))) ∘ coev(V)
 end

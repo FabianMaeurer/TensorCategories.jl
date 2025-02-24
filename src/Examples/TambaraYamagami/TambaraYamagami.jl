@@ -115,7 +115,7 @@ function tambara_yamagami(K::Ring, A::Group, τ::RingElem, χ::BilinearForm)
     end
     set_associator!(TY, n+1, n+1, n+1, [[zero_mat for _ ∈ 1:n]; inv(a)*matrix(K,[inv(χ(els[i],els[j])) for i ∈ 1:n, j ∈ 1:n])])
     set_one!(TY, [1; [0 for _ ∈ 1:n]])
-    set_spherical!(TY, [K(1) for _ ∈ 1:n+1])
+    set_pivotal!(TY, [K(1) for _ ∈ 1:n+1])
 
     set_attribute!(TY, :classification, ["Tambara-Yamagami"])
 
@@ -262,7 +262,7 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
 
     set_one!(C,[1,0,0])
 
-    set_spherical!(C, [F(1) for s ∈ simples(C)])
+    set_pivotal!(C, [F(1) for s ∈ simples(C)])
 
     set_attribute!(C, :classification, ["Ising", "Tambara-Yamagami"])
 

@@ -11,7 +11,7 @@
     ass::Array{MatElem,4}
     braiding::Array{MatElem,3}
     tensor_product::Array{Int,3}
-    spherical::Vector
+    pivotal::Vector
     twist::Vector
     one::Vector{Int}
     name::String
@@ -51,7 +51,7 @@ function six_j_category(F::Ring, mult::Array{Int,3}, names::Vector{String} = ["X
     C.simples = length(mult[1,1,:])
     C.simples_names = names
     set_tensor_product!(C,mult)
-    set_spherical!(C, [F(1) for _ ∈ names])
+    set_pivotal!(C, [F(1) for _ ∈ names])
     #C.ass = [id(⊗(X,Y,Z)) for X ∈ simples(C), Y ∈ simples(C), Z ∈ simples(C)]
     return C
 end
@@ -61,8 +61,7 @@ function six_j_category(F::Ring, names::Vector{String})
     C.base_ring = F
     C.simples = length(names)
     C.simples_names = names
-    
-    set_spherical!(C, [F(1) for _ ∈ names])
+    set_pivotal!(C, [F(1) for _ ∈ names])
     
     return C
 end
@@ -100,19 +99,47 @@ function set_associator!(F::SixJCategory, i::Int, j::Int, k::Int, l::Int, ass::A
     F.ass[i,j,k,l] = matrix(base_ring(F), (N > 1 ? size(ass) : (1,1))..., ass)
 end
 
+function set_associator!(F::SixJCategory, i::Int, j::Int, k::Int, l::Int, m::Int, n::Int, v::RingElem) 
+    F.ass[i,j,k,l][m,n] = v
+end
 
-function set_spherical!(F::SixJCategory, sp)
-    F.spherical = sp
+function set_pivotal!(F::SixJCategory, sp)
+    F.pivotal = sp
+end
+
+function set_spherical!(F::SixJCategory, sp) 
+    @req is_spherical(F,sp) "Not a spherical structure"
+    F.pivotal = sp
+end
+
+function is_spherical(F::SixJCategory, sp) 
+    all([s*ev(x)∘coev(x) == inv(s)*ev(dual(x))∘coev(dual(x)) for (s,x) ∈ zip(sp,simples(F))]) 
+end
+
+function is_spherical(F::SixJCategory)
+    get_attribute!(is_spherical, :is_spherical) do
+        if isdefined(F, :pivotal) 
+            if is_spherical(F,F.pivotal)
+                return true 
+            end
+        end
+        false
+    end
+    
 end
 
 function set_canonical_spherical!(C::SixJCategory)
     @assert is_fusion(C)
-    set_spherical!(C, [fpdim(s)*inv(dim(s)) for s ∈ simples(C)])
+    set_pivotal!(C, [fpdim(s)*inv(dim(s)) for s ∈ simples(C)])
     end
 
-function set_one!(F::SixJCategory, v) 
+function set_one!(F::SixJCategory, v::Vector) 
     F.one = v
 end 
+
+function set_one!(F::SixJCategory, i::Int)
+    F.one = [k == i for k ∈ 1:F.simples]
+end
 
 function set_ribbon!(F::SixJCategory, r)
     F.ribbon = r
@@ -539,13 +566,17 @@ function simple_objects_ev(X::SixJObject)
 end
 
 function spherical(X::SixJObject)
+    @req is_spherical(parent(X)) "Not spherical"
+    pivotal(X)
+end
+
+function pivotal(X::SixJObject)
     C = parent(X)
     F = base_ring(C)
-    sp = C.spherical
+    sp = C.pivotal
     mats = [diagonal_matrix(θ, k) for (θ,k) ∈ zip(sp, X.components)]
     return morphism(X,X,mats)
 end
-
 
 *(λ,f::SixJMorphism) = SixJMorphism(domain(f), codomain(f), λ .*f.m)
 
@@ -1015,7 +1046,7 @@ function restriction_of_scalars(C::SixJCategory, K::Ring)
 
     D.ass = [matrix(K, size(m)..., [preimage(f, a) for a ∈ m]) for m ∈ C.ass]
 
-    isdefined(C, :spherical) && set_spherical!(D, [preimage(f, a) for a ∈ C.spherical])
+    isdefined(C, :spherical) && set_pivotal!(D, [preimage(f, a) for a ∈ C.spherical])
 
     try 
         D.braiding = [matrix(K, size(m)..., [preimage(f, a) for a ∈ m]) for m ∈ C.braiding]

@@ -71,6 +71,6 @@ function cat_fr_9143()
         end
     end    
     set_one!(C,[1,0,0,0,0,0,0,0,0])
-    TensorCategories.set_spherical!(C, [K(1) for s ∈ simples(C)])
+    TensorCategories.set_pivotal!(C, [K(1) for s ∈ simples(C)])
     return C
 end

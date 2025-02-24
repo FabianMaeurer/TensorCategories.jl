@@ -503,6 +503,8 @@ end
 # end
 
 
+rank(C::Category) = length(simples(C))
+
 is_isomorphic_simples(X::Object, Y::Object) = is_isomorphic(X,Y)
 
 

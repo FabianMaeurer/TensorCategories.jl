@@ -6,8 +6,9 @@ function load_fusion_category(name::String)
     load(joinpath(@__DIR__, name * ".mrdi"))
 end
 
-function add_to_local_database(C::SixJCategory, name::String)
-    files = readdir(joinpath(@__DIR__))
+function add_to_local_database(C::SixJCategory, name::String, path::String = @__DIR__)
+
+    files = readdir(joinpath(path))
 
     if name * ".mrdi" ∈ files 
         println("File already existent. Do you want to overwrite? [y/n]")
@@ -20,5 +21,5 @@ function add_to_local_database(C::SixJCategory, name::String)
             return 
         end
     end
-    save(joinpath(@__DIR__, name * ".mrdi"), C)
+    save(joinpath(path, name * ".mrdi"), C)
 end
