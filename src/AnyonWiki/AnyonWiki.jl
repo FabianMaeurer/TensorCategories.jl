@@ -12,14 +12,13 @@ pivotal_path = joinpath(@__DIR__, "MultFreeCenters/PivotalStructures/")
 
 Load the n-th fusion category from the list of multiplicity free fusion categories of rank ≤ 7.
 """
-function anyonwiki(n::Int)
+function anyonwiki(n::Int, K::Ring = load_anyon_number_field(n::Int))
     
     data = []
     CC = AcbField(512)
     Q = QQBarField()
-    K = load_anyon_number_field(n::Int)
-    deg = degree(K)
-    e = complex_embeddings(K)[1]
+    deg = K == Q ? 24 : degree(K)
+    e = K == Q ? nothing : complex_embeddings(K)[1]
 
     # Open File n and extract data
     open(joinpath(associator_path, "cat_$n")) do f 
@@ -36,7 +35,7 @@ function anyonwiki(n::Int)
 
             x = guess(Q, x_real + x_imag, deg)
 
-            append!(data, [Any[indices; preimage(e,x)]])
+            append!(data, [Any[indices; K == Q ? x : preimage(e,x)]])
         end
     end
     N = maximum([a[1] for a ∈ data])
@@ -56,6 +55,9 @@ function anyonwiki(n::Int)
     for a ∈ 1:N, b ∈ 1:N, c ∈ 1:N, d ∈ 1:N
         abc_d = filter(e -> e[[1,2,3,4]] == [a,b,c,d], data)
         l = Int(sqrt(length(abc_d)))
+        abc_d = sort(abc_d, by = v -> v[6])
+        abc_d = sort(abc_d, by = v -> v[5])
+        
         M = matrix(K,l,l, [v[7] for v ∈ abc_d])
         set_associator!(C,a,b,c,d,M)  
     end
@@ -116,7 +118,7 @@ function load_anyon_pivotal(n::Int, K = load_anyon_number_field(n), e = complex_
 
     CC = AcbField(512)
     Q = QQBarField()
-    deg = degree(K) 
+    deg = K == Q ? 24 : degree(K) 
 
     piv = elem_type(K)[]
     open(joinpath(pivotal_path, "pivots_cat_$n")) do f 
@@ -132,7 +134,7 @@ function load_anyon_pivotal(n::Int, K = load_anyon_number_field(n), e = complex_
 
             x = guess(Q, x_real + x_imag, deg)
 
-            append!(piv, [preimage(e, x)])
+            append!(piv, [K == Q ? x : preimage(e, x)])
         end
     end
     return piv 
