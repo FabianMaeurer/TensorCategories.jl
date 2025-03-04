@@ -272,7 +272,9 @@ function direct_sum_decomposition(X::Object, S = simples(parent(X)))
 
     # temporary solution!
     iso = is_isomorphic(X,Z)[2]
+    
     inv_iso = inv(iso)
+
     return Z, iso, [inv_iso∘i for i ∈ incl], [p∘iso for p ∈ proj]
 
     #----------------------------------
@@ -358,14 +360,11 @@ function is_subobject(X::Object, Y::Object)
 end
 
 function is_isomorphic(X::Object, Y::Object)
-    H = Hom(X,Y)
-    if !is_square(int_dim(H)) 
-        return false, nothing
-    end
+    EX = End(X)
+    EY = End(Y)
+    H = Hom(X,Y) 
 
-    if is_simple(X) && is_simple(Y)
-        return int_dim(Hom(X,Y)) > 0
-    end
+    mats = [express_in_basis]
 
     @error "Not implemented"
 end

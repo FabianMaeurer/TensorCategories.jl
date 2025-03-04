@@ -606,7 +606,7 @@ function tensor_product(M::RightModuleObject, N::RightModuleObject)
     right_module_tensor_product(M,N)[1]
 end
 
-@memoize Dict function right_module_tensor_product(M::RightModuleObject, N::RightModuleObject)
+ function right_module_tensor_product(M::RightModuleObject, N::RightModuleObject)
     A = algebra(parent(M))
     @assert is_commutative(A)
     

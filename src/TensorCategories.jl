@@ -14,8 +14,8 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     polynomial_ring, QQ, QQBarField, QQField, QQFieldElem, QQMPolyRingElem, Ring, RingElem, ZZ, QQBarFieldElem,
     ZZRingElem, abelian_closure, abelian_group, absolute_simple_field, action, base_field, defining_polynomial,
     base_ring, basis, central_primitive_idempotents, change_base_ring, 
-     characteristic,
-    charpoly, codomain, coeff, coefficients, cokernel, complex_embeddings, compose, centralizer, embedding,
+     characteristic, NumField,
+    charpoly, codomain, coeff, coefficients, cokernel, complex_embeddings, compose, centralizer, embedding, complex_embedding,
     cyclotomic_field, decompose, degree, det, diagonal_matrix, dim, direct_sum, divisors, set_name!,
     domain, dual, eigenspace, eigenspaces, eigenvalues, elem_type, elements, exponent,
     exponents, factor, QQFieldElem, QQPolyRingElem, ZZRingElem, gcd, gen, gens, get_attribute, get_attribute!,
@@ -58,7 +58,6 @@ import Oscar: @register_serialization_type,
                 serialize_with_params
 
 using InteractiveUtils
-using Memoization
 using SparseArrays
 using Base.Threads
 

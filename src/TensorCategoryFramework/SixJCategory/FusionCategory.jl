@@ -117,11 +117,9 @@ function is_spherical(F::SixJCategory, sp)
 end
 
 function is_spherical(F::SixJCategory)
-    get_attribute!(is_spherical, :is_spherical) do
+    get_attribute!(F, :is_spherical) do
         if isdefined(F, :pivotal) 
-            if is_spherical(F,F.pivotal)
-                return true 
-            end
+            return is_spherical(F,F.pivotal)
         end
         false
     end

@@ -11,7 +11,6 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false)
 
         The approach is the MeatAxe algorithm. 
     =#
-
     # Over QQBar it's easier
     K = base_ring(X)
     if K == QQBarField() || typeof(K) == CalciumField || typeof(K) <: Union{PadicField,QadicField}
@@ -51,7 +50,6 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false)
 
         return unique_simples([K;I])
     end
-
 
     M = regular_module(R)
     M.action_of_gens = [representation_matrix(g) for g ∈ gens(R)]

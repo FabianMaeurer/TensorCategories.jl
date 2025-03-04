@@ -210,7 +210,7 @@ end
 
 Check whether σ and τ are isomorphic. If true return the isomorphism.
 """
-#= @memoize Dict =# function is_isomorphic(σ::GroupRepresentation, τ::GroupRepresentation)
+#=  =# function is_isomorphic(σ::GroupRepresentation, τ::GroupRepresentation)
     @assert parent(σ) == parent(τ) "Mismatching parents"
 
     if int_dim(σ) != int_dim(τ) return false, nothing end
@@ -500,7 +500,7 @@ end
 Decompose the representation into a direct sum of simple objects. Return a
 list of tuples with simple objects and multiplicities.
 """
-#= @memoize Dict =# function decompose(σ::GroupRepresentation)
+#=  =# function decompose(σ::GroupRepresentation)
     F = base_ring(σ)
     if int_dim(σ) == 0 return [] end
     G = σ.group
@@ -565,7 +565,7 @@ end
 
 Return the hom-space of the representations as a vector space.
 """
-#= @memoize Dict =# function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
+#=  =# function Hom(σ::GroupRepresentation, τ::GroupRepresentation)
     grp = base_group(σ)
     F = base_ring(σ)
 

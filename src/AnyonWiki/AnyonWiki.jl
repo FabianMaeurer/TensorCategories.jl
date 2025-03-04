@@ -8,7 +8,7 @@ pivotal_path = joinpath(@__DIR__, "MultFreeCenters/PivotalStructures/")
 
 @doc raw""" 
 
-    anyonewiki(n::Int64)
+    anyonewiki(n::Int)
 
 Load the n-th fusion category from the list of multiplicity free fusion categories of rank ≤ 7.
 """
@@ -17,8 +17,21 @@ function anyonwiki(n::Int, K::Ring = load_anyon_number_field(n::Int))
     data = []
     CC = AcbField(512)
     Q = QQBarField()
-    deg = K == Q ? 24 : degree(K)
-    e = K == Q ? nothing : complex_embeddings(K)[1]
+    deg = typeof(K) <: Union{<:NumField,QQField} ? degree(K) : 24
+    if typeof(K) <: Union{<:NumField,QQField}
+        es = complex_embeddings(K) 
+        r = load_anyon_associator_root(n)
+        r2 = load_anyon_pivotal_root(n) 
+        for f ∈ es 
+            try 
+                preimage(f,r)
+                preimage(f,r2)
+                global e = f
+                break 
+            catch 
+            end
+        end
+    end
 
     # Open File n and extract data
     open(joinpath(associator_path, "cat_$n")) do f 
@@ -30,12 +43,25 @@ function anyonwiki(n::Int, K::Ring = load_anyon_number_field(n::Int))
             s = split(s, " ")
 
             indices = Int[eval(Meta.parse(a)) for a ∈ s[1:end-3]]
-            x_real = CC(s[end-2] * " +/- 1e-512")
-            x_imag = CC(s[end][1:end-2] * "+/- 1e-512") * CC(im) 
 
-            x = guess(Q, x_real + x_imag, deg)
+            found = false 
 
-            append!(data, [Any[indices; K == Q ? x : preimage(e,x)]])
+            while ! found
+                x_real = CC(s[end-2] * "+/- 1e-510")
+                x_imag = CC(s[end][1:end-2] * "+/- 1e-510") * CC(im) 
+                try 
+                global x = guess(Q, x_real + x_imag, deg)
+                found = true
+                catch  err
+                    if precision(CC) > 5000 error(err) end
+                    CC = AcbField(2*precision(CC)) 
+                end
+            end
+            if typeof(K) <: Union{<:NumField,QQField}
+                append!(data, [Any[indices; preimage(e,x)]])
+            else 
+                append!(data, [Any[indices; K(x)]])       
+            end
         end
     end
     N = maximum([a[1] for a ∈ data])
@@ -63,7 +89,12 @@ function anyonwiki(n::Int, K::Ring = load_anyon_number_field(n::Int))
     end
     set_one!(C, 1)
     
-    set_pivotal!(C, load_anyon_pivotal(n, K, e))
+    if typeof(K) <: Union{<:NumField,QQField}
+        set_pivotal!(C, load_anyon_pivotal(n, K, e))
+    else 
+        set_pivotal!(C, load_anyon_pivotal(n, K, nothing))     
+    end
+    
 
     C
 end
@@ -106,19 +137,62 @@ function load_anyon_number_field(n::Int)
             line += 1
         end
     end
-
+    
     K1 == K2 && return K1
-    K1 == QQ && return K2 
+    K1 == QQ && return K2
     K2 == QQ && return K1 
 
     simplify(splitting_field([defining_polynomial(K1), defining_polynomial(K2)]))[1]
 end
 
+function load_anyon_associator_root(n::Int)
+    line = 1
+    CC = AcbField(1024)
+    Q = QQBarField()
+    deg = 24
+    open(joinpath(associator_path, "Roots.dat")) do f 
+
+        while ! eof(f) 
+            s = readline(f) 
+            if line == n
+                s = filter(!=('\"'), s)
+                s = split(s, " ")
+                x_real = CC(s[1] * " +/- 1e-512")
+                x_imag = CC(s[end][1:end-2] * "+/- 1e-512") * CC(im) 
+
+                return guess(Q,x_real + x_imag,deg)
+            end
+            line += 1
+        end
+    end
+end
+
+function load_anyon_pivotal_root(n::Int)
+    line = 1
+    CC = AcbField(1024)
+    Q = QQBarField()
+    deg = 24
+    open(joinpath(pivotal_path, "Roots.dat")) do f 
+
+        while ! eof(f) 
+            s = readline(f) 
+            if line == n
+                s = filter(!=('\"'), s)
+                s = split(s, " ")
+                x_real = CC(s[1] * " +/- 1e-512")
+                x_imag = CC(s[end][1:end-2] * "+/- 1e-512") * CC(im) 
+
+                return guess(Q,x_real + x_imag,deg)
+            end
+            line += 1
+        end
+    end
+end
 function load_anyon_pivotal(n::Int, K = load_anyon_number_field(n), e = complex_embeddings(K)[1])
 
     CC = AcbField(512)
     Q = QQBarField()
-    deg = K == Q ? 24 : degree(K) 
+    deg = typeof(K) <: Union{<:NumField,QQField} ? degree(K) : 24
 
     piv = elem_type(K)[]
     open(joinpath(pivotal_path, "pivots_cat_$n")) do f 
@@ -134,7 +208,11 @@ function load_anyon_pivotal(n::Int, K = load_anyon_number_field(n), e = complex_
 
             x = guess(Q, x_real + x_imag, deg)
 
-            append!(piv, [K == Q ? x : preimage(e, x)])
+            if typeof(K) <: Union{<:NumField,QQField}
+                push!(piv, preimage(e, x))
+            else 
+                push!(piv, K(x))    
+            end
         end
     end
     return piv 

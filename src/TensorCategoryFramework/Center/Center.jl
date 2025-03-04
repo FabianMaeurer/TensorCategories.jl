@@ -83,7 +83,7 @@ end
 Return the Drinfeld center of ```C```.
 """
 function center(C::Category; equivalence = false)
-    @assert is_semisimple(C) "Semisimplicity required"
+    #@assert is_semisimple(C) "Semisimplicity required"
     return CenterCategory(base_ring(C),C)
 end
 
@@ -744,7 +744,7 @@ matrix(f::CenterMorphism) = matrix(f.m)
 
 Return the composition ```g∘f```.
 """
-compose(f::CenterMorphism, g::CenterMorphism) = morphism(domain(f), codomain(g), g.m∘f.m) 
+compose(f::CenterMorphism, g::CenterMorphism) = morphism(domain(f), codomain(g), g.m ∘ f.m) 
 
 """
     dual(X::CenterObject)
@@ -825,6 +825,9 @@ else return ```(false,nothing)```.
 function is_isomorphic(X::CenterObject, Y::CenterObject)
     # TODO: Fix This. How to compute a central isomorphism?
 
+    if ! is_isomorphic(object(X),object(Y))[1]
+        return false, nothing
+    end
     # if is_simple(X) && is_simple(Y)
     #     H = hom_by_linear_equations(X,Y)
     #     if int_dim(H) > 0
@@ -834,11 +837,19 @@ function is_isomorphic(X::CenterObject, Y::CenterObject)
     #     end
     # end
 
+    EX = endomorphism_ring(X) 
+    EY = endomorphism_ring(Y) 
+
+    if dim(EX) != dim(EY) 
+        return false, nothing 
+    end
+
     S = simples(parent(X))
 
     if [dim(Hom(X,s)) for s ∈ S] == [dim(Hom(Y,s)) for s ∈ S]
-        _, iso = is_isomorphic(X.object, Y.object)
-        return true, morphism(X,Y,central_projection(X,Y,iso))
+       @show  _, iso = is_isomorphic(X.object, Y.object)
+       @show central_projection(X,Y,iso).m
+        return true, central_projection(X,Y,iso)
     else
         return false, nothing
     end
@@ -1022,7 +1033,7 @@ function add_induction!(C::CenterCategory, X::Object, IX::CenterObject)
 end
 
 function simples_by_induction!(C::CenterCategory, log = true)
-    S = CenterObject[one(C)]
+    S = CenterObject[]
 
     if rank(category(C)) == 1
         C.simples = S
@@ -1056,6 +1067,7 @@ function simples_by_induction!(C::CenterCategory, log = true)
     for s ∈ induction_generators(C)
 
         Is = induction_restriction(s, simpls)
+        S_in_Z = []
 
         if dim(category(C)) != 0
             #Test which simples in S are included
@@ -1071,7 +1083,7 @@ function simples_by_induction!(C::CenterCategory, log = true)
 
         Z = induction(s, simpls, parent_category = C)
 
-        if !isempty(S_in_Z)
+        if ! isempty(S_in_Z)
             #factor out all already known simples
 
             incl_basis = vcat([basis(induction_right_adjunction(Hom(object(t),s), t, Z)) for (t,_) ∈ S_in_Z]...)

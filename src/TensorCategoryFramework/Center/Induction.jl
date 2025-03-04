@@ -70,15 +70,15 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
         γ[i] = inv(distr_after) ∘ γ[i] ∘ distr_before 
     end
 
-    if !is_split_semisimple(C)
-        # factor out such that the left and right tensor product coincide.
-        r = direct_sum([horizontal_direct_sum([image(f⊗id(X)⊗id(dual(b)) - id(b)⊗id(X)⊗dual(f))[2] for f in End(b)]) for b in simples])
+    # if !is_split_semisimple(C)
+    #     # factor out such that the left and right tensor product coincide.
+    #     r = direct_sum([horizontal_direct_sum([image(f⊗id(X)⊗id(dual(b)) - id(b)⊗id(X)⊗dual(f))[2] for f in End(b)]) for b in simples])
 
-        Z,r = cokernel(r)
-        ir = right_inverse(r)
+    #     Z,r = cokernel(r)
+    #     ir = right_inverse(r)
 
-        γ = [(id(b)⊗r) ∘ γᵢ ∘ (ir ⊗ id(b)) for (γᵢ,b) ∈ zip(γ, simples)]
-    end
+    #     γ = [(id(b)⊗r) ∘ γᵢ ∘ (ir ⊗ id(b)) for (γᵢ,b) ∈ zip(γ, simples)]
+    # end
 
     IX = CenterObject(parent_category,Z,γ)
 
@@ -162,7 +162,7 @@ function induction_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = inducti
     @assert is_split_semisimple(parent(H[1]))
 
     simpls = simples(parent(H[1]))
-    if typeof(base_ring(Y)) == CalciumField() || base_ring(Y) == QQBarField()
+    if typeof(base_ring(Y)) == CalciumField || base_ring(Y) == QQBarField()
         ind_f = [dim(xi) * compose(
             associator(xi, object(Y), dual(xi)),
             id(xi) ⊗ half_braiding(Y, dual(xi)),
@@ -240,14 +240,20 @@ function induction_adjunction(f::Morphism, Y::CenterObject, IX = induction(domai
     @assert is_split_semisimple(parent(f))
 
     simpls = simples(parent(f))
-    duals = dual.(simpls)
-
-    ind_f = [compose(
-        inv(half_braiding(Y, xi)) ⊗ id(dxi),
-        associator(object(Y), xi, dxi),
-        id(object(Y)) ⊗ (ev(dxi) ∘ (spherical(xi) ⊗ id(dxi)))
-    ) for (xi,dxi) ∈ zip(simpls,duals)]
-
+    if typeof(base_ring(Y)) == CalciumField || base_ring(Y) == QQBarField()
+        ind_f = [dim(xi) * compose(
+            associator(xi, object(Y), dual(xi)),
+            id(xi) ⊗ half_braiding(Y, dual(xi)),
+            inv_associator(xi, dual(xi), object(Y)),
+            (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
+        ) for xi ∈ simpls]
+    else
+        ind_f = [dim(xi) * compose(
+            inv(half_braiding(Y, xi)) ⊗ id(dual(xi)),
+            associator(object(Y), xi, dual(xi)),
+            id(object(Y)) ⊗ (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi))))
+        ) for xi ∈ simpls]
+    end
     # ind_f = [(dim(xi))*compose(
     #     (id(xi) ⊗ f) ⊗ id(dual(xi)),
     #     associator(xi, object(Y), dual(xi)),
@@ -256,8 +262,8 @@ function induction_adjunction(f::Morphism, Y::CenterObject, IX = induction(domai
     #     (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
     # ) for xi ∈ simples(parent(f))]
 
-    morphism(IX, Y, horizontal_direct_sum(ind_f) ∘ induction_restriction(f))
-    # morphism(IX,Y, horizontal_direct_sum([sqrt(dim(xi))*((ev(dual(xi)) ∘(spherical(xi)⊗id(dual(xi))))⊗id(object(IX))) ∘ (id(xi)⊗half_braiding(Y,dual(xi))) ∘ associator(xi,object(Y),dual(xi)) ∘ ((id(xi)⊗f)⊗id(dual(xi))) for xi in simples(parent(X))]))
+    mors = morphism(IX, Y, horizontal_direct_sum(ind_f) ∘ induction_restriction(f))
+
 end
 
 function inverse_induction_adjunction(f::CenterMorphism, X::Object)
