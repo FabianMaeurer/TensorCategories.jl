@@ -191,6 +191,8 @@ function induction_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = inducti
 end
 
 function induction_right_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = induction(codomain(H[1]), parent_category = parent(Y)))
+
+    length(basis(H)) == 0 && return HomSpace(Y, IX, CenterMorphism[])
     simpls = simples(parent(H[1]))
 
     duals = dual.(simpls)

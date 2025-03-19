@@ -121,7 +121,7 @@ Return the tensor product object.
 """
 ⊗(X::T...) where T <: Object = tensor_product(X...)
 ⊗(X::Object, Y::Object) = tensor_product(X,Y)
-
+⊗(x,y) = tensor_product(x,y)
 ⊗(C::Category, K::Field) = extension_of_scalars(C,K)
 ⊗(X::Object, K::Field) = extension_of_scalars(X,K)
 ⊗(f::Morphism, K::Field) = extension_of_scalars(f,K)

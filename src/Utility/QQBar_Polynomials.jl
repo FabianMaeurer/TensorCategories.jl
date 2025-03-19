@@ -129,13 +129,17 @@ end
 
 function rational_lift(I::MPolyIdeal)
     K = base_ring(base_ring((I)))
-    @assert typeof(K) <: Union{QQField, AbsSimpleNumField}
+
+    #@assert typeof(K) <: Union{QQField, AbsSimpleNumField}
+    if typeof(K) == CalciumField || K == QQBarField() 
+        return qqbar_rational_lift(I)
+    end
 
     if K == QQ 
         return I
     end
 
-    G = [g for g ∈ gens(I) if g != 0]
+    G = [g for g ∈ groebner_basis(I) if g != 0]
 
     α = gen(K)
     μ = minpoly(α)
@@ -150,7 +154,35 @@ function rational_lift(I::MPolyIdeal)
         push!(base, sum(coeffs .* monos))
     end
 
-    return ideal(base)
+    return ideal(base), [symbols(Qx)[end] => α]
+end
+
+function qqbar_rational_lift(I::MPolyIdeal)
+    G = [g for g ∈ groebner_basis(I) if g != 0]
+    n = length(gens(base_ring(I)))
+
+    # Collect all non rational coefficients
+    coeffs = vcat(collect.(coefficients.(G))...)
+    filter!(! is_rational, coeffs)
+    unique!(coeffs)
+
+    # Add a variable for each root
+    Qx, x = polynomial_ring(QQ, n + length(coeffs)) 
+
+    coeffs_to_variable = Dict(a => z for (a,z) ∈ zip(coeffs, x[n+1:end]))
+    minpolys = [minpoly(QQBarField()(c))(z) for (c,z) ∈ zip(coeffs, x[n+1:end])]
+    
+    base = []
+    
+    # Substitute coefficients by variables
+    for f ∈ G
+        local coeffs = [is_rational(a) ? QQ(a) : coeffs_to_variable[a] for a ∈ coefficients(f)]
+        monos = [change_base_ring(QQ,m)(x[1:n]...) for m ∈ monomials(f)]
+
+        push!(base, sum(coeffs .* monos))
+    end
+
+    return ideal([base; minpolys]), [symbols(Qx)[n+i] => c for (i,c) ∈ zip(1:length(coeffs), coeffs)]
 end
 
 function *(k::QQBarFieldElem, p::T) where T <: Union{QQPolyRingElem, QQMPolyRingElem}

@@ -1154,34 +1154,59 @@ function sort_simples_by_dimension!(C::CenterCategory)
     C.simples = C.simples[σ]
 end
 
-function split(X::CenterObject, E = End(X))
+function split(X::CenterObject, E = End(X), 
+    C = _extension_of_scalars(parent(X), QQBarField(), 
+    extension_of_scalars(category(parent(X)), QQBarField())), 
+    e = complex_embeddings(base_ring(X))[1])
     #Assume X simple
-    int_dim(E) ≤ 1 && return [X]
+    # int_dim(E) ≤ 1 && return [X]
 
-    g = gens(E)
-    f = g[findmax(degree ∘ minpoly, g)[2]]
+    # g = gens(E)
+    # f = g[findmax(degree ∘ minpoly, g)[2]]
 
-    L = splitting_field(minpoly(f))
-    collect(values(eigenvalues(f ⊗ L)))
+    # L = splitting_field(minpoly(f))
+    # collect(values(eigenvalues(f ⊗ L)))
+    if base_ring(X) == QQ 
+        to_qqbar = QQBarField()
+    else
+        to_qqbar = x -> guess(QQBarField(), e(x,512), degree(x))
+    end
+    # C = _extension_of_scalars(parent(X), QQBarField(), extension_of_scalars(category(parent(X)), QQBarField(), embedding = to_qqbar))
+
+    ext_X = extension_of_scalars(X, QQBarField(), C, embedding = to_qqbar)
+    ext_E = HomSpace(ext_X,ext_X, [morphism(ext_X,ext_X, extension_of_scalars(morphism(f), QQBarField(), category(C), embedding = to_qqbar)) for f ∈ basis(E)])
+
+    simple_subobjects(ext_X, ext_E)
 end
 
-function split(C::CenterCategory)
+function split(C::CenterCategory, e = complex_embeddings(base_ring(C))[1])
     ends = End.(simples(C))
 
     non_split = filter(e -> int_dim(e) > 1, ends)
 
     length(non_split) == 0 && return C 
 
-    minpolys = [minpoly.(basis(e)) for e ∈ non_split]
+    # minpolys = [minpoly.(basis(e)) for e ∈ non_split]
 
-    K = base_ring(C) 
-    _,x = K[:x]
-    minpolys = [B[findfirst(f -> degree(f) == length(B), B)](x) for B ∈ minpolys]
+    # K = base_ring(C) 
+    # _,x = K[:x]
+    # minpolys = [B[findfirst(f -> degree(f) == length(B), B)](x) for B ∈ minpolys]
 
-    L = simplify(absolute_simple_field(splitting_field(minpolys))[1])[1]
+    # L = simplify(absolute_simple_field(splitting_field(minpolys))[1])[1]
 
-    incl = K == QQ ? L : is_subfield(K,L)[2]
-    extension_of_scalars(C, L, incl)
+    # incl = K == QQ ? L : is_subfield(K,L)[2]
+    if base_ring(C) == QQ 
+        to_qqbar = QQBarField()
+    else
+        to_qqbar = x -> guess(QQBarField(), e(x,512), degree(x))
+    end
+    CL = _extension_of_scalars(C, QQBarField(), extension_of_scalars(category(C), QQBarField(), embedding = to_qqbar))
+
+    simpls = vcat([split(s, E, CL, e) for (s,E) ∈ zip(simples(C), ends)]...)
+
+    CL.simples = simpls
+
+    return CL
 end
 
 
@@ -1338,19 +1363,19 @@ end
     extension_of_scalars 
 ----------------------------------------------------------=#    
 
-function extension_of_scalars(C::CenterCategory, L::Field, emb = is_subfield(base_ring(C), L)[2])
+function extension_of_scalars(C::CenterCategory, L::Field; embedding = is_subfield(base_ring(C), L)[2])
 
-    CL = _extension_of_scalars(C,L, extension_of_scalars(category(C), L, embedding = emb))
+    CL = _extension_of_scalars(C,L, extension_of_scalars(category(C), L, embedding = embedding))
 
-    CL.simples = vcat([[x for (x,_) ∈ decompose(extension_of_scalars(s, L, CL, embedding = emb))] for s ∈ simples(C)]...)
+    CL.simples = vcat([[x for (x,_) ∈ decompose(extension_of_scalars(s, L, CL, embedding = embedding))] for s ∈ simples(C)]...)
 
     if isdefined(C, :inductions)
-        CL.inductions = Dict(extension_of_scalars(x, L, category(CL), embedding = emb) =>
-                        extension_of_scalars(Ix, L, CL, embedding = emb) for (x,Ix) ∈ C.inductions)
+        CL.inductions = Dict(extension_of_scalars(x, L, category(CL), embedding = embedding) =>
+                        extension_of_scalars(Ix, L, CL, embedding = embedding) for (x,Ix) ∈ C.inductions)
     end
 
     if isdefined(C, :induction_gens)
-        CL.induction_gens = [extension_of_scalars(is, L, category(CL),  embedding = emb) for is ∈ C.induction_gens]
+        CL.induction_gens = [extension_of_scalars(is, L, category(CL),  embedding = embedding) for is ∈ C.induction_gens]
     end
 
     return CL
@@ -1360,11 +1385,11 @@ function _extension_of_scalars(C::CenterCategory, L::Field, cL = category(C)⊗L
     CenterCategory(L,cL)
 end
 
-function extension_of_scalars(X::CenterObject, L::Field, CL = _extension_of_scalars(parent(X),L);  embedding = embedding(base_ring(X), L))
+function extension_of_scalars(X::CenterObject, L::Field, CL::CenterCategory = _extension_of_scalars(parent(X),L);  embedding = embedding(base_ring(X), L))
     CenterObject(CL, extension_of_scalars(object(X), L, category(CL),  embedding = embedding), [extension_of_scalars(f, L, category(CL),  embedding = embedding) for f ∈ half_braiding(X)])
 end
 
-function extension_of_scalars(f::CenterMorphism, L::Field, CL = _extension_of_scalars(parent(f),L),  embedding = embedding(base_ring(f), L))
+function extension_of_scalars(f::CenterMorphism, L::Field, CL::CenterCategory = _extension_of_scalars(parent(f),L),  embedding = embedding(base_ring(f), L))
     dom = extension_of_scalars(domain(f), L, CL,  embedding = embedding)
     cod = extension_of_scalars(codomain(f), L, CL,  embedding = embedding)
     m = extension_of_scalars(morphism(f), L, category(CL),  embedding = embedding)

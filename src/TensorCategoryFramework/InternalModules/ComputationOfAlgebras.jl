@@ -13,6 +13,14 @@ function algebra_structures(X::Object, unit = Hom(one(parent(X)), X)[1]; show_di
     _algebra_structures(_algebra_structure_ideal, X, unit, show_dimension = show_dimension)
 end
 
+function algebra_extensions(A::AlgebraObject, X::BiModuleObject)
+    AX, (inclusion,), (projection,) = direct_sum(object(A),object(X))
+
+    u = inclusion ∘ unit(A)
+
+    _algebra_structures(_algebra_structure_ideal, AX, u, subalgebra = A, extension = X, inclusion = inclusion, projection = projection, show_dimension = true)
+end
+
 @doc raw""" 
 
     separable_algebra_structures(X::Object)
@@ -49,11 +57,35 @@ function etale_algebra_structures(X::Object, unit = Hom(one(parent(X)), X)[1]; s
     [A for A ∈ commutative_algebra_structures(X, unit, show_dimension = show_dimension) if is_separable(A)]
 end
 
-function _algebra_structures(structure_ideal::Function, X::Object, unit = Hom(one(parent(X)), X)[1]; show_dimension = false)
+function _algebra_structures(structure_ideal::Function, X::Object, _unit = Hom(one(parent(X)), X)[1]; show_dimension = false, subalgebra = nothing, extension = nothing, inclusion = nothing, projection = nothing)
 
     mult_base = basis(Hom(X⊗X, X))
+
+    if subalgebra !== nothing 
+        @assert inclusion ∘ unit(subalgebra) == _unit 
+
+        subalgebra_multiplication = compose(
+            projection ⊗ projection,
+            multiplication(subalgebra),
+            inclusion
+        )
+
+        # Restrict to A-module morphisms 
+        AX = bimodule(subalgebra) ⊕ extension
+
+        # Get bimodule tensor prodct and projection
+        AX_AX, c = bimodule_tensor_product(AX, AX)
+        
+        mult_base = [m ∘ c for m ∈ morphism.(basis(Hom(AX_AX, AX)))]
+
+        coeffs = express_in_basis(subalgebra_multiplication, mult_base)
+
+        free_basis = coeffs .== 0
+        mult_base = [subalgebra_multiplication; mult_base[free_basis]]
+    end
+
     m = length(mult_base)
-    I = structure_ideal(X, mult_base, unit)
+    I = structure_ideal(X, mult_base, _unit)
 
     d = dim(I)
 
@@ -62,7 +94,11 @@ function _algebra_structures(structure_ideal::Function, X::Object, unit = Hom(on
 
         # get a fixed solution for ϕ ∘ unit = unit together with
         # a basis for the linear part 
-        iso_fixed_part, iso_var_basis = fix_unit(basis(Hom(X,X)), unit)
+        if subalgebra === nothing 
+            global iso_fixed_part, iso_var_basis = fix_subalgebra(basis(Hom(X,X)), _unit)
+        else
+            global iso_fixed_part, iso_var_basis = fix_subalgebra(basis(Hom(X,X)), inclusion)
+        end
 
         n = length(iso_var_basis)
         K = base_ring(X)
@@ -108,11 +144,9 @@ function _algebra_structures(structure_ideal::Function, X::Object, unit = Hom(on
             i !== nothing && push!(free_indices, (i,a)) 
         end
 
-        free_indices
         # set free coefficients to 1
         y = gens(base_ring(I))
        
-
         free_coeffs = [y[i]*(y[i] - 1) for (i,_) ∈ free_indices[1:d]]
         
         I = ideal([gens(I); free_coeffs])
@@ -136,7 +170,7 @@ function _algebra_structures(structure_ideal::Function, X::Object, unit = Hom(on
 
     ms = [sum(s .* mult_base) for s ∈ sols]
 
-    [AlgebraObject(parent(X), X, m, unit) for m ∈ ms]
+    [AlgebraObject(parent(X), X, m, _unit) for m ∈ ms]
 end
 
 function fix_unit(base::Vector{<:Morphism}, unit::Morphism)
@@ -169,6 +203,35 @@ function fix_unit(base::Vector{<:Morphism}, unit::Morphism)
     return fixed_sol, var_sol
 end
 
+function fix_subalgebra(base::Vector{<:Morphism}, inclusion::Morphism)
+    K = base_ring(parent(inclusion))
+    n = length(base)
+    Kx,vars = polynomial_ring(K, n)
+
+    _basis = basis(Hom(domain(inclusion), codomain(inclusion)))
+
+    eqs = [zero(Kx) for _ ∈ _basis]
+    for (a,f) ∈ zip(vars, base) 
+        eqs = eqs .+ (a .* express_in_basis(f ∘ inclusion, _basis))
+    end
+
+    # coefficients of inclusion
+    m = length(_basis)
+    _coeffs = matrix(K, m, 1, express_in_basis(inclusion, _basis))
+
+    # extract coeffs as matrix 
+    M = matrix(K, n, m, vcat([[coeff(e,a) for a ∈ vars] for e ∈ eqs]...))
+
+    sol = solve(transpose(M),_coeffs, side = :right)
+    _,nullsp = nullspace(transpose(M))
+
+    fixed_sol = sum(collect(sol)[:] .* base)
+    
+    var_sol = [sum(c .* base) for c ∈ eachcol(collect(nullsp))]
+
+    return fixed_sol, var_sol
+end
+
 function _algebra_structure_ideal(X::Object, mult_basis::Vector{<:Morphism},  unit::Morphism)
     C = parent(X)
     K = base_ring(C)
@@ -185,19 +248,27 @@ function _algebra_structure_ideal(X::Object, mult_basis::Vector{<:Morphism},  un
 
     ass = associator(X,X,X)
 
-    for (a, f) ∈ zip(x_m, mult_basis)
+    mult_Hom =  HomSpace(domain(mult_basis[1]), X, mult_basis)
+
+    id_times_multbase = id(X) ⊗ mult_Hom 
+    multbase_times_id = mult_Hom ⊗ id(X)
+
+    u_id = (unit ⊗ id(X))
+    id_u = (id(X) ⊗ unit)
+    for (a, f, id_f, f_id) ∈ zip(x_m, mult_basis, id_times_multbase, multbase_times_id)
+        
         for (a2, f2) ∈ zip(x_m, mult_basis)
-            first = compose(ass, id(X) ⊗ f, f2)
-            second = compose(f ⊗ id(X), f2)
+            first = compose(ass, id_f, f2)
+            second = compose(f_id, f2)
             coeffs = express_in_basis(first - second, mult_coeff_basis)
 
             eqs_mult = eqs_mult .+ ((a * a2) .* coeffs)
         end
     
-        coeffs = express_in_basis(f ∘ (unit ⊗ id(X)), unit_coeff_basis)
+        coeffs = express_in_basis(f ∘ u_id, unit_coeff_basis)
         eqs_unit_l = eqs_unit_l .+ (a .* coeffs) 
 
-        coeffs = express_in_basis(f ∘ (id(X) ⊗ unit), unit_coeff_basis)
+        coeffs = express_in_basis(f ∘ id_u, unit_coeff_basis)
         eqs_unit_r = eqs_unit_r .+ (a .* coeffs)
     
     end

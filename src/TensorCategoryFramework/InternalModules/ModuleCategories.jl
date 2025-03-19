@@ -637,6 +637,7 @@ end
 end
          
 
+
 function tensor_product(M::BiModuleObject, N::BiModuleObject)
     bimodule_tensor_product(M,N)[1]
 end
@@ -749,6 +750,53 @@ function tensor_product(f::ModuleMorphism{T}, g::ModuleMorphism{T}) where T <: M
     ModuleMorphism(dom, cod, p_cod ∘ (morphism(f) ⊗ morphism(g)) ∘ inv_p_dom)
 end
 
+function tensor_product(V::HomSpace{T}, W::HomSpace{T}) where T <: ModuleObject 
+    if int_dim(V) * int_dim(W) == 0 
+        return morphism_type(parent(domain(V)))[]
+    end
+    T == BiModuleObject && (mod_tensor = bimodule_tensor_product)
+    T == RightModuleObject && (mod_tensor = right_module_tensor_product)
+    T == LeftModuleObject && (mod_tensor = left_module_tensor_product)
+
+    dom, p_dom = mod_tensor(domain(V), domain(W))
+    cod, p_cod = mod_tensor(codomain(V), codomain(W))
+
+    inv_p_dom = right_inverse(p_dom)
+
+    [ModuleMorphism(dom, cod, p_cod ∘ (morphism(f) ⊗ morphism(g)) ∘ inv_p_dom) for f ∈ V, g ∈ W]
+end
+
+function tensor_product(f::Morphism, W::HomSpace{T}) where T <: ModuleObject 
+    if int_dim(W) == 0 
+        return morphism_type(parent(domain(V)))[]
+    end
+    T == BiModuleObject && (mod_tensor = bimodule_tensor_product)
+    T == RightModuleObject && (mod_tensor = right_module_tensor_product)
+    T == LeftModuleObject && (mod_tensor = left_module_tensor_product)
+
+    dom, p_dom = mod_tensor(domain(f), domain(W))
+    cod, p_cod = mod_tensor(codomain(f), codomain(W))
+
+    inv_p_dom = right_inverse(p_dom)
+
+    [ModuleMorphism(dom, cod, p_cod ∘ (morphism(f) ⊗ morphism(g)) ∘ inv_p_dom) for g ∈ W]
+end
+
+function tensor_product(V::HomSpace{T}, g::Morphism) where T <: ModuleObject 
+    if int_dim(V) == 0 
+        return morphism_type(parent(domain(V)))[]
+    end
+    T == BiModuleObject && (mod_tensor = bimodule_tensor_product)
+    T == RightModuleObject && (mod_tensor = right_module_tensor_product)
+    T == LeftModuleObject && (mod_tensor = left_module_tensor_product)
+
+    dom, p_dom = mod_tensor(domain(V), domain(g))
+    cod, p_cod = mod_tensor(codomain(V), codomain(g))
+
+    inv_p_dom = right_inverse(p_dom)
+
+    [ModuleMorphism(dom, cod, p_cod ∘ (morphism(f) ⊗ morphism(g)) ∘ inv_p_dom) for f ∈ V]
+end
 
 function associator(X::T, Y::T, Z::T) where T <: ModuleObject
 

@@ -232,7 +232,7 @@ end
 
 
 function decompose_over_qqbar(X::Object, E = End(X))
-    @assert is_semisimple(parent(X))
+    #@assert is_semisimple(parent(X))
     if int_dim(E) == 1
         try 
             set_attribute!(X, :is_simple, true)

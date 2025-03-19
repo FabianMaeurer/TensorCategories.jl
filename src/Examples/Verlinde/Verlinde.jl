@@ -91,7 +91,7 @@ end
 #construct the Verlinde type categorie with m many objects,  l-th associator and k-th braiding; Need (m+1, l) coprime
 #furthermore for the braiding k we use even higher roots of unity,  but also need (m+1, k) coprime
 #Formulas come from "Temperley-Lieb Recoupling theory"
-function verlinde_category(K::Ring, m::Int, l::Int = 1, k::Int = 1)
+function verlinde_category(K::Ring, m::Int, l::Int = 1, t::Int = 1)
 	#K=Oscar.QQBarField()
 	z = root_of_unity(K, 2*m+2)
    	q = quantum(z^l+z^-l, 2*m+2)
@@ -101,45 +101,79 @@ function verlinde_category(K::Ring, m::Int, l::Int = 1, k::Int = 1)
    	M = verlindefusionmultmatrix(m)
    	C = six_j_category(K, ["X$i" for i in 0:m-1])
    	set_tensor_product!(C, M)
+	C.ass = Array{MatElem}(undef,m,m,m,m)
 
-   	for lx in 0:m-1,  ly in 0:m-1,  lz in 0:m-1,  lw in 0:m-1
-	   #println("$lx,  $ly,  $lz,  $lw")
-	   li = intersect(ver_admissible(m, lx, ly), ver_admissible(m, lw, lz))
-	   lj = intersect(ver_admissible(m, lx, lw), ver_admissible(m, ly, lz))
-	   gr = length(li)
-	   C.ass[lx+1, ly+1, lz+1, lw+1] = matrix(K, gr, gr, [tl_six_j_symbol(q, ly, lx, lw, lz, j, i) for i in li,  j in lj])	
-   	end
+	a = (i,j,k,l) -> verlinde_six_j_symbol(K,q,i,j,k,l,m)
+	set_attribute!(C, :six_j_symbol, a)
 
-	try 
-		#zz = root_of_unity(K, 4*m+4)
+   	# for lx in 0:m-1,  ly in 0:m-1,  lz in 0:m-1,  lw in 0:m-1
+	#    #println("$lx,  $ly,  $lz,  $lw")
+	#    li = intersect(ver_admissible(m, lx, ly), ver_admissible(m, lw, lz))
+	#    lj = intersect(ver_admissible(m, lx, lw), ver_admissible(m, ly, lz))
+	#    gr = length(li)
+	#    C.ass[lx+1, ly+1, lz+1, lw+1] = matrix(K, gr, gr, [tl_six_j_symbol(q, ly, lx, lw, lz, j, i) for i in li,  j in lj])	
+   	# end
+
+
+	#zz = root_of_unity(K, 4*m+4)
+	has_braiding = K == QQBarField() || typeof(K) == CalciumField || is_square(z)
+	if has_braiding
 		zz = sqrt(z)
 		braid = Array{MatElem, 3}(undef,  m, m, m) #slight mistake,  need to check formulas again
-
-		for a in 0:m-1
-			for b in 0:m-1
-				M=ver_admissible(m, a, b)
-				#println(a,b,M)
-				for i in 0:m-1
-					if i in M
-						#@show braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [(-1)^(i)*q[i+1]*lambda(zz^(k+m+1), a, b, i)//Net(q, div(a+b-i, 2), div(a-b+i, 2), div(-a+b+i, 2))])
-						braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [lambda(zz^(k),a,b,i)])
-						#braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [(-1)^(div(a+b+i,2))*zz^(div(i*(i+2)-a*(a+2)-b*(b+2),2))])
-					else 
-						braid[a+1, b+1, i+1] = matrix(K,  0,  0,  [])
-					end
-				end
-			end
-		end
-
 		set_braiding!(C, braid)
-	catch e
-		@info "Field to small to define a braiding: \n    $e"
+
+		b = (i,j,k) -> verlinde_r_symbol(K,i,j,k,m,zz,t)
+		set_attribute!(C, :r_symbol, b)
+		# for a in 0:m-1
+		# 	for b in 0:m-1
+		# 		M=ver_admissible(m, a, b)
+		# 		#println(a,b,M)
+		# 		for i in 0:m-1
+		# 			if i in M
+		# 				#@show braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [(-1)^(i)*q[i+1]*lambda(zz^(k+m+1), a, b, i)//Net(q, div(a+b-i, 2), div(a-b+i, 2), div(-a+b+i, 2))])
+		# 				braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [lambda(zz^(k),a,b,i)])
+		# 				#braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [(-1)^(div(a+b+i,2))*zz^(div(i*(i+2)-a*(a+2)-b*(b+2),2))])
+		# 			else 
+		# 				braid[a+1, b+1, i+1] = matrix(K,  0,  0,  [])
+		# 			end
+		# 		end
+		# 	end
+		# end
+
+		# 
 	end
 
 
+
    	set_one!(C,  [mod(i, m) == 1 ? 1 : 0 for i ∈ 1:m])
-   	set_name!(C,  "Verlinde Category $m with associator $l and braiding $k")
+	if has_braiding 
+	   	set_name!(C,  "Verlinde Category $m with associator $l and braiding $t")
+	else
+		set_name!(C,  "Verlinde Category $m with associator $l")
+	end
    	return C
+end
+
+function verlinde_six_j_symbol(K::Ring, q, i::Int, j::Int, k::Int, l::Int, m::Int)
+	lx,ly,lz,lw = i-1,j-1,k-1,l-1
+	li = intersect(ver_admissible(m, lx, ly), ver_admissible(m, lw, lz))
+	lj = intersect(ver_admissible(m, lx, lw), ver_admissible(m, ly, lz))
+	gr = length(li)
+	
+	matrix(K, gr, gr, [tl_six_j_symbol(q, ly, lx, lw, lz, j, i) for i in li,  j in lj])	
+end
+
+function verlinde_r_symbol(K::Ring, i::Int, j::Int, k::Int, m::Int, zz::RingElem, t::Int = 1)
+	a,b = i-1,j-1
+	M = ver_admissible(m, a, b)
+	#println(a,b,M)
+	if k-1 in M
+		#@show braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [(-1)^(i)*q[i+1]*lambda(zz^(k+m+1), a, b, i)//Net(q, div(a+b-i, 2), div(a-b+i, 2), div(-a+b+i, 2))])
+		return matrix(K,  1,  1,  [lambda(zz^(t),a,b,k-1)])
+		#braid[a+1, b+1, i+1] = matrix(K,  1,  1,  [(-1)^(div(a+b+i,2))*zz^(div(i*(i+2)-a*(a+2)-b*(b+2),2))])
+	else 
+		return matrix(K,  0,  0,  [])
+	end
 end
 
 verlinde_category(m::Int, l::Int = 1, k::Int = 1) = verlinde_category(cyclotomic_field(4*m+4)[1],m, l, k)

@@ -404,8 +404,7 @@ function express_in_basis(f::VectorSpaceMorphism, B::Vector{<:VectorSpaceMorphis
     F = base_ring(f)
     B_mat = matrix(F,hcat([[x for x ∈ b.m][:] for b ∈ B]...))
     f_mat = matrix(F, 1, *(size(f.m)...), [x for x ∈ f.m][:])
-
-    return [x for x ∈ solve(transpose(B_mat),f_mat)][:]
+    return [x for x ∈ solve(transpose(B_mat),f_mat, side = :left)][:]
 end
 
 (F::Field)(f::VectorSpaceMorphism) = F(matrix(f)[1,1])

@@ -34,7 +34,13 @@ struct SixJMorphism <: Morphism
     m::Vector{<:MatElem}
 end
 
+==(X::SixJObject, Y::SixJObject) = base_ring(X) == base_ring(Y) && X.components == Y.components
 
+function ==(C::SixJCategory, D::SixJCategory)
+    base_ring(C) ≠ base_ring(D) && return false 
+    multiplication_table(C) ≠ multiplication_table(D) && return false 
+    true 
+end
 
 #-------------------------------------------------------------------------------
 #   Constructors
@@ -161,13 +167,19 @@ indecomposables_names(C::SixJCategory) = C.simples_names
 #(::Type{Int})(x::QQFieldElem) = Int(numerator(x))
 
 function braiding(X::SixJObject, Y::SixJObject) 
+    C = parent(X)
     if is_simple(X) && is_simple(Y)
         i = findfirst(e -> e != 0, X.components)
         j = findfirst(e -> e != 0, Y.components)
-        return morphism(X⊗Y,Y⊗X, parent(X).braiding[i,j,:])
+
+        if ! all(isassigned(C.braiding, i,j,k) for k ∈ 1:C.simples)
+            r_symbol = get_attribute(C, :r_symbol)
+            C.braiding[i,j,:] = [r_symbol(i,j,k) for k ∈ 1:C.simples]
+        end
+        return morphism(X⊗Y,Y⊗X, C.braiding[i,j,:])
     end
 
-    simple_objects = simples(parent(X))
+    simple_objects = simples(C)
     n = length(simple_objects)
 
     X_summands = vcat([[s for l ∈ 1:X.components[k]] for (k,s) ∈ zip(1:n, simple_objects)]...)
@@ -196,7 +208,7 @@ associator(C::SixJCategory) = C.ass
 Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 """
 function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
-    @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
+    #@assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
 
     C = parent(X)
 
@@ -220,6 +232,11 @@ function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
         i = findfirst(e -> e ≠ 0, X.components)
         j = findfirst(e -> e ≠ 0, Y.components)
         k = findfirst(e -> e ≠ 0, Z.components)
+
+        if ! all(isassigned(C_associator, i,j,k,l) for l ∈ 1:n)
+            six_j_symbol = get_attribute(C, :six_j_symbol)
+            C_associator[i,j,k,:] =[six_j_symbol(i,j,k,l) for l ∈ 1:n]
+        end
         return morphism(dom,dom, C_associator[i,j,k,:])
 
     end
@@ -292,6 +309,12 @@ function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
         i = findfirst(e -> e ≠ 0, X.components)
         j = findfirst(e -> e ≠ 0, Y.components)
         k = findfirst(e -> e ≠ 0, Z.components)
+
+        if ! all(isassigned(C_associator, i,j,k,l) for l ∈ 1:n)
+            six_j_symbol = get_attribute(C, :six_j_symbol)
+            C_associator[i,j,k,:] =[six_j_symbol(i,j,k,l) for l ∈ 1:n]
+        end
+
         return inv(morphism(dom,dom, C_associator[i,j,k,:]))
 
     end
@@ -378,7 +401,7 @@ end
 
 is_simple(X::SixJObject) = sum(X.components) == 1
 
-==(X::SixJObject, Y::SixJObject) = parent(X) == parent(Y) && X.components == Y.components
+# ==(X::SixJObject, Y::SixJObject) = parent(X) == parent(Y) && X.components == Y.components
 ==(f::SixJMorphism, g::SixJMorphism) = domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
 
 
@@ -634,7 +657,7 @@ end
 
 
 function tensor_product(X::SixJObject, Y::SixJObject)
-    @assert parent(X) == parent(Y) "Mismatching parents"
+    #@assert parent(X) == parent(Y) "Mismatching parents"
     C = parent(X)
     n = C.simples
     T = [0 for i ∈ 1:n]
@@ -883,7 +906,7 @@ struct SixJHomSpace<: AbstractHomSpace
 end
 
 function Hom(X::SixJObject, Y::SixJObject)
-    @assert parent(X) == parent(Y) "Mismatching parents"
+    #@assert parent(X) == parent(Y) "Mismatching parents"
     Xi, Yi = X.components, Y.components
     F = base_ring(X)
 
@@ -904,23 +927,23 @@ function Hom(X::SixJObject, Y::SixJObject)
     return SixJHomSpace(X,Y,basis_mors)
 end
 
-function express_in_basis(f::SixJMorphism, base::Vector{SixJMorphism})
-    F = base_ring(domain(f))
-    A = Array{elem_type(F),2}(undef,int_dim(Hom(domain(f),codomain(f))),0)
-    b = []
-    for g ∈ base
-        y = []
-        for m ∈ g.m
-            y = [y; [x for x ∈ m][:]]
-        end
-        A = [A y]
-    end
-    for m ∈ f.m
-        b = [b; [x for x ∈ m][:]]
-    end
+# function express_in_basis(f::SixJMorphism, base::Vector{SixJMorphism})
+#     F = base_ring(domain(f))
+#     A = Array{elem_type(F),2}(undef,length(base),0)
+#     b = []
+#     for g ∈ base
+#         y = []
+#         for m ∈ g.m
+#             y = [y; [x for x ∈ m][:]]
+#         end
+#         A = [A y]
+#     end
+#     for m ∈ f.m
+#         b = [b; [x for x ∈ m][:]]
+#     end
 
-    return [i for  i ∈ solve(transpose(matrix(F,A)), matrix_space(F,1,length(b))(F.(b)))][:]
-end
+#     return [i for  i ∈ solve(transpose(matrix(F,A)), matrix_space(F,1,length(b))(F.(b)))][:]
+# end
 
 
 #-------------------------------------------------------------------------------
@@ -1004,6 +1027,15 @@ function extension_of_scalars(C::SixJCategory, L::Ring; embedding = embedding(ba
     end
 end
 
+function extension_of_scalars(C::SixJCategory, K::QQBarField)
+    e = complex_embeddings(base_ring(C))[1]
+    if base_ring(C) == QQ 
+        to_qqbar = QQBarField()
+    else
+        to_qqbar = x -> guess(QQBarField(), e(x,512), degree(x))
+    end   
+    extension_of_scalars(C,K, embedding = to_qqbar)
+end
 
 """ 
 
@@ -1023,10 +1055,9 @@ Return the category ``C⊗K``.
 """
 function extension_of_scalars(m::SixJMorphism, L::Ring, CL = parent(m) ⊗ L; embedding = embedding(base_ring(m), L))
     try
-
         mats = [matrix(L, size(m)..., embedding.(collect(m))) for m ∈ matrices(m)] 
-        g = morphism(extension_of_scalars(domain(m), L, CL),
-                    extension_of_scalars(codomain(m), L, CL), 
+        g = morphism(extension_of_scalars(domain(m), L, CL, embedding = embedding),
+                    extension_of_scalars(codomain(m), L, CL, embedding = embedding), 
                     mats)
 
         return g

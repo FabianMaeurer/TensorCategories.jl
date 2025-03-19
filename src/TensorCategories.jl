@@ -23,7 +23,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     hom, id, ideal, identity_matrix, image, index, inv, involution, irreducible_modules,
     is_abelian, is_central, is_finite, is_invertible, is_isomorphic, is_modular,
     is_rational, is_semisimple, is_simple, is_square, is_subfield, is_subgroup,
-    is_independent, is_invertible, iso_oscar_gap,
+    is_independent, is_invertible, is_separable, iso_oscar_gap,
     jordan_normal_form, kernel, kronecker_product, lcm, leading_coefficient,
     leading_monomial, left_transversal, lex, load, matrix, matrix_algebra, minpoly, quo,
     monomials, multiplication_table, multiplicity, nullspace, nvars, one, orbit,
@@ -81,6 +81,7 @@ export action_matrix
 export add_simple! 
 export add_to_local_database
 export algebra
+export algebra_extensions
 export algebras
 export algebra_structures
 export AlgebraObject
@@ -428,6 +429,7 @@ export verlinde_category
 export vertical_direct_sum
 export VSHomSpace 
 export VSObject 
+export witness_set
 export zero 
 export zero_morphism 
 export ZPlusRing, ℕRing, ℤ₊Ring

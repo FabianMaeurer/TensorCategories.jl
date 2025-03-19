@@ -27,9 +27,9 @@ abstract type HomSet end
 
 abstract type AbstractHomSpace <: VectorSpaceObject end
 
-struct HomSpace <: AbstractHomSpace
-    X::Object
-    Y::Object
+struct HomSpace{T} <: AbstractHomSpace
+    X::T
+    Y::T
     basis::Vector{<:Morphism}
 end
 

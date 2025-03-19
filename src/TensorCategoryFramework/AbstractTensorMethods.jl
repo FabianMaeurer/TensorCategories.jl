@@ -19,6 +19,17 @@ end
 
 tensor_product(X::T) where T <: Union{Vector,Tuple} = tensor_product(X...)
 
+function tensor_product(V::HomSpace{T}, W::HomSpace{T}) where T <: Object
+    [f ⊗ g for f ∈ V, g ∈ W]
+end
+
+function tensor_product(f::Morphism, W::HomSpace{T}) where T <: Object
+    [f ⊗ g for g ∈ W]
+end
+
+function tensor_product(V::HomSpace{T}, g::Morphism) where T <: Object
+    [f ⊗ g for f ∈ V]
+end
 
 """
     distribute_left(X::SixJObject, Y::SixJObject, Z::SixJObject)

@@ -1,33 +1,47 @@
-function recover_solutions(p::Tuple, K::Field, var_order; splitting_info = true)
+function recover_solutions(p::Tuple, K::Field, var_order, deg = -1; splitting_info = true, fix_solutions = [])
     p = p[2]
     f = p.elim
     g = p.denom
     v = p.param
     rs = roots(K,f)
-
     solutions = []
-    
+ 
+    if K == QQBarField()
+        C = CalciumField()
+        rs = C.(rs)
+    end
 
+    for (x, val) ∈ fix_solutions
+        i = findfirst(==(x), p.vars)
+        # find all solutions with xᵢ = v 
+        if i > length(p.param) 
+            all_i = findall(==((val)), K.(rs))
+            rs = rs[all_i]
+        else
+            all_i = findall(==(val), [K(v[i](r)*inv(g(r))) for r ∈ rs])
+            rs = rs[all_i]
+        end
+    end
+  
     if length(p.lf_cfs) == 0
         perm = indexin(var_order, p.vars)
         for r ∈ rs
-            solutions = [solutions; Tuple([[vi(r)*inv(g(r)) for vi ∈ v];r])[perm]]
+            solutions = [solutions; Tuple([[K(vi(r)*inv(g(r))) for vi ∈ v];K(r)])[perm]]
         end
     else
         perm = indexin(var_order, p.vars[1:end-1])
         for r ∈ rs
-            solutions = [solutions; Tuple([vi(r)*inv(g(r)) for vi ∈ v])[perm]]
+            solutions = [solutions; Tuple([K(vi(r)*inv(g(r))) for vi ∈ v])[perm]]
         end
     end
 
-    if splitting_info && length(rs) < degree(f)
+    if splitting_info && isempty(fix_solutions) && length(rs) < degree(f)
         @info "More solutions over splitting field of $f"
     end
 
     # for r ∈ rs
     #     solutions = [solutions; Tuple([[vi(r)*inv(g(r)) for vi ∈ v];r])[perm]]
     # end
-
     return solutions
 end
 
@@ -51,11 +65,13 @@ function real_solutions_over_base_field(I::MPolyIdeal; splitting_info = true)
     catch
     end
 
-    QI = rational_lift(I)
+    QI, fixed_sols = rational_lift(I)
 
-    S = recover_solutions(real_solutions(QI), K, symbols(base_ring(QI)), splitting_info = splitting_info)
+    S = recover_solutions(real_solutions(QI), K, symbols(base_ring(QI)), fix_solutions = fixed_sols, splitting_info = splitting_info)
     
-    unique([s[1:end-1] for s ∈ S if all([g(s[1:end-1]...) == 0 for g ∈ G])])
+    n = dim(base_ring(I))
+
+    unique([s[1:n] for s ∈ S if all([g(s[1:n]...) == 0 for g ∈ G])])
 end
 
 function guess_real_solutions_over_base_field(I::MPolyIdeal)
@@ -106,25 +122,30 @@ function witness_set(I::Ideal, bound = 100)
     d = dim(I)
     deg = degree(I)
     K = base_ring(base_ring(I))
-    x = gens(base_ring(I))
-    n = length(x)
+    
+    n = dim(base_ring(I))
     
     # a = gen(K)
 
     # rand_base = [[a^i for i ∈ 0:degree(K)-1]; [0]; [-a^i for i ∈ 0:degree(K)-1]]
     
-    for _ ∈ 1:bound 
-        c = matrix(K, rand(-1:1,n+1,d)) 
+    QI, fixed_sols = rational_lift(I)
+    x = gens(base_ring(QI))[1:n]
 
-        J = ideal([sum(e .* [x; 1]) for e ∈ eachcol(c)]) + I
+    for _ ∈ 1:bound 
+        c = matrix(QQ, rand(-1:1,n+1,d)) 
+
+        J = QI + ideal([sum(e .* [x; 1]) for e ∈ eachcol(c)])
 
         rank(c) < d && continue 
         dim(J) > 0 && continue 
+        
+        S = recover_solutions(real_solutions(J), K, symbols(base_ring(QI)), fix_solutions = fixed_sols, splitting_info = false) 
 
-        s = real_solutions_over_base_field(J, splitting_info = false) 
+        s = unique([s[1:n] for s ∈ S])
 
         if length(s) > 0
-            return s 
+            return s
         end
     end
 
