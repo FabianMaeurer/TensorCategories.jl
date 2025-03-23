@@ -31,7 +31,13 @@ function print_multiplication_table(indecomposables::Vector{<:Object}, names::Ve
     return [pretty_print_decomposable(s⊗t,indecomposables,names) for s ∈ indecomposables, t ∈ indecomposables]
 end
 
-print_multiplication_table(C::Category) = print_multiplication_table(indecomposables(C), indecomposables_names(C))
+function print_multiplication_table(C::Category)
+    if is_semisimple(C) 
+        print_multiplication_table(multiplication_table(C), simples_names(C))
+    else
+        print_multiplication_table(indecomposables(C), indecomposables_names(C))
+    end
+end
 
 function pretty_print_decomposable(m::Object,indecomposables::Vector{<:Object},names::Vector{String})
     facs = is_semisimple(parent(m)) ? decompose(m, indecomposables) : decompose(m)

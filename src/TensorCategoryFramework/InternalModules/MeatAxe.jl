@@ -39,7 +39,6 @@ function spin_submodule(M::LeftModuleObject, u::Morphism)
     # until the image is isomorphic to U
     # (Analog to the spinning algorithm for modules over an
     # algebra)
-    @show parent(M)
     A = object(algebra(parent(M)))
     
     action_on_U = compose(

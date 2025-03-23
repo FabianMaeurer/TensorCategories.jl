@@ -39,9 +39,9 @@ function six_j_category(S::Vector{<:Object}, names::Vector{String} = ["X$i" for 
 
     set_associator!(skel_C, ass)
 
-    if multiplicity(C) > 1
-        @warn "6j-Symbols might be wrong since multiplicity is greater than one"
-    end
+    # if multiplicity(C) > 1
+    #     @warn "6j-Symbols might be wrong since multiplicity is greater than one"
+    # end
     # Try to set spherical
     try 
         set_pivotal!(skel_C,[F(1) for s ∈ S])
@@ -125,10 +125,83 @@ function six_j_symbols(C::Category, S = simples(C))
             
     end
 
+    return ass           
+end
+
+function six_j_symbols_of_construction(C::Category, S = simples(C))
+    @assert is_semisimple(C)
+
+    N = length(S)
+    C_morphism_type = morphism_type(category(C))
+    F = base_ring(C) 
+
+   # mult = multiplication_table(C)
+
+    ass = Array{MatElem}(undef,N,N,N,N)
+
+    one_indices = findall(s -> int_dim(Hom(s,one(C))) > 0 , S)
+    one_components = simple_subobjects(one(C))
+
+    # Set unitors to identity
+    S[one_indices] = one_components
+
+    prods = [X ⊗ Y for X ∈ S, Y ∈ S]
+    homs = [morphism.(basis(Hom(prods[i,j],Z))) for i ∈ 1:N, j ∈ 1:N, Z ∈ S]
     
+
+    associators = [associator(object.((X,Y,Z))...) for X ∈ S, Y ∈ S, Z ∈ S]
+
+
+
+    for (i,j,k,l) ∈ Base.product(1:N, 1:N, 1:N, 1:N)
+
+        #set trivial associators
+        if !isempty([i,j,k] ∩ one_indices) 
+            n = sum([length(homs[i,j,v]) * length(homs[v,k,l]) for v ∈ 1:N])
+            ass[i,j,k,l] = identity_matrix(F,n)
+            continue
+        end
+
+        # Build a basis for Hom((X⊗Y)⊗Z,W)
+        B_XY_Z_W = C_morphism_type[]
+        for n ∈ 1:N
+            V = S[n]
+
+            H_XY_V = homs[i,j,n]
+
+            H_VZ_W = homs[n,k,l]
+
+            B = [f ∘ (g ⊗ id(object(S[k]))) for f ∈ H_VZ_W, g ∈ H_XY_V][:]
+            if length(B) == 0 continue end
+            B_XY_Z_W = [B_XY_Z_W; B]
+        end
+
+        # Build a basis for Hom(X⊗(Y⊗Z),W)
+        B_X_YZ_W = C_morphism_type[]
+        for n ∈ 1:N
+            V = S[n]
+
+            H_YZ_V = homs[j,k,n]
+
+            H_XV_W = homs[i,n,l]
+                    
+            B = [f ∘ (id(object(S[i])) ⊗ g) for f ∈ H_XV_W, g ∈ H_YZ_V][:]
+            if length(B) == 0 continue end
+            B_X_YZ_W = [B_X_YZ_W; B]
+        end
+        
+        # Express the asociator in the corresponding basis
+        a = associators[i,j,k]
+
+        associator_XYZ_W = hcat([express_in_basis(f ∘ a, B_XY_Z_W) for f ∈ B_X_YZ_W]...)
+       
+        ass[i,j,k,l] = matrix(F, length(B_XY_Z_W), length(B_X_YZ_W),  associator_XYZ_W)
+            
+    end
 
     return ass           
 end
+
 
 function skeletal_spherical(C::Category, Homs)
 end

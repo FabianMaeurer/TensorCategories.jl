@@ -204,7 +204,9 @@ Base.length(H::AbstractHomSpace) = int_dim(H)
 Base.eltype(H::Type{T}) where T <: AbstractHomSpace = fieldtype(H, :basis).parameters[1] 
 
 
-(R::Ring)(f::Morphism) = morphism_to_scalar(R,f)
+function (R::Ring)(f::Morphism) 
+     morphism_to_scalar(R,f)
+end
 (R::QQBarField)(f::Morphism) = morphism_to_scalar(R,f)
 
 function morphism_to_scalar(R::Ring, f::Morphism)  

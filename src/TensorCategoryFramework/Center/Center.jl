@@ -1,4 +1,4 @@
-mutable struct CenterCategory <: Category
+@attributes mutable struct CenterCategory <: Category
     base_ring::Ring
     category::Category
     simples::Vector{O} where O <: Object
@@ -1342,20 +1342,22 @@ end
 ----------------------------------------------------------=#    
 
 function smatrix(C::CenterCategory)
-    simpls = simples(C)
-    n = length(simpls)
-    K = base_ring(C)
-    S = [zero_morphism(category(C)) for _ ∈ 1:n, _ ∈ 1:n]
-    @threads for i ∈ 1:n
-        for j ∈ i:n
-            S[i,j] = S[j,i] = tr(half_braiding(simpls[i], object(simpls[j])) ∘ half_braiding(simpls[j], object(simpls[i])))
+    get_attribute!(C, :smatrix) do
+        simpls = simples(C)
+        n = length(simpls)
+        K = base_ring(C)
+        S = [zero_morphism(category(C)) for _ ∈ 1:n, _ ∈ 1:n]
+        @threads for i ∈ 1:n
+            for j ∈ i:n
+                S[i,j] = S[j,i] = tr(half_braiding(simpls[i], object(simpls[j])) ∘ half_braiding(simpls[j], object(simpls[i])))
+            end
         end
-    end
 
-    try
-        return matrix(K, n, n, [K(s) for s ∈ S])
-    catch
-        return S
+        try
+            return matrix(K, n, n, [K(s) for s ∈ S])
+        catch
+            return S
+        end
     end
 end
 
@@ -1444,4 +1446,71 @@ function twist(X::CenterObject)
     !B && error("Something went wrong")
 
     return k
+end
+
+
+#=----------------------------------------------------------
+    Skeletalization 
+----------------------------------------------------------=#
+
+function multiplication_table(C::CenterCategory)
+    get_attribute!(C, :multiplication_table) do
+        S = simples(C) 
+        dims = dim.(S)
+        d = sum(dims.^2)
+
+        if characteristic(base_ring(C)) > 0 
+            return multiplication_table(S)
+        end
+
+        S_matrix = smatrix(C)
+
+        n = length(S) 
+
+        multiplicities = Array{Int,3}(undef,n,n,n)
+
+
+        for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n 
+        
+            verlinde_formula = sum([*(S_matrix[l,[i,j,k]]...)//dims[l] for l ∈ 1:n])
+
+            multiplicities[i,j,k] = Int(QQ(verlinde_formula//d))
+
+        end
+        return multiplicities
+    end
+end
+
+function six_j_symbols(C::CenterCategory, S = simples(C))
+    @assert is_semisimple(C)
+
+    six_j_symbols_of_construction(C, S)
+end
+
+
+function simples_names(C::CenterCategory)
+    S = simples(C) 
+    n = length(S)
+    names = ["" for i ∈ S]
+    
+    not_taken = [i for i ∈ 1:n]
+    while ! isempty(not_taken)
+        i = popfirst!(not_taken) 
+        s = object(S[i])
+        
+        iso = findall(e -> is_isomorphic(object(S[i]), object(e))[1], S)
+
+        if length(iso) == 1 
+            names[i] = "($(s), γ)"
+            continue
+        end
+
+        l = 1
+        for j ∈ iso
+            names[j] = "($s, γ$l)"
+            l += 1
+        end
+    end
+
+    return names
 end
