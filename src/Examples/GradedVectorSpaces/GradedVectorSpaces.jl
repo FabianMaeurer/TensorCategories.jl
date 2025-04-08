@@ -508,7 +508,7 @@ function six_j_category(V::GradedVectorSpaces)
 
     set_name!(C, "Graded vector spaces over $K with simple objects in $G")
 
-    C.spherical = [V.spherical[g] for g ∈ elems]
+    set_pivotal!(C, [V.spherical[g] for g ∈ elems])
     return C
 end
 #-----------------------------------------------------------------

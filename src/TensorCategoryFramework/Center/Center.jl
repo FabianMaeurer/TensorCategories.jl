@@ -847,9 +847,8 @@ function is_isomorphic(X::CenterObject, Y::CenterObject)
     S = simples(parent(X))
 
     if [dim(Hom(X,s)) for s ∈ S] == [dim(Hom(Y,s)) for s ∈ S]
-       @show  _, iso = is_isomorphic(X.object, Y.object)
-       @show central_projection(X,Y,iso).m
-        return true, central_projection(X,Y,iso)
+        _, iso = is_isomorphic(X.object, Y.object)
+        return true, central_projection(X,Y,[iso])[1]
     else
         return false, nothing
     end
@@ -974,12 +973,17 @@ end
 
 Compute the image under the projection ```Hom(F(X),F(Y)) → Hom(X,Y)```.
 """
-function central_projection(dom::CenterObject, cod::CenterObject, f::Morphism, simpls = simples(parent(domain(f))))
-    X = domain(f)
-    Y = codomain(f)
+function central_projection(dom::CenterObject, cod::CenterObject, f::Vector{<:Morphism}, simpls = simples(category(parent(dom))))
+
+    if length(f) == 0 
+        return CenterMorphism[]
+    end
+
+    X = domain(f[1])
+    Y = codomain(f[1])
     C = parent(X)
     D = dim(C)
-    proj = zero_morphism(X, Y)
+    proj = [zero_morphism(X, Y) for _ ∈ f]
     a = associator
     inv_a = inv_associator
 
@@ -988,11 +992,13 @@ function central_projection(dom::CenterObject, cod::CenterObject, f::Morphism, s
 
         yY = half_braiding(cod, dXi)
         
-        ϕ = (ev(dXi)⊗id(Y))∘inv_a(dual(dXi),dXi,Y)∘(spherical(Xi)⊗yY)∘a(Xi,Y,dXi)∘((id(Xi)⊗f)⊗id(dXi))∘(yX⊗id(dXi))∘inv_a(X,Xi,dXi)∘(id(X)⊗coev(Xi))
+        ϕ_before = (yX⊗id(dXi))∘inv_a(X,Xi,dXi)∘(id(X)⊗coev(Xi))
 
-        proj = proj + dim(Xi)*ϕ
+        ϕ_after = (ev(dXi)⊗id(Y))∘inv_a(dual(dXi),dXi,Y)∘(spherical(Xi)⊗yY)∘a(Xi,Y,dXi)
+
+        proj = [p + dim(Xi)*(ϕ_after ∘ ((id(Xi)⊗g)⊗id(dXi)) ∘ ϕ_before) for (p,g) ∈ zip(proj,f)]
     end
-    return morphism(dom, cod, inv(D*base_ring(dom)(1))*proj)
+    return [morphism(dom, cod, inv(D*base_ring(dom)(1))*p) for p ∈ proj]
 end
 
 """
@@ -1169,7 +1175,7 @@ function split(X::CenterObject, E = End(X),
     if base_ring(X) == QQ 
         to_qqbar = QQBarField()
     else
-        to_qqbar = x -> guess(QQBarField(), e(x,512), degree(x))
+        to_qqbar = x -> guess(QQBarField(), e(x,512), maximum([1,degree(x)]))
     end
     # C = _extension_of_scalars(parent(X), QQBarField(), extension_of_scalars(category(parent(X)), QQBarField(), embedding = to_qqbar))
 
@@ -1198,7 +1204,7 @@ function split(C::CenterCategory, e = complex_embeddings(base_ring(C))[1])
     if base_ring(C) == QQ 
         to_qqbar = QQBarField()
     else
-        to_qqbar = x -> guess(QQBarField(), e(x,512), degree(x))
+        to_qqbar = x -> guess(QQBarField(), e(x,512), maximum([degree(x),1]))
     end
     CL = _extension_of_scalars(C, QQBarField(), extension_of_scalars(category(C), QQBarField(), embedding = to_qqbar))
 
@@ -1319,9 +1325,9 @@ end
 function hom_by_projection(X::CenterObject, Y::CenterObject)
     b = basis(Hom(X.object, Y.object))
 
-    projs = [central_projection(X,Y,f) for f in b]
+    projs = central_projection(X,Y,b)
 
-    proj_exprs = [express_in_basis(p,b) for p ∈ projs]
+    proj_exprs = [express_in_basis(morphism(p),b) for p ∈ projs]
 
     M = zero(matrix_space(base_ring(X), length(b),length(b)))
     for i ∈ 1:length(proj_exprs)
@@ -1333,7 +1339,7 @@ function hom_by_projection(X::CenterObject, Y::CenterObject)
         f = morphism(X,Y,sum([m*bi for (m,bi) ∈ zip(M[i,:], b)]))
         H_basis = [H_basis; f]
     end
-    return CenterHomSpace(X,Y,H_basis)
+    return HomSpace(X,Y,H_basis)
 end
 
 
@@ -1455,13 +1461,16 @@ end
 
 function multiplication_table(C::CenterCategory)
     get_attribute!(C, :multiplication_table) do
+
+        if characteristic(base_ring(C)) > 0 || !is_split_semisimple(C)
+            return multiplication_table(C)
+        end
+
         S = simples(C) 
         dims = dim.(S)
         d = sum(dims.^2)
 
-        if characteristic(base_ring(C)) > 0 
-            return multiplication_table(S)
-        end
+
 
         S_matrix = smatrix(C)
 
@@ -1469,22 +1478,45 @@ function multiplication_table(C::CenterCategory)
 
         multiplicities = Array{Int,3}(undef,n,n,n)
 
+        duals = [findfirst(e -> is_isomorphic(e,dual(s))[1], S) for s ∈ S]
 
         for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n 
         
-            verlinde_formula = sum([*(S_matrix[l,[i,j,k]]...)//dims[l] for l ∈ 1:n])
+            verlinde_formula = sum([*(S_matrix[l,[i,j,duals[k]]]...)//dims[l] for l ∈ 1:n])
 
-            multiplicities[i,j,k] = Int(QQ(verlinde_formula//d))
-
+            if typeof(base_ring(C)) <: Union{PadicField, QadicField}
+                multiplicities[i,j,k] = Int(lift(coordinates(verlinde_formula//d)[1]))
+            else
+                multiplicities[i,j,k] = Int(QQ(verlinde_formula//d))
+            end
         end
         return multiplicities
     end
 end
 
-function six_j_symbols(C::CenterCategory, S = simples(C))
+# function multiplicity_spaces(C::CenterCategory, S = simples(C))
+#     get_attribute!(C, :multiplicity_spaces) do
+#         n = length(S)
+#         d = dim(C)
+
+#         if ! is_split_semisimple(C) 
+#             Sij = S[i]⊗S[j]
+#             return [Hom(Sij, S[k]) for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n]
+#         end
+
+#         multiplicities = multiplication_table(C)
+
+#         spaces = [HomSpace(S[i],S[j], [zero_morphism(S[i],S[j]) for _ ∈ 1:multiplicities[i,j,k]]) for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n]
+
+#         return spaces
+#     end
+# end
+
+
+function six_j_symbols(C::CenterCategory, S = simples(C), mult = nothing)
     @assert is_semisimple(C)
 
-    six_j_symbols_of_construction(C, S)
+    six_j_symbols_of_construction(C, S, multiplication_table(C))
 end
 
 

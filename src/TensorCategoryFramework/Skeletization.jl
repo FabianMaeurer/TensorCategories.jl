@@ -1,10 +1,10 @@
-function six_j_category(C::Category, names::Vector{String} = ["X$i" for i ∈ 1:length(simples(C))])
-    F = six_j_category(simples(C), names)
+function six_j_category(C::Category, names::Vector{String} = simples_names(C); multiplication_table = nothing)
+    F = six_j_category(simples(C), names, multiplication_table = multiplication_table)
     set_name!(F, "Skeletization of $C")
     return F
 end
 
-function six_j_category(S::Vector{<:Object}, names::Vector{String} = ["X$i" for i ∈ 1:length(S)])
+function six_j_category(S::Vector{<:Object}, names::Vector{String} = simples_names(parent(S[1])); multiplication_table = nothing)
     C = parent(S[1])
     @assert is_ring(C)
 
@@ -16,7 +16,6 @@ function six_j_category(S::Vector{<:Object}, names::Vector{String} = ["X$i" for 
     n = length(S)
     F = base_ring(C)
 
-    mult = Array{Int,3}(undef,n,n,n)
 
     # prods = [X ⊗ Y for X ∈ S, Y ∈ S]
     # homs = [basis(Hom(prods[i,j],Z)) for i ∈ 1:length(S), j ∈ 1:length(S), Z ∈ S]
@@ -28,12 +27,13 @@ function six_j_category(S::Vector{<:Object}, names::Vector{String} = ["X$i" for 
     skel_C = six_j_category(F,names)
 
     # Extract 6j-Symbols
-    ass = six_j_symbols(C, S)
+    ass = six_j_symbols(C, S, multiplication_table)
 
     # Recover multiplication table 
     one_index = findfirst(s -> int_dim(Hom(one(C),s)) > 0, S)
     set_one!(skel_C, [i == one_index for i ∈ 1:n])
-    mult = [size(ass[i,j,one_index,k], 1) for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n]
+
+    mult = multiplication_table !== nothing ? multiplication_table : [size(ass[i,j,one_index,k], 1) for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n]
 
     set_tensor_product!(skel_C,mult)
 
@@ -58,7 +58,7 @@ function six_j_category(S::Vector{<:Object}, names::Vector{String} = ["X$i" for 
     return skel_C
 end
 
-function six_j_symbols(C::Category, S = simples(C))
+function six_j_symbols(C::Category, S = simples(C), mult = nothing)
     @assert is_semisimple(C)
 
     N = length(S)
@@ -74,7 +74,13 @@ function six_j_symbols(C::Category, S = simples(C))
     S[one_indices] = one_components
 
     prods = [X ⊗ Y for X ∈ S, Y ∈ S]
-    homs = [basis(Hom(prods[i,j],Z)) for i ∈ 1:N, j ∈ 1:N, Z ∈ S]
+
+    if mult !== nothing 
+        global homs = [mult[i,j,k] > 0 ? basis(Hom(prods[i,j],S[k])) : C_morphism_type[] for i ∈ 1:N, j ∈ 1:N, k ∈ 1:N]
+    else
+        global homs = [basis(Hom(prods[i,j],S[k])) for i ∈ 1:N, j ∈ 1:N, k ∈ 1:N]
+    end
+
     associators = [associator(X,Y,Z) for X ∈ S, Y ∈ S, Z ∈ S]
 
 
@@ -128,7 +134,7 @@ function six_j_symbols(C::Category, S = simples(C))
     return ass           
 end
 
-function six_j_symbols_of_construction(C::Category, S = simples(C))
+function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothing)
     @assert is_semisimple(C)
 
     N = length(S)
@@ -146,15 +152,18 @@ function six_j_symbols_of_construction(C::Category, S = simples(C))
     S[one_indices] = one_components
 
     prods = [X ⊗ Y for X ∈ S, Y ∈ S]
-    homs = [morphism.(basis(Hom(prods[i,j],Z))) for i ∈ 1:N, j ∈ 1:N, Z ∈ S]
-    
+
+    if mult !== nothing 
+        global homs = [mult[i,j,k] > 0 ? morphism.(basis(Hom(prods[i,j],S[k]))) : C_morphism_type[] for i ∈ 1:N, j ∈ 1:N, k ∈ 1:N]
+    else
+        global homs = [morphism.(basis(Hom(prods[i,j],S[k]))) for i ∈ 1:N, j ∈ 1:N, k ∈ 1:N]
+    end    
 
     associators = [associator(object.((X,Y,Z))...) for X ∈ S, Y ∈ S, Z ∈ S]
 
 
 
     for (i,j,k,l) ∈ Base.product(1:N, 1:N, 1:N, 1:N)
-
         #set trivial associators
         if !isempty([i,j,k] ∩ one_indices) 
             n = sum([length(homs[i,j,v]) * length(homs[v,k,l]) for v ∈ 1:N])
@@ -190,9 +199,9 @@ function six_j_symbols_of_construction(C::Category, S = simples(C))
             B_X_YZ_W = [B_X_YZ_W; B]
         end
         
+
         # Express the asociator in the corresponding basis
         a = associators[i,j,k]
-
         associator_XYZ_W = hcat([express_in_basis(f ∘ a, B_XY_Z_W) for f ∈ B_X_YZ_W]...)
        
         ass[i,j,k,l] = matrix(F, length(B_XY_Z_W), length(B_X_YZ_W),  associator_XYZ_W)

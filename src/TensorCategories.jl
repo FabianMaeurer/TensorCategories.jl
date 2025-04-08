@@ -10,14 +10,14 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     cyclotomic_field, Fac, Field, FieldElem, FinField, GF, GAP,
     GAPGroupHomomorphism, GL, GSet, GroupElem, Hecke.AbstractAssociativeAlgebra,
     Hecke.AbstractAssociativeAlgebraElem, Ideal, MPolyRingElem, MPolyIdeal, Map, MatElem, MatrixElem,
-    MatrixGroup, matrix_space, ModuleIsomorphism, number_field, PcGroup, PolyRingElem,
+    MatrixGroup, matrix_space, ModuleIsomorphism, number_field, PcGroup, PolyRingElem, FqMPolyRingElem, FqPolyRingElem,
     polynomial_ring, QQ, QQBarField, QQField, QQFieldElem, QQMPolyRingElem, Ring, RingElem, ZZ, QQBarFieldElem,
     ZZRingElem, abelian_closure, abelian_group, absolute_simple_field, action, base_field, defining_polynomial,
     base_ring, basis, central_primitive_idempotents, change_base_ring, 
-     characteristic, NumField,
+     characteristic, NumField, rational_solutions,
     charpoly, codomain, coeff, coefficients, cokernel, complex_embeddings, compose, centralizer, embedding, complex_embedding,
-    cyclotomic_field, decompose, degree, det, diagonal_matrix, dim, direct_sum, divisors, set_name!,
-    domain, dual, eigenspace, eigenspaces, eigenvalues, elem_type, elements, exponent,
+    cyclotomic_field, decompose, degree, det, diagonal_matrix, dim, direct_sum, divisors, set_name!, coordinates,
+    domain, dual, eigenspace, eigenspaces, eigenvalues, elem_type, elements, exponent, lift, prime_field, absolute_coordinates,
     exponents, factor, QQFieldElem, QQPolyRingElem, ZZRingElem, gcd, gen, gens, get_attribute, get_attribute!,
     gmodule, groebner_basis, group_algebra, gset, guess, has_attribute, height_bits, hnf,
     hom, id, ideal, identity_matrix, image, index, inv, involution, irreducible_modules,
@@ -38,7 +38,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     QadicField, QadicFieldElem, FlintLocalField, FlintLocalFieldElem,
     MultTableGroup, is_isomorphic_with_map, subgroup_classes, representative,
     pc_group, permutation_group, @req, is_constant, automorphism_group,
-    permuted
+    permuted, change_base_ring
 
 # using Serialization
 import Oscar: @register_serialization_type,
@@ -124,6 +124,7 @@ export CenterObject
 export central_objects 
 export central_primitive_idempotents
 export centralizer
+export change_base_ring
 export Cocycle 
 export codomain 
 export coefficients
@@ -443,7 +444,6 @@ include("CategoryFramework/ProductCategory.jl")
 include("CategoryFramework/Fallbacks.jl")
 include("CategoryFramework/LimitsAndDiagrams/Limits.jl")
 include("CategoryFramework/OppositeCategory.jl")
-include("CategoryFramework/DeligneTensorProduct.jl")
 include("CategoryFramework/Semisimplification.jl")
 include("CategoryFramework/ArrowCategory.jl")
 include("CategoryFramework/ChainComplexes/ChainComplexes.jl")
@@ -451,6 +451,7 @@ include("CategoryFramework/ChainComplexes/ShortExactSequences.jl")
 
 
 include("Utility/QQBar_Polynomials.jl")
+#include("Utility/QQBar_mats.jl")
 include("Utility/SolveGroebner.jl")
 include("Utility/QuantumIntegers.jl")
 include("Utility/Technicallities.jl")
@@ -493,7 +494,11 @@ include("TensorCategoryFramework/Equivariantization/EquivariantInduction.jl")
 include("TensorCategoryFramework/Equivariantization/EquivariantCheck.jl")
 include("TensorCategoryFramework/SixJCategory/SixJFunctors.jl")
 
+include("CategoryFramework/DeligneTensorProduct.jl")
+
+
 include("TensorCategoryFramework/InternalModules/InternalAlgebras.jl")
+include("TensorCategoryFramework/InternalModules/CanonicalAlgebra.jl")
 include("TensorCategoryFramework/InternalModules/ModuleCategories.jl")
 include("TensorCategoryFramework/InternalModules/ComputationOfAlgebras.jl")
 include("TensorCategoryFramework/InternalModules/MeatAxe.jl")

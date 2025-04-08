@@ -48,15 +48,24 @@ end
 function real_solutions_over_base_field(I::MPolyIdeal; splitting_info = true)
     K = base_ring(base_ring(I))
 
-    if is_finite(K)
-        return recover_solutions(real_solutions(I), K, symbols(base_ring(I)), splitting_info = splitting_info)
-    end
+    # if is_finite(K)
+    #     return recover_solutions(real_solutions(I), K, symbols(base_ring(I)), splitting_info = splitting_info)
+    # end
 
     if K == QQ
         return recover_solutions(real_solutions(I), K, symbols(base_ring(I)),splitting_info = splitting_info)
     end
 
     G = gens(I)
+
+    if is_finite(K) 
+        R = base_ring(I)
+        d = dim(R) 
+        elems_K = collect(K)
+        tupls = Base.product([elems_K for _ ∈ 1:d]...)
+
+        return [c for c ∈ tupls if all([g(c...) == 0 for g ∈ G])]
+    end
 
     try 
         I = ideal([change_base_ring(QQ, f) for f ∈ gens(I)])
@@ -122,6 +131,10 @@ function witness_set(I::Ideal, bound = 100)
     d = dim(I)
     deg = degree(I)
     K = base_ring(base_ring(I))
+
+    if d == 0 
+        return real_solutions_over_base_field(I)
+    end
     
     n = dim(base_ring(I))
     
@@ -129,18 +142,29 @@ function witness_set(I::Ideal, bound = 100)
 
     # rand_base = [[a^i for i ∈ 0:degree(K)-1]; [0]; [-a^i for i ∈ 0:degree(K)-1]]
     
-    QI, fixed_sols = rational_lift(I)
+    if is_finite(K)
+        global QI = I
+        global L = K
+    else
+        QI, fixed_sols = rational_lift(I)
+        L = base_ring(QI)
+    end
+    # QI, fixed_sols = rational_lift(I)
     x = gens(base_ring(QI))[1:n]
 
     for _ ∈ 1:bound 
-        c = matrix(QQ, rand(-1:1,n+1,d)) 
+        c = matrix(L, rand(-1:1,n+1,d)) 
 
         J = QI + ideal([sum(e .* [x; 1]) for e ∈ eachcol(c)])
 
         rank(c) < d && continue 
         dim(J) > 0 && continue 
         
-        S = recover_solutions(real_solutions(J), K, symbols(base_ring(QI)), fix_solutions = fixed_sols, splitting_info = false) 
+        S = if is_finite(K) 
+             rational_solutions(J)
+        else
+            recover_solutions(real_solutions(J), K, symbols(base_ring(QI)), fix_solutions = fixed_sols, splitting_info = false) 
+        end
 
         s = unique([s[1:n] for s ∈ S])
 

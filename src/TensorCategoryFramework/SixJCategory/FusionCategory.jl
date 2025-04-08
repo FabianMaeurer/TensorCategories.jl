@@ -114,18 +114,19 @@ function set_pivotal!(F::SixJCategory, sp)
 end
 
 function set_spherical!(F::SixJCategory, sp) 
-    @req is_spherical(F,sp) "Not a spherical structure"
     F.pivotal = sp
+    @req is_spherical(F) "Not a spherical structure"
+
 end
 
-function is_spherical(F::SixJCategory, sp) 
-    all([s*ev(x)∘coev(x) == inv(s)*ev(dual(x))∘coev(dual(x)) for (s,x) ∈ zip(sp,simples(F))]) 
-end
+# function is_spherical(F::SixJCategory, sp) 
+#     all([s*ev(dual(x))∘coev(x) == inv(s)*ev(dual(x))∘coev(x) for (s,x) ∈ zip(sp,simples(F))]) 
+# end
 
 function is_spherical(F::SixJCategory)
     get_attribute!(F, :is_spherical) do
         if isdefined(F, :pivotal) 
-            return is_spherical(F,F.pivotal)
+            return all([dim(x) == dim(dual(x)) for x in simples(F)])
         end
         false
     end
@@ -233,11 +234,8 @@ function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
         j = findfirst(e -> e ≠ 0, Y.components)
         k = findfirst(e -> e ≠ 0, Z.components)
 
-        if ! all(isassigned(C_associator, i,j,k,l) for l ∈ 1:n)
-            six_j_symbol = get_attribute(C, :six_j_symbol)
-            C_associator[i,j,k,:] =[six_j_symbol(i,j,k,l) for l ∈ 1:n]
-        end
-        return morphism(dom,dom, C_associator[i,j,k,:])
+        
+        return morphism(dom,dom, [six_j_symbol(C,i,j,k,l) for l ∈ 1:n])
 
     end
 
@@ -267,14 +265,7 @@ function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     # YZ_arr = [Yⱼ⊗Zₖ for  Zₖ ∈ Z_summands, Yⱼ ∈ Y_summands][:]
     # distr_after = direct_sum([distribute_right(Xᵢ, YZ_arr) for Xᵢ ∈ X_summands]) ∘ distr_after
 
-    _,ix,px = direct_sum(X_summands)
-    _,iy,py = direct_sum(Y_summands)
-    _,iz,pz = direct_sum(Z_summands)
 
-    distr_before = vertical_direct_sum([(f⊗g)⊗h for f ∈ px, g ∈ py, h ∈ pz][:])
-    #distr_after = vertical_direct_sum([f⊗(g⊗h) for f ∈ px, g ∈ py, h ∈ pz][:])
-
-    distr_after = horizontal_direct_sum([f⊗(g⊗h) for f ∈ ix, g ∈ iy, h ∈ iz][:])
     #-----------------------------------
     # Associator morphism
     #-----------------------------------
@@ -283,6 +274,18 @@ function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     #     m = m ⊕ associator(x,y,z)
     # end
     m = direct_sum([associator(x,y,z) for x ∈ X_summands, y ∈ Y_summands, z ∈ Z_summands][:])
+
+    # if length(X_summands) == 1 || length(Y_summands) == 1 || length(Z_summands) == 1
+    #     return m 
+    # end
+    _,ix,px = direct_sum(X_summands)
+    _,iy,py = direct_sum(Y_summands)
+    _,iz,pz = direct_sum(Z_summands)
+
+    distr_before = vertical_direct_sum([(f⊗g)⊗h for f ∈ px, g ∈ py, h ∈ pz][:])
+    #distr_after = vertical_direct_sum([f⊗(g⊗h) for f ∈ px, g ∈ py, h ∈ pz][:])
+
+    distr_after = horizontal_direct_sum([f⊗(g⊗h) for f ∈ ix, g ∈ iy, h ∈ iz][:])
     
     return compose(distr_before, m , distr_after)
 end
@@ -310,15 +313,10 @@ function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
         j = findfirst(e -> e ≠ 0, Y.components)
         k = findfirst(e -> e ≠ 0, Z.components)
 
-        if ! all(isassigned(C_associator, i,j,k,l) for l ∈ 1:n)
-            six_j_symbol = get_attribute(C, :six_j_symbol)
-            C_associator[i,j,k,:] =[six_j_symbol(i,j,k,l) for l ∈ 1:n]
-        end
+       
 
-        return inv(morphism(dom,dom, C_associator[i,j,k,:]))
-
+        return morphism(dom,dom, [inv(six_j_symbol(C,i,j,k,l)) for l ∈ 1:n])
     end
-
     #---------------------------------
     # associators for arbitrary objects
     #---------------------------------
@@ -375,6 +373,15 @@ function vector_permutation(A::Vector,B::Vector)
     end
     return perm
 end
+
+function six_j_symbol(C::SixJCategory, i::Int, j::Int, k::Int, l::Int)
+    if ! isassigned(C.ass, i,j,k,l)
+        six_j_symbol = get_attribute(C, :six_j_symbol)
+        C.ass[i,j,k,l] = six_j_symbol(i,j,k,l) 
+    end
+    return C.ass[i,j,k,l]
+end
+
 
 
 #-------------------------------------------------------------------------------
@@ -687,6 +694,7 @@ function tensor_product(f::SixJMorphism, g::SixJMorphism)
     simpl = simples(C)
 
     for i ∈ 1:C.simples, j ∈ 1:C.simples
+
         A = kronecker_product(f.m[i],g.m[j])
         d1,d2 = size(A)
         #if d1*d2 == 0 continue end
@@ -1055,6 +1063,7 @@ Return the category ``C⊗K``.
 """
 function extension_of_scalars(m::SixJMorphism, L::Ring, CL = parent(m) ⊗ L; embedding = embedding(base_ring(m), L))
     try
+
         mats = [matrix(L, size(m)..., embedding.(collect(m))) for m ∈ matrices(m)] 
         g = morphism(extension_of_scalars(domain(m), L, CL, embedding = embedding),
                     extension_of_scalars(codomain(m), L, CL, embedding = embedding), 
@@ -1128,4 +1137,28 @@ function trivial_fusion_category(K::Field)
     C.name = "Trivial fusion category over $K"
 
     return C
+end
+
+#=----------------------------------------------------------
+    Reversed monoidal structure 
+----------------------------------------------------------=#
+
+function reversed_monoidal_category(C::SixJCategory)
+
+    D = six_j_category(base_ring(C), simples_names(C))
+    n = length(simples(D))
+
+    set_tensor_product!(D, [C.tensor_product[j,i,k] for i in 1:n, j in 1:n, k ∈ 1:n])
+
+    set_associator!(D, Array{MatElem,4}(undef, n, n, n, n))
+    set_attribute!(D, :six_j_symbol, (i,j,k,l) -> inv(six_j_symbol(C, k,j,i,l)))
+
+    if isdefined(C, :pivotal)
+        set_pivotal!(D, inv.(C.pivotal))
+    end
+    if isdefined(C, :one)
+        set_one!(D, C.one)
+    end
+    set_name!(D, "$(C.name) with reversed monoidal structure")
+    D
 end

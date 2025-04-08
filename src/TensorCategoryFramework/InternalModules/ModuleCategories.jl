@@ -1480,7 +1480,7 @@ function bimodule_simples(M::BiModuleCategory)
 
     simpls = vcat([simple_subobjects(m, H) for (m,H) in zip(free_bimodules, homs)]...)
 
-    if A == B
+    if A == B && int_dim(End(one(M))) == 1 
         return unique_simples([one(M); simpls])
     else
         return unique_simples(simpls)

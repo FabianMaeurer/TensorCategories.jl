@@ -135,6 +135,10 @@ function rational_lift(I::MPolyIdeal)
         return qqbar_rational_lift(I)
     end
 
+    if is_finite(K)
+        return finite_field_rational_lift(I)
+    end
+
     if K == QQ 
         return I
     end
@@ -184,6 +188,50 @@ function qqbar_rational_lift(I::MPolyIdeal)
 
     return ideal([base; minpolys]), [symbols(Qx)[n+i] => c for (i,c) ∈ zip(1:length(coeffs), coeffs)]
 end
+
+function finite_field_rational_lift(I::MPolyIdeal)
+    K = base_ring(base_ring(I))
+
+    if dim(base_ring(I)) == 1 
+        return ideal([change_base_ring(QQ, f) for f ∈ gens(I)]), []
+    end
+
+    α = gen(K)
+    μ = minpoly(α)
+
+    F = prime_field(K)
+    Qx, x = polynomial_ring(QQ, length(gens(base_ring(I))) + 1) 
+    base = [change_base_ring(QQ,μ)(x[end])]
+
+    G = groebner_basis(I)
+
+    for f ∈ G
+        coeffs = [polynomial(QQ, QQ.([lift(ZZ,c) for c ∈ absolute_coordinates(a)]))(x[end]) for a ∈ coefficients(f)]
+
+        monos = [change_base_ring(QQ,m)(x[1:end-1]...) for m ∈ monomials(f)]
+
+        push!(base, sum(coeffs .* monos))
+    end
+
+    return ideal(base), [symbols(Qx)[end] => α]
+end
+
+function change_base_ring(K::QQField, p::FqMPolyRingElem)
+    c = coefficients(p)
+
+    _,vars = polynomial_ring(QQ, dim(parent(p)))
+
+    return sum(QQ(lift(ZZ, c)) * sum(vars .* e) for (c,m,e) ∈ zip(coefficients(p), monomials(p), exponents(p)))
+end
+
+function change_base_ring(K::QQField, p::FqPolyRingElem)
+    c = coefficients(p)
+
+    _,x = QQ[:x]
+
+    return sum(QQ(lift(ZZ, c)) * x^i for (c,i) ∈ zip(coefficients(p), 0:degree(p)))
+end
+
 
 function *(k::QQBarFieldElem, p::T) where T <: Union{QQPolyRingElem, QQMPolyRingElem}
     if is_rational(k) 

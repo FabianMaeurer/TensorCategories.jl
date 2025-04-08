@@ -112,7 +112,7 @@ function express_in_basis(f::T, B::Vector{T}) where T <: Morphism
     # B_mat = matrix(F, size(b_mat,1), size(b_mat, 2), b_mat)
     # f_mat = matrix(F, *(size(matrix(f))...), 1, [x for x ∈ matrix(f)][:])
     vec_f = morphism(matrix(f))
-    vec_basis = [morphism(matrix(b)) for b ∈ B]
+    vec_basis = VSMorphism[morphism(matrix(b)) for b ∈ B]
     return express_in_basis(vec_f, vec_basis)
 end
 

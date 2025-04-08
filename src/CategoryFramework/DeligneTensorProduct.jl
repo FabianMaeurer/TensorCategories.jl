@@ -1,6 +1,6 @@
 
 
-function tensor_product(C::Category, D::Category, names1::Vector{String} = String[], names2::Vector{String} = String[])
+function tensor_product(C::SixJCategory, D::SixJCategory, names1::Vector{String} = String[], names2::Vector{String} = String[])
     @assert is_multifusion(C)
     @assert is_multifusion(D)
 
@@ -21,11 +21,8 @@ function tensor_product(C::Category, D::Category, names1::Vector{String} = Strin
     catch
     end
 
-    skel_C = length(names1) == 0 ? six_j_category(C) : six_j_category(C, names1)
-    skel_D = length(names2) == 0 ? six_j_category(D) : six_j_category(D, names2)
-
-    S = simples(skel_C)
-    T = simples(skel_D)
+    S = simples(C)
+    T = simples(D)
 
     m,n = length.([S,T])
 
@@ -41,31 +38,48 @@ function tensor_product(C::Category, D::Category, names1::Vector{String} = Strin
 
     ass = Array{MatElem,4}(undef, n*m, n*m, n*m, n*m)
 
-    for i1 ∈ 1:m, j1 ∈ 1:n, i2 ∈ 1:m, j2 ∈ 1:n, i3 ∈ 1:m, j3 ∈ 1:n
-        X = S[i1]⊗S[i2]⊗S[i3]
-        Y = T[j1]⊗T[j2]⊗T[j3]
-        for k ∈ 1:m, l ∈ 1:n
-            ass[(i1-1)*n + j1, (i2-1)*n + j2, (i3-1)*n + j3, (k-1)*n + l] = kronecker_product(change_base_ring(F, skel_C.ass[i1,i2,i3,k]), change_base_ring(F,skel_D.ass[j1,j2,j3,l]))
-        end
-    end
+    # for i1 ∈ 1:m, j1 ∈ 1:n, i2 ∈ 1:m, j2 ∈ 1:n, i3 ∈ 1:m, j3 ∈ 1:n
+    #     X = S[i1]⊗S[i2]⊗S[i3]
+    #     Y = T[j1]⊗T[j2]⊗T[j3]
+    #     for k ∈ 1:m, l ∈ 1:n
+    #         ass[(i1-1)*n + j1, (i2-1)*n + j2, (i3-1)*n + j3, (k-1)*n + l] = kronecker_product(change_base_ring(F, skel_C.ass[i1,i2,i3,k]), change_base_ring(F,skel_D.ass[j1,j2,j3,l]))
+    #     end
+    # end
+ 
 
     CD = six_j_category(F, mult, ["$s ⊠ $t" for t ∈ T, s ∈ S][:])
 
+    N = n*m
+
+
+    function _six_j_symbol(i,j,k,l) 
+        i1,j1 = divrem(i-1,n) .+ [1,1]
+        i2,j2 = divrem(j-1,n) .+ [1,1]
+        i3,j3 = divrem(k-1,n) .+ [1,1]
+        i4,j4 = divrem(l-1,n) .+ [1,1]
+         kronecker_product(change_base_ring(F, six_j_symbol(C,i1,i2,i3,i4)),change_base_ring(F,six_j_symbol(D, j1,j2,j3,j4)))
+    end
+
     set_tensor_product!(CD, mult)
-    set_associator!(CD, ass)
+    set_associator!(CD, Array{MatElem,4}(undef,N,N,N,N))
+
+    set_attribute!(CD, :six_j_symbol, _six_j_symbol )
+
+   # set_associator!(CD, ass)
 
     one_coeffs = zeros(Int,n*m)
-    one_C = one(skel_C).components
-    one_D = one(skel_D).components
+    one_C = one(C).components
+    one_D = one(D).components
     for i ∈ 1:m, j ∈ 1:n
         one_coeffs[(i-1)*n + j] = one_C[i]*one_D[j]
     end
     set_one!(CD, one_coeffs)
 
     try 
-        spheric = [skel_C.spherical[i]*skel_D.spherical[j] for j ∈ 1:n, i ∈ 1:m][:]
-        set_spherical(CD, spheric)
-    catch
+        spheric = [C.pivotal[i]*D.pivotal[j] for j ∈ 1:n, i ∈ 1:m][:]
+        set_pivotal!(CD, spheric)
+    catch e
+        print(e)
     end
 
     return CD

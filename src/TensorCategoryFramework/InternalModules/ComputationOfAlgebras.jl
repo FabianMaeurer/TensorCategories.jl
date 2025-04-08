@@ -159,7 +159,7 @@ function _algebra_structures(structure_ideal::Function, X::Object, _unit = Hom(o
     if d < 0 
         return AlgebraObject[]
     elseif d == 0
-        sols = real_solutions_over_base_field(I)
+        sols = rational_solutions(I)
     else
         sols = witness_set(I)
     end

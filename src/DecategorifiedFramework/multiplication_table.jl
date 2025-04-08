@@ -99,8 +99,7 @@ end
         
     
 function print_sum(facs::Vector{T}, names::Vector{String}) where T <: Union{Int, RingElem}
-
-    if length(facs) == 0 return "0" end
+    if sum(facs) == 0 return "0" end
 
     str = ""
     for (k,name) ∈ zip(facs, names)
