@@ -519,6 +519,7 @@ include("Examples/VercleyenSingerland/FR_9143/fr_9143.jl")
 include("Examples/E6Subfactor/E6subfactor.jl")
 include("Examples/Haagerup/HaagerupH3.jl")
 include("Examples/Haagerup/ExtendedHaagerup.jl")
+include("Examples/SU(k)/SU(3)_3.jl")
 
 @register_serialization_type SixJCategory
 

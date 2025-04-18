@@ -85,7 +85,7 @@ function six_j_symbols(C::Category, S = simples(C), mult = nothing)
 
 
 
-    for (i,j,k,l) ∈ Base.product(1:N, 1:N, 1:N, 1:N)
+    @threads for (i,j,k,l) ∈ collect(Base.product(1:N, 1:N, 1:N, 1:N))
 
         #set trivial associators
         if !isempty([i,j,k] ∩ one_indices) 
@@ -163,7 +163,7 @@ function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothi
 
 
 
-    for (i,j,k,l) ∈ Base.product(1:N, 1:N, 1:N, 1:N)
+    @threads for (i,j,k,l) ∈ collect(Base.product(1:N, 1:N, 1:N, 1:N))
         #set trivial associators
         if !isempty([i,j,k] ∩ one_indices) 
             n = sum([length(homs[i,j,v]) * length(homs[v,k,l]) for v ∈ 1:N])

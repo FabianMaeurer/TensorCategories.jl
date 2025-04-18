@@ -95,7 +95,7 @@ function meataxe(M::RightModuleObject, incl::Vector{T}, proj::Vector{T}) where T
         polys = [k for (k,v) ∈ collect(factor(minpoly(θ)))]
         polys = sort(polys, by = degree)
         for p ∈ polys 
-            p(0) == 0 && continue 
+            p(θ) == 0 && continue 
             ξ = p(θ)
 
             action_of_a = compose(
@@ -104,7 +104,7 @@ function meataxe(M::RightModuleObject, incl::Vector{T}, proj::Vector{T}) where T
             )
 
             kernel_of_a, kernel_inclusion = kernel(action_of_a)
-
+            
             if !is_zero(int_dim(Hom(kernel_of_a, object(M))))
                 kernel_non_zero = true
                 break
@@ -124,9 +124,9 @@ function meataxe(M::RightModuleObject, incl::Vector{T}, proj::Vector{T}) where T
     #     end
     # end
 
-    if is_zero(kernel_of_a)
-        return true, M, id(M)
-    end
+    # if is_zero(kernel_of_a)
+    #     return true, M, id(M)
+    # end
 
     for f ∈ basis(Hom(kernel_of_a, object(M)))
         N, inclusion = spin_submodule(M,f)
