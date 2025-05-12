@@ -9,7 +9,7 @@
 
 Return a set of algebra objects over ``X``. An empty array is returned only if there are no algebra structures. If the algebr is not connected, i.e. ``Hom(𝟙,X) ≠ k``, then a unit should be provided.
 """
-function algebra_structures(X::Object, unit = sum(basis(Hom(one(parent(X))), X)); show_dimension = false)
+function algebra_structures(X::Object, unit = sum(basis(Hom(one(parent(X)), X))); show_dimension = false)
     _algebra_structures(_algebra_structure_ideal, X, unit, show_dimension = show_dimension)
 end
 

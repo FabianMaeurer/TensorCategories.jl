@@ -38,7 +38,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     QadicField, QadicFieldElem, FlintLocalField, FlintLocalFieldElem,
     MultTableGroup, is_isomorphic_with_map, subgroup_classes, representative,
     pc_group, permutation_group, @req, is_constant, automorphism_group,
-    permuted, change_base_ring
+    permuted, change_base_ring, schur_index_over_center
 
 # using Serialization
 import Oscar: @register_serialization_type,
@@ -522,8 +522,12 @@ include("Examples/Haagerup/ExtendedHaagerup.jl")
 include("Examples/SU(k)/SU(3)_3.jl")
 
 @register_serialization_type SixJCategory
+@register_serialization_type SixJMorphism
+@register_serialization_type SixJObject
+@register_serialization_type CenterCategory
 
 include("Serialization/SixJSerialization.jl")
+include("Serialization/CenterSerialization.jl")
 include("SixJCategoryDatabase/main.jl")
 include("AnyonWiki/AnyonWiki.jl")
 

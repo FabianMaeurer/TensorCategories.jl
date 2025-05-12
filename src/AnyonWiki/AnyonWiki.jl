@@ -188,6 +188,7 @@ function load_anyon_pivotal_root(n::Int)
         end
     end
 end
+
 function load_anyon_pivotal(n::Int, K = load_anyon_number_field(n), e = complex_embeddings(K)[1])
 
     CC = AcbField(512)
@@ -216,4 +217,23 @@ function load_anyon_pivotal(n::Int, K = load_anyon_number_field(n), e = complex_
         end
     end
     return piv 
+end
+
+
+function load_anyon_attributes(n::Int) 
+    open(joinpath(@__DIR__, "MultFreeCenters/cat_properties.txt")) do f 
+
+        line = 1
+        while ! eof(f) 
+            s = readline(f) 
+
+            if line == n+1
+                s = filter(!=('\"'), s)
+                s = split(s, ", ")
+
+                return [parse(Bool, t) for t in s]
+            end
+            line += 1
+        end
+    end
 end

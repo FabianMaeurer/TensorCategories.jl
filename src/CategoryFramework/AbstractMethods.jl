@@ -297,9 +297,7 @@ function central_primitive_idempotents(H::AbstractHomSpace)
     @assert domain(H) == codomain(H) "Not an endomorphism algebra"
 
     base = basis(H)
-    A = endomorphism_ring(H.X, base)
-    one(A)
- 
+    A = endomorphism_ring(H.X, base) 
 
     if !is_semisimple(A) && characteristic(base_ring(H)) == 0 
         X = semisimplify(domain(H))

@@ -914,7 +914,7 @@ function tr(f::ModuleMorphism{RightModuleObject})
 
     d = dim(object(A))
     t = base_ring(f)(tr(morphism(f)))*inv(d) 
-    t * id(one(parent(f)))
+    t * id(free_right_module(one(category(parent(f))), A))
 end
 
 #=----------------------------------------------------------

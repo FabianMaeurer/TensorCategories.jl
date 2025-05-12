@@ -57,6 +57,7 @@ function Semisimplification(f::Morphism)
     Semisimplification(f,C)
 end
 
+is_abelian(C::Semisimplification) = is_abelian(category(C))
 is_semisimple(C::Semisimplification) = true
 is_multiring(C::Semisimplification) = is_multiring(category(C))
 is_multifusion(C::Semisimplification) = is_multiring(category(C)) && is_rigid(category(C))

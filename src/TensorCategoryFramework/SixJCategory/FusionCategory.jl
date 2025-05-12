@@ -135,6 +135,7 @@ end
 
 function set_canonical_spherical!(C::SixJCategory)
     @assert is_fusion(C)
+    set_pivotal!(C, base_ring(C).([1 for _ ∈ 1:C.simples]))
     set_pivotal!(C, [fpdim(s)*inv(dim(s)) for s ∈ simples(C)])
     end
 
@@ -848,8 +849,11 @@ end
 
 function sort_simples!(C::SixJCategory, order::Vector{Int})
     C.tensor_product = [C.tensor_product[i,j,k] for i ∈ order, j ∈ order, k ∈ order]
+    if has_attribute(C, :multiplication_table)
+        set_attribute!(C, :multiplication_table, C.tensor_product)
+    end
     n = C.simples
-    ass = C.ass
+    ass = deepcopy(C.ass)
 
     for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n, l ∈ 1:n 
         ass[i,j,k,l] = C.ass[order[[i,j,k,l]]...]
@@ -859,7 +863,7 @@ function sort_simples!(C::SixJCategory, order::Vector{Int})
     C.simples_names = C.simples_names[order]
 
     isdefined(C, :one) && (C.one = C.one[order])
-    isdefined(C, :spherical) && (C.spherical = C.spherical[order])
+    isdefined(C, :pivotal) && (C.pivotal = C.pivotal[order])
     isdefined(C, :braiding) && (C.braiding = [C.braiding[i,j,k] for i ∈ order, j ∈ order, k ∈ order])
     isdefined(C, :twist) && (C.twist = C.twist[order])
     return C

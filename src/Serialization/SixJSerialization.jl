@@ -5,6 +5,7 @@
 const database_path = joinpath(@__DIR__,"src/SixJCategoryDatabase/")
 
 @register_serialization_type SixJCategory
+@register_serialization_type SixJMorphism
 
 function save_object(s::SerializerState, C::SixJCategory)
     save_data_dict(s) do 
@@ -112,4 +113,36 @@ function load_object(s::DeserializerState, ::Type{SixJCategory})
     end
     
     return C
+end
+
+#=----------------------------------------------------------
+    Serialize SixJMorphism 
+----------------------------------------------------------=#
+
+type_params(X::SixJObject) = TypeParams(X.parent, parent(X))
+
+function save_object(s::SerializerState, X::SixJObject)
+    save_data_dict(s) do 
+        save_object(s, X.components, :components)
+    end
+end
+
+function load_object(s::DeserializerState, ::Type{SixJObject},params::SixJCategory)
+    components = load_object(s, Vector{Int64}, :components)
+    return SixJObject(parent, components)
+end
+
+function save_object(s::SerializerState, m::SixJMorphism)
+    save_data_dict(s) do 
+        save_object(s, m.domain, :domain)
+        save_object(s, m.codomain, :codomain)
+        save_object(s, m.m, :mats)
+    end
+end
+
+function load_object(s::DeserializerState, ::Type{SixJMorphism}, parent::SixJCategory)
+    domain = load_object(s, SixJobject, :domain, parent)
+    codomain = load_object(s, SixJObject, :codomain, parent)
+    m = load_object(s, Array{MatElem}, :mats)
+    return SixJMorphism(domain, codomain, m)
 end

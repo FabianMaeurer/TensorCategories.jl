@@ -6,7 +6,7 @@
     methods to compute simple subobjects. 
 ----------------------------------------------------------=#
 
-function simple_subobjects(X::Object, E = End(X), is_simple = false)
+function simple_subobjects(X::Object, E = End(X), is_simple = false, is_indecomposable = false)
     #=  Compute all simple subobjects in a tensor category
 
         The approach is the MeatAxe algorithm. 
@@ -23,24 +23,24 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false)
     end
 
     #A simple algebra of squarefree dimension is a division algebra
-    if is_simple && is_squarefree(dim(E)) 
+    if is_simple && !is_square(dim(E)) 
         return [X]
     end
 
     R = endomorphism_ring(X,E)
 
    
-    if !is_simple && is_semisimple(endomorphism_ring(X,E))
+    if !is_indecomposable #&& is_semisimple(endomorphism_ring(X,E))
         img = [image(i)[1] for i ∈ central_primitive_idempotents(E)]
         if length(img) == int_dim(E)
             return img
         end
-        return vcat([simple_subobjects(i, End(i), true) for i in img]...)
+        return vcat([simple_subobjects(i, End(i), is_simple, true) for i in img]...)
     end
 
     i = findfirst(f -> !is_irreducible(f), minpoly.(basis(E)))
 
-    if i !== nothing && is_semisimple(R)
+    if i !== nothing #&& is_semisimple(R)
         f = E[i]
         l = roots(minpoly(f))[1]
         K = kernel(f - l*id(X))[1]
@@ -49,6 +49,10 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false)
         I = simple_subobjects(I, End(I), true)
 
         return unique_simples([K;I])
+    end
+
+    if schur_index_over_center(R)^2 == dim(E)//dim(center(R))
+        return [X]
     end
 
     M = regular_module(R)
