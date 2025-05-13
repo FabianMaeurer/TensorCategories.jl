@@ -3,8 +3,8 @@
     Gert Vercleyen. 
 ----------------------------------------------------------=#
 
-associator_path = joinpath(@__DIR__, "MultFreeCenters/6jSymbols/")
-pivotal_path = joinpath(@__DIR__, "MultFreeCenters/PivotalStructures/")
+associator_path = joinpath(@__DIR__, "AnyonWikiData/6jSymbols/")
+pivotal_path = joinpath(@__DIR__, "AnyonWikiData/PivotalStructures/")
 
 @doc raw""" 
 
@@ -221,7 +221,7 @@ end
 
 
 function load_anyon_attributes(n::Int) 
-    open(joinpath(@__DIR__, "MultFreeCenters/cat_properties.txt")) do f 
+    open(joinpath(@__DIR__, "AnyonWikiData/cat_properties.txt")) do f 
 
         line = 1
         while ! eof(f) 

@@ -46,7 +46,7 @@ for n ∈ 201:300
         write(time_log, "$n, $t1, $t2\n")
         flush(time_log)
 
-        add_to_local_database(skel_Z, joinpath(@__DIR__, "MultFreeCenters/Centers/Center_$n"))
+        add_to_local_database(skel_Z, joinpath(@__DIR__, "AnyonWikiData/Centers/Center_$n"))
 
     catch e 
         println(" failed")

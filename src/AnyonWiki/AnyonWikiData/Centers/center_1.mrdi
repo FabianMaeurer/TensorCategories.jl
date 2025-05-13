@@ -1,0 +1,1 @@
+{"_ns":{"Oscar":["https://github.com/oscar-system/Oscar.jl","1.2.2"]},"_type":"SixJCategory","data":{"base_ring":{"_type":"QQField"},"simples":"1","simples_names":["X1"],"tensor_product":["1"],"ass":[[["1"]]],"one":["1"],"name":"Skeletization of Drinfeld center of Fusion category number 1 from AnyonWiki List","braiding":[[["1"]]]}}
