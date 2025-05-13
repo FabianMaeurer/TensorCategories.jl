@@ -415,7 +415,7 @@ export TensorPowerMorphism
 export TensorPowerObject
 export tmatrix 
 export tr 
-export trivial_3_cocylce 
+export trivial_3_cocycle
 export trivial_fusion_category
 export twist
 export twisted_graded_vector_spaces
