@@ -1,0 +1,3 @@
+K,a = number_field(-60384291815905005548914634509932618570431929012790174928122656675392107 + 105592515914127620624823100666577054389102353984 * x + 957053467905191421828411 * x * x + x * x * x);
+K2 = simplify(K)[1];
+writedlm("/home/gert/Projects/MultFreeCenters/Mathematica/simplerfields" * string(135) * ".txt", string(defining_polynomial(K2)));
