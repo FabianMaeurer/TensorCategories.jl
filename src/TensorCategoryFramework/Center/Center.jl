@@ -1468,7 +1468,7 @@ function multiplication_table(C::CenterCategory)
 
         S = simples(C) 
         dims = dim.(S)
-        d = sum(dims.^2)
+        d = dim(C)
 
 
 
@@ -1478,11 +1478,13 @@ function multiplication_table(C::CenterCategory)
 
         multiplicities = Array{Int,3}(undef,n,n,n)
 
-        duals = [findfirst(e -> is_isomorphic(e,dual(s))[1], S) for s ∈ S]
+        #duals = [findfirst(e -> is_isomorphic(e,dual(s))[1], S) for s ∈ S]
+
+        S_dual = d*inv(S_matrix)
 
         for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n 
         
-            verlinde_formula = sum([*(S_matrix[l,[i,j,duals[k]]]...)//dims[l] for l ∈ 1:n])
+            verlinde_formula = sum([*(S_matrix[l,[i,j]]...,S_dual[l,k])//dims[l] for l ∈ 1:n])
 
             if typeof(base_ring(C)) <: Union{PadicField, QadicField}
                 multiplicities[i,j,k] = Int(lift(coordinates(verlinde_formula//d)[1]))
