@@ -38,7 +38,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     QadicField, QadicFieldElem, FlintLocalField, FlintLocalFieldElem,
     MultTableGroup, is_isomorphic_with_map, subgroup_classes, representative,
     pc_group, permutation_group, @req, is_constant, automorphism_group,
-    permuted, change_base_ring, schur_index_over_center
+    permuted, change_base_ring, schur_index_over_center, issimple, cyclotomic_extension
 
 # using Serialization
 import Oscar: @register_serialization_type,
@@ -401,6 +401,7 @@ export solve_groebner
 export sort_simples_by_dimension! 
 export spherical 
 export split
+export split_cyclotomic
 export stalk 
 export stalks 
 export SubcategoryObject 

@@ -55,6 +55,7 @@ is_multifusion(C::CenterCategory) = is_multifusion(category(C))
 
 is_modular(C::CenterCategory) = true 
 is_braided(C::CenterCategory) = true
+is_rigid(C::CenterCategory) = true
 
 function induction_generators(C::CenterCategory) 
     if isdefined(C, :induction_gens)
@@ -1185,7 +1186,47 @@ function split(X::CenterObject, E = End(X),
     simple_subobjects(ext_X, ext_E)
 end
 
-function split(C::CenterCategory, e = complex_embeddings(base_ring(C))[1])
+function split_cyclotomic(C::CenterCategory, absolute = false)
+    Ends = End.(simples(C))
+    K = base_ring(C)
+
+    if all([int_dim(e) == 1 for e ∈ Ends])
+        return C
+    end
+
+    n = 1
+
+    # find smallest cyclotomic extension such that Z(C) splits
+    for e ∈ Ends
+        if int_dim(e) > 1
+            i = findfirst(f -> degree(minpoly(f)) == int_dim(e), basis(e))
+           
+            f = if i === nothing 
+                r = endomorphism_ring(domain(e),e)
+                 r_gens = gens(r)
+                 _,i = findmax(degree.(minpoly.(r_gens)))
+                 minpoly(r_gens[i])
+            else
+                minpoly(e[i])
+            end
+
+            m = max(int_dim(e),4)
+            while true 
+                L = cyclotomic_extension(K,m)
+                L = absolute ? L.Ka : L.Kr
+                rs = roots(L, f)
+                length(rs) > 0 && break
+                m += 1
+            end
+            
+        end
+    end
+    
+    extension_of_scalars(C, L, embedding = x -> L(x))
+end
+
+
+function split_algebraic(C::CenterCategory, e = complex_embeddings(base_ring(C))[1])
     ends = End.(simples(C))
 
     non_split = filter(e -> int_dim(e) > 1, ends)
@@ -1375,12 +1416,28 @@ function extension_of_scalars(C::CenterCategory, L::Field; embedding = is_subfie
 
     CL = _extension_of_scalars(C,L, extension_of_scalars(category(C), L, embedding = embedding))
 
-    CL.simples = vcat([[x for (x,_) ∈ decompose(extension_of_scalars(s, L, CL, embedding = embedding))] for s ∈ simples(C)]...)
+    S = simples(C)
+    Ends = End.(S)
 
-    if isdefined(C, :inductions)
-        CL.inductions = Dict(extension_of_scalars(x, L, category(CL), embedding = embedding) =>
-                        extension_of_scalars(Ix, L, CL, embedding = embedding) for (x,Ix) ∈ C.inductions)
+    new_simples = CenterObject[]
+
+    for i ∈ eachindex(S)
+        if int_dim(Ends[i]) == 1
+            # All simples with End(s) == k can be just written over
+            push!(new_simples, extension_of_scalars(S[i], L, CL, embedding = embedding))
+        else
+            s_L = extension_of_scalars(S[i], L, CL, embedding = embedding)
+            h = HomSpace(s_L, s_L, [morphism(s_L,s_L, extension_of_scalars(morphism(f), L, category(CL), embedding = embedding)) for f ∈ Ends[i]])
+            # Split all other simples by decomposing the extension
+            append!(new_simples, simple_subobjects(extension_of_scalars(S[i], L, CL, embedding = embedding), h))
+        end
     end
+
+    CL.simples = new_simples
+    # if isdefined(C, :inductions)
+    #     CL.inductions = Dict(extension_of_scalars(x, L, category(CL), embedding = embedding) =>
+    #                     extension_of_scalars(Ix, L, CL, embedding = embedding) for (x,Ix) ∈ C.inductions)
+    # end
 
     if isdefined(C, :induction_gens)
         CL.induction_gens = [extension_of_scalars(is, L, category(CL),  embedding = embedding) for is ∈ C.induction_gens]

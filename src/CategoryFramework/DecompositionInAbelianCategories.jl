@@ -22,12 +22,33 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false, is_indecomp
         return [X]
     end
 
+    R = endomorphism_ring(X,E)
+
     #A simple algebra of squarefree dimension is a division algebra
-    if is_simple && !is_square(dim(E)) 
+
+    if is_simple && is_squarefree(div(dim(E),dim(center(R)[1]))) 
         return [X]
     end
 
-    R = endomorphism_ring(X,E)
+    i = findfirst(f -> !is_irreducible(f), minpoly.(basis(E)))
+
+    if i !== nothing #&& is_semisimple(R)
+        f = E[i]
+        min_f = minpoly(f)
+        rs = roots(min_f)
+
+        if length(rs) == int_dim(E) && is_semisimple(parent(X))
+            return unique_simples([kernel(f - r*id(X))[1] for r ∈ rs])
+        end
+
+        l = rs[1]
+        K = kernel(f - l*id(X))[1]
+        I = image(f - l*id(X))[1]
+        K = simple_subobjects(K, End(K), false)
+        I = simple_subobjects(I, End(I), false)
+
+        return unique_simples([K;I])
+    end
 
    
     if !is_indecomposable #&& is_semisimple(endomorphism_ring(X,E))
@@ -38,20 +59,14 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false, is_indecomp
         return vcat([simple_subobjects(i, End(i), is_simple, true) for i in img]...)
     end
 
-    i = findfirst(f -> !is_irreducible(f), minpoly.(basis(E)))
+ 
 
-    if i !== nothing #&& is_semisimple(R)
-        f = E[i]
-        l = roots(minpoly(f))[1]
-        K = kernel(f - l*id(X))[1]
-        I = image(f - l*id(X))[1]
-        K = simple_subobjects(K, End(K), true)
-        I = simple_subobjects(I, End(I), true)
-
-        return unique_simples([K;I])
+    if is_squarefree(div(dim(E),dim(center(R)[1]))) && issimple(R)
+        return [X]
     end
 
-    if schur_index_over_center(R)^2 == dim(E)//dim(center(R))
+
+    if schur_index_over_center(R)^2 == dim(E)//dim(center(R)[1])
         return [X]
     end
 

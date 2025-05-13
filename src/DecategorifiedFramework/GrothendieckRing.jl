@@ -8,12 +8,20 @@
 
 Return the grothendieck ring of the multiring category ``C``.
 """
-function split_grothendieck_ring(C::Category, simples = indecomposables(C))
+function split_grothendieck_ring(C::Category, simples = nothing)
     @assert is_multiring(C) "C is required to be multiring"
 
-    m = multiplication_table(C,simples)
+    m = if simples !== nothing 
+         multiplication_table(C,simples)
+    else
+        multiplication_table(C)
+    end
 
-    one_coeffs = coefficients(one(C),simples)
+    one_coeffs = if simples !== nothing 
+        coefficients(one(C),simples)
+    else
+        coefficients(one(C))
+    end
 
     A = ℕRing(ZZ.(m), ZZ.(one_coeffs))
     try 
@@ -25,7 +33,7 @@ function split_grothendieck_ring(C::Category, simples = indecomposables(C))
     
 
     if is_rigid(C)
-        invol = [findfirst(j -> sum(m[i,j,Bool.(one_coeffs)]) > 0, 1:length(simples)) for i ∈ 1:length(simples)]
+        invol = [findfirst(j -> sum(m[i,j,Bool.(one_coeffs)]) > 0, 1:length(one_coeffs)) for i ∈ 1:length(one_coeffs)]
         set_attribute!(A, :involution, invol)
     end
 
