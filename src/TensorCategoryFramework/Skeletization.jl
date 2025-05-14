@@ -177,7 +177,6 @@ function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothi
             V = S[n]
 
             H_XY_V = homs[i,j,n]
-
             H_VZ_W = homs[n,k,l]
 
             B = [f ∘ (g ⊗ id(object(S[k]))) for f ∈ H_VZ_W, g ∈ H_XY_V][:]

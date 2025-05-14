@@ -1566,11 +1566,11 @@ function multiplication_table(C::CenterCategory)
 
         #duals = [findfirst(e -> is_isomorphic(e,dual(s))[1], S) for s ∈ S]
 
-        S_dual = d*inv(S_matrix)
+        duals = [findfirst(!=(0), e) for e ∈ eachrow(S_matrix^2)]
 
         for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n 
         
-            verlinde_formula = sum([*(S_matrix[l,[i,j]]...,S_dual[l,k])//dims[l] for l ∈ 1:n])
+            verlinde_formula = sum([*(S_matrix[l,[i,j,duals[k]]]...)//dims[l] for l ∈ 1:n])
 
             if typeof(base_ring(C)) <: Union{PadicField, QadicField}
                 multiplicities[i,j,k] = Int(lift(coordinates(verlinde_formula//d)[1]))
