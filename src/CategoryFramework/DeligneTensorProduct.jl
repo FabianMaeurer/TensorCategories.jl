@@ -1,6 +1,6 @@
 
 
-function tensor_product(C::SixJCategory, D::SixJCategory, names1::Vector{String} = String[], names2::Vector{String} = String[])
+function tensor_product(C::SixJCategory, D::SixJCategory, names1::Vector{String} = String[], names2::Vector{String} = String[], implicit_data::Bool = false)
     @assert is_multifusion(C)
     @assert is_multifusion(D)
 
@@ -36,36 +36,40 @@ function tensor_product(C::SixJCategory, D::SixJCategory, names1::Vector{String}
         end
     end
 
-    ass = Array{MatElem,4}(undef, n*m, n*m, n*m, n*m)
-
-    # for i1 ∈ 1:m, j1 ∈ 1:n, i2 ∈ 1:m, j2 ∈ 1:n, i3 ∈ 1:m, j3 ∈ 1:n
-    #     X = S[i1]⊗S[i2]⊗S[i3]
-    #     Y = T[j1]⊗T[j2]⊗T[j3]
-    #     for k ∈ 1:m, l ∈ 1:n
-    #         ass[(i1-1)*n + j1, (i2-1)*n + j2, (i3-1)*n + j3, (k-1)*n + l] = kronecker_product(change_base_ring(F, skel_C.ass[i1,i2,i3,k]), change_base_ring(F,skel_D.ass[j1,j2,j3,l]))
-    #     end
-    # end
- 
+  
 
     CD = six_j_category(F, mult, ["$s ⊠ $t" for t ∈ T, s ∈ S][:])
 
     N = n*m
+    set_tensor_product!(CD, mult)
 
+    if implicit_data
+        function _six_j_symbol(i,j,k,l) 
+            i1,j1 = divrem(i-1,n) .+ [1,1]
+            i2,j2 = divrem(j-1,n) .+ [1,1]
+            i3,j3 = divrem(k-1,n) .+ [1,1]
+            i4,j4 = divrem(l-1,n) .+ [1,1]
+            kronecker_product(change_base_ring(F, six_j_symbol(C,i1,i2,i3,i4)),change_base_ring(F,six_j_symbol(D, j1,j2,j3,j4)))
+        end
 
-    function _six_j_symbol(i,j,k,l) 
-        i1,j1 = divrem(i-1,n) .+ [1,1]
-        i2,j2 = divrem(j-1,n) .+ [1,1]
-        i3,j3 = divrem(k-1,n) .+ [1,1]
-        i4,j4 = divrem(l-1,n) .+ [1,1]
-         kronecker_product(change_base_ring(F, six_j_symbol(C,i1,i2,i3,i4)),change_base_ring(F,six_j_symbol(D, j1,j2,j3,j4)))
+        set_associator!(CD, Array{MatElem,4}(undef,N,N,N,N))
+
+        set_attribute!(CD, :six_j_symbol, _six_j_symbol )
+    else 
+        ass = Array{MatElem,4}(undef, n*m, n*m, n*m, n*m)
+
+        for i1 ∈ 1:m, j1 ∈ 1:n, i2 ∈ 1:m, j2 ∈ 1:n, i3 ∈ 1:m, j3 ∈ 1:n
+            X = S[i1]⊗S[i2]⊗S[i3]
+            Y = T[j1]⊗T[j2]⊗T[j3]
+            for k ∈ 1:m, l ∈ 1:n
+                ass[(i1-1)*n + j1, (i2-1)*n + j2, (i3-1)*n + j3, (k-1)*n + l] = kronecker_product(change_base_ring(F, six_j_symbol(C,i1,i2,i3,k)), change_base_ring(F,six_j_symbol(D, j1,j2,j3,l)))
+            end
+        end
+
+        set_associator!(CD, ass)
     end
 
-    set_tensor_product!(CD, mult)
-    set_associator!(CD, Array{MatElem,4}(undef,N,N,N,N))
-
-    set_attribute!(CD, :six_j_symbol, _six_j_symbol )
-
-   # set_associator!(CD, ass)
+    # set_associator!(CD, ass)
 
     one_coeffs = zeros(Int,n*m)
     one_C = one(C).components
@@ -80,6 +84,34 @@ function tensor_product(C::SixJCategory, D::SixJCategory, names1::Vector{String}
         set_pivotal!(CD, spheric)
     catch e
         print(e)
+    end
+
+    if is_braided(C) && is_braided(D)
+
+        if implicit_data
+            function _r_symbol(i,j,k) 
+                i1,j1 = divrem(i-1,n) .+ [1,1]
+                i2,j2 = divrem(j-1,n) .+ [1,1]
+                i3,j3 = divrem(k-1,n) .+ [1,1]
+                kronecker_product(change_base_ring(F, r_symbol(C,i1,i2,i3)),change_base_ring(F, r_symbol(D, j1,j2,j3)))
+            end
+
+            set_braiding!(CD, Array{MatElem,3}(undef,N,N,N))
+
+            set_attribute!(CD, :r_symbol, _r_symbol)
+        else
+            braid = Array{MatElem,3}(undef, n*m, n*m, n*m)
+
+            for i1 ∈ 1:m, j1 ∈ 1:n, i2 ∈ 1:m, j2 ∈ 1:n
+                X = S[i1]⊗S[i2]
+                Y = T[j1]⊗T[j2]
+                for k ∈ 1:m, l ∈ 1:n
+                    braid[(i1-1)*n + j1, (i2-1)*n + j2, (k-1)*n + l] = kronecker_product(change_base_ring(F, r_symbol(C,i1,i2,k)), change_base_ring(F,r_symbol(D,j1,j2,l)))
+                end
+            end
+
+            set_braiding!(CD, braid)
+        end
     end
 
     return CD

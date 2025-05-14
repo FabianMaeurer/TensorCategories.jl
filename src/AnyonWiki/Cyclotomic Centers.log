@@ -1,0 +1,170 @@
+n = 30: 
+MethodError: no method matching cyclotomic_extension(::QQField, ::Int64)
+The function `cyclotomic_extension` exists, but no method is defined for this combination of argument types.
+
+Closest candidates are:
+  cyclotomic_extension(!Matched::AbsSimpleNumField, ::Int64; cached, compute_maximal_order, compute_LLL_basis, simplified)
+   @ Hecke ~/.julia/packages/Hecke/G43QZ/src/RCF/cyclo.jl:68
+  cyclotomic_extension(!Matched::ClassField, ::Int64; cached)
+   @ Hecke ~/.julia/packages/Hecke/G43QZ/src/RCF/cyclo.jl:269
+  cyclotomic_extension(!Matched::Type{ClassField}, !Matched::AbsSimpleNumField, !Matched::Int64; cached)
+   @ Hecke ~/.julia/packages/Hecke/G43QZ/src/RCF/cyclo.jl:286
+  ...
+
+
+n = 30: 
+UndefVarError: `m` not defined in `TensorCategories`
+Suggestion: check for spelling errors or missing imports.
+
+n = 33: 
+InterruptException:
+
+n = 34: 
+InterruptException:
+
+n = 45: 
+UndefVarError: `m` not defined in `TensorCategories`
+Suggestion: check for spelling errors or missing imports.
+
+n = 47: 
+TaskFailedException
+
+    nested task error: ArgumentError: Not spherical
+    Stacktrace:
+     [1] macro expansion
+       @ ~/.julia/packages/AbstractAlgebra/DNYYA/src/Assertions.jl:602 [inlined]
+     [2] spherical(X::SixJObject)
+       @ TensorCategories ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/SixJCategory/FusionCategory.jl:605
+     [3] macro expansion
+       @ ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/Center/Induction.jl:144 [inlined]
+     [4] (::TensorCategories.var"#594#threadsfor_fun#1622"{TensorCategories.var"#594#threadsfor_fun#1618#1623"{SixJObject, CenterObject, Vector{SixJObject}, UnitRange{Int64}}})(tid::Int64; onethread::Bool)
+       @ TensorCategories ./threadingconstructs.jl:253
+     [5] #594#threadsfor_fun
+       @ ./threadingconstructs.jl:220 [inlined]
+     [6] (::Base.Threads.var"#1#2"{TensorCategories.var"#594#threadsfor_fun#1622"{TensorCategories.var"#594#threadsfor_fun#1618#1623"{SixJObject, CenterObject, Vector{SixJObject}, UnitRange{Int64}}}, Int64})()
+       @ Base.Threads ./threadingconstructs.jl:154
+
+n = 49: 
+TaskFailedException
+
+    nested task error: ArgumentError: Not spherical
+    Stacktrace:
+     [1] macro expansion
+       @ ~/.julia/packages/AbstractAlgebra/DNYYA/src/Assertions.jl:602 [inlined]
+     [2] spherical(X::SixJObject)
+       @ TensorCategories ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/SixJCategory/FusionCategory.jl:605
+     [3] macro expansion
+       @ ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/Center/Induction.jl:144 [inlined]
+     [4] (::TensorCategories.var"#594#threadsfor_fun#1622"{TensorCategories.var"#594#threadsfor_fun#1618#1623"{SixJObject, CenterObject, Vector{SixJObject}, UnitRange{Int64}}})(tid::Int64; onethread::Bool)
+       @ TensorCategories ./threadingconstructs.jl:253
+     [5] #594#threadsfor_fun
+       @ ./threadingconstructs.jl:220 [inlined]
+     [6] (::Base.Threads.var"#1#2"{TensorCategories.var"#594#threadsfor_fun#1622"{TensorCategories.var"#594#threadsfor_fun#1618#1623"{SixJObject, CenterObject, Vector{SixJObject}, UnitRange{Int64}}}, Int64})()
+       @ Base.Threads ./threadingconstructs.jl:154
+
+n = 56: 
+TaskFailedException
+
+    nested task error: InterruptException:
+    Stacktrace:
+      [1] _array_for(::Type{AbstractAlgebra.Generic.MatSpaceElem{AbsSimpleNumFieldElem}}, ::Base.HasLength, len::Int64)
+        @ Base ./array.jl:675
+      [2] collect(itr::Base.Generator{Tuple{TensorCategories.SixJMorphism, TensorCategories.SixJMorphism}, TensorCategories.var"#1082#1084"{Int64}})
+        @ Base ./array.jl:796
+      [3] (::TensorCategories.var"#1081#1083"{Tuple{TensorCategories.SixJMorphism, TensorCategories.SixJMorphism}})(i::Int64)
+        @ TensorCategories ./none:0
+      [4] iterate
+        @ ./generator.jl:48 [inlined]
+      [5] collect_to!(dest::Vector{AbstractAlgebra.Generic.MatSpaceElem{AbsSimpleNumFieldElem}}, itr::Base.Generator{UnitRange{Int64}, TensorCategories.var"#1081#1083"{Tuple{TensorCategories.SixJMorphism, TensorCategories.SixJMorphism}}}, offs::Int64, st::Int64)
+        @ Base ./array.jl:849
+      [6] collect_to_with_first!(dest::Vector{AbstractAlgebra.Generic.MatSpaceElem{AbsSimpleNumFieldElem}}, v1::AbstractAlgebra.Generic.MatSpaceElem{AbsSimpleNumFieldElem}, itr::Base.Generator{UnitRange{Int64}, TensorCategories.var"#1081#1083"{Tuple{TensorCategories.SixJMorphism, TensorCategories.SixJMorphism}}}, st::Int64)
+        @ Base ./array.jl:827
+      [7] collect(itr::Base.Generator{UnitRange{Int64}, TensorCategories.var"#1081#1083"{Tuple{TensorCategories.SixJMorphism, TensorCategories.SixJMorphism}}})
+        @ Base ./array.jl:801
+      [8] direct_sum
+        @ ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/SixJCategory/FusionCategory.jl:798 [inlined]
+      [9] ⊕
+        @ ~/.julia/dev/TensorCategories.jl/src/CategoryFramework/Fallbacks.jl:115 [inlined]
+     [10] tensor_product(f::TensorCategories.SixJMorphism, g::TensorCategories.SixJMorphism)
+        @ TensorCategories ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/SixJCategory/FusionCategory.jl:714
+     [11] ⊗(f::TensorCategories.SixJMorphism, g::TensorCategories.SixJMorphism)
+        @ TensorCategories ~/.julia/dev/TensorCategories.jl/src/CategoryFramework/Fallbacks.jl:142
+     [12] left_trace(f::TensorCategories.SixJMorphism)
+        @ TensorCategories ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/AbstractTensorMethods.jl:185
+     [13] #1033
+        @ ./generator.jl:0 [inlined]
+     [14] iterate
+        @ ./generator.jl:48 [inlined]
+     [15] collect_to!(dest::Vector{TensorCategories.SixJMorphism}, itr::Base.Generator{UnitRange{Int64}, TensorCategories.var"#1033#1034"{TensorCategories.SixJMorphism}}, offs::Int64, st::Int64)
+        @ Base ./array.jl:849
+     [16] collect_to_with_first!(dest::Vector{TensorCategories.SixJMorphism}, v1::TensorCategories.SixJMorphism, itr::Base.Generator{UnitRange{Int64}, TensorCategories.var"#1033#1034"{TensorCategories.SixJMorphism}}, st::Int64)
+        @ Base ./array.jl:827
+     [17] collect(itr::Base.Generator{UnitRange{Int64}, TensorCategories.var"#1033#1034"{TensorCategories.SixJMorphism}})
+        @ Base ./array.jl:801
+     [18] tr(f::TensorCategories.SixJMorphism)
+        @ TensorCategories ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/SixJCategory/FusionCategory.jl:472
+     [19] dim(X::SixJObject)
+        @ TensorCategories ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/SixJCategory/FusionCategory.jl:660
+     [20] (::TensorCategories.var"#1627#1630"{CenterObject})(xi::SixJObject)
+        @ TensorCategories ./none:0
+     [21] iterate
+        @ ./generator.jl:48 [inlined]
+     [22] collect_to!(dest::Vector{TensorCategories.SixJMorphism}, itr::Base.Generator{Vector{SixJObject}, TensorCategories.var"#1627#1630"{CenterObject}}, offs::Int64, st::Int64)
+        @ Base ./array.jl:849
+     [23] collect_to_with_first!(dest::Vector{TensorCategories.SixJMorphism}, v1::TensorCategories.SixJMorphism, itr::Base.Generator{Vector{SixJObject}, TensorCategories.var"#1627#1630"{CenterObject}}, st::Int64)
+        @ Base ./array.jl:827
+     [24] collect(itr::Base.Generator{Vector{SixJObject}, TensorCategories.var"#1627#1630"{CenterObject}})
+        @ Base ./array.jl:801
+     [25] induction_adjunction(H::TensorCategories.SixJHomSpace, Y::CenterObject, IX::CenterObject)
+        @ TensorCategories ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/Center/Induction.jl:173
+     [26] macro expansion
+        @ ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/Center/Center.jl:1294 [inlined]
+     [27] (::TensorCategories.var"#543#threadsfor_fun#1535"{TensorCategories.var"#543#threadsfor_fun#1528#1536"{CenterObject, CenterObject, Vector{TensorCategories.SixJHomSpace}, Vector{TensorCategories.SixJHomSpace}, Vector{Object}, CenterCategory, Vector{Int64}}})(tid::Int64; onethread::Bool)
+        @ TensorCategories ./threadingconstructs.jl:253
+     [28] #543#threadsfor_fun
+        @ ./threadingconstructs.jl:220 [inlined]
+     [29] (::Base.Threads.var"#1#2"{TensorCategories.var"#543#threadsfor_fun#1535"{TensorCategories.var"#543#threadsfor_fun#1528#1536"{CenterObject, CenterObject, Vector{TensorCategories.SixJHomSpace}, Vector{TensorCategories.SixJHomSpace}, Vector{Object}, CenterCategory, Vector{Int64}}}, Int64})()
+        @ Base.Threads ./threadingconstructs.jl:154
+
+n = 57: 
+InterruptException:
+
+n = 58: 
+InterruptException:
+
+n = 47: 
+TaskFailedException
+
+    nested task error: ArgumentError: Not spherical
+    Stacktrace:
+     [1] macro expansion
+       @ ~/.julia/packages/AbstractAlgebra/DNYYA/src/Assertions.jl:602 [inlined]
+     [2] spherical(X::SixJObject)
+       @ TensorCategories ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/SixJCategory/FusionCategory.jl:605
+     [3] macro expansion
+       @ ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/Center/Induction.jl:144 [inlined]
+     [4] (::TensorCategories.var"#593#threadsfor_fun#1623"{TensorCategories.var"#593#threadsfor_fun#1619#1624"{SixJObject, CenterObject, Vector{SixJObject}, UnitRange{Int64}}})(tid::Int64; onethread::Bool)
+       @ TensorCategories ./threadingconstructs.jl:253
+     [5] #593#threadsfor_fun
+       @ ./threadingconstructs.jl:220 [inlined]
+     [6] (::Base.Threads.var"#1#2"{TensorCategories.var"#593#threadsfor_fun#1623"{TensorCategories.var"#593#threadsfor_fun#1619#1624"{SixJObject, CenterObject, Vector{SixJObject}, UnitRange{Int64}}}, Int64})()
+       @ Base.Threads ./threadingconstructs.jl:154
+
+n = 49: 
+TaskFailedException
+
+    nested task error: ArgumentError: Not spherical
+    Stacktrace:
+     [1] macro expansion
+       @ ~/.julia/packages/AbstractAlgebra/DNYYA/src/Assertions.jl:602 [inlined]
+     [2] spherical(X::SixJObject)
+       @ TensorCategories ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/SixJCategory/FusionCategory.jl:605
+     [3] macro expansion
+       @ ~/.julia/dev/TensorCategories.jl/src/TensorCategoryFramework/Center/Induction.jl:144 [inlined]
+     [4] (::TensorCategories.var"#593#threadsfor_fun#1623"{TensorCategories.var"#593#threadsfor_fun#1619#1624"{SixJObject, CenterObject, Vector{SixJObject}, UnitRange{Int64}}})(tid::Int64; onethread::Bool)
+       @ TensorCategories ./threadingconstructs.jl:253
+     [5] #593#threadsfor_fun
+       @ ./threadingconstructs.jl:220 [inlined]
+     [6] (::Base.Threads.var"#1#2"{TensorCategories.var"#593#threadsfor_fun#1623"{TensorCategories.var"#593#threadsfor_fun#1619#1624"{SixJObject, CenterObject, Vector{SixJObject}, UnitRange{Int64}}}, Int64})()
+       @ Base.Threads ./threadingconstructs.jl:154
+

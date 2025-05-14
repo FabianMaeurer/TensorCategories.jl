@@ -856,7 +856,7 @@ function is_isomorphic(X::CenterObject, Y::CenterObject)
 end
 
 function is_isomorphic_simples(X::CenterObject, Y::CenterObject)
-    H = hom_by_linear_equations(X,Y)
+    H = hom_by_adjunction(X,Y)
     int_dim(H) > 0 ? (true , H[1]) : (false, nothing)
 end
 
@@ -1157,7 +1157,17 @@ end
 
 function sort_simples_by_dimension!(C::CenterCategory)  
     fp_dims = [fpdim(s) for s ∈ simples(C)]
+    
+    one_ind = findfirst(==(one(C)), C.simples)
+
+    C.simples[[1,one_ind]] = C.simples[[one_ind, 1]]
+
     σ = sortperm(fp_dims, by = abs)
+
+    has_attribute(C, :multiplication_table) && delete!(C.__attrs, :multiplication_table)
+    has_attribute(C, :smatrix) && delete!(C.__attrs, :smatrix)
+
+
     C.simples = C.simples[σ]
 end
 
@@ -1186,7 +1196,7 @@ function split(X::CenterObject, E = End(X),
     simple_subobjects(ext_X, ext_E)
 end
 
-function split_cyclotomic(C::CenterCategory, absolute = false)
+function split_cyclotomic(C::CenterCategory; absolute = false)
     Ends = End.(simples(C))
     K = base_ring(C)
 
@@ -1194,7 +1204,7 @@ function split_cyclotomic(C::CenterCategory, absolute = false)
         return C
     end
 
-    n = 1
+    n = []
 
     # find smallest cyclotomic extension such that Z(C) splits
     for e ∈ Ends
@@ -1212,17 +1222,36 @@ function split_cyclotomic(C::CenterCategory, absolute = false)
 
             m = max(int_dim(e),4)
             while true 
-                L = cyclotomic_extension(K,m)
-                L = absolute ? L.Ka : L.Kr
+                L = if K == QQ 
+                        cyclotomic_field(m)[1]
+                    else
+                        cyclotomic_extension(K,m).Kr
+                    end
+               
                 rs = roots(L, f)
-                length(rs) > 0 && break
+                if length(rs) > 0 
+                    push!(n,m) 
+                    break
+                end
                 m += 1
             end
             
         end
     end
+    m = lcm(n...)
+    L = if K == QQ 
+            cyclotomic_field(m)[1]
+        else
+            L2 = cyclotomic_extension(K,m)
+            absolute ? L2.Ka : L2.Kr
+        end
     
-    extension_of_scalars(C, L, embedding = x -> L(x))
+
+    if absolute
+        extension_of_scalars(C,L)
+    else
+        extension_of_scalars(C, L, embedding = x -> L(x))
+    end
 end
 
 

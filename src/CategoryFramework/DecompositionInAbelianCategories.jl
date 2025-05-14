@@ -30,13 +30,13 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false, is_indecomp
         return [X]
     end
 
-    i = findfirst(f -> !is_irreducible(f), minpoly.(basis(E)))
+    i = findfirst(f -> degree(f) > 1 && length(roots(f)) > 0, minpoly.(basis(E)))
 
     if i !== nothing #&& is_semisimple(R)
         f = E[i]
         min_f = minpoly(f)
         rs = roots(min_f)
-
+        is_irreducible(min_f)
         if length(rs) == int_dim(E) && is_semisimple(parent(X))
             return unique_simples([kernel(f - r*id(X))[1] for r ∈ rs])
         end

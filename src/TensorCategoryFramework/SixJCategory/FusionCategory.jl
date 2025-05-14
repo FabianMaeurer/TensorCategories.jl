@@ -383,6 +383,13 @@ function six_j_symbol(C::SixJCategory, i::Int, j::Int, k::Int, l::Int)
     return C.ass[i,j,k,l]
 end
 
+function r_symbol(C::SixJCategory, i::Int, j::Int, k::Int)
+    if ! isassigned(C.braiding, i,j,k)
+        r_symbol = get_attribute(C, :r_symbol)
+        C.braiding[i,j,k,l] = r_symbol(i,j,k) 
+    end
+    return C.braiding[i,j,k]
+end
 
 
 #-------------------------------------------------------------------------------
@@ -1123,8 +1130,19 @@ end
 function reverse_braiding(C::SixJCategory)
     @assert is_braided(C)
 
-    D = deepcopy(C)
+    D = six_j_category(
+        base_ring(C),
+        multiplication_table(C),
+        simples_names(C)
+    )
+
+    set_associator!(D, associator(C))
+
+    isdefined(C, :pivotal) && set_pivotal!(D, C.pivotal)
+    isdefined(C, :one) && set_one!(D, C.one)
+
     n = length(simples(D))
+    set_braiding!(D, Array{MatElem,3}(undef, n, n, n))
     for i ∈ 1:n, j ∈ 1:n
         D.braiding[i,j,:] = inv.(C.braiding[j,i,:])
     end
