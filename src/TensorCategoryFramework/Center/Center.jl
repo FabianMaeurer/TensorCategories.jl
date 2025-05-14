@@ -1156,11 +1156,11 @@ function simples_by_induction!(C::CenterCategory, log = true)
 end
 
 function sort_simples_by_dimension!(C::CenterCategory)  
-    fp_dims = [fpdim(s) for s ∈ simples(C)]
     
     one_ind = findfirst(==(one(C)), C.simples)
 
     C.simples[[1,one_ind]] = C.simples[[one_ind, 1]]
+    fp_dims = [fpdim(s) for s ∈ simples(C)]
 
     σ = sortperm(fp_dims, by = abs)
 
