@@ -1569,8 +1569,8 @@ function multiplication_table(C::CenterCategory)
         duals = [findfirst(!=(0), e) for e ∈ eachrow(S_matrix^2)]
 
         for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n 
-        
-            verlinde_formula = sum([*(S_matrix[l,[i,j,duals[k]]]...)//dims[l] for l ∈ 1:n])
+            @show i,j,k
+            @show verlinde_formula = sum([*(S_matrix[l,[i,j,duals[k]]]...)//dims[l] for l ∈ 1:n])
 
             if typeof(base_ring(C)) <: Union{PadicField, QadicField}
                 multiplicities[i,j,k] = Int(lift(coordinates(verlinde_formula//d)[1]))

@@ -5,7 +5,7 @@
 log = open(joinpath(@__DIR__, "Cyclotomic Centers.log"), "a")
 time_log = open(joinpath(@__DIR__, "Cyclotomic Centers Time.log"), "a")
 
-for n ∈ 30:100
+for n ∈ 86:200
      
     attributes = TensorCategories.load_anyon_attributes(n)
 
@@ -49,6 +49,7 @@ for n ∈ 30:100
             Z = center(C) 
             simples(Z)
             Z = split_cyclotomic(Z)
+            sort_simples_by_dimension!(Z)
         end
 
         print("Center computed in $t1 seconds, ")

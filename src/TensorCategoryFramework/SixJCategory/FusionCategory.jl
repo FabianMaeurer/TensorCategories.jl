@@ -854,27 +854,27 @@ function simples(C::SixJCategory)
 end
 
 
-# function sort_simples!(C::SixJCategory, order::Vector{Int})
-#     C.tensor_product = [C.tensor_product[i,j,k] for i ∈ order, j ∈ order, k ∈ order]
-#     if has_attribute(C, :multiplication_table)
-#         set_attribute!(C, :multiplication_table, C.tensor_product)
-#     end
-#     n = C.simples
-#     ass = deepcopy(C.ass)
+function sort_simples!(C::SixJCategory, order::Vector{Int})
+    C.tensor_product = [C.tensor_product[i,j,k] for i ∈ order, j ∈ order, k ∈ order]
+    if has_attribute(C, :multiplication_table)
+        set_attribute!(C, :multiplication_table, C.tensor_product)
+    end
+    n = C.simples
+   
 
-#     C.ass = C.ass[order,order,order,order]
-#     # for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n, l ∈ 1:n 
-#     #     C.ass[order[[i,j,k,l]]...] = ass[i,j,k,l]
-#     # end
+    C.ass = C.ass[order,order,order,order]
+    # for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n, l ∈ 1:n 
+    #     C.ass[order[[i,j,k,l]]...] = ass[i,j,k,l]
+    # end
     
-#     C.simples_names = C.simples_names[order]
+    C.simples_names = C.simples_names[order]
 
-#     isdefined(C, :one) && (C.one = C.one[order])
-#     isdefined(C, :pivotal) && (C.pivotal = C.pivotal[order])
-#     isdefined(C, :braiding) && (C.braiding = [C.braiding[i,j,k] for i ∈ order, j ∈ order, k ∈ order])
-#     isdefined(C, :twist) && (C.twist = C.twist[order])
-#     return C
-# end
+    isdefined(C, :one) && (C.one = C.one[order])
+    isdefined(C, :pivotal) && (C.pivotal = C.pivotal[order])
+    isdefined(C, :braiding) && (C.braiding = [C.braiding[i,j,k] for i ∈ order, j ∈ order, k ∈ order])
+    isdefined(C, :twist) && (C.twist = C.twist[order])
+    return C
+end
 
 #-------------------------------------------------------------------------------
 #   Kernel and Cokernel
