@@ -606,6 +606,10 @@ function spherical(X::SixJObject)
     pivotal(X)
 end
 
+function is_pivotal(C::SixJCategory) 
+    all([pivotal(x)⊗pivotal(y) == double_dual_monoidal_structure(x,y) ∘ pivotal(x ⊗ y) for x ∈ simples(C), y ∈ simples(C)])
+end 
+
 function pivotal(X::SixJObject)
     C = parent(X)
     F = base_ring(C)

@@ -4,8 +4,6 @@
 
 const database_path = joinpath(@__DIR__,"src/SixJCategoryDatabase/")
 
-@register_serialization_type SixJCategory
-@register_serialization_type SixJMorphism
 
 function save_object(s::SerializerState, C::SixJCategory)
     save_data_dict(s) do 

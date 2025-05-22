@@ -205,6 +205,10 @@ function right_trace(f::Morphism)
     return (ev(right_dual(dV))) ∘ (j⊗(f∘i)) ∘ coev(right_dual(V))
 end
 
+function squared_norm(X::Object)
+    dim(X) * dim(dual(X))
+end
+
 function invertibles(C::Category)
     @assert is_rigid(C)
     return [s for s ∈ simples(C) if int_dim(End(s ⊗ dual(s))) == 1]
@@ -373,6 +377,14 @@ end
 function exponent(C::Category)
     @assert is_multiring(C)
     lcm([exponent(x) for x ∈ indecomposables(C)])
+end
+
+
+function double_dual_monoidal_structure(X::Object, Y::Object)
+    compose(
+        dual(inv(dual_monoidal_structure(X,Y))),
+        dual_monoidal_structure(dual(Y), dual(X))
+    )
 end
 
 #=-------------------------------------------------

@@ -2,7 +2,6 @@
     Serialize The Datatype CenterCategory. 
 ----------------------------------------------------------=#
 
-@register_serialization_type CenterCategory
 
 function save_object(s::SerializerState, C::CenterCategory)
 

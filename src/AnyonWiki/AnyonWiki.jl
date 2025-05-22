@@ -13,9 +13,20 @@ anyon_path = joinpath(@__DIR__, "AnyonWikiData/")
 
 Load the n-th fusion category from the list of multiplicity free fusion categories of rank ≤ 7.
 """
-function anyonwiki(n::Int, K::Ring = load_anyon_number_field(n::Int); cyclotomic = false)
+function anyonwiki(n::Int, K::Union{Ring,Nothing} = nothing ; minimal = false)
     
-    cyclotomic && return anyonwiki_cyclotomic(n)
+    if ! minimal && K === nothing 
+        if n ∈ ZZ.(readlines(joinpath(anyon_path, "cyclopos.txt")))
+            return anyonwiki_cyclotomic(n)
+        end
+    end
+
+    if K === nothing && minimal  
+        K = load_anyonwiki_number_field(n::Int)
+    elseif K === nothing
+        K = QQBarField()
+    end        
+
 
     data = []
     CC = AcbField(512)
@@ -23,8 +34,8 @@ function anyonwiki(n::Int, K::Ring = load_anyon_number_field(n::Int); cyclotomic
     deg = typeof(K) <: Union{<:NumField,QQField} ? degree(K) : 24
     if typeof(K) <: Union{<:NumField,QQField}
         es = complex_embeddings(K) 
-        r = load_anyon_associator_root(n)
-        r2 = load_anyon_pivotal_root(n) 
+        r = load_anyonwiki_associator_root(n)
+        r2 = load_anyonwiki_pivotal_root(n) 
         for f ∈ es 
             try 
                 preimage(f,r)
@@ -93,16 +104,16 @@ function anyonwiki(n::Int, K::Ring = load_anyon_number_field(n::Int); cyclotomic
     set_one!(C, 1)
     
     if typeof(K) <: Union{<:NumField,QQField}
-        set_pivotal!(C, load_anyon_pivotal(n, K, e))
+        set_pivotal!(C, load_anyonwiki_pivotal(n, K, e))
     else 
-        set_pivotal!(C, load_anyon_pivotal(n, K, nothing))     
+        set_pivotal!(C, load_anyonwiki_pivotal(n, K, nothing))     
     end
     
 
     C
 end
 
-function load_anyon_number_field(n::Int)
+function load_anyonwiki_number_field(n::Int)
     line = 1
     open(joinpath(associator_path, "Polynomials")) do f 
 
@@ -148,7 +159,7 @@ function load_anyon_number_field(n::Int)
     simplify(splitting_field([defining_polynomial(K1), defining_polynomial(K2)]))[1]
 end
 
-function load_anyon_associator_root(n::Int)
+function load_anyonwiki_associator_root(n::Int)
     line = 1
     CC = AcbField(1024)
     Q = QQBarField()
@@ -170,7 +181,7 @@ function load_anyon_associator_root(n::Int)
     end
 end
 
-function load_anyon_pivotal_root(n::Int)
+function load_anyonwiki_pivotal_root(n::Int)
     line = 1
     CC = AcbField(1024)
     Q = QQBarField()
@@ -192,7 +203,7 @@ function load_anyon_pivotal_root(n::Int)
     end
 end
 
-function load_anyon_pivotal(n::Int, K = load_anyon_number_field(n), e = complex_embeddings(K)[1])
+function load_anyonwiki_pivotal(n::Int, K = load_anyonwiki_number_field(n), e = complex_embeddings(K)[1])
 
     CC = AcbField(512)
     Q = QQBarField()
@@ -223,7 +234,7 @@ function load_anyon_pivotal(n::Int, K = load_anyon_number_field(n), e = complex_
 end
 
 
-function load_anyon_attributes(n::Int) 
+function load_anyonwiki_attributes(n::Int) 
     symbols = [ :braided, :unitary, :spherical, :ribbon, :modular]
     open(joinpath(@__DIR__, "AnyonWikiData/cat_properties.txt")) do f 
 
@@ -244,7 +255,7 @@ end
 
 function anyonwiki_cyclotomic(n::Int)
     cyclopos = [parse(Int, s) for s ∈ readlines(joinpath(anyon_path, "cycloPos.txt"))]
-    attrs = load_anyon_attributes(n)
+    attrs = load_anyonwiki_attributes(n)
 
     if n ∉ cyclopos 
         error("Category number $n is not cyclotomic")
@@ -252,6 +263,8 @@ function anyonwiki_cyclotomic(n::Int)
 
     f_symbol_string = readlines(joinpath(anyon_path, "cyclic_6j_Symbols/cat_$n.jl"))[4]
     
+    p_symbol_string = readlines(joinpath(anyon_path, "cyclic_P_Symbols/cat_$n.jl"))[4]
+
     r_symbol_string = if attrs[:braided]
         readlines(joinpath(anyon_path, "cyclic_R_Symbols/cat_$n.jl"))[4]
     else 
@@ -260,18 +273,19 @@ function anyonwiki_cyclotomic(n::Int)
 
     # read root
     i = findfirst(r"z\d*", f_symbol_string)
-    j = if attrs[:braided]
+    j = findfirst(r"z\d*", p_symbol_string)
+    k = if attrs[:braided]
         findfirst(r"z\d*", r_symbol_string)
     else 
         nothing
     end 
 
-    if i === nothing && j === nothing
+    if i === nothing && j === nothing && k == nothing
         global K = QQ 
     else
-        roots = [parse(Int, s[k][2:end]) for (s,k) ∈ zip([f_symbol_string, r_symbol_string], [i,j]) if k !== nothing]
+        roots = [l === nothing ? 1 : parse(Int, s[l][2:end]) for (s,l) ∈ zip([f_symbol_string,p_symbol_string, r_symbol_string], [i,j,k])]
 
-        r = lcm([1 ; roots]...)
+        r = lcm(roots...)
 
         eval(Meta.parse("global K, z$r = cyclotomic_field($r)"))
     end
@@ -329,4 +343,100 @@ function anyonwiki_cyclotomic(n::Int)
 
     return C
     
+end
+
+function load_anyonwiki_fusion_rules(n::Int)
+
+    data = []
+
+    open(joinpath(associator_path, "cat_$n")) do f 
+
+        while ! eof(f)
+
+            s = readline(f) 
+            s = filter(!=('\"'), s)
+            s = split(s, " ")
+
+            push!(data, Int[eval(Meta.parse(a)) for a ∈ s[1:4]])
+        end
+    end
+
+    N = maximum([a[1] for a ∈ data])
+    
+    # Construct multiplication table from associators
+    mult = zeros(Int,N,N,N)
+    
+    for (_,a,b,c) ∈ filter(e -> e[1] == 1, data) 
+        
+        mult[a,b,c] = 1 
+    end
+
+    return mult 
+end
+
+function fusion_ring_name(m::Array{Int,3})
+    r = size(m,1)
+
+    Iᵣ = [i == j ? 1 : 0 for i ∈ 1:r, j ∈ 1:r]
+
+    # Group simples by One, self dual, and not self dual
+    one = findfirst(i -> all([m[i,:,:] == m[:,i,:] == Iᵣ]), 1:r)
+    self_dual = findall(i -> i != one && m[i,i,one] == 1, 1:r)
+    non_self_dual = findall(i -> i != one && m[i,i,one] == 0, 1:r)
+    
+    n = length(non_self_dual)
+
+    # Compute FPdims to sort groups
+    fpdims = maximum.(filter(isreal, eigenvalues(QQBarField(), matrix(QQ, r,r, m[i,:,:]))) for i ∈ 1:r)
+
+
+    #Compute dual pairs
+    dual_pairs = Tuple.(unique(Set.(Tuple.(findall(==(1), m[:,:,1] .- Iᵣ)))))
+
+    # First canonical ordering
+    self_dual = sort(self_dual, by =  e -> fpdims[e])
+    pairs = sort(dual_pairs, by = e -> fpdims[e[1]])
+    non_self_dual = vcat(dual_pairs...)
+
+    # get all permutations fixing the ordering rules 
+    self_dual_perms = 
+        if !isempty(self_dual)
+            Sₘ = symmetric_group(length(self_dual))
+            elements(stabilizer(Sₘ, fpdims[self_dual], permuted)[1])
+        else 
+            [symmetric_group(1)[0]]
+        end
+    
+    pairs_perms = 
+        if !isempty(dual_pairs) 
+            Sₖ = symmetric_group(length(dual_pairs))
+            elements(stabilizer(Sₖ, fpdims[getindex.(dual_pairs,1)], permuted)[1])
+        else
+            [symmetric_group(1)[0]]
+        end
+
+    # Create the signature for every permutation 
+    signatures = []
+
+    base = maximum(m) + 1
+    
+    fixed_order = [one; self_dual; vcat(collect.(dual_pairs)...)]
+
+    for p1 ∈ self_dual_perms, p2 ∈ pairs_perms 
+        
+        binary_choice = Base.product([fpdims[i] == fpdims[j] ? [true,false] : [false] for (i,j) ∈ dual_pairs]...)
+
+        # Add the permutations inside the pairs where possible
+        perms = [[one; permuted(self_dual, p1); vcat([rev ? collect(reverse(v)) : collect(v) for (v,rev) ∈ zip(permuted(dual_pairs, p2), bool)]...)] for bool ∈ binary_choice]
+
+        for p3 ∈ perms
+            val = ""
+            for i ∈ p3, j ∈ p3, k ∈ p3 
+                val = val * "$(m[i,j,k])"
+            end
+            @show val
+            push!(signatures, parse(ZZRingElem, val, base))
+        end
+    end
+    return r,n, maximum(signatures)
 end

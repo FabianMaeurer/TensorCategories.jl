@@ -112,6 +112,7 @@ function product_ev(X::Object, Y::Object)
 end
 
 
+
 # function show(io::IO, F::DualFunctor)
 #     show(io, "Duality Functor in $(F.domain)")
 # end

@@ -7,7 +7,7 @@ time_log = open(joinpath(@__DIR__, "Cyclotomic Centers Time.log"), "a")
 
 for n ∈ 86:200
      
-    attributes = TensorCategories.load_anyon_attributes(n)
+    attributes = TensorCategories.load_anyonwiki_attributes(n)
 
     # Works only for spherical categories
     if !attributes[:spherical] continue end

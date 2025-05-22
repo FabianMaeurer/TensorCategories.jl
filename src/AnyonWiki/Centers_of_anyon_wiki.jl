@@ -2,12 +2,12 @@
     Script to compute the centers of the anyon wiki 
 ----------------------------------------------------------=#
 
-log = open(joinpath(@__DIR__, "Centers_of_anyon_wiki.log"), "a")
-time_log = open(joinpath(@__DIR__, "Centers_of_anyon_wiki_time.log"), "a")
+log = open(joinpath(@__DIR__, "Logs/Centers_of_anyon_wiki.log"), "a")
+time_log = open(joinpath(@__DIR__, "Logs/Centers_of_anyon_wiki_time.log"), "a")
 
 for n ∈ 201:300  
      
-    attributtes = TensorCategories.load_anyon_attributes(n)
+    attributtes = TensorCategories.load_anyonwiki_attributes(n)
 
     # Works only for spherical categories
     if attributtes[3] != 1 continue end

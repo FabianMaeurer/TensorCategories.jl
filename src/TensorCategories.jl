@@ -52,10 +52,7 @@ import Oscar: @register_serialization_type,
                 load_typed_object,
                 SerializerState,
                 DeserializerState,
-                encode_type,
-                register_serialization_type,
-                load_array_node,
-                serialize_with_params
+                load_array_node
 
 using InteractiveUtils
 using SparseArrays
@@ -260,6 +257,7 @@ export is_multifusion
 export is_multifusion 
 export is_multiring 
 export is_multitensor 
+export is_pivotal
 export is_relative_braiding
 export is_right_module
 export is_ring 

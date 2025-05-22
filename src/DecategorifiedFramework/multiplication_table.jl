@@ -6,7 +6,9 @@ function multiplication_table(C::Category, indecomposables::Vector{<:Object} = i
         return get_attribute(C, :multiplication_table)
     end
     
-    coeffs = [coefficients(s⊗t, indecomposables) for s ∈ indecomposables, t ∈ indecomposables]
+    dims = [int_dim(End(s)) for s ∈ indecomposables]
+
+    coeffs = [coefficients(s⊗t, indecomposables, dims) for s ∈ indecomposables, t ∈ indecomposables]
 
         
     mult = [c[k] for c ∈ coeffs, k ∈ 1:length(indecomposables)]
@@ -66,7 +68,7 @@ function pretty_print_decomposable(facs::Vector{Int}, names::Vector{String})
     return str
 end
 
-function coefficients(X::T, indecomposables::Vector{T} = indecomposables(parent(X))) where {T <: Object}
+function coefficients(X::T, indecomposables::Vector{T} = indecomposables(parent(X)), dims = int_dim.(End.(indecomposables))) where {T <: Object}
     if is_semisimple(parent(X))
         return fusion_coefficients(X, indecomposables)
     else
@@ -74,8 +76,8 @@ function coefficients(X::T, indecomposables::Vector{T} = indecomposables(parent(
     end
 end
 
-function fusion_coefficients(X::T, simpls::Vector{T} = simples(parent(X))) where {T <: Object}
-    [int_dim(Hom(s,X)) for s ∈ simpls]
+function fusion_coefficients(X::T, simpls::Vector{T} = simples(parent(X)), dims = [int_dim(End(s)) for s ∈ simpls]) where {T <: Object}
+    [div(int_dim(Hom(s,X)), d) for (s,d) ∈ zip(simpls, dims)]
 end
 
 function _coefficients(X::T, indecomposables::Vector{T} = indecomposables(parent(X))) where {T <: Object}

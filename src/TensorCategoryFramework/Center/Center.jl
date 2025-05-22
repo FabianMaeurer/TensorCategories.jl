@@ -121,6 +121,7 @@ is_fusion(C::CenterCategory) = all([int_dim(End(s)) == 1 for s ∈ simples(C)])
 is_abelian(C::CenterCategory) = true
 is_linear(C::CenterCategory) = true
 is_monoidal(C::CenterCategory) = true
+is_spherical(C::CenterCategory) = is_spherical(category(C))
 
 """
     add_simple!(C::CenterCategory, S::CenterObject)
@@ -628,7 +629,7 @@ dim(X::CenterObject) = dim(X.object)
 
 Return the Frobenius-Perron dimension of ```X```.
 """
-fpdim(X::CenterObject) = fpdim(object(X))
+#fpdim(X::CenterObject) = fpdim(object(X))
 
 """
     simples(C::CenterCategory)
@@ -856,6 +857,8 @@ function is_isomorphic(X::CenterObject, Y::CenterObject)
 end
 
 function is_isomorphic_simples(X::CenterObject, Y::CenterObject)
+    !is_isomorphic(object(X), object(Y))[1] && return (false, nothing)
+
     H = hom_by_adjunction(X,Y)
     int_dim(H) > 0 ? (true , H[1]) : (false, nothing)
 end
@@ -1548,8 +1551,8 @@ end
 function multiplication_table(C::CenterCategory)
     get_attribute!(C, :multiplication_table) do
 
-        if characteristic(base_ring(C)) > 0 || !is_split_semisimple(C)
-            return multiplication_table(C)
+        if characteristic(base_ring(C)) > 0 || !is_split_semisimple(C) || !is_spherical(C)
+            return multiplication_table(simples(C))
         end
 
         S = simples(C) 
@@ -1569,8 +1572,7 @@ function multiplication_table(C::CenterCategory)
         duals = [findfirst(!=(0), e) for e ∈ eachrow(S_matrix^2)]
 
         for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n 
-            @show i,j,k
-            @show verlinde_formula = sum([*(S_matrix[l,[i,j,duals[k]]]...)//dims[l] for l ∈ 1:n])
+            verlinde_formula = sum([*(S_matrix[l,[i,j,duals[k]]]...)//dims[l] for l ∈ 1:n])
 
             if typeof(base_ring(C)) <: Union{PadicField, QadicField}
                 multiplicities[i,j,k] = Int(lift(coordinates(verlinde_formula//d)[1]))

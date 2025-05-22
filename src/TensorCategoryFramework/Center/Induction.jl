@@ -47,7 +47,7 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
                 #_basis, basis_dual = adjusted_dual_basis(_basis, basis_dual, S, W, T)
 
 
-                #corrections = base_ring(X).([(id(W)⊗ev(dual(T))) ∘ (id(W)⊗(spherical(T)⊗id(dual(T)))) ∘ a(W,T,dual(T)) ∘ (f⊗g) ∘ a(S,dual(S),W) ∘ (coev(S)⊗id(W)) for (f,g) ∈ zip(_basis,basis_dual)])
+                #corrections = base_ring(X).([(id(W)⊗ev(dual(T))) ∘ (id(W)⊗(pivotal(T)⊗id(dual(T)))) ∘ a(W,T,dual(T)) ∘ (f⊗g) ∘ a(S,dual(S),W) ∘ (coev(S)⊗id(W)) for (f,g) ∈ zip(_basis,basis_dual)])
                 
             
                 #@show "component_iso"
@@ -130,21 +130,23 @@ function end_of_induction(X::Object, IX = induction(X))
 
     m = [zero_morphism(X,X) for _ in 1:length(simpls)]
 
+    dims = dim.(dual.(simpls))
     @threads for i ∈ 1:length(simpls)
         xi = simpls[i]
         dxi = dual(xi)
+        d = dims[i]
         if typeof(base_ring(X)) == CalciumField #|| base_ring(X) == QQBarField()
-            m[i] = (dim(xi))*compose(
+            m[i] = d*compose(
                 associator(xi, object(IX), dxi),
                 id(xi) ⊗ half_braiding(IX, dxi),
                 inv_associator(xi, dxi, object(IX)),
-                (ev(dxi) ∘ (spherical(xi) ⊗ id(dxi))) ⊗ id(object(IX))
+                (ev(dxi) ∘ (pivotal(xi) ⊗ id(dxi))) ⊗ id(object(IX))
             ) 
         else
-            m[i] = (dim(xi))*compose(
+            m[i] = d*compose(
                 inv(half_braiding(IX, xi)) ⊗ id(dxi),
                 associator(object(IX), xi, dxi),
-                id(object(IX)) ⊗ (ev(dxi) ∘ (spherical(xi) ⊗ id(dxi)))
+                id(object(IX)) ⊗ (ev(dxi) ∘ (pivotal(xi) ⊗ id(dxi)))
             ) 
         end
     end
@@ -161,39 +163,53 @@ end
 function induction_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = induction(domain(H), parent_category = parent(Y)))
     @assert is_split_semisimple(parent(H[1]))
 
+    C = parent(domain(H))
+
+    dims = dim.(dual.(simples(C)))
+   
     simpls = simples(parent(H[1]))
     if typeof(base_ring(Y)) == CalciumField || base_ring(Y) == QQBarField()
-        ind_f = [dim(xi) * compose(
+        ind_f = [d * compose(
             associator(xi, object(Y), dual(xi)),
             id(xi) ⊗ half_braiding(Y, dual(xi)),
             inv_associator(xi, dual(xi), object(Y)),
-            (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
-        ) for xi ∈ simpls]
+            (ev(dual(xi)) ∘ (pivotal(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
+        ) for (xi,d) ∈ zip(simpls, dims)]
     else
-        ind_f = [dim(xi) * compose(
+        ind_f = [d * compose(
             inv(half_braiding(Y, xi)) ⊗ id(dual(xi)),
             associator(object(Y), xi, dual(xi)),
-            id(object(Y)) ⊗ (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi))))
-        ) for xi ∈ simpls]
+            id(object(Y)) ⊗ (ev(dual(xi)) ∘ (pivotal(xi) ⊗ id(dual(xi))))
+        ) for (xi,d) ∈ zip(simpls,dims)]
     end
     # ind_f = [(dim(xi))*compose(
     #     (id(xi) ⊗ f) ⊗ id(dual(xi)),
     #     associator(xi, object(Y), dual(xi)),
     #     id(xi) ⊗ half_braiding(Y, dual(xi)),
     #     inv_associator(xi, dual(xi), object(Y)),
-    #     (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
+    #     (ev(dual(xi)) ∘ (pivotal(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
     # ) for xi ∈ simples(parent(f))]
 
     mors = [morphism(IX, Y, horizontal_direct_sum(ind_f) ∘ induction_restriction(f)) for f ∈ H]
 
     return HomSpace(IX, Y, mors)
-    # morphism(IX,Y, horizontal_direct_sum([sqrt(dim(xi))*((ev(dual(xi)) ∘(spherical(xi)⊗id(dual(xi))))⊗id(object(IX))) ∘ (id(xi)⊗half_braiding(Y,dual(xi))) ∘ associator(xi,object(Y),dual(xi)) ∘ ((id(xi)⊗f)⊗id(dual(xi))) for xi in simples(parent(X))]))
+    # morphism(IX,Y, horizontal_direct_sum([sqrt(dim(xi))*((ev(dual(xi)) ∘(pivotal(xi)⊗id(dual(xi))))⊗id(object(IX))) ∘ (id(xi)⊗half_braiding(Y,dual(xi))) ∘ associator(xi,object(Y),dual(xi)) ∘ ((id(xi)⊗f)⊗id(dual(xi))) for xi in simples(parent(X))]))
 end
 
 function induction_right_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = induction(codomain(H[1]), parent_category = parent(Y)))
 
     length(basis(H)) == 0 && return HomSpace(Y, IX, CenterMorphism[])
     simpls = simples(parent(H[1]))
+
+    C = parent(domain(H))
+
+
+    dims = if is_spherical(C)
+        dim.(simples(C))
+    else
+        sqrt.(squared_norm.(simples(C)))
+    end
+
 
     duals = dual.(simpls)
 
@@ -208,7 +224,7 @@ function induction_right_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = i
     #     associator(xi, object(Y), dual(xi)),
     #     id(xi) ⊗ half_braiding(Y, dual(xi)),
     #     inv_associator(xi, dual(xi), object(Y)),
-    #     (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
+    #     (ev(dual(xi)) ∘ (pivotal(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
     # ) for xi ∈ simples(parent(f))]
 
     base = [morphism(Y, IX, induction_restriction(f) ∘ vertical_direct_sum(ind_f)) for f ∈ H]
@@ -217,7 +233,15 @@ function induction_right_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = i
 end
 
 function induction_right_adjunction(f::Morphism, Y::CenterObject, IX = induction(codomain(f), parent_category = parent(Y)))
-    simpls = simples(parent(f))
+
+    simpls = simples(parent(H[1]))
+
+    dims = if is_spherical(C)
+        dim.(simples(C))
+    else
+        sqrt.(squared_norm.(simples(C)))
+    end
+
 
     duals = dual.(simpls)
 
@@ -226,13 +250,12 @@ function induction_right_adjunction(f::Morphism, Y::CenterObject, IX = induction
         inv_associator(object(Y),xi,dxi),
         half_braiding(Y,xi) ⊗ id(dxi)
     ) for (xi, dxi) ∈ zip(simpls,duals)]
-
     # ind_f = [(dim(xi))*compose(
     #     (id(xi) ⊗ f) ⊗ id(dual(xi)),
     #     associator(xi, object(Y), dual(xi)),
     #     id(xi) ⊗ half_braiding(Y, dual(xi)),
     #     inv_associator(xi, dual(xi), object(Y)),
-    #     (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
+    #     (ev(dual(xi)) ∘ (pivotal(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
     # ) for xi ∈ simples(parent(f))]
 
     morphism(Y, IX, induction_restriction(f) ∘ vertical_direct_sum(ind_f))
@@ -241,27 +264,31 @@ end
 function induction_adjunction(f::Morphism, Y::CenterObject, IX = induction(domain(f), parent_category = parent(Y)))
     @assert is_split_semisimple(parent(f))
 
-    simpls = simples(parent(f))
+    C = parent(domain(H))
+
+    dims = dim.(dual.(simples(C)))
+   
+    simpls = simples(parent(H[1]))
     if typeof(base_ring(Y)) == CalciumField || base_ring(Y) == QQBarField()
-        ind_f = [dim(xi) * compose(
+        ind_f = [d * compose(
             associator(xi, object(Y), dual(xi)),
             id(xi) ⊗ half_braiding(Y, dual(xi)),
             inv_associator(xi, dual(xi), object(Y)),
-            (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
-        ) for xi ∈ simpls]
+            (ev(dual(xi)) ∘ (pivotal(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
+        ) for (xi,d) ∈ zip(simpls, dims)]
     else
-        ind_f = [dim(xi) * compose(
+        ind_f = [d * compose(
             inv(half_braiding(Y, xi)) ⊗ id(dual(xi)),
             associator(object(Y), xi, dual(xi)),
-            id(object(Y)) ⊗ (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi))))
-        ) for xi ∈ simpls]
+            id(object(Y)) ⊗ (ev(dual(xi)) ∘ (pivotal(xi) ⊗ id(dual(xi))))
+        ) for (xi,d) ∈ zip(simpls,dims)]
     end
     # ind_f = [(dim(xi))*compose(
     #     (id(xi) ⊗ f) ⊗ id(dual(xi)),
     #     associator(xi, object(Y), dual(xi)),
     #     id(xi) ⊗ half_braiding(Y, dual(xi)),
     #     inv_associator(xi, dual(xi), object(Y)),
-    #     (ev(dual(xi)) ∘ (spherical(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
+    #     (ev(dual(xi)) ∘ (pivotal(xi) ⊗ id(dual(xi)))) ⊗ id(object(Y))
     # ) for xi ∈ simples(parent(f))]
 
     mors = morphism(IX, Y, horizontal_direct_sum(ind_f) ∘ induction_restriction(f))
@@ -306,7 +333,7 @@ function adjusted_pairing(f::Morphism, g::Morphism, S::Object, W::Object, T::Obj
     # Correspondes to the pairing intriduced in 
     # https://doi.org/10.48550/arXiv.1010.1222 after 
     # natural Isomorphisms
-    ϕ = (id(W)⊗ev(dual(T))) ∘ (id(W)⊗(spherical(T)⊗id(dual(T)))) ∘ associator(W,T,dual(T)) ∘ (f⊗g) ∘ associator(S,dual(S),W) ∘ (coev(S)⊗id(W))
+    ϕ = (id(W)⊗ev(dual(T))) ∘ (id(W)⊗(pivotal(T)⊗id(dual(T)))) ∘ associator(W,T,dual(T)) ∘ (f⊗g) ∘ associator(S,dual(S),W) ∘ (coev(S)⊗id(W))
 
     dim(End(W)) == 1 && return dim(W) * ϕ
     
