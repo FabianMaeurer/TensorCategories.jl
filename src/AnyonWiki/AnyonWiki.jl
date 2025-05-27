@@ -345,6 +345,13 @@ function anyonwiki_cyclotomic(n::Int)
     
 end
 
+function anyonwiki_center(n::Int; cyclotomic = false)
+    if cyclotomic 
+        load(joinpath(@__DIR__, "AnyonWikiData/CyclotomicCenters/CyclotomicCenter_$n.mrdi"))
+    else 
+        load(joinpath(@__DIR__, "AnyonWikiData/Centers/Center_$n.mrdi"))
+    end
+end
 function load_anyonwiki_fusion_rules(n::Int)
 
     data = []

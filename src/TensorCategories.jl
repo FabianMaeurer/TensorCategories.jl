@@ -84,6 +84,7 @@ export algebra_structures
 export AlgebraObject
 export AlgebraMorphism
 export anyonwiki
+export anyonwiki_center
 export ArrowCategory
 export ArrowObject
 export ArrowMorphism
