@@ -629,7 +629,7 @@ dim(X::CenterObject) = dim(X.object)
 
 Return the Frobenius-Perron dimension of ```X```.
 """
-#fpdim(X::CenterObject) = fpdim(object(X))
+fpdim(X::CenterObject) = fpdim(object(X))
 
 """
     simples(C::CenterCategory)

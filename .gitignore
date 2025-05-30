@@ -6,6 +6,5 @@ Codecov.jl
 .DS_Store
 .vscode
 build/
-
-src/AnyonWiki/AnyonWikiData/Mathematica/
-src/AnyonWiki/AnyonWikiData/JuliaTests/
+.vscode/
+coverage/
