@@ -5,4 +5,7 @@
 Codecov.jl
 .DS_Store
 .vscode
-build
+build/
+
+src/AnyonWiki/AnyonWikiData/Mathematica/
+src/AnyonWiki/AnyonWikiData/JuliaTests/
