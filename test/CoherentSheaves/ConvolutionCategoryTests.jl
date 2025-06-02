@@ -3,7 +3,7 @@
     # Test ConvolutionCategory constructor
     @testset "Constructor Tests" begin
         G = symmetric_group(3)
-        K = finite_field(2)
+        K,_ = finite_field(2)
         X = gset(G, [1, 2, 3])
         conv_cat = convolution_category(K, X)
         
@@ -15,7 +15,7 @@
     # Test ConvolutionObject constructor
     @testset "Object Tests" begin
         G = symmetric_group(3)
-        K = finite_field(2)
+        K,_ = finite_field(2)
         X = gset(G, [1, 2, 3])
         conv_cat = convolution_category(K, X)
         sheaf = CohSheafObject(conv_cat.squaredCoh, [zero(representation_category(K, G))])
@@ -28,7 +28,7 @@
     # Test ConvolutionMorphism constructor
     @testset "Morphism Tests" begin
         G = symmetric_group(3)
-        K = finite_field(2)
+        K,_ = finite_field(2)
         X = gset(G, [1, 2, 3])
         conv_cat = convolution_category(K, X)
         sheaf = CohSheafObject(conv_cat.squaredCoh, [zero(representation_category(K, G))])
@@ -44,7 +44,7 @@
     # Test is_multitensor and is_fusion
     @testset "Category Properties Tests" begin
         G = symmetric_group(3)
-        K = finite_field(2)
+        K,_ = finite_field(2)
         X = gset(G, [1, 2, 3])
         conv_cat = convolution_category(K, X)
         
@@ -55,7 +55,7 @@
     # Test tensor product of ConvolutionObjects
     @testset "Tensor Product Tests" begin
         G = symmetric_group(3)
-        K = finite_field(2)
+        K,_ = finite_field(2)
         X = gset(G, [1, 2, 3])
         conv_cat = convolution_category(K, X)
         sheaf1 = CohSheafObject(conv_cat.squaredCoh, [zero(representation_category(K, G))])
@@ -72,7 +72,7 @@
     # Test tensor product of ConvolutionMorphisms
     @testset "Tensor Product Morphism Tests" begin
         G = symmetric_group(3)
-        K = finite_field(2)
+        K,_ = finite_field(2)
         X = gset(G, [1, 2, 3])
         conv_cat = convolution_category(K, X)
         sheaf1 = CohSheafObject(conv_cat.squaredCoh, [zero(representation_category(K, G))])
@@ -94,7 +94,7 @@
     # Test simple objects
     @testset "Simple Objects Tests" begin
         G = symmetric_group(3)
-        K = finite_field(2)
+        K,_ = finite_field(2)
         X = gset(G, [1, 2, 3])
         conv_cat = convolution_category(K, X)
         

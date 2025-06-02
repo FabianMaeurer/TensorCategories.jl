@@ -38,7 +38,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     QadicField, QadicFieldElem, FlintLocalField, FlintLocalFieldElem,
     MultTableGroup, is_isomorphic_with_map, subgroup_classes, representative,
     pc_group, permutation_group, @req, is_constant, automorphism_group,
-    permuted, change_base_ring, schur_index_over_center, issimple, cyclotomic_extension
+    permuted, change_base_ring, schur_index_over_center, issimple, cyclotomic_extension, ArbField
 
 # using Serialization
 import Oscar: @register_serialization_type,
@@ -181,6 +181,7 @@ export Functor
 export functor
 export FusionCategory 
 export fusion_coefficient
+export fusion_ring_name
 export gcrossed_product
 export generic_algebra
 export getindex 
@@ -327,6 +328,7 @@ export parent
 export pentagon_axiom 
 export pentagon_equations
 export pivotal
+export pivotal_structures
 export preimage
 export print_multiplication_table 
 export print_multiplication_table 
@@ -472,6 +474,7 @@ include("CategoryFramework/NaturalTransformations.jl")
 
 include("TensorCategoryFramework/AbstractTensorMethods.jl")
 include("TensorCategoryFramework/SixJCategory/FusionCategory.jl")
+include("TensorCategoryFramework/SixJCategory/PivotalStructures.jl")
 #include("structures/MultiFusionCategories/FusionCategoryExperimental.jl")
 include("TensorCategoryFramework/6j-Solver.jl")
 include("TensorCategoryFramework/Skeletization.jl")

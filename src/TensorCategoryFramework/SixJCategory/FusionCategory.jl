@@ -91,6 +91,9 @@ function set_braiding!(F::SixJCategory, braiding)
     F.braiding = braiding
 end
 
+function rank(C::SixJCategory)
+    C.simples 
+end
 
 set_associator!(F::SixJCategory, ass) = F.ass = ass
 function set_associator!(F::SixJCategory, i::Int, j::Int, k::Int, ass::Vector{<:MatElem})
@@ -119,9 +122,9 @@ function set_spherical!(F::SixJCategory, sp)
 
 end
 
-# function is_spherical(F::SixJCategory, sp) 
-#     all([s*ev(dual(x))∘coev(x) == inv(s)*ev(dual(x))∘coev(x) for (s,x) ∈ zip(sp,simples(F))]) 
-# end
+function is_spherical(F::SixJCategory, sp) 
+    all([s*ev(dual(x))∘coev(x) == inv(s)*ev(dual(x))∘coev(x) for (s,x) ∈ zip(sp,simples(F))]) 
+end
 
 function is_spherical(F::SixJCategory)
     get_attribute!(F, :is_spherical) do
