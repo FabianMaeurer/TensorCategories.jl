@@ -38,7 +38,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     QadicField, QadicFieldElem, FlintLocalField, FlintLocalFieldElem,
     MultTableGroup, is_isomorphic_with_map, subgroup_classes, representative,
     pc_group, permutation_group, @req, is_constant, automorphism_group,
-    permuted, change_base_ring, schur_index_over_center, issimple, cyclotomic_extension, ArbField
+    permuted, change_base_ring, schur_index_over_center, issimple, cyclotomic_extension, ArbField, next_prime
 
 # using Serialization
 import Oscar: @register_serialization_type,
@@ -533,6 +533,7 @@ include("Serialization/SixJSerialization.jl")
 include("Serialization/CenterSerialization.jl")
 include("SixJCategoryDatabase/main.jl")
 include("AnyonWiki/AnyonWiki.jl")
+include("AnyonWiki/CheckAnyonwiki.jl")
 
 
 

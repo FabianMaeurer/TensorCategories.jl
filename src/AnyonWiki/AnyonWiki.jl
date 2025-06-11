@@ -253,8 +253,103 @@ function load_anyonwiki_attributes(n::Int)
     end
 end
 
+
 function anyonwiki_cyclotomic(n::Int)
+    r = anyonwiki_cyclotomic_root(n)
+    
+    if r > 2 
+        eval(Meta.parse("global K, z$r = cyclotomic_field($r, \"z$r\")"))
+    else
+        global K = QQ 
+    end
+    
+    anyonwiki_cyclotomic(n, K)
+end
+
+function anyonwiki_cyclotomic(n::Int, K::Field)
+    
+    r = anyonwiki_cyclotomic_root(n)
+    root = root_of_unity(K,r)
+    eval(Meta.parse("z$r = $(root)"))
+
+
+    associator_array = anyonwiki_cyclotomic_associator(n,K)
+   
+    mult = multiplication_table_from_F_symbols(associator_array)
+
+
+    C = six_j_category(K, mult)
+    set_name!(C, "Fusion category number $n from AnyonWiki")
+    set_associator!(C, associator_array)
+    set_one!(C, [i == 1 for i ∈ 1:C.simples])
+
+    pivotals = include(joinpath(anyon_path, "cyclic_P_Symbols/cat_$n.jl"))
+
+    set_pivotal!(C, K.([pivotals[[i]] for i ∈ 1:length(pivotals)]))
+
+    attrs = load_anyonwiki_attributes(n)
+
+    if attrs[:braided] 
+       
+        braiding_array = anyonwiki_cyclotomic_braiding(n, K)
+        set_braiding!(C, braiding_array)
+    end
+
+    return C
+    
+end
+
+function anyonwiki_finite(n::Int)
+    r = anyonwiki_cyclotomic_root(n)
+
+    f_symbol_string = readlines(joinpath(anyon_path, "cyclic_6j_Symbols/cat_$n.jl"))[4]
+
+    ind = findall(r"\//\d+", f_symbol_string)
+    inverse = lcm([parse(Int, f_symbol_string[i[3:end]]) for i in ind])
+
+    K = finite_prime_field_with_root_of_unity(r, inverse + 1)
+
+    anyonwiki_cyclotomic(n,K)
+end
+
+function multiplication_table_from_F_symbols(ass::Array{MatElem,4})
+    # Build multiplication_table
+    N, = size(ass)
+
+    mult = zeros(Int,N,N,N)
+    
+    for i ∈ 1:N, j ∈ 1:N, k ∈ 1:N 
+        mult[i,j,k] = size(ass[1,i,j,k])[1]
+    end
+    return mult
+end
+
+function anyonwiki_cyclotomic_braiding(n::Int, K::Field)
+    r = anyonwiki_cyclotomic_root(n)
+    root = root_of_unity(K,r)
+    eval(Meta.parse("z$r = $(root)"))
+
+
+    braiding_dict = include(joinpath(anyon_path, "cyclic_R_symbols/cat_$n.jl"))
+
+    N = maximum([a[1] for a ∈ keys(braiding_dict)])
+
+    braiding_array = Array{MatElem}(undef, N,N,N)
+
+    for a ∈ 1:N, b ∈ 1:N, c ∈ 1:N
+        ab_c = filter(e -> e[[1,2,3]] == [a,b,c], collect(keys(braiding_dict)))
+        l = Int(sqrt(length(ab_c)))
+
+        M = matrix(K,l,l, [braiding_dict[v] for v ∈ ab_c])
+        braiding_array[a,b,c] = M
+    end
+
+    return braiding_array
+end
+
+function anyonwiki_cyclotomic_root(n::Int)
     cyclopos = [parse(Int, s) for s ∈ readlines(joinpath(anyon_path, "cycloPos.txt"))]
+
     attrs = load_anyonwiki_attributes(n)
 
     if n ∉ cyclopos 
@@ -281,14 +376,18 @@ function anyonwiki_cyclotomic(n::Int)
     end 
 
     if i === nothing && j === nothing && k == nothing
-        global K = QQ 
+        return 1 
     else
         roots = [l === nothing ? 1 : parse(Int, s[l][2:end]) for (s,l) ∈ zip([f_symbol_string,p_symbol_string, r_symbol_string], [i,j,k])]
 
-        r = lcm(roots...)
-
-        eval(Meta.parse("global K, z$r = cyclotomic_field($r)"))
+        return r = lcm(roots...)
     end
+end
+
+function anyonwiki_cyclotomic_associator(n::Int, K::Field)
+    r = anyonwiki_cyclotomic_root(n)
+        root = root_of_unity(K,r)
+    eval(Meta.parse("z$r = $(root)"))
 
     # read 6j-symbols 
     associator_dict = include(joinpath(anyon_path, "cyclic_6j_Symbols/cat_$n.jl"))
@@ -307,42 +406,15 @@ function anyonwiki_cyclotomic(n::Int)
         M = matrix(K,l,l, [associator_dict[v] for v ∈ abc_d])
         associator_array[a,b,c,d] = M
     end
+    return associator_array 
+end
 
-    # Build multiplication_table
-    mult = zeros(Int,N,N,N)
-    
-    for (_,a,b,c) ∈ filter(e -> e[1] == 1, keys(associator_dict)) 
-        
-        mult[a,b,c] = 1 
+function finite_prime_field_with_root_of_unity(n::Int, lower_bound = 2)
+    p = next_prime(maximum([n,lower_bound-1])) 
+    while gcd(n, p - 1) < n
+        p = next_prime(p)
     end
-
-    C = six_j_category(K, mult)
-    set_name!(C, "Fusion category number $n from AnyonWiki")
-    set_associator!(C, associator_array)
-    set_one!(C, [i == 1 for i ∈ 1:N])
-
-    pivotals = include(joinpath(anyon_path, "cyclic_P_Symbols/cat_$n.jl"))
-
-    set_pivotal!(C, K.([pivotals[[i]] for i ∈ 1:length(pivotals)]))
-
-
-    if attrs[:braided] 
-        braiding_dict = include(joinpath(anyon_path, "cyclic_R_symbols/cat_$n.jl"))
-        braiding_array = Array{MatElem}(undef, N,N,N)
-
-        for a ∈ 1:N, b ∈ 1:N, c ∈ 1:N
-            ab_c = filter(e -> e[[1,2,3]] == [a,b,c], collect(keys(braiding_dict)))
-            l = Int(sqrt(length(ab_c)))
-     
-            M = matrix(K,l,l, [braiding_dict[v] for v ∈ ab_c])
-            braiding_array[a,b,c] = M
-        end
-
-        set_braiding!(C, braiding_array)
-    end
-
-    return C
-    
+    return GF(p)
 end
 
 function anyonwiki_center(n::Int; cyclotomic = false)
