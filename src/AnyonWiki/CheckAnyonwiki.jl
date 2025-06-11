@@ -18,7 +18,7 @@ function test_cyclotomic_anyonwiki(properties = nothing)
     for n ∈ cyclic_n
 
         # Check properties 
-        all_passed, n_errors = test_anyonwiki_cyclotomic(n, properties)
+        all_passed, n_errors = test_cyclotomic_anyonwiki(n, properties)
 
         if !all_passed 
             push!(errors, n => n_errors)
