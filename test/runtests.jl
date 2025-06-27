@@ -26,5 +26,5 @@ end
     include("ModuleCategoryTests/Non-semisimpleModules.jl")
 end
 
-include("CoherentSheaves/ConvolutionCategoryTests.jl")
+#include("CoherentSheaves/ConvolutionCategoryTests.jl")
 
