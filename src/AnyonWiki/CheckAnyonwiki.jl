@@ -13,7 +13,7 @@ function test_cyclotomic_anyonwiki(properties = nothing)
     # n => [property => [expected, actual]]
     errors = Dict{Int, Dict{Symbol, Vector{Bool}}}()
 
-    cyclic_n = parse.(Int, readlines(joinpath(@__DIR__, "AnyonWikiData/cyclopos.txt")))
+    cyclic_n = parse.(Int, readlines(joinpath(@__DIR__, "AnyonWikiData/cycloPos.txt")))
 
     for n ∈ cyclic_n
 

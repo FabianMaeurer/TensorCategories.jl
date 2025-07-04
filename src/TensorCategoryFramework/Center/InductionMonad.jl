@@ -9,9 +9,14 @@ mutable struct InductionMonad <: Monad
 
     function InductionMonad(C::Category)
         T = new()
-        T.category = C
+        T.codomain = C
         return T
     end 
+end
+
+function induction_monad(C::Category)
+    @assert is_fusion(C) 
+    InductionMonad(C)
 end
  
 
@@ -22,6 +27,7 @@ end
 
 function (T::InductionMonad)(f::Morphism)
     @assert parent(f) == codomain(T)
+    induction_restriction(f)
 end
 
 function domain(T::InductionMonad) 
@@ -42,6 +48,21 @@ function multiplication(T::InductionMonad, X::Object)
         associator(object(TX),x,dual(x)),
         (id(object(TX)) ⊗ ev(dual(x)))
     ) for x ∈ simples(parent(X))])
+end
+
+function monad_module(X::CenterObject)
+    monad_module(InductionMonad(parent(C)), X)
+end
+
+function monad_module(T::InductionMonad, X::CenterObject)
+    action = horizontal_direct_sum([
+        compose(
+            inv(half_braiding(X,s)) ⊗ id(dual(s)),
+            associator(s, object(X), dual(s)),
+            id(object(X)) ⊗ (ev(dual(s)) ∘ (pivotal(s) ⊗ id(dual(s))))
+        ) for s ∈ simples(codomain(T))])
+    
+        return monad_module(object(X),T,action)
 end
 
 #=----------------------------------------------------------

@@ -766,8 +766,7 @@ function dual(X::CenterObject)
             (id(dX) ⊗ a(X.object, Xi, dX)) ∘ 
             (id(dX) ⊗ (inv(yXi) ⊗ id(dX))) ∘ 
             (id(dX) ⊗ inv_a(Xi, X.object, dX)) ∘ 
-            a(dX, Xi, X.object ⊗ dX) ∘ 
-            (id(dX ⊗ Xi) ⊗ c)
+            (id(dX) ⊗ (id(Xi) ⊗ c))
         γ = [γ; f]
     end
     return CenterObject(parent(X),dX,γ)

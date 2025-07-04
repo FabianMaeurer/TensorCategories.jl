@@ -19,7 +19,7 @@ struct MonadModuleMorphism <: Morphism
     m::Morphism 
 end
 
-MonadModule(X::Object, action::Morphism) = MonadModule(parent(X),X,action)
+monad_module(X::Object, T::Monad, action::Morphism) = MonadModule(MonadModules(parent(X), T), X, action)
 
 morphism(X::MonadModule, Y::MonadModule, m) = MonadModuleMorphism(X,Y,m)
 

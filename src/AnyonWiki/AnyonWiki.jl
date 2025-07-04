@@ -16,7 +16,7 @@ Load the n-th fusion category from the list of multiplicity free fusion categori
 function anyonwiki(n::Int, K::Union{Ring,Nothing} = nothing ; minimal = false)
     
     if ! minimal && K === nothing 
-        if n ∈ ZZ.(readlines(joinpath(anyon_path, "cyclopos.txt")))
+        if n ∈ ZZ.(readlines(joinpath(anyon_path, "cycloPos.txt")))
             return anyonwiki_cyclotomic(n)
         end
     end

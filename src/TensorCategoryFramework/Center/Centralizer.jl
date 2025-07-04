@@ -1,5 +1,5 @@
 #=----------------------------------------------------------
-    Structure for the Müger Centralizer 
+    Structure for the Centralizer 
 ----------------------------------------------------------=#
 
 mutable struct CentralizerCategory <: Category
