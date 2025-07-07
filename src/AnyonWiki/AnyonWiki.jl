@@ -330,7 +330,7 @@ function anyonwiki_cyclotomic_braiding(n::Int, K::Field)
     eval(Meta.parse("z$r = $(root)"))
 
 
-    braiding_dict = include(joinpath(anyon_path, "cyclic_R_symbols/cat_$n.jl"))
+    braiding_dict = include(joinpath(anyon_path, "cyclic_R_Symbols/cat_$n.jl"))
 
     N = maximum([a[1] for a ∈ keys(braiding_dict)])
 
