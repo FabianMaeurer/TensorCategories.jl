@@ -6,9 +6,9 @@ struct Cocycle{N}
 end
 
 """
-    Cocylce(G::Group, m::Dict{NTuple{N,G}, T})
+    Cocycle(G::Group, m::Dict{NTuple{N,G}, T})
 
-Return a ```N```-cocylce of ```G```. By now the condition is not checked.
+Return a ```N```-cocycle of ```G```. By now the condition is not checked.
 """
 function Cocycle(G::Group, m::Dict{NTuple{N,S},T}) where {S<:GroupElem,T<:FieldElem,N}
     return Cocycle(G,parent(collect(values(m))[1]),m)
