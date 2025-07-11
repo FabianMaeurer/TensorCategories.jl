@@ -280,7 +280,7 @@ function load_anyonwiki_pivotal(rank::Int,
 
     piv = include(joinpath(@__DIR__, "AnyonWikiData/new_P_Symbols/$cat_string"))
 
-    [K(preimage(e,string_to_acb(CC, x))) for x in collect(values(sort(piv)))]
+    [K(preimage(e,string_to_acb(CC, piv[x]))) for x in keys(sort(piv))]
     # deg = typeof(K) <: Union{<:NumField,QQField} ? degree(K) : 24
 
     # piv = elem_type(K)[]
