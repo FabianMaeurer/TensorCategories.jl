@@ -3,7 +3,7 @@
     along a complex embedding       
 ----------------------------------------------------------=#
 
-function preimage(e::NumFieldEmb, x; tol = 10^(-10))
+function preimage(e::NumFieldEmb, x, deg = 80; tol = 10^(-10))
 
     # Get the number field in question
     K = number_field(e)
@@ -11,7 +11,7 @@ function preimage(e::NumFieldEmb, x; tol = 10^(-10))
     # Get the Complex Field 
     CC = parent(e(K(1)))
 
-    min = minpoly(x) 
+    min = minpoly(x, deg) 
 
     # roots in domain 
     rs = roots(K, min)
@@ -29,6 +29,6 @@ function preimage(e::NumFieldEmb, x; tol = 10^(-10))
     return rs[i]
 end
 
-function minpoly(x::AcbFieldElem, deg = 24)
+function minpoly(x::AcbFieldElem, deg = 128)
     minpoly(guess(QQBarField(), x, deg))
 end

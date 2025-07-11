@@ -56,13 +56,15 @@ function anyonwiki(rank::Int,
     
     # Get associator dict with strings
     _ass_dict = include(joinpath(@__DIR__, "AnyonWikiData/new_6j_Symbols/$cat_string"))
-    ass_dict = Dict{Vector{Int}, elem_type(K)}()
-    # Convert data to numberfield
-    for (k, str) ∈ _ass_dict 
-        x = string_to_acb(CC, str)
-        x = preimage(e, x)
-        ass_dict[k] = K(x)
-    end
+    # ass_dict = Dict{Vector{Int}, elem_type(K)}()
+    # # Convert data to numberfield
+    # for (k, str) ∈ _ass_dict 
+    #     x = string_to_acb(CC, str)
+    #     x = preimage(e, x, degree(K))
+    #     ass_dict[k] = K(x)
+    # end
+
+    ass_dict = apply_preimage_to_anyon_file(e, joinpath(@__DIR__, "AnyonWikiData/new_6j_Symbols/$cat_string"))
 
     # open(joinpath(anyon_path, "new_6j_symbols/cat_$n")) do f 
 
@@ -264,6 +266,17 @@ end
 #     end
 # end
 
+function apply_preimage_to_anyon_file(e::NumFieldEmb, file::String)
+    str = read(file, String)
+    reg = r"\"[^\"]*\""
+    matches = unique(collect([m.match[2:end-1] for m in eachmatch(reg,str)]))
+    sub = Dict(String(k) =>  preimage(e, string_to_acb(AcbField(512), String(k)), degree(number_field(e))) for k in matches)
+    
+    dict = include(file)
+
+    new_dict = Dict(k => sub[v] for (k,v) ∈ dict)
+end
+
 function load_anyonwiki_pivotal(rank::Int, 
     multiplicity::Int, 
     non_self_dual::Int,
@@ -280,7 +293,7 @@ function load_anyonwiki_pivotal(rank::Int,
 
     piv = include(joinpath(@__DIR__, "AnyonWikiData/new_P_Symbols/$cat_string"))
 
-    [K(preimage(e,string_to_acb(CC, piv[x]))) for x in keys(piv)]
+    [K(preimage(e,string_to_acb(CC, piv[x]))) for x in sort(collect(keys(piv)))]
     # deg = typeof(K) <: Union{<:NumField,QQField} ? degree(K) : 24
 
     # piv = elem_type(K)[]
@@ -413,12 +426,13 @@ function anyonwiki_braiding(rank::Int,
     
     _braiding_dict = include(joinpath(anyon_path, "new_R_Symbols/$cat_string"))
     braiding_dict = Dict{Vector{Int}, elem_type(K)}()
-    for (k, str) ∈ _braiding_dict 
-        x = string_to_acb(CC, str)
-        x = preimage(emb, x)
-        braiding_dict[k] = K(x)
-    end
+    # for (k, str) ∈ _braiding_dict 
+    #     x = string_to_acb(CC, @show str)
+    #     x = preimage(emb, x, degree(K))
+    #     braiding_dict[k] = K(x)
+    # end
 
+    braiding_dict = apply_preimage_to_anyon_file(emb, joinpath(anyon_path, "new_R_Symbols/$cat_string"))
     N = rank
 
     braiding_array = Array{MatElem}(undef, N,N,N)
