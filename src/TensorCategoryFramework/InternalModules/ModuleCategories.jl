@@ -1399,7 +1399,11 @@ function is_isomorphic(M::ModuleObject, N::ModuleObject)
     end
 end
 
-
+function is_isomorphic_simples(M::ModuleObject, N::ModuleObject)
+    H = Hom(M,N)
+    if int_dim(H) == 0 return false, nothing end
+    true, H[1]
+end
 #=----------------------------------------------------------
     Compute Module Categories 
 ----------------------------------------------------------=#

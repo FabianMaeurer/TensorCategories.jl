@@ -145,6 +145,22 @@ function involution(x::ℕRingElem)
     error("there is no involution on $(parent(x))")
 end
 
+
+function fusion_subrings(R::ℕRing)
+    subs = unique([_topologize(x) for x in basis(R)])
+end
+
+function _topologize(x::ℕRingElem)
+    y = x
+    base = findall(!=(0), coefficients(x))
+    new_base = []
+    while base != new_base 
+        y = y*x
+        base = new_base
+        new_base = unique([base; findall(!=(0), coefficients(y))])
+    end
+    return sort(new_base)
+end
 #=----------------------------------------------------------
     Pretty Printing 
 ----------------------------------------------------------=#

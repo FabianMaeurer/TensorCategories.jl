@@ -14,7 +14,7 @@ function preimage(e::NumFieldEmb, x; tol = 10^(-10))
     min = minpoly(x) 
 
     # roots in domain 
-    rs = roots(change_base_ring(K, min))
+    rs = roots(K, min)
 
     # Roots in Complex Field 
     complex_rs = e.(rs) 
@@ -27,4 +27,8 @@ function preimage(e::NumFieldEmb, x; tol = 10^(-10))
     end
 
     return rs[i]
+end
+
+function minpoly(x::AcbFieldElem, deg = 24)
+    minpoly(guess(QQBarField(), x, deg))
 end

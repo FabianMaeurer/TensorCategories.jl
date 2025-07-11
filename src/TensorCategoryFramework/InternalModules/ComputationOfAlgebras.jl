@@ -21,6 +21,10 @@ function algebra_extensions(A::AlgebraObject, X::BiModuleObject)
     _algebra_structures(_algebra_structure_ideal, AX, u, subalgebra = A, extension = X, inclusion = inclusion, projection = projection, show_dimension = true)
 end
 
+function separable_algebra_extensions(A::AlgebraObject, X::BiModuleObject)
+    [A for A ∈ algebra_extensions(A,X) if is_separable(A)]
+end
+
 @doc raw""" 
 
     separable_algebra_structures(X::Object)
@@ -236,8 +240,8 @@ function _algebra_structure_ideal(X::Object, mult_basis::Vector{<:Morphism},  un
     C = parent(X)
     K = base_ring(C)
 
-    mult_coeff_basis = basis(Hom((X⊗X)⊗X, X))
-    unit_coeff_basis = basis(End(X))
+    mult_coeff_basis = Hom((X⊗X)⊗X, X)
+    unit_coeff_basis = End(X)
 
     m = length(mult_basis)
     Kx,x_m = polynomial_ring(K, m)
@@ -260,6 +264,7 @@ function _algebra_structure_ideal(X::Object, mult_basis::Vector{<:Morphism},  un
         for (a2, f2) ∈ zip(x_m, mult_basis)
             first = compose(ass, id_f, f2)
             second = compose(f_id, f2)
+
             coeffs = express_in_basis(first - second, mult_coeff_basis)
 
             eqs_mult = eqs_mult .+ ((a * a2) .* coeffs)

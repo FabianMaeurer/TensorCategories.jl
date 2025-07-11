@@ -4,6 +4,8 @@
 
 const database_path = joinpath(@__DIR__,"src/SixJCategoryDatabase/")
 
+@register_serialization_type SixJCategory
+
 
 function save_object(s::SerializerState, C::SixJCategory)
     save_data_dict(s) do 
@@ -75,7 +77,7 @@ function load_object(s::DeserializerState, ::Type{SixJCategory})
 
     C.ass = reshape(
         load_array_node(s, :ass) do (i,m)
-            m = load_object(s, Matrix, (elem_type(base_ring(C)), base_ring(C)))
+            m = load_object(s, Matrix{elem_type(base_ring(C))}, base_ring(C))
             a = size(m,1)
             b = length(size(m)) == 2 ? size(m,2) : 0
             matrix(base_ring(C), a, b, m)
@@ -94,15 +96,14 @@ function load_object(s::DeserializerState, ::Type{SixJCategory})
     catch 
     end
 
-    try
+    if haskey(s, :braiding)
         C.braiding = reshape(
             load_array_node(s, :braiding) do (i,m)
                 m = load_object(s, Matrix, (elem_type(base_ring(C)), base_ring(C)))
                 matrix(base_ring(C), size(m,1),size(m,2), m)
             end,
             n,n,n
-        )
-    catch 
+        ) 
     end
 
     try 

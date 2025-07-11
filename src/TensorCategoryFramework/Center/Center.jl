@@ -117,7 +117,9 @@ Return the image under the forgetful functor.
 morphism(f::CenterMorphism) = f.m
 
 is_weakly_fusion(C::CenterCategory) = dim(category(C)) != 0
-is_fusion(C::CenterCategory) = all([int_dim(End(s)) == 1 for s ∈ simples(C)])
+is_fusion(C::CenterCategory) = get_attribute!(C, :is_fusion) do 
+    dim(category(C)) != 0 && dim(C) == sum(dim(x)^2 for x ∈ simples(C))
+end
 is_abelian(C::CenterCategory) = true
 is_linear(C::CenterCategory) = true
 is_monoidal(C::CenterCategory) = true
@@ -956,6 +958,10 @@ function Hom(X::CenterObject, Y::CenterObject)
 
     alg_closed = (base_ring(X) == QQBarField() || typeof(base_ring(X)) == CalciumField)
 
+    if int_dim(Hom(object(X),object(Y))) == 0
+        return HomSpace(X,Y,CenterMorphism[])
+    end
+
     if alg_closed && has_attribute(X, :is_simple) && 
         get_attribute(X, :is_simple) &&
         has_attribute(Y, :is_simple) &&
@@ -1166,9 +1172,12 @@ function sort_simples_by_dimension!(C::CenterCategory)
 
     σ = sortperm(fp_dims, by = abs)
 
-    has_attribute(C, :multiplication_table) && delete!(C.__attrs, :multiplication_table)
-    has_attribute(C, :smatrix) && delete!(C.__attrs, :smatrix)
-
+    if has_attribute(C, :multiplication_table) 
+        set_attribute!(C, get_attribute(C, :multiplication_table)[σ,σ,σ])
+    end
+    if has_attribute(C, :smatrix)
+        set_attribute!(C,:smatrix, get_attribute(C, :smatrix)[σ,σ])
+    end
 
     C.simples = C.simples[σ]
 end
@@ -1369,7 +1378,7 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject)
         end
         eq_i = [zero(Fx) for _ ∈ 1:length(base)]
         for (f,a) ∈ zip(B,poly_basis)
-            coeffs = express_in_basis((id(s)⊗f)∘γₛ - λₛ∘(f⊗id(s)), base)
+            coeffs = express_in_basis((id(s)⊗f)∘γₛ - λₛ∘(f⊗id(s)), H)
             eq_i = eq_i .+ (a .* coeffs)
         end
         

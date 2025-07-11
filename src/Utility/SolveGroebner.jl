@@ -78,7 +78,7 @@ function real_solutions_over_base_field(I::MPolyIdeal; splitting_info = true)
 
     S = recover_solutions(real_solutions(QI), K, symbols(base_ring(QI)), fix_solutions = fixed_sols, splitting_info = splitting_info)
     
-    n = dim(base_ring(I))
+    @show n = ngens(base_ring(I))
 
     unique([s[1:n] for s ∈ S if all([g(s[1:n]...) == 0 for g ∈ G])])
 end
@@ -136,7 +136,7 @@ function witness_set(I::Ideal, bound = 100)
         return real_solutions_over_base_field(I)
     end
     
-    n = dim(base_ring(I))
+    n = ngens(base_ring(I))
     
     # a = gen(K)
 

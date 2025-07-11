@@ -8,17 +8,20 @@
 
 Return the grothendieck ring of the multiring category ``C``.
 """
-function split_grothendieck_ring(C::Category, simples = nothing)
+function split_grothendieck_ring(C::Category, simpls = nothing)
     @assert is_multiring(C) "C is required to be multiring"
 
-    m = if simples !== nothing 
-         multiplication_table(C,simples)
+    m = if simpls !== nothing 
+         multiplication_table(C,simpls)
     else
         multiplication_table(C)
     end
 
-    one_coeffs = if simples !== nothing 
-        coefficients(one(C),simples)
+    one_coeffs = if simpls !== nothing 
+        coefficients(one(C),simpls)
+    elseif is_fusion(C) && simpls === nothing
+        i = findfirst(z -> int_dim(Hom(one(C), z)) > 0, simples(C))
+        [j == i for j in 1:rank(C)]
     else
         coefficients(one(C))
     end

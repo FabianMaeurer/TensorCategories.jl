@@ -32,6 +32,7 @@ function is_multifusion(C::Category)
 end
 
 function is_split_semisimple(C::Category)
+    is_fusion(C) && return true
     is_semisimple(C) && all(s -> int_dim(End(s)) == 1, simples(C))
 end 
 

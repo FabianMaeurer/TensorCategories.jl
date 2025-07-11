@@ -709,7 +709,6 @@ function tensor_product(f::SixJMorphism, g::SixJMorphism)
     simpl = simples(C)
 
     for i ∈ 1:C.simples, j ∈ 1:C.simples
-
         A = kronecker_product(f.m[i],g.m[j])
         d1,d2 = size(A)
         #if d1*d2 == 0 continue end
@@ -953,23 +952,9 @@ function Hom(X::SixJObject, Y::SixJObject)
     return SixJHomSpace(X,Y,basis_mors)
 end
 
-# function express_in_basis(f::SixJMorphism, base::Vector{SixJMorphism})
-#     F = base_ring(domain(f))
-#     A = Array{elem_type(F),2}(undef,length(base),0)
-#     b = []
-#     for g ∈ base
-#         y = []
-#         for m ∈ g.m
-#             y = [y; [x for x ∈ m][:]]
-#         end
-#         A = [A y]
-#     end
-#     for m ∈ f.m
-#         b = [b; [x for x ∈ m][:]]
-#     end
-
-#     return [i for  i ∈ solve(transpose(matrix(F,A)), matrix_space(F,1,length(b))(F.(b)))][:]
-# end
+function express_in_basis(f::SixJMorphism, H::SixJHomSpace)
+   vcat((collect(m)[:] for m ∈ matrices(f))...)
+end
 
 
 #-------------------------------------------------------------------------------

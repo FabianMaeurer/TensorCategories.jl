@@ -134,7 +134,7 @@ function six_j_symbols(C::Category, S = simples(C), mult = nothing)
     return ass           
 end
 
-function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothing)
+function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothing; log = nothing)
     @assert is_semisimple(C)
 
     N = length(S)
@@ -236,6 +236,27 @@ function skeletal_braiding(C::Category, S = simples(C))
     return braid
 end
 
+function skeletal_braiding_of_construction(C::Category, S = simples(C), mult = nothing)
+    @assert is_braided(C)
+    
+    N = length(S)
+    C_morphism_type = morphism_type(C)
+    F = base_ring(C) 
+    braid = Array{MatElem}(undef,N,N,N)
+
+    for (i,j,l) ∈ Base.product(1:N,1:N,1:N)
+        X,Y,W = S[[i,j,l]]
+        # Basis for Hom(X⊗Y,W)
+        B_XY_W = basis(Hom(X⊗Y,W))
+
+        # Basis for Hom(Y⊗X,W)
+        B_YX_W = basis(Hom(Y⊗X,W))
+
+        braid_XY_W = hcat([express_in_basis(f ∘ braiding(X,Y), B_XY_W) for f ∈ B_YX_W]...)
+        braid[i,j,l] = matrix(F, length(B_XY_W), length(B_YX_W), braid_XY_W)
+    end
+    return braid
+end
 
 #=----------------------------------------------------------
     Gauge Transform  

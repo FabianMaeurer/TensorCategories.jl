@@ -6,7 +6,7 @@ import Oscar
 import Oscar.AbstractAlgebra.Generic: Poly
 import Oscar.AbstractAlgebra: Group
 import Oscar.Hecke: RelSimpleNumField, regular_module, meataxe, NumFieldEmb
-import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAlgebra, AssociativeAlgebraElem,
+import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAlgebra, AssociativeAlgebraElem, ngens,
     cyclotomic_field, Fac, Field, FieldElem, FinField, GF, GAP,
     GAPGroupHomomorphism, GL, GSet, GroupElem, Hecke.AbstractAssociativeAlgebra,
     Hecke.AbstractAssociativeAlgebraElem, Ideal, MPolyRingElem, MPolyIdeal, Map, MatElem, MatrixElem,
@@ -38,7 +38,8 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     QadicField, QadicFieldElem, FlintLocalField, FlintLocalFieldElem,
     MultTableGroup, is_isomorphic_with_map, subgroup_classes, representative,
     pc_group, permutation_group, @req, is_constant, automorphism_group,
-    permuted, change_base_ring, schur_index_over_center, issimple, cyclotomic_extension, ArbField, next_prime
+    permuted, change_base_ring, schur_index_over_center, issimple, cyclotomic_extension, ArbField, next_prime, AcbFieldElem,
+    rationals_as_number_field
 
 # using Serialization
 import Oscar: @register_serialization_type,
@@ -376,6 +377,7 @@ export semisimplify
 export six_j_category
 export SixJCategory 
 export SixJObject 
+export separable_algebra_extensions
 export separable_algebra_structures
 export set_associator! 
 export set_braiding! 
@@ -524,10 +526,7 @@ include("Examples/Haagerup/HaagerupH3.jl")
 include("Examples/Haagerup/ExtendedHaagerup.jl")
 include("Examples/SU(k)/SU(3)_3.jl")
 
-@register_serialization_type SixJCategory
-@register_serialization_type SixJMorphism
-@register_serialization_type SixJObject
-@register_serialization_type CenterCategory
+
 
 include("Serialization/SixJSerialization.jl")
 include("Serialization/CenterSerialization.jl")
@@ -535,6 +534,10 @@ include("SixJCategoryDatabase/main.jl")
 include("AnyonWiki/AnyonWiki.jl")
 include("AnyonWiki/CheckAnyonwiki.jl")
 
+
+@register_serialization_type SixJMorphism
+@register_serialization_type SixJObject
+@register_serialization_type CenterCategory
 
 
 #include("Utility/Serialization.jl")
