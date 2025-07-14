@@ -7,6 +7,9 @@ associator_path = joinpath(@__DIR__, "AnyonWikiData//")
 pivotal_path = joinpath(@__DIR__, "AnyonWikiData/PivotalStructures/")
 anyon_path = joinpath(@__DIR__, "AnyonWikiData/")
 
+
+
+
 @doc raw""" 
 
     anyonwiki(n::Int)
@@ -14,6 +17,81 @@ anyon_path = joinpath(@__DIR__, "AnyonWikiData/")
 Load the n-th fusion category from the list of multiplicity free fusion categories of rank ≤ 7.
 """
 function anyonwiki(rank::Int, 
+                    multiplicity::Int, 
+                    non_self_dual::Int,
+                    fusion_ring::Int, 
+                    associator::Int, 
+                    braiding::Int, 
+                    pivotal::Int)
+
+    K,_ = load_anyonwiki_number_field(rank,multiplicity,non_self_dual,fusion_ring,associator,braiding, pivotal)
+
+    cat_code = "$(rank)_$(multiplicity)_$(non_self_dual)_$(fusion_ring)_$(associator)_$(braiding)_$(pivotal)"
+    cat_string = "cat_$cat_code.jl"
+
+    C = six_j_category(K, ["𝟙"; String["X$i" for i in 2:rank]])
+
+    ass = include(joinpath(@__DIR__, "AnyonWikiData/algebraic_F_symbols/$cat_string"))
+
+    ass = Dict(k => K == QQ ? K(v...) : K(v) for (k,v) in ass)
+
+    ass = dict_to_associator(rank, K, ass)
+
+    set_tensor_product!(C, multiplication_table_from_F_symbols(ass))
+    set_associator!(C, ass)
+    set_one!(C, [i == 1 for i in 1:rank])
+
+    if braiding != 0 
+        braid = include(joinpath(@__DIR__, "AnyonWikiData/algebraic_R_symbols/$cat_string"))
+        braid = Dict(k =>  K == QQ ? K(v...) : K(v) for (k,v) in braid)
+        braid = dict_to_braiding(rank, K, braid)
+        set_braiding!(C, braid)
+    end
+
+    piv = include(joinpath(@__DIR__, "AnyonWikiData/algebraic_P_symbols/$cat_string"))
+
+    piv = Dict(k =>  K == QQ ? K(v...) : K(v) for (k,v) in piv)
+
+    piv = [K(piv[[p]]) for p in 1:rank]
+    set_pivotal!(C, piv)
+
+    set_name!(C, "Fusion Category $cat_code")
+    return C
+end
+
+function dict_to_associator(N::Int, K::Field, ass::Dict)
+    # Transform associator dict to Matrices 
+
+    ass_matrices = Array{MatElem,4}(undef,N,N,N,N)
+
+    for a ∈ 1:N, b ∈ 1:N, c ∈ 1:N, d ∈ 1:N
+        abc_d = filter(e -> e[[1,2,3,4]] == [a,b,c,d], collect(keys(ass)))
+        l = Int(sqrt(length(abc_d)))
+        abc_d = sort(abc_d, by = v -> v[6])
+        abc_d = sort(abc_d, by = v -> v[5])
+        
+        M = matrix(K,l,l, [ass[v] for v ∈ abc_d])
+        ass_matrices[a,b,c,d] = M
+    end
+
+    ass_matrices 
+end
+
+function dict_to_braiding(N::Int, K::Field, braid::Dict)
+    # Transform associator dict to Matrices 
+    braiding_array = Array{MatElem,3}(undef,N,N,N)
+
+    for a ∈ 1:N, b ∈ 1:N, c ∈ 1:N
+        ab_c = filter(e -> e[[1,2,3]] == [a,b,c], collect(keys(braid)))
+        l = Int(sqrt(length(ab_c)))
+
+        M = matrix(K,l,l, [braid[v] for v ∈ ab_c])
+        braiding_array[a,b,c] = M
+    end
+    braiding_array
+end
+
+function anyonwiki_from_numerics(rank::Int, 
                     multiplicity::Int, 
                     non_self_dual::Int,
                     fusion_ring::Int, 
@@ -34,7 +112,7 @@ function anyonwiki(rank::Int,
 
 
     data = []
-    CC = AcbField(512)
+    CC = AcbField(2048)
     Q = QQBarField()
     # deg = typeof(K) <: Union{<:NumField,QQField} ? degree(K) : 24
     # if typeof(K) <: Union{<:NumField,QQField}
@@ -144,7 +222,11 @@ end
 
 function string_to_acb(CC::AcbField, str::String)
     re,co = split(str, "+")
-    x = CC(re * "+/- 1e-510") + CC(co[1:end-2] * "+/- 1e-510")*CC(im)
+    if co == "0"
+        x = CC(re * "+/- 2e-510")
+    else
+        x = CC(re * "+/- 2e-510") + CC(co[1:end-2] * "+/- 2e-510")*CC(im)
+    end
 end
 
 function load_anyonwiki_number_field(rank::Int, 
@@ -172,7 +254,8 @@ function load_anyonwiki_number_field(rank::Int,
     else 
         p,str = data
         K,a = number_field(polynomial(QQ,p))
-        CC = AcbField(256)
+        
+        CC = AcbField(2048)
         root = string_to_acb(CC,str)
         emb = complex_embedding(K,root)
         return K, emb
@@ -224,7 +307,7 @@ end
 
 # function load_anyonwiki_associator_root(n::Int)
 #     line = 1
-#     CC = AcbField(1024)
+#     CC = AcbField(2048)
 #     Q = QQBarField()
 #     deg = 24
 #     open(joinpath(associator_path, "Roots.dat")) do f 
@@ -246,7 +329,7 @@ end
 
 # function load_anyonwiki_pivotal_root(n::Int)
 #     line = 1
-#     CC = AcbField(1024)
+#     CC = AcbField(2048)
 #     Q = QQBarField()
 #     deg = 24
 #     open(joinpath(pivotal_path, "Roots.dat")) do f 
@@ -270,8 +353,7 @@ function apply_preimage_to_anyon_file(e::NumFieldEmb, file::String)
     str = read(file, String)
     reg = r"\"[^\"]*\""
     matches = unique(collect([m.match[2:end-1] for m in eachmatch(reg,str)]))
-    sub = Dict(String(k) =>  preimage(e, string_to_acb(AcbField(512), String(k)), degree(number_field(e))) for k in matches)
-    
+    sub = Dict(String(k) =>  preimage(e, string_to_acb(AcbField(2048), String(k)), degree(number_field(e))) for k in matches)
     dict = include(file)
 
     new_dict = Dict(k => sub[v] for (k,v) ∈ dict)
@@ -286,14 +368,14 @@ function load_anyonwiki_pivotal(rank::Int,
     pivotal::Int,
     K, e = complex_embeddings(K)[1])
 
-    CC = AcbField(512)
+    CC = AcbField(2048)
     Q = QQBarField()
 
     cat_string = "cat_$(rank)_$(multiplicity)_$(non_self_dual)_$(fusion_ring)_$(associator)_$(braiding)_$(pivotal).jl"
 
     piv = include(joinpath(@__DIR__, "AnyonWikiData/new_P_Symbols/$cat_string"))
 
-    [K(preimage(e,string_to_acb(CC, piv[x]))) for x in sort(collect(keys(piv)))]
+    [K(preimage(e,string_to_acb(CC, piv[x]), degree(K))) for x in sort(collect(keys(piv)))]
     # deg = typeof(K) <: Union{<:NumField,QQField} ? degree(K) : 24
 
     # piv = elem_type(K)[]
@@ -420,7 +502,7 @@ function anyonwiki_braiding(rank::Int,
     pivotal::Int,
     K::Field, emb)
 
-    CC = AcbField(512)
+    CC = AcbField(2048)
 
     cat_string = "cat_$(rank)_$(multiplicity)_$(non_self_dual)_$(fusion_ring)_$(associator)_$(braiding)_$(pivotal).jl"
     

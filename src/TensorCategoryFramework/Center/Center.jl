@@ -1207,7 +1207,7 @@ function split(X::CenterObject, E = End(X),
     simple_subobjects(ext_X, ext_E)
 end
 
-function split_cyclotomic(C::CenterCategory; absolute = false)
+function split(C::CenterCategory; absolute = true)
     Ends = End.(simples(C))
     K = base_ring(C)
 
@@ -1218,19 +1218,30 @@ function split_cyclotomic(C::CenterCategory; absolute = false)
     n = []
 
     # find smallest cyclotomic extension such that Z(C) splits
+    # If that does not exists compute minimal extension field such that 
+    # it splits.
     for e ∈ Ends
         if int_dim(e) > 1
             i = findfirst(f -> degree(minpoly(f)) == int_dim(e), basis(e))
-           
             f = if i === nothing 
                 r = endomorphism_ring(domain(e),e)
-                 r_gens = gens(r)
+                r_gens = gens(r)
                  _,i = findmax(degree.(minpoly.(r_gens)))
-                 minpoly(r_gens[i])
+                 if degree(minpoly(r_gens[i])) == int_dim(e)
+                    minpoly(r_gens[i])
+                 else
+                    f = minpoly(rand(r))
+                    while degree(f) < int_dim(e) 
+                        f = minpoly(rand(r))
+                    end 
+                    f 
+                end
             else
                 minpoly(e[i])
             end
 
+            # if the extension is abelian 
+            
             m = max(int_dim(e),4)
             while true 
                 L = if K == QQ 
@@ -1244,7 +1255,7 @@ function split_cyclotomic(C::CenterCategory; absolute = false)
                     push!(n,m) 
                     break
                 end
-                m += 1
+                @show m += 1
             end
             
         end

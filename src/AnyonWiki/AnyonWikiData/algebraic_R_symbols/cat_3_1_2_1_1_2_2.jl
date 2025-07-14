@@ -1,0 +1,4 @@
+# 1
+Dict(
+	[1, 1, 1] => QQFieldElem[1, 0], [1, 2, 2] => QQFieldElem[1, 0], [1, 3, 3] => QQFieldElem[1, 0], [2, 1, 2] => QQFieldElem[1, 0], [2, 2, 3] => QQFieldElem[0, 1], [2, 3, 1] => QQFieldElem[-1, -1], [3, 1, 3] => QQFieldElem[1, 0], [3, 2, 1] => QQFieldElem[-1, -1], [3, 3, 2] => QQFieldElem[0, 1]
+)

@@ -367,3 +367,60 @@ function _subst_gauge!(C::SixJCategory, ind::Vector{Int}, x::Vector{<:FracFieldE
         C.ass[i,j,k,l] = matrix(L, size(C.ass[i,j,k,l])..., [numerator(a)(x...)//denominator(a)(x...) for a in C.ass[i,j,k,l]])
     end
 end
+
+
+#=----------------------------------------------------------
+    Export Skeletal categories as dicts 
+----------------------------------------------------------=#
+
+function save_F_symbols(C::SixJCategory, file::String)  
+
+    F = F_symbols(C)
+    S,T = typeof(F).parameters
+    pol = polynomial(QQ,collect(coefficients(base_ring(C).pol)))
+
+    open(file, "w") do io
+        write(io, "# Field with defining polynomial $pol \n# relative to the basis 1,...,x^$(degree(pol)-1)\n\n ")
+
+        write(io,"Dict{$S,$T}(")
+
+        write(io, join(["\t$k => $(coefficients(v))" for (k,v) in F], ",\n"))
+
+        write(io, "\n)")
+    end
+    nothing
+end
+
+function save_R_symbols(C::SixJCategory, file::String)  
+
+    R = R_symbols(C)
+    S,T = typeof(R).parameters
+    pol = polynomial(QQ,collect(coefficients(base_ring(C).pol)))
+
+    open(file, "w") do io
+        write(io, "# Field with defining polynomial $pol \n# relative to the basis 1,...,x^$(degree(pol)-1)\n\n ")
+        write(io,"Dict{$S,$T}(")
+
+        write(io, join(["\t$k => $(coefficients(v))" for (k,v) in R], ",\n"))
+
+        write(io, "\n)")
+    end
+    nothing
+end
+
+function save_P_symbols(C::SixJCategory, file::String)  
+
+    P = P_symbols(C)
+    S,T = typeof(P).parameters
+    pol = polynomial(QQ,collect(coefficients(base_ring(C).pol)))
+
+    open(file, "w") do io
+        write(io, "# Field with defining polynomial $pol \n# relative to the basis 1,...,x^$(degree(pol)-1)\n\n ")
+        write(io,"Dict{$S,$T}(")
+
+        write(io, join(["\t$k => $(coefficients(v))" for (k,v) in P], ",\n"))
+
+        write(io, "\n)")
+    end
+    nothing
+end

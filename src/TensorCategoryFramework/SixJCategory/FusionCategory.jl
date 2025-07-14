@@ -1176,3 +1176,106 @@ function reversed_monoidal_category(C::SixJCategory)
     set_name!(D, "$(C.name) with reversed monoidal structure")
     D
 end
+
+
+#=----------------------------------------------------------
+    Export F-symbols as Dict 
+----------------------------------------------------------=#
+
+function F_symbols(C::SixJCategory)
+
+    S = simples(C)
+
+    N = length(S)
+    C_morphism_type = morphism_type(C)
+    K = base_ring(C) 
+
+    F_dict = Dict{Vector{Int}, elem_type(K)}()
+
+    one_indices = findall(s -> int_dim(Hom(s,one(C))) > 0 , S)
+    one_components = simple_subobjects(one(C))
+
+    # Set unitors to identity
+    S[one_indices] = one_components
+
+    prods = [X ⊗ Y for X ∈ S, Y ∈ S]
+
+
+    homs = [basis(Hom(prods[i,j],S[k])) for i ∈ 1:N, j ∈ 1:N, k ∈ 1:N]
+
+    m = multiplicity(C) 
+    mult = multiplication_table(C)
+
+    for (a,b,c,d) ∈ collect(Base.product(1:N, 1:N, 1:N, 1:N))
+        for e in 1:N, f in 1:N 
+            if mult[a,b,e] * mult[e,c,d] == 0 
+                continue 
+            end
+
+            if m == 1
+                F = K(compose(
+                    Hom(C[d], C[e] ⊗ C[c])[1],
+                    Hom(C[e], C[a] ⊗ C[b])[1] ⊗ id(C[c]),
+                    associator(C[[a,b,c]]...),
+                    Hom(C[a] ⊗ C[b], C[e])[1] ⊗ id(C[c]),
+                    Hom(C[e] ⊗ C[c], C[d])[1]
+                ))
+                F_dict[[a,b,c,d,e,f]] = F
+            else
+                error("Not yet implemented")
+            end
+        end
+    end
+
+    return F_dict           
+end
+
+function R_symbols(C::SixJCategory)
+
+    S = simples(C)
+
+    N = length(S)
+    C_morphism_type = morphism_type(C)
+    K = base_ring(C) 
+
+    R_dict = Dict{Vector{Int}, elem_type(K)}()
+
+    one_indices = findall(s -> int_dim(Hom(s,one(C))) > 0 , S)
+    one_components = simple_subobjects(one(C))
+
+    # Set unitors to identity
+    S[one_indices] = one_components
+
+    prods = [X ⊗ Y for X ∈ S, Y ∈ S]
+
+
+    homs = [basis(Hom(prods[i,j],S[k])) for i ∈ 1:N, j ∈ 1:N, k ∈ 1:N]
+
+    m = multiplicity(C) 
+    mult = multiplication_table(C)
+
+    for (a,b,c) ∈ collect(Base.product(1:N, 1:N, 1:N))
+        
+        if mult[a,b,c] == 0 
+            continue 
+        end
+
+        if m == 1
+            R = K(compose(
+                Hom(C[c], C[a] ⊗ C[b])[1],
+                braiding(C[[a,b]]...),
+                Hom(C[b] ⊗ C[a], C[c])[1],
+            ))
+            R_dict[[a,b,c]] = R
+        else
+            error("Not yet implemented")
+        end
+    
+    end
+
+    return R_dict           
+end
+
+function P_symbols(C::SixJCategory)
+    Dict([k] => C.pivotal[k] for k in 1:rank(C))
+end
