@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+title: "TensorCategories.jl"
+version: 1.4.4
+license: "MIT"
+type: software
+abstract: "TensorCategories provides a vast framework to compute categorical constructions of fusion categories explictly. These include the center and module categories"
+message: "If you use this software, please cite it as below."
+authors:
+  - given-names: Fabian
+    family-names: Mäurer
+    affiliation: RPTU Kaiserslautern-Landau
+keywords:
+  - Tensor Categories
+  - Fusion Categories
+  - Drinfeld Center 
+  - Module Categories
