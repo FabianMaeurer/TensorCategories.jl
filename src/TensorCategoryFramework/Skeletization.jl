@@ -137,6 +137,10 @@ end
 function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothing; log = nothing)
     @assert is_semisimple(C)
 
+    if log !== nothing && !isdir(joinpath(@__DIR__, "$log"))
+        mkdir(joinpath(@__DIR__, "$log"))
+    end 
+
     N = length(S)
     C_morphism_type = morphism_type(category(C))
     F = base_ring(C) 
@@ -151,60 +155,86 @@ function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothi
     # Set unitors to identity
     S[one_indices] = one_components
 
-    prods = [X ⊗ Y for X ∈ S, Y ∈ S]
+    # prods = [X ⊗ Y for X ∈ S, Y ∈ S]
 
-    if mult !== nothing 
-        global homs = [mult[i,j,k] > 0 ? morphism.(basis(Hom(prods[i,j],S[k]))) : C_morphism_type[] for i ∈ 1:N, j ∈ 1:N, k ∈ 1:N]
-    else
-        global homs = [morphism.(basis(Hom(prods[i,j],S[k]))) for i ∈ 1:N, j ∈ 1:N, k ∈ 1:N]
-    end    
+    # if mult !== nothing 
+    #     global homs = [mult[i,j,k] > 0 ? morphism.(basis(Hom(prods[i,j],S[k]))) : C_morphism_type[] for i ∈ 1:N, j ∈ 1:N, k ∈ 1:N]
+    # else
+    #     global homs = [morphism.(basis(Hom(prods[i,j],S[k]))) for i ∈ 1:N, j ∈ 1:N, k ∈ 1:N]
+    # end  
+    
+    homs = multiplicity_spaces(C)
+    homs = Dict(k => morphism.(basis(v)) for (k,v) in homs)
+    missed = [(i,j,k) => C_morphism_type[] for i in 1:N, j in 1:N, k in 1:N if !haskey(homs, (i,j,k))]
+    if length(missed) > 0
+        push!(homs, missed...)
+    end
+    #associators = [associator(object.((X,Y,Z))...) for X ∈ S, Y ∈ S, Z ∈ S]
 
-    associators = [associator(object.((X,Y,Z))...) for X ∈ S, Y ∈ S, Z ∈ S]
 
 
+    @threads for i ∈ 1:N 
+        for j ∈ 1:N, k ∈ 1:N
+            a = associator(object.(S[[i,j,k]])...)
 
-    @threads for (i,j,k,l) ∈ collect(Base.product(1:N, 1:N, 1:N, 1:N))
-        #set trivial associators
-        if !isempty([i,j,k] ∩ one_indices) 
-            n = sum([length(homs[i,j,v]) * length(homs[v,k,l]) for v ∈ 1:N])
-            ass[i,j,k,l] = identity_matrix(F,n)
-            continue
-        end
+            for l ∈ 1:N
+                if log !== nothing && isfile(joinpath(@__DIR__, "$log/$(i)_$(j)_$(k)_$(l)"))
+                    _m =  load(joinpath(@__DIR__, "$log/$(i)_$(j)_$(k)_$(l)"))
+                    ass[i,j,k,l] = matrix(F, size(_m,1),size(_m,2), collect(_m)) 
+                    continue 
+                end
 
-        # Build a basis for Hom((X⊗Y)⊗Z,W)
-        B_XY_Z_W = C_morphism_type[]
-        for n ∈ 1:N
-            V = S[n]
+                #set trivial associators
+                if !isempty([i,j,k] ∩ one_indices) 
+                    n = sum([length(homs[i,j,v]) * length(homs[v,k,l]) for v ∈ 1:N])
+                    ass[i,j,k,l] = identity_matrix(F,n)
 
-            H_XY_V = homs[i,j,n]
-            H_VZ_W = homs[n,k,l]
+                    if log !== nothing 
+                    save( joinpath(@__DIR__, "$log/$(i)_$(j)_$(k)_$(l)"),ass[i,j,k,l])
+                end
+                    continue
+                end
 
-            B = [f ∘ (g ⊗ id(object(S[k]))) for f ∈ H_VZ_W, g ∈ H_XY_V][:]
-            if length(B) == 0 continue end
-            B_XY_Z_W = [B_XY_Z_W; B]
-        end
+                # Build a basis for Hom((X⊗Y)⊗Z,W)
+                B_XY_Z_W = C_morphism_type[]
+                for n ∈ 1:N
+                    V = S[n]
 
-        # Build a basis for Hom(X⊗(Y⊗Z),W)
-        B_X_YZ_W = C_morphism_type[]
-        for n ∈ 1:N
-            V = S[n]
+                    H_XY_V = homs[i,j,n]
+                    H_VZ_W = homs[n,k,l]
 
-            H_YZ_V = homs[j,k,n]
+                    B = [f ∘ (g ⊗ id(object(S[k]))) for f ∈ H_VZ_W, g ∈ H_XY_V][:]
+                    if length(B) == 0 continue end
+                    B_XY_Z_W = [B_XY_Z_W; B]
+                end
 
-            H_XV_W = homs[i,n,l]
-                    
-            B = [f ∘ (id(object(S[i])) ⊗ g) for f ∈ H_XV_W, g ∈ H_YZ_V][:]
-            if length(B) == 0 continue end
-            B_X_YZ_W = [B_X_YZ_W; B]
-        end
-        
+                # Build a basis for Hom(X⊗(Y⊗Z),W)
+                B_X_YZ_W = C_morphism_type[]
+                for n ∈ 1:N
+                    V = S[n]
 
-        # Express the asociator in the corresponding basis
-        a = associators[i,j,k]
-        associator_XYZ_W = hcat([express_in_basis(f ∘ a, B_XY_Z_W) for f ∈ B_X_YZ_W]...)
-       
-        ass[i,j,k,l] = matrix(F, length(B_XY_Z_W), length(B_X_YZ_W),  associator_XYZ_W)
+                    H_YZ_V = homs[j,k,n]
+
+                    H_XV_W = homs[i,n,l]
+                            
+                    B = [f ∘ (id(object(S[i])) ⊗ g) for f ∈ H_XV_W, g ∈ H_YZ_V][:]
+                    if length(B) == 0 continue end
+                    B_X_YZ_W = [B_X_YZ_W; B]
+                end
+                
+
+                # Express the asociator in the corresponding basis
+                #a = associators[i,j,k]
+                associator_XYZ_W = hcat([express_in_basis(f ∘ a, B_XY_Z_W) for f ∈ B_X_YZ_W]...)
             
+                ass[i,j,k,l] = matrix(F, length(B_XY_Z_W), length(B_X_YZ_W),  associator_XYZ_W) 
+
+                if log !== nothing && !isempty(associator_XYZ_W)
+                    @show (i,j,k,l)
+                    save(joinpath(@__DIR__, "$log/$(i)_$(j)_$(k)_$(l)"),associator_XYZ_W)
+                end
+            end
+        end
     end
 
     return ass           
@@ -222,18 +252,30 @@ function skeletal_braiding(C::Category, S = simples(C))
     F = base_ring(C) 
     braid = Array{MatElem}(undef,N,N,N)
 
-    for (i,j,l) ∈ Base.product(1:N,1:N,1:N)
-        X,Y,W = S[[i,j,l]]
-        # Basis for Hom(X⊗Y,W)
-        B_XY_W = basis(Hom(X⊗Y,W))
-
-        # Basis for Hom(Y⊗X,W)
-        B_YX_W = basis(Hom(Y⊗X,W))
-
-        braid_XY_W = hcat([express_in_basis(f ∘ braiding(X,Y), B_XY_W) for f ∈ B_YX_W]...)
-        braid[i,j,l] = matrix(F, length(B_XY_W), length(B_YX_W), braid_XY_W)
+    homs = multiplicity_spaces(C) 
+    homs = Dict(k => (basis(v)) for (k,v) in homs)
+    missed = [(i,j,k) => C_morphism_type[] for i in 1:N, j in 1:N, k in 1:N if !haskey(homs, (i,j,k))]
+    if length(missed) > 0
+        push!(homs, missed...)
     end
-    return braid
+    n = 0
+    M = N^3
+    Threads.@threads for i ∈ 1:N
+        for j ∈ 1:N, l ∈ 1:N
+            X,Y,W = S[[i,j,l]]
+            # Basis for Hom(X⊗Y,W)
+            B_XY_W = (homs[i,j,l])
+
+            # Basis for Hom(Y⊗X,W)
+            B_YX_W = (homs[j,i,l])
+
+            braid_XY_W = hcat([express_in_basis(f ∘ braiding(X,Y), B_XY_W) for f ∈ B_YX_W]...)
+            braid[i,j,l] = matrix(F, length(B_XY_W), length(B_YX_W), braid_XY_W)
+            n += 1 
+            println("\r$(Float64(n//M))")
+        end
+    end
+   return braid
 end
 
 function skeletal_braiding_of_construction(C::Category, S = simples(C), mult = nothing)
@@ -244,15 +286,22 @@ function skeletal_braiding_of_construction(C::Category, S = simples(C), mult = n
     F = base_ring(C) 
     braid = Array{MatElem}(undef,N,N,N)
 
+    homs = multiplicity_spaces(C) 
+    homs = Dict(k => (basis(v)) for (k,v) in homs)
+    missed = [(i,j,k) => C_morphism_type[] for i in 1:N, j in 1:N, k in 1:N if !haskey(homs, (i,j,k))]
+    if length(missed) > 0
+        push!(homs, missed...)
+    end
+
     for (i,j,l) ∈ Base.product(1:N,1:N,1:N)
         X,Y,W = S[[i,j,l]]
         # Basis for Hom(X⊗Y,W)
-        B_XY_W = basis(Hom(X⊗Y,W))
+        B_XY_W = morphism.(basis(homs[i,j,l]))
 
         # Basis for Hom(Y⊗X,W)
-        B_YX_W = basis(Hom(Y⊗X,W))
+        B_YX_W = morphism.(basis(homs[j,i,l]))
 
-        braid_XY_W = hcat([express_in_basis(f ∘ braiding(X,Y), B_XY_W) for f ∈ B_YX_W]...)
+        braid_XY_W = hcat([express_in_basis(f ∘ morphism(braiding(X,Y)), B_XY_W) for f ∈ B_YX_W]...)
         braid[i,j,l] = matrix(F, length(B_XY_W), length(B_YX_W), braid_XY_W)
     end
     return braid

@@ -4,7 +4,7 @@
 
 const database_path = joinpath(@__DIR__,"src/SixJCategoryDatabase/")
 
-@register_serialization_type SixJCategory
+#@register_serialization_type SixJCategory
 
 
 function save_object(s::SerializerState, C::SixJCategory)

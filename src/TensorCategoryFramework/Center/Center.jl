@@ -118,12 +118,14 @@ morphism(f::CenterMorphism) = f.m
 
 is_weakly_fusion(C::CenterCategory) = dim(category(C)) != 0
 is_fusion(C::CenterCategory) = get_attribute!(C, :is_fusion) do 
-    dim(category(C)) != 0 && dim(C) == sum(dim(x)^2 for x ∈ simples(C))
+    dim(category(C)) != 0 && dim(C) == sum(squared_norm(object(x)) for x ∈ simples(C))
 end
 is_abelian(C::CenterCategory) = true
 is_linear(C::CenterCategory) = true
 is_monoidal(C::CenterCategory) = true
 is_spherical(C::CenterCategory) = is_spherical(category(C))
+
+squared_norm(X::CenterObject) = squared_norm(object(X))
 
 """
     add_simple!(C::CenterCategory, S::CenterObject)
@@ -638,7 +640,7 @@ fpdim(X::CenterObject) = fpdim(object(X))
 
 Return a vector containing the simple objects of ```C```. 
 """
-function simples(C::CenterCategory; sort = false, show_progress = false)
+function simples(C::CenterCategory; sort = true, show_progress = false)
     if isdefined(C, :simples) 
         return C.simples 
     end
@@ -1017,6 +1019,30 @@ Return the zero morphism ```0:X → Y```.
 """
 zero_morphism(X::CenterObject, Y::CenterObject) = morphism(X,Y,zero_morphism(X.object,Y.object))
 
+
+function multiplicity_spaces(C::CenterCategory)
+    get_attribute!(C, :multiplicity_spaces) do 
+        m = multiplication_table(C) 
+        indexed_simples = pairs(simples(C))
+
+        homs_chunks = [[] for i in 1:Threads.nthreads()]
+
+        Threads.@threads for (i,S) ∈ collect(indexed_simples)
+            for (j,T) ∈ indexed_simples
+                ST = S ⊗ T
+                for  (k,V) ∈ indexed_simples
+                    if m[i,j,k] == 0 
+                        continue 
+                    end
+                    
+                    push!(homs_chunks[Threads.threadid()], (i,j,k) => hom_by_linear_equations(ST,V))
+                end
+            end
+        end
+        Dict(vcat(homs_chunks...))
+    end
+end
+
 #-------------------------------------------------------------------------------
 #   Pretty Printing
 #-------------------------------------------------------------------------------
@@ -1173,7 +1199,7 @@ function sort_simples_by_dimension!(C::CenterCategory)
     σ = sortperm(fp_dims, by = abs)
 
     if has_attribute(C, :multiplication_table) 
-        set_attribute!(C, get_attribute(C, :multiplication_table)[σ,σ,σ])
+        set_attribute!(C, :multiplication_table, get_attribute(C, :multiplication_table)[σ,σ,σ])
     end
     if has_attribute(C, :smatrix)
         set_attribute!(C,:smatrix, get_attribute(C, :smatrix)[σ,σ])
@@ -1220,6 +1246,8 @@ function split(C::CenterCategory; absolute = true)
     # find smallest cyclotomic extension such that Z(C) splits
     # If that does not exists compute minimal extension field such that 
     # it splits.
+
+    generators = PolyRingElem[]
     for e ∈ Ends
         if int_dim(e) > 1
             i = findfirst(f -> degree(minpoly(f)) == int_dim(e), basis(e))
@@ -1240,42 +1268,44 @@ function split(C::CenterCategory; absolute = true)
                 minpoly(e[i])
             end
 
-            # if the extension is abelian 
-            
-            m = max(int_dim(e),4)
-            while true 
-                L = if K == QQ 
-                        cyclotomic_field(m)[1]
-                    else
-                        cyclotomic_extension(K,m).Kr
-                    end
-               
-                rs = roots(L, f)
-                if length(rs) > 0 
-                    push!(n,m) 
-                    break
-                end
-                @show m += 1
-            end
-            
+            push!(generators, f) 
         end
     end
-    m = lcm(n...)
-    L = if K == QQ 
-            cyclotomic_field(m)[1]
-        else
-            L2 = cyclotomic_extension(K,m)
-            absolute ? L2.Ka : L2.Kr
-        end
-    
+    L_rel = splitting_field([change_base_ring(base_ring(C), f) for f in generators])
 
-    if absolute
-        extension_of_scalars(C,L)
+    if base_ring(C) == QQ || is_abelian(base_ring(C))
+        L2, iso1 = absolute_simple_field(L_rel)
+        L3, iso2 = simplify(L2)
+
+        if is_abelian(L3)
+            for m ∈ degree(L_rel.pol):degree(L3)^2 
+                L = cyclotomic_extension(base_ring(C), m)
+                if !isempty(roots(L.Kr,L_rel.pol))
+                    global L = L.Ka
+                    break
+                end
+            end
+        else 
+            return extension_of_scalars(C,L3, embedding = e -> preimage(iso2, preimage(iso1, (L_rel(e)))))
+        end
+    else 
+        for m ∈ degree(L_rel.pol):absolute_degree(L_rel)^2 
+            L = cyclotomic_extension(base_ring(C), m)
+            if !isempty(roots(Lr,L_rel.pol))
+                global L = L.Ka
+                break
+            end
+        end
+    end
+
+    if base_ring(C) == QQ
+        return extension_of_scalars(C,L, embedding = e -> L(e))
     else
-        extension_of_scalars(C, L, embedding = x -> L(x))
+        return extension_of_scalars(C,L)
     end
 end
 
+cyclotomic_extension(K::QQField, n::Int) = cyclotomic_extension(rationals_as_number_field()[1], n)
 
 function split_algebraic(C::CenterCategory, e = complex_embeddings(base_ring(C))[1])
     ends = End.(simples(C))
@@ -1363,7 +1393,7 @@ function hom_by_adjunction(X::CenterObject, Y::CenterObject)
 end
 
 
-function hom_by_linear_equations(X::CenterObject, Y::CenterObject)
+function hom_by_linear_equations(X::CenterObject, Y::CenterObject, ind = 1:rank(category(parent(X))))
     #@assert parent(X) == parent(Y)
 
     H = Hom(object(X), object(Y))
@@ -1381,7 +1411,7 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject)
 
     S = simples(parent(object(X)))
 
-    for (s,γₛ,λₛ) ∈ zip(S,half_braiding(X), half_braiding(Y))
+    for (s,γₛ,λₛ) ∈ zip(S[ind],half_braiding(X)[ind], half_braiding(Y)[ind])
         Hs = Hom(object(X)⊗s, s⊗object(Y))
         base = basis(Hs)
         if length(base) == 0

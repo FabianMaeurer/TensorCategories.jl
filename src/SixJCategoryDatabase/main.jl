@@ -2,9 +2,9 @@
     Access Fusion Category Database  
 ----------------------------------------------------------=#
 
-function load_fusion_category(name::String)
-    load(joinpath(@__DIR__, name * ".mrdi"))
-end
+# function load_fusion_category(name::String)
+#     load(joinpath(@__DIR__, name * ".mrdi"))
+# end
 
 function add_to_local_database(C::SixJCategory, name::String, path::String = @__DIR__)
 

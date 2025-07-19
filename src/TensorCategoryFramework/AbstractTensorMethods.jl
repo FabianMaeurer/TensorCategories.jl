@@ -240,7 +240,7 @@ function dim(X::Object)
     error("No dimension defined")
 end
 
-dim(C::Category) = sum(dim(s)^2 for s ∈ simples(C))
+dim(C::Category) = sum(squared_norm(s) for s ∈ simples(C))
 #-------------------------------------------------------
 # S-Matrix
 #-------------------------------------------------------

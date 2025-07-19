@@ -42,6 +42,7 @@ function ==(C::SixJCategory, D::SixJCategory)
     true 
 end
 
+object_type(::SixJCategory) = SixJObject
 #-------------------------------------------------------------------------------
 #   Constructors
 #-------------------------------------------------------------------------------
@@ -1207,28 +1208,45 @@ function F_symbols(C::SixJCategory)
     mult = multiplication_table(C)
 
     for (a,b,c,d) ∈ collect(Base.product(1:N, 1:N, 1:N, 1:N))
+
+        sym = collect(C.ass[a,b,c,d])[:]
+  
         for e in 1:N, f in 1:N 
-            if mult[a,b,e] * mult[e,c,d] == 0 
+            if mult[a,b,e] * mult[e,c,d] * mult[b,c,f] * mult[a,f,d] == 0 
                 continue 
             end
-
             if m == 1
-                F = K(compose(
-                    Hom(C[d], C[e] ⊗ C[c])[1],
-                    Hom(C[e], C[a] ⊗ C[b])[1] ⊗ id(C[c]),
-                    associator(C[[a,b,c]]...),
-                    Hom(C[a] ⊗ C[b], C[e])[1] ⊗ id(C[c]),
-                    Hom(C[e] ⊗ C[c], C[d])[1]
-                ))
-                F_dict[[a,b,c,d,e,f]] = F
+                # F = K(compose(
+                #     Hom(C[d], C[e] ⊗ C[c])[1],
+                #     Hom(C[e], C[a] ⊗ C[b])[1] ⊗ id(C[c]),
+                #     associator(C[[a,b,c]]...),
+                #     id(C[a]) ⊗ Hom(C[b] ⊗ C[c], C[f])[1],
+                #     Hom(C[a] ⊗ C[f], C[d])[1]
+                # ))
+                F_dict[[a,b,c,d,f,e]] = popfirst!(sym)
             else
-                error("Not yet implemented")
+                for (i,g) in pairs(basis(Hom(C[d], C[e] ⊗ C[c])))
+                    for (j,g2) in pairs(basis(Hom(C[e], C[a] ⊗ C[b])))
+                        for (i2,h) in pairs(basis(Hom(C[b] ⊗ C[c], C[f])))
+                            for (j2,h2) in pairs(basis(Hom(C[a] ⊗ C[f], C[d])))
+                                # F = K(compose(
+                                #     g,
+                                #     g2 ⊗ id(C[c]),
+                                #     associator(C[[a,b,c]]...),
+                                #     id(C[a]) ⊗ h,
+                                #     h2
+                                # ))
+                                F_dict[[a,b,c,d,f,j2,i2,e,j,i]] = popfirst!(sym)
+                            end
+                        end
+                    end
+                end
             end
         end
     end
 
     return F_dict           
-end
+end 
 
 function R_symbols(C::SixJCategory)
 
@@ -1255,20 +1273,20 @@ function R_symbols(C::SixJCategory)
     mult = multiplication_table(C)
 
     for (a,b,c) ∈ collect(Base.product(1:N, 1:N, 1:N))
-        
+        sym = collect(C.braiding[a,b,c])[:]
+
         if mult[a,b,c] == 0 
             continue 
         end
 
         if m == 1
-            R = K(compose(
-                Hom(C[c], C[a] ⊗ C[b])[1],
-                braiding(C[[a,b]]...),
-                Hom(C[b] ⊗ C[a], C[c])[1],
-            ))
-            R_dict[[a,b,c]] = R
+            R_dict[[a,b,c]] = popfirst!(sym)
         else
-            error("Not yet implemented")
+            for i ∈ 1:mult[a,b,c]
+                for j ∈ 1:mult[b,a,c]
+                    R_dict[[a,b,c,i,j]] = popfirst!(sym)
+                end
+            end
         end
     
     end
@@ -1277,5 +1295,5 @@ function R_symbols(C::SixJCategory)
 end
 
 function P_symbols(C::SixJCategory)
-    Dict([k] => C.pivotal[k] for k in 1:rank(C))
+    Dict([k] => C.pivotal[k] for k in 1:rank(C)) 
 end

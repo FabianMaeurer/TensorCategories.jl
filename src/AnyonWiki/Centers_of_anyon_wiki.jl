@@ -1,61 +1,43 @@
 #=----------------------------------------------------------
     Script to compute the centers of the anyon wiki 
 ----------------------------------------------------------=#
+using Revise, TensorCategories, Oscar
 
 log = open(joinpath(@__DIR__, "Logs/Centers_of_anyon_wiki.log"), "a")
 time_log = open(joinpath(@__DIR__, "Logs/Centers_of_anyon_wiki_time.log"), "a")
 
-for n ∈ 201:300  
-     
-    attributtes = TensorCategories.load_anyonwiki_attributes(n)
+code_to_name(a,b,c,d,e,f,g) = "center_$(a)_$(b)_$(c)_$(d)_$(e)_$(f)_$g"
 
-    # Works only for spherical categories
-    if attributtes[3] != 1 continue end
+codes = sort(collect(keys(include(joinpath(@__DIR__, "AnyonWikiData/base_field_generators.jl")))))
 
-    # Skip modular ones for now
-    if attributtes[5] != 0 continue end
-    
-    C = anyonwiki(n, QQBarField())
-    
-    # if ! pentagon_axiom(C) 
-    #     write(log, "Pentagon axiom failed for n = $n\n")
-    #     println("Pentagon axiom failed for n = $n")
-    #     continue
-    # end
+for c ∈ codes[2:5:end]
+    file_name = code_to_name(c...)
 
-    # if ! is_spherical(C)
-    #     write(log, "Spherical axiom failed for n = $n\n")
-    #     println("Spherical axiom failed for n = $n")
-    #     continue
-    # end
-    
-    print("n = $n: ")
+    if isdir(joinpath(@__DIR__, "AnyonWikiData/Centers/$file_name"))
+        continue 
+    end
 
     try 
-        t1 = @elapsed begin 
-            Z = center(C) 
-            simples(Z)
-        end
 
-        print("Center computed in $t1 seconds, ")
+        C = anyonwiki(c...)
 
-        t2 = @elapsed skel_Z = six_j_category(Z)
+        t1 = @elapsed Z = center(C)
 
-        println("Skeleton computed in $t2 seconds")
-
-        write(time_log, "$n, $t1, $t2\n")
-        flush(time_log)
-
-        add_to_local_database(skel_Z, joinpath(@__DIR__, "AnyonWikiData/Centers/Center_$n"))
-
-    catch e 
-        println(" failed")
+        t2 = @elapsed Z = split(Z)
         
-        str = IOBuffer()
-        showerror(str, e) 
-        str = String(take!(str))
-        write(log, """n = $n: 
-        $(str)\n\n""")
+        t3 = @elapsed Z2 = six_j_category(Z)
+        
+
+        t4 = @elapsed save_fusion_category(Z2, joinpath(@__DIR__, "AnyonWikiData/Centers"), file_name)
+
+
+        write(time_log, "$file_name: $t1, $t2, $t3, $t4\n")
+        flush(time_log)
+    catch e 
+        io = IOBuffer() 
+        showerror(io,e)
+        msg = String(take!(io))
+        write(log, "$file_name:\n$(msg)\n\n")
         flush(log)
     end
 end

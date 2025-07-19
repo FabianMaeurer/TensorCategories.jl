@@ -12,9 +12,9 @@ anyon_path = joinpath(@__DIR__, "AnyonWikiData/")
 
 @doc raw""" 
 
-    anyonwiki(n::Int)
+    anyonwiki(r,m,n,i,a,b,p)
 
-Load the n-th fusion category from the list of multiplicity free fusion categories of rank ≤ 7.
+Load the fusion category from the list of multiplicity free fusion categories of rank ≤ 7 with index (r,m,n,i,a,b,p).
 """
 function anyonwiki(rank::Int, 
                     multiplicity::Int, 
@@ -67,14 +67,31 @@ function dict_to_associator(N::Int, K::Field, ass::Dict)
     for a ∈ 1:N, b ∈ 1:N, c ∈ 1:N, d ∈ 1:N
         abc_d = filter(e -> e[[1,2,3,4]] == [a,b,c,d], collect(keys(ass)))
         l = Int(sqrt(length(abc_d)))
-        abc_d = sort(abc_d, by = v -> v[6])
-        abc_d = sort(abc_d, by = v -> v[5])
-        
+
+        if length(first(keys(ass))) == 6 
+            abc_d = sort(abc_d, by = v -> v[6])
+            abc_d = sort(abc_d, by = v -> v[5])
+        else
+            abc_d = sort(abc_d, by = v -> v[[8,9,10,5,7,6]])
+        end
         M = matrix(K,l,l, [ass[v] for v ∈ abc_d])
-        ass_matrices[a,b,c,d] = M
+        ass_matrices[a,b,c,d] = (M)
     end
 
     ass_matrices 
+end
+
+function group_dict_keys_by(f::Function, D::Dict)
+    groups = Dict()
+    for (k,v) ∈ D 
+        f_k = f(k)
+        if f_k ∈ keys(groups)
+            push!(groups[f_k], k => v)
+        else 
+            push!(groups, f_k => Dict(k => v))
+        end
+    end
+    return groups 
 end
 
 function dict_to_braiding(N::Int, K::Field, braid::Dict)
@@ -84,7 +101,7 @@ function dict_to_braiding(N::Int, K::Field, braid::Dict)
     for a ∈ 1:N, b ∈ 1:N, c ∈ 1:N
         ab_c = filter(e -> e[[1,2,3]] == [a,b,c], collect(keys(braid)))
         l = Int(sqrt(length(ab_c)))
-
+        sort!(ab_c)
         M = matrix(K,l,l, [braid[v] for v ∈ ab_c])
         braiding_array[a,b,c] = M
     end
@@ -701,4 +718,95 @@ function fusion_ring_name(m::Array{Int,3})
         end
     end
     return r,n, maximum(signatures)
+end
+
+#=----------------------------------------------------------
+    Save to anyonwiki 
+----------------------------------------------------------=#
+
+function save_fusion_category(C::SixJCategory, path::String, name::String)
+    cat_path = joinpath(path, name)
+
+    mkdir(cat_path)
+
+    save_fusion_category_meta_data(C, joinpath(cat_path, "$(name)_meta"))
+
+    save_symbols(F_symbols(C), joinpath(cat_path, "$(name)_F_symbols"))
+
+    save_symbols(P_symbols(C), joinpath(cat_path, "$(name)_P_symbols"))
+    
+    if is_braided(C) 
+        save_symbols(R_symbols(C), joinpath(cat_path, "$(name)_R_symbols"))
+    end
+end
+
+function load_fusion_category(file::String)
+    name = splitpath(file)[end]
+
+    meta = include(joinpath(file, "$(name)_meta"))
+
+    K = meta["field"]
+    rank = meta["rank"]
+    description = meta["name"]
+    simples_names = meta["simples_names"]
+    one = meta["one"]
+    
+    # include F/P/R-symbols as coefficient vectors, convert to number field elements and then to matrices
+    F_symbols = include(joinpath(file, "$(name)_F_symbols"))
+    F_symbols = Dict(k => K == QQ ? K(v...) : K(v) for (k,v) ∈ F_symbols)
+    F_symbols = dict_to_associator(rank, K, F_symbols)
+
+    P_symbols = include(joinpath(file, "$(name)_P_symbols"))
+    P_symbols = [K == QQ ? K(P_symbols[k]...) : K(P_symbols[k]) for k ∈ sort(collect(keys(P_symbols)))]
+
+    C = six_j_category(K,  multiplication_table_from_F_symbols(F_symbols))
+    set_associator!(C, F_symbols)
+    set_pivotal!(C, P_symbols)
+
+    if isfile(joinpath(file, "$(name)_R_symbols"))
+        R_symbols = include(joinpath(file, "$(name)_R_symbols"))
+        R_symbols = Dict(k => K == QQ ? K(v...) : K(v) for (k,v) ∈ R_symbols)
+        set_braiding!(C, dict_to_braiding(rank, K, R_symbols))
+    end
+
+    set_name!(C, description)
+    set_simples_name!(C, simples_names)
+    set_one!(C, one)
+
+    C
+end
+
+
+function save_symbols(S::Dict, file::String)
+    K = parent(first(S)[2])
+
+    open(file, "w") do io 
+        write(io, "Dict(\n")
+         
+        if K == QQ
+            write(io, join(["\t$k => $([v])" for (k,v) ∈ S], ",\n") )
+        else
+            write(io, join(["\t$k => $(coefficients(v))" for (k,v) ∈ S], ",\n"))
+        end
+
+        write(io, ")")
+    end
+end
+
+function save_fusion_category_meta_data(C::SixJCategory, file::String)
+    open(file, "w") do io 
+        write(io, "# Meta data for $C\n\n")
+        write(io, """Dict(\n
+        \t\"name\" => \"$(C.name)\",\n""")
+        if base_ring(C) == QQ 
+            write(io, "\t\"field\" => QQ,\n")
+        else
+            write(io, "\t\"field\" => number_field(polynomial(QQ,$(collect(coefficients(base_ring(C).pol)))))[1],\n")
+        end
+        write(io, """
+        \t\"rank\"=> $(rank(C)),\n
+        \t\"simples_names\" => $(simples_names(C)),\n
+        \t\"one\" => $(C.one)\n)
+        """)
+    end
 end

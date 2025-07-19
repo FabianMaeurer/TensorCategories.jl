@@ -2,14 +2,13 @@ module TensorCategories
 
 import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show,div, rand, split
 
-import Oscar
 import Oscar.AbstractAlgebra.Generic: Poly
 import Oscar.AbstractAlgebra: Group
 import Oscar.Hecke: RelSimpleNumField, regular_module, meataxe, NumFieldEmb
 import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAlgebra, AssociativeAlgebraElem, ngens,
-    cyclotomic_field, Fac, Field, FieldElem, FinField, GF, GAP,
+    cyclotomic_field, Fac, Field, FieldElem, FinField, GF, GAP,QQ,
     GAPGroupHomomorphism, GL, GSet, GroupElem, Hecke.AbstractAssociativeAlgebra,
-    Hecke.AbstractAssociativeAlgebraElem, Ideal, MPolyRingElem, MPolyIdeal, Map, MatElem, MatrixElem,
+    Hecke.AbstractAssociativeAlgebraElem, Ideal, MPolyRingElem, MPolyIdeal, Map, MatElem, MatrixElem, conductor,
     MatrixGroup, matrix_space, ModuleIsomorphism, number_field, PcGroup, PolyRingElem, FqMPolyRingElem, FqPolyRingElem,
     polynomial_ring, QQ, QQBarField, QQField, QQFieldElem, QQMPolyRingElem, Ring, RingElem, ZZ, QQBarFieldElem,
     ZZRingElem, abelian_closure, abelian_group, absolute_simple_field, action, base_field, defining_polynomial,
@@ -29,7 +28,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     monomials, multiplication_table, multiplicity, nullspace, nvars, one, orbit,
     orbits, order, parent, permutation_matrix, preimage, primary_decomposition, product, rank, real_solutions, resultant, root_of_unity, roots, rref, save,
     set_attribute!, size, solve, sparse_matrix, splitting_field,
-    stabilizer, sub, subst, symbols, symmetric_group, tensor_power, tensor_product, tr,
+    stabilizer, sub, subst, symbols, symmetric_group, tensor_power, tensor_product, tr, absolute_degree,
     trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗, AbsSimpleNumField,
     number_of_rows, number_of_columns, is_squarefree, is_commutative,
     gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra,
@@ -170,6 +169,7 @@ export ev_coev
 export exponent
 export express_in_basis 
 export extension_of_scalars
+export F_symbols
 export factor 
 export free_bimodule
 export free_left_module
@@ -296,6 +296,7 @@ export matrix
 export meataxe
 export minimal_subquotients
 export minimal_subquotients_with_multiplicity
+export multiplicity_spaces
 export ModuleCategory
 export ModuleMorphism
 export ModuleObject
@@ -324,6 +325,7 @@ export opposite_morphism
 export opposite_object
 export orbit_index 
 export orbit_stabilizers 
+export P_symbols
 export pairing 
 export parent 
 export pentagon_axiom 
@@ -347,6 +349,7 @@ export pushout_product
 export QuantumZZRing
 export QuantumZZRingElem
 export QZZ
+export R_symbols
 export radical
 export rand
 export rational_lift 
@@ -370,6 +373,7 @@ export RingCatMorphism
 export RingSubcategory 
 export roots 
 export save 
+export save_fusion_category
 export Semisimplification
 export SemisimplifiedObject
 export SemisimplifiedMorphism
@@ -535,9 +539,9 @@ include("AnyonWiki/AnyonWiki.jl")
 include("AnyonWiki/CheckAnyonwiki.jl")
 
 
-@register_serialization_type SixJMorphism
-@register_serialization_type SixJObject
-@register_serialization_type CenterCategory
+# @register_serialization_type SixJMorphism
+# @register_serialization_type SixJObject
+# @register_serialization_type CenterCategory
 
 
 #include("Utility/Serialization.jl")
