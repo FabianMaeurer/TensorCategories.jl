@@ -731,12 +731,12 @@ function save_fusion_category(C::SixJCategory, path::String, name::String)
 
     save_fusion_category_meta_data(C, joinpath(cat_path, "$(name)_meta"))
 
-    save_symbols(F_symbols(C), joinpath(cat_path, "$(name)_F_symbols"))
+    save_symbols(F_symbols(C), joinpath(cat_path, "$(name)_F_symbols"), 4)
 
     save_symbols(P_symbols(C), joinpath(cat_path, "$(name)_P_symbols"))
     
     if is_braided(C) 
-        save_symbols(R_symbols(C), joinpath(cat_path, "$(name)_R_symbols"))
+        save_symbols(R_symbols(C), joinpath(cat_path, "$(name)_R_symbols"), 3)
     end
 end
 
@@ -752,9 +752,7 @@ function load_fusion_category(file::String)
     one = meta["one"]
     
     # include F/P/R-symbols as coefficient vectors, convert to number field elements and then to matrices
-    F_symbols = include(joinpath(file, "$(name)_F_symbols"))
-    F_symbols = Dict(k => K == QQ ? K(v...) : K(v) for (k,v) ∈ F_symbols)
-    F_symbols = dict_to_associator(rank, K, F_symbols)
+    F_symbols = load_F_symbols(rank,K,joinpath(file, "$(name)_F_symbols"))
 
     P_symbols = include(joinpath(file, "$(name)_P_symbols"))
     P_symbols = [K == QQ ? K(P_symbols[k]...) : K(P_symbols[k]) for k ∈ sort(collect(keys(P_symbols)))]
@@ -763,10 +761,9 @@ function load_fusion_category(file::String)
     set_associator!(C, F_symbols)
     set_pivotal!(C, P_symbols)
 
-    if isfile(joinpath(file, "$(name)_R_symbols"))
-        R_symbols = include(joinpath(file, "$(name)_R_symbols"))
-        R_symbols = Dict(k => K == QQ ? K(v...) : K(v) for (k,v) ∈ R_symbols)
-        set_braiding!(C, dict_to_braiding(rank, K, R_symbols))
+    if isdir(joinpath(file, "$(name)_R_symbols"))
+        R_symbols = load_R_symbols(rank,K,joinpath(file, "$(name)_R_symbols"))
+        set_braiding!(C, R_symbols)
     end
 
     set_name!(C, description)
@@ -776,20 +773,85 @@ function load_fusion_category(file::String)
     C
 end
 
+function load_F_symbols(rank::Int, K::Field, path::String)
+    ass = Array{MatElem,4}(undef, rank,rank,rank,rank)
 
-function save_symbols(S::Dict, file::String)
+    for i ∈ 1:rank, j ∈ 1:rank, k ∈ 1:rank, l ∈ 1:rank 
+        _file = joinpath(path, "[$(i), $(j), $(k), $l]")
+
+        if isfile(_file)
+            symbols = include(_file)
+            symbols_keys = collect(keys(symbols))
+            if length(first(keys(symbols))) == 6 
+                symbols_keys = sort(symbols_keys, by = v -> v[[5,6]])
+            else
+                symbols_keys = sort(symbols_keys, by = v -> v[[8,9,10,5,7,6]])
+            end
+            n = Int(sqrt(length(symbols_keys)))
+            M = matrix(K,n,n, [symbols[v] for v ∈ symbols_keys])
+            ass[i,j,k,l] = M
+        else
+            ass[i,j,k,l] = zero_matrix(K,0,0)
+        end
+    end
+    ass 
+end
+
+function load_R_symbols(rank::Int, K::Field, path::String)
+    braid = Array{MatElem,3}(undef, rank,rank,rank)
+
+    for i ∈ 1:rank, j ∈ 1:rank, k ∈ 1:rank
+        _file = joinpath(path, "[$(i), $(j), $(k)]")
+
+        if isfile(_file)
+            symbols = include(_file)
+
+            symbols_keys = sort(collect(keys(symbols)))
+          
+            n = Int(sqrt(length(symbols)))
+            M = matrix(K,n,n, [symbols[v] for v ∈ symbols_keys])
+            braid[i,j,k] = M
+        else
+            braid[i,j,k] = zero_matrix(K,0,0)
+        end
+    end
+    braid 
+end
+
+
+
+function save_symbols(S::Dict, path::String, chunk::Int = 0)
     K = parent(first(S)[2])
 
-    open(file, "w") do io 
-        write(io, "Dict(\n")
-         
-        if K == QQ
-            write(io, join(["\t$k => $([v])" for (k,v) ∈ S], ",\n") )
-        else
-            write(io, join(["\t$k => $(coefficients(v))" for (k,v) ∈ S], ",\n"))
-        end
+    if chunk != 0
+        chunks = group_dict_keys_by(e -> e[1:chunk], S)
+        mkdir(path)
 
-        write(io, ")")
+        for (k,ch) ∈ chunks
+            open(joinpath(path, "$k"), "w") do io 
+                write(io, "Dict(\n")
+                
+                if K == QQ
+                    write(io, join(["\t$k => $([v])" for (k,v) ∈ ch], ",\n") )
+                else
+                    write(io, join(["\t$k => $(coefficients(v))" for (k,v) ∈ ch], ",\n"))
+                end
+
+                write(io, ")")
+            end
+        end
+    else
+        open(path, "w") do io 
+            write(io, "Dict(\n")
+            
+            if K == QQ
+                write(io, join(["\t$k => $([v])" for (k,v) ∈ S], ",\n") )
+            else
+                write(io, join(["\t$k => $(coefficients(v))" for (k,v) ∈ S], ",\n"))
+            end
+
+            write(io, ")")
+        end
     end
 end
 
