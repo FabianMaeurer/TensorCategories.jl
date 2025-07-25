@@ -258,8 +258,7 @@ function skeletal_braiding(C::Category, S = simples(C))
     if length(missed) > 0
         push!(homs, missed...)
     end
-    n = 0
-    M = N^3
+
     Threads.@threads for i ∈ 1:N
         for j ∈ 1:N, l ∈ 1:N
             X,Y,W = S[[i,j,l]]
@@ -271,8 +270,6 @@ function skeletal_braiding(C::Category, S = simples(C))
 
             braid_XY_W = hcat([express_in_basis(f ∘ braiding(X,Y), B_XY_W) for f ∈ B_YX_W]...)
             braid[i,j,l] = matrix(F, length(B_XY_W), length(B_YX_W), braid_XY_W)
-            n += 1 
-            println("\r$(Float64(n//M))")
         end
     end
    return braid
