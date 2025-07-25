@@ -876,3 +876,4 @@ function save_fusion_category_meta_data(C::SixJCategory, file::String)
         """)
     end
 end
+

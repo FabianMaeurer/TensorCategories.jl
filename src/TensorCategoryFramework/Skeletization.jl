@@ -308,6 +308,27 @@ end
     Gauge Transform  
 ----------------------------------------------------------=#
 
+# function unitary_gauge(C::SixJCategory)
+#     @assert multiplicity(C) == 1
+#     N = rank(C) 
+#     K = base_ring(C)
+    
+#     if  ! is_normal(K) 
+#         K,emb = normal_closure(K)
+#         C = extension_of_scalars(C,K,embedding = emb)
+#     end
+
+#     conjg = complex_conjugation(K)
+
+    
+
+#     D = six_j_category(R, multiplication_table(C))
+#     D.one = C.one 
+#     D.ass = [change_base_ring(R,m) for m in C.ass]
+    
+#     trafo = Dict((i,j,k) => popfirst!(g) * Hom(D[]))
+# end
+
 function gauge_transform(C::SixJCategory, bases::Dict)
 
     S = simples(C)
@@ -372,18 +393,18 @@ function with_gauge_freedom(C::SixJCategory)
     one_index = C.one 
     N = length(simples(C)) 
 
-    # Take all combinations not fixed by unitors 
-    indices = [(i,j) for i ∈ 1:N, j ∈ 1:N if isempty([i,j] ∩ one_index)]
+    non_trivial_indices = findall(!=(0), multiplication_table(C))
+
+    R,g = polynomial_ring(K, sum(multiplication_table(C)))
+    L = fraction_field(R)
+    D = six_j_category(L, multiplication_table(C))
+    D.one = C.one 
+    D.ass = [change_base_ring(L,m) for m in C.ass]
 
     # Bases for Hom spaces Hom(ij,k)
-    homs = [(i,j,k) => basis(Hom(C[i]⊗C[j], C[k])) for (i,j) ∈ indices, k ∈ 1:N if C.tensor_product[i,j,k] > 0]
+    @show homs = [(i,j,k) => [popfirst!(g) * f for f ∈ basis(Hom(D[i]⊗D[j], D[k]))] for (i,j,k) ∈ Tuple.(non_trivial_indices)]
 
-    R,x = polynomial_ring(K, sum(length.(homs)))
-    L = fraction_field(R)
-    y = L.(x)
-    homs = [k => [popfirst!(y) * (f ⊗ L) for f ∈ H] for (k,H) ∈ homs]
-
-    return gauge_transform(C ⊗ L, Dict(homs))
+    return gauge_transform(D, Dict(homs))
 end
 
 function _subst_gauge!(C::SixJCategory, x::Vector{<:FracFieldElem})
