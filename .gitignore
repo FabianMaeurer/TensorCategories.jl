@@ -8,5 +8,3 @@ Codecov.jl
 docs/build/
 .vscode/
 coverage/
-/src/TensorCategoryFramework/HaagerupCenter/
-/src/TensorCategoryFramework/HaagerupCenterR/
