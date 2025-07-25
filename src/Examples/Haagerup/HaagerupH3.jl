@@ -1,3 +1,9 @@
+
+function haagerup_H3_center()
+    path = joinpath(@__DIR__, "../center_haagerup")
+    load_fusion_category(path)
+end
+
 """ 
 
     haagerup_H3([p1 = 1, p2 = 2])

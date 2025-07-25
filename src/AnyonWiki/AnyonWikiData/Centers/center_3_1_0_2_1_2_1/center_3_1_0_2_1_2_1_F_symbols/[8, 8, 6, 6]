@@ -1,0 +1,5 @@
+Dict(
+	[8, 8, 6, 6, 8, 1] => QQFieldElem[1, 0],
+	[8, 8, 6, 6, 8, 6] => QQFieldElem[-1, 0],
+	[8, 8, 6, 6, 7, 1] => QQFieldElem[2, 0],
+	[8, 8, 6, 6, 7, 6] => QQFieldElem[2, 0])

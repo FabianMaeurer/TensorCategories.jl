@@ -205,6 +205,7 @@ export GVSHomSpace
 export GVSMorphism 
 export GVSObject 
 export haagerup_H3 
+export haagerup_H3_center
 export half_braiding 
 export half_braidings 
 export hexagon_axiom

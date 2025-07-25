@@ -59,6 +59,13 @@ function anyonwiki(rank::Int,
     return C
 end
 
+function anyonwiki_center(i,j,k,l,m,n,o)
+    name = join(["$(a)" for a ∈ [i,j,k,l,m,n,o]], "_")
+    path = joinpath(@__DIR__, "AnyonWikiData/Centers/center_$name")
+
+    load_fusion_category(path)
+end
+
 function dict_to_associator(N::Int, K::Field, ass::Dict)
     # Transform associator dict to Matrices 
 
@@ -736,7 +743,7 @@ function save_fusion_category(C::SixJCategory, path::String, name::String)
     save_symbols(P_symbols(C), joinpath(cat_path, "$(name)_P_symbols"))
     
     if is_braided(C) 
-        save_symbols(R_symbols(C), joinpath(cat_path, "$(name)_R_symbols"), 3)
+        save_symbols(R_symbols(C), joinpath(cat_path, "$(name)_R_symbols"))
     end
 end
 
@@ -788,7 +795,8 @@ function load_F_symbols(rank::Int, K::Field, path::String)
                 symbols_keys = sort(symbols_keys, by = v -> v[[8,9,10,5,7,6]])
             end
             n = Int(sqrt(length(symbols_keys)))
-            M = matrix(K,n,n, [symbols[v] for v ∈ symbols_keys])
+            vals = [K == QQ ? K(symbols[v]...) : K(symbols[v]) for v ∈ symbols_keys]
+            M = matrix(K,n,n, vals)
             ass[i,j,k,l] = M
         else
             ass[i,j,k,l] = zero_matrix(K,0,0)
@@ -798,22 +806,18 @@ function load_F_symbols(rank::Int, K::Field, path::String)
 end
 
 function load_R_symbols(rank::Int, K::Field, path::String)
-    braid = Array{MatElem,3}(undef, rank,rank,rank)
+    braid = [zero_matrix(K,0,0) for _ ∈ 1:rank, _ ∈ 1:rank, _ ∈ 1:rank]
+    symbols = include(path)
+    chunks = group_dict_keys_by(e -> e[1:3], symbols)
 
-    for i ∈ 1:rank, j ∈ 1:rank, k ∈ 1:rank
-        _file = joinpath(path, "[$(i), $(j), $(k)]")
+    for ((i,j,k), D) ∈ chunks 
+        
+        symbols_keys = sort(collect(keys(D)))
+        n = Int(sqrt(length(D)))
+        vals = [K == QQ ? K(D[v]...) : K(D[v]) for v ∈ symbols_keys]
 
-        if isfile(_file)
-            symbols = include(_file)
-
-            symbols_keys = sort(collect(keys(symbols)))
-          
-            n = Int(sqrt(length(symbols)))
-            M = matrix(K,n,n, [symbols[v] for v ∈ symbols_keys])
-            braid[i,j,k] = M
-        else
-            braid[i,j,k] = zero_matrix(K,0,0)
-        end
+        M = matrix(K,n,n, vals)
+        braid[i,j,k] = M
     end
     braid 
 end

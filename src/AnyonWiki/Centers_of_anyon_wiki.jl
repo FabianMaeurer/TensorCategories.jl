@@ -10,7 +10,7 @@ code_to_name(a,b,c,d,e,f,g) = "center_$(a)_$(b)_$(c)_$(d)_$(e)_$(f)_$g"
 
 codes = sort(collect(keys(include(joinpath(@__DIR__, "AnyonWikiData/base_field_generators.jl")))))
 
-for c ∈ codes[2:5:end]
+for c ∈ filter(e -> e[1] < 6, codes)
     file_name = code_to_name(c...)
 
     if isdir(joinpath(@__DIR__, "AnyonWikiData/Centers/$file_name"))
