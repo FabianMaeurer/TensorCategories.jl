@@ -1,0 +1,12 @@
+# Meta data for Skeletization of Drinfeld center of Fusion Category 5_1_0_6_2_1_1
+
+Dict(
+
+	"name" => "Skeletization of Drinfeld center of Fusion Category 5_1_0_6_2_1_1",
+	"field" => number_field(polynomial(QQ,QQFieldElem[1, 0, 0, 0, -1, 0, 0, 0, 1]))[1],
+	"rank"=> 21,
+
+	"simples_names" => ["(𝟙, γ)", "(X2, γ)", "(X3, γ)", "(𝟙 ⊕ X3, γ)", "(X2 ⊕ X3, γ)", "(X4, γ1)", "(X4, γ2)", "(X5, γ1)", "(X5, γ2)", "(𝟙 ⊕ X3 ⊕ X4, γ)", "(𝟙 ⊕ X3 ⊕ X5, γ)", "(X2 ⊕ X3 ⊕ X4, γ)", "(X2 ⊕ X3 ⊕ X5, γ)", "(X4 ⊕ X5, γ1)", "(𝟙 ⊕ X2 ⊕ X4 ⊕ X5, γ)", "(X4 ⊕ X5, γ2)", "(X4 ⊕ X5, γ3)", "(X4 ⊕ X5, γ4)", "(X4 ⊕ X5, γ5)", "(X3 ⊕ X4 ⊕ X5, γ1)", "(X3 ⊕ X4 ⊕ X5, γ2)"],
+
+	"one" => [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+)
