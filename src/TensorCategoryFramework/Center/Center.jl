@@ -1523,7 +1523,7 @@ function extension_of_scalars(C::CenterCategory, L::Field; embedding = is_subfie
     if isdefined(C, :induction_gens)
         CL.induction_gens = [extension_of_scalars(is, L, category(CL),  embedding = embedding) for is ∈ C.induction_gens]
     end
-
+    sort_simples_by_dimension!(CL)
     return CL
 end
 

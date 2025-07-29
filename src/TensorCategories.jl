@@ -175,7 +175,7 @@ export free_bimodule
 export free_left_module
 export free_module
 export free_right_module
-export Fibonacci 
+export fibonacci_category 
 export Forgetful 
 export fpdim 
 export Functor 
@@ -404,6 +404,7 @@ export simple_subobjects
 export simples 
 export simples_names 
 export six_j_symbols 
+export skeletalize
 export smatrix 
 export solve_groebner 
 export sort_simples_by_dimension! 

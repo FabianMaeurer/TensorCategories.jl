@@ -1,9 +1,9 @@
-function Fibonacci(K::Ring, a::Int = 1)
+function fibonacci_category(K::Ring, a::Int = 1)
 
     C = six_j_category(K, ["𝟙", "τ"])
 
     _,x = K["x"]
-    a = roots(x^2+x-1)[a]
+    a = - roots(x^2-x-1)[a]
 
     M = zeros(Int, 2,2,2)
 
@@ -20,8 +20,8 @@ function Fibonacci(K::Ring, a::Int = 1)
     return C
 end
 
-function Fibonacci(a::Int = 1) 
+function fibonacci_category(a::Int = 1) 
     _,x = QQ[:x]
-    K,ϕ = number_field(x^2 + x - 1, "ϕ")
-    Fibonacci(K, a)
+    K,ϕ = number_field(x^2 - x - 1, "ϕ")
+    fibonacci_category(K, a)
 end

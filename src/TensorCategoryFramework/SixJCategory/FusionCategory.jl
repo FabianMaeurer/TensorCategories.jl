@@ -1010,7 +1010,6 @@ Return the category ``C⊗K``.
 """
 function extension_of_scalars(C::SixJCategory, L::Ring; embedding = embedding(base_ring(C), L))
 
-
     try
         D = six_j_category(L, C.tensor_product, simples_names(C))
 
@@ -1055,7 +1054,10 @@ end
 
 Return the object ``X`` as an object of the category ``C⊗K``.
 """
-function extension_of_scalars(X::SixJObject, L::Ring, CL = parent(X) ⊗ L;embedding = nothing)
+function extension_of_scalars(X::SixJObject, L::Ring, CL = nothing; embedding = nothing)
+    if CL === nothing
+            CL = extension_of_scalars(parent(m), L, embedding = embedding)
+    end
     SixJObject(CL, X.components)
 end
 
@@ -1065,8 +1067,11 @@ end
 
 Return the category ``C⊗K``.
 """
-function extension_of_scalars(m::SixJMorphism, L::Ring, CL = parent(m) ⊗ L; embedding = embedding(base_ring(m), L))
-    try
+function extension_of_scalars(m::SixJMorphism, L::Ring, CL = nothing; embedding = embedding(base_ring(m), L))
+    try 
+        if CL === nothing
+            CL = extension_of_scalars(parent(m), L, embedding = embedding)
+        end
 
         mats = [matrix(L, size(m)..., embedding.(collect(m))) for m ∈ matrices(m)] 
         g = morphism(extension_of_scalars(domain(m), L, CL, embedding = embedding),

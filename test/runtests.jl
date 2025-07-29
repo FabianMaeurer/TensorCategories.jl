@@ -26,5 +26,7 @@ end
     include("ModuleCategoryTests/Non-semisimpleModules.jl")
 end
 
+include("Anyonwiki/AnyonwikiTest.jl")
+
 #include("CoherentSheaves/ConvolutionCategoryTests.jl")
 

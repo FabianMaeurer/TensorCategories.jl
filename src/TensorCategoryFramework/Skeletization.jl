@@ -1,3 +1,8 @@
+
+function skeletalize(C::Category, names::Vector{String} = simples_names(C); multiplication_table = nothing)
+    six_j_category(C, names, multiplication_table = multiplication_table)
+end
+
 function six_j_category(C::Category, names::Vector{String} = simples_names(C); multiplication_table = nothing)
     F = six_j_category(simples(C), names, multiplication_table = multiplication_table)
     set_name!(F, "Skeletization of $C")
