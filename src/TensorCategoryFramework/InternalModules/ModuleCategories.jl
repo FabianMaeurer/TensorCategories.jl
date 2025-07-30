@@ -1585,8 +1585,10 @@ function multiplication_table(M::BiModuleCategory)
         ends = int_dim.(End.(simples(M)))
 
         for i ∈ 1:r, j ∈ 1:r 
-            if (i,j,k) ∈ keys(mult_spaces)
-                table[i,j,k] = div(length(mult_spaces[(i,j,k)]), *(ends[[i,j,k]]...))
+            for k ∈ 1:r
+                if (i,j,k) ∈ keys(mult_spaces)
+                    table[i,j,k] = div(length(mult_spaces[(i,j,k)]), *(ends[[i,j,k]]...))
+                end
             end
         end
         table 
