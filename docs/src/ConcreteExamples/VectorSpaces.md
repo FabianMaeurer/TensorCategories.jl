@@ -1,5 +1,7 @@
-```@setup VS
-using TensorCategories, Oscar
+```@meta 
+DocTestSetup = quote 
+    using TensorCategories, Oscar
+end
 ```
 
 
@@ -58,7 +60,7 @@ VSMorphism <: Morphism
 
 and constructed giving a domain, codomain and matrix element.
 
-```@docs 
+```@docs; canonical = false
 morphism(::VectorSpaceObject, ::VectorSpaceObject, ::MatElem)
 ```
 
@@ -72,9 +74,12 @@ GradedVectorSpaces <: VectorSpaces
 ```
 and they are constructed in straightforward manner
 
-```@example VS
+```jldoctest; output = false
 G = symmetric_group(6)
 VecG = graded_vector_spaces(G)
+
+# output
+Category of G-graded vector spaces over Algebraic closure of rational field where G is Sym(6)
 ```
 
 To add a non-trivial associator (twist) there is another constructor. 
@@ -90,12 +95,16 @@ Graded vector spaces decompose into direct sums of vector spaces for each elemen
 GVSObject <: VectorSpaceObject
 ```
 
-```@example VS
+```jldoctest; output = false
 G = symmetric_group(5)
 g,s = gens(G)
 V1 = VectorSpaceObject(QQ,5)
 V2 = VectorSpaceObject(QQ, [:v, :w])
 W = VectorSpaceObject(g => V1, s => V2, g*s => V1⊗V2)
+
+# output
+Graded vector space of dimension 17 with grading
+PermGroupElem[(1,2,3,4,5), (1,2,3,4,5), (1,2,3,4,5), (1,2,3,4,5), (1,2,3,4,5), (1,2), (1,2), (2,3,4,5), (2,3,4,5), (2,3,4,5), (2,3,4,5), (2,3,4,5), (2,3,4,5), (2,3,4,5), (2,3,4,5), (2,3,4,5), (2,3,4,5)]
 ```
 
 Morphisms are implemented analogously by pairs of group elements and vector space objects.

@@ -28,7 +28,8 @@ Tambara-Yamagami categories are implemented as an instance of `SixJCategory` and
 The Ising fusion category is a special example of a Tambara-Yamagami category with ``A = \mathbb Z_2``.  
 
 ```@docs
-Ising
+ising_category()
+ising_category(::Ring)
 ```
 
 # The Haagerup Subfactor
@@ -36,7 +37,7 @@ Ising
 The fusion categories stemming from the Haagerup subfactor are a well known and important example of a fusion category. Details can be found in 
 [wolf2021microscopic](@cite).
 
-In the Morita equivalence class of the Haagerup subfactor lie three categories. We call them ``\mathcal H_1,\mathcal H_2`` and ``\mathcal H_3``. The first two have multiplicity larger then 1 and are up to now not included. The third has multiplicity 1 and is also known as the Haagerup-Izumi category for ``\mathbb Z_3``. It has six simple objects and fusion rules
+In the Morita equivalence class of the Haagerup subfactor lie three categories. We call them ``\mathcal H_1,\mathcal H_2`` and ``\mathcal H_3``. The third has multiplicity 1 and is also known as the Haagerup-Izumi category for ``\mathbb Z_3``. It has six simple objects and teh same fusion rules as ``\mathcal H_2``:
 
 ```math
 \begin{array}{c||c|c|c|c|c|c}
@@ -50,9 +51,11 @@ In the Morita equivalence class of the Haagerup subfactor lie three categories. 
     \end{array}
 ```
 
-We implement the category ``\mathcal H_3`` as an instance of `SixJCategory`. The other two will follow as soon as we know the proper ``6j``-symbols.
+All three can be accessed via
 
 ```@docs
+haagerup_H1
+haagerup_H2
 haagerup_H3
 ```
 

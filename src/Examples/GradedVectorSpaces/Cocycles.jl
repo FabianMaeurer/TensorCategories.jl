@@ -6,7 +6,7 @@ struct Cocycle{N}
 end
 
 """
-    Cocylce(G::Group, m::Dict{NTuple{N,G}, T})
+    Cocycle(G::Group, m::Dict{NTuple{N,G}, T})
 
 Return a ```N```-cocylce of ```G```. By now the condition is not checked.
 """

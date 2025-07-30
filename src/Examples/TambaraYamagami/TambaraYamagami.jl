@@ -190,53 +190,53 @@ end
 
 """ 
 
-    Ising()
+    ising_category()
 
-Construct the Ising category over ``ℚ(√2)``.
+Construct the ising_category category over ``ℚ(√2)``.
 """
-function Ising()
+function ising_category()
     _,x = QQ[:x]
     K,r2 = number_field(x^2-2, "√2")
-    Ising(K, r2, 1)
+    ising_category(K, r2, 1)
 end
 
 """ 
 
-    Ising(F::Ring)
+    ising_category(F::Ring)
 
-Construct the Ising category over ``F``.
+Construct the ising_category category over ``F``.
 """
-function Ising(F::Ring)
-    Ising(F, sqrt(F(2)))
+function ising_category(F::Ring)
+    ising_category(F, sqrt(F(2)))
 end
 
 """ 
 
-    Ising(F::Ring, τ::RingElem)
+    ising_category(F::Ring, τ::RingElem)
 
-Construct the Ising category with specific ``τ = √2``.
+Construct the ising_category category with specific ``τ = √2``.
 """
-function Ising(F::Ring, τ::RingElem)
-    Ising(F,τ,1)
+function ising_category(F::Ring, τ::RingElem)
+    ising_category(F,τ,1)
 end
 
 """ 
 
-    Ising(F::Ring, q::Int)
+    ising_category(F::Ring, q::Int)
 
-Construct the braided Ising category over ``F`` where q = ±1 defined the braiding defined by ±i. 
+Construct the braided ising_category category over ``F`` where q = ±1 defined the braiding defined by ±i. 
 """
-function Ising(F::Ring, q::Int)
-    Ising(F,sqrt(F(2)),q)
+function ising_category(F::Ring, q::Int)
+    ising_category(F,sqrt(F(2)),q)
 end
 
 """ 
 
-    Ising(F::Ring, τ::RingElem, q::Int)
+    ising_category(F::Ring, τ::RingElem, q::Int)
 
-Construct the Ising fusion category where ``τ = √2`` a root and `q ∈ {1,-1}` specifies the braiding if it exists.
+Construct the ising_category fusion category where ``τ = √2`` a root and `q ∈ {1,-1}` specifies the braiding if it exists.
 """
-function Ising(F::Ring, sqrt_2::RingElem, q::Int)
+function ising_category(F::Ring, sqrt_2::RingElem, q::Int)
     #F,ξ = cyclotomic_field(16, "ξ₁₆")
 
     a = sqrt_2 
@@ -264,7 +264,7 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
 
     set_pivotal!(C, [F(1) for s ∈ simples(C)])
 
-    set_attribute!(C, :classification, ["Ising", "Tambara-Yamagami"])
+    set_attribute!(C, :classification, ["ising_category", "Tambara-Yamagami"])
 
     G = abelian_group(PcGroup, [2])
     set_attribute!(C, :group, G)
@@ -276,7 +276,7 @@ function Ising(F::Ring, sqrt_2::RingElem, q::Int)
 
     # set_simples_name!(C,["𝟙","χ","X"])
 
-    set_name!(C, "Ising fusion category")
+    set_name!(C, "ising_category fusion category")
 
     # set one of the four possible braidings 
     # http://arxiv.org/abs/2010.00847v1 (Ex. 4.13)

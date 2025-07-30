@@ -17,7 +17,7 @@ up to the developer. As long as the interface for the desired additional
 structures is implemented. 
 
 Some kind of categories, i.e. fusion categories, are entirely described
-(up to equivalence) by discrete data known as ``6j$-symbols``. Thus 
+(up to equivalence) by discrete data known as ``F``-symbols. Thus 
 for such categories we can provide a datatype [`SixJCategory`](../SixJCategories/SixJCategories.md) 
 to quickly work with categories given by such data.
 

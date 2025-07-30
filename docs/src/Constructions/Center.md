@@ -1,4 +1,4 @@
-```@setup Ising
+```@setup ising_category
 using TensorCategories
 ```
 
@@ -27,8 +27,8 @@ interface is supported.
 
 ## Example
 
-```@example Ising
-I = Ising()
+```@example ising_category
+I = ising_category()
 C = center(I)
 simples(C)
 ```

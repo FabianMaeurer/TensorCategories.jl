@@ -19,19 +19,20 @@ makedocs(
             "Abelian Categories" => "Interface/AbelianCategories.md",
             "Monoidal Categories" => "Interface/MonoidalCategories.md",
             "Linear Categories" => "Interface/LinearCategories.md",
-            "Tensor Categories" => [
-                "Framework" => "Interface/TensorCategories.md",
-                "6j-Symbols" => "SixJCategories/SixJCategories.md"
-            ],
+            "Tensor Categories" => "Interface/TensorCategories.md",
             "Genericity" => "Interface/Generic.md",
-            "Basic Consttructions" => "Interface/BasicConstructions.md"
+            "Basic Constructions" => "Interface/BasicConstructions.md"
         ],
         "Examples" => [
             "Graded Vector Spaces" => "ConcreteExamples/VectorSpaces.md",
             "Group Representations" => "ConcreteExamples/Representations.md",
             "Equivariant Coherent Sheaves" => "ConcreteExamples/CoherentSheaves.md",
-            "Fusion Categories with 6j-Symbols" => "SixJCategories/6JExamples.md",
             "Representations of  ``U_q(\\mathfrak{sl}_2(K))``" => "ConcreteExamples/UqSl2.md"
+        ],
+        "F-Symbols" => [
+            "Skeletal Fusion Categories" => "F-symbols/SkeletalFusion.md",
+            "Examples" => "F-symbols/Examples.md",
+            "AnyonWiki" => "F-symbols/AnyonWiki.md"
         ],
         # "Concrete Examples" => [
         #     "Vector Spaces" => "VectorSpaces.md",
@@ -48,7 +49,7 @@ makedocs(
        #"Multitensor Category Interface" => "Multitensor.md",
         "Categorical Constructions" => [
             "The Drinfeld Center" => "Constructions/Center.md",
-            "The Drinfeld Centralizer" => "Constructions/Centralizer.md",
+            #"The Drinfeld Centralizer" => "Constructions/Centralizer.md",
             "Internal Module Categories" => "Constructions/ModuleCategories.md"
         ],
         "References" => "References.md"

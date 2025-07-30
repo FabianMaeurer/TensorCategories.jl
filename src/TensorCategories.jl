@@ -204,6 +204,7 @@ export GTensorAction
 export GVSHomSpace 
 export GVSMorphism 
 export GVSObject 
+export haagerup_H2
 export haagerup_H3 
 export haagerup_H3_center
 export half_braiding 
@@ -276,7 +277,7 @@ export is_tensor
 export is_zero
 export isequivariant 
 export isgraded 
-export Ising 
+export ising_category 
 export is_invertible
 export karoubian_envelope 
 export kernel 

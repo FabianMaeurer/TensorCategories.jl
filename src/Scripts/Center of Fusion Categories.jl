@@ -1,8 +1,8 @@
 using TensorCategories, Oscar
 #=------------------------------------------------
-    Ising
+    ising_category
 ------------------------------------------------=#
-Ising_time = @elapsed begin
+ising_category_time = @elapsed begin
 
 I = Ising()
 

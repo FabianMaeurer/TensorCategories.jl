@@ -1,4 +1,18 @@
 
+function haagerup_H2()
+    C = anyonwiki(6,1,2,8,2,0,1)
+    set_name!(C, "Fusion category ℋ₂")
+    set_simples_names(C, ["𝟙", "α", "α∗", "ρ", "αρ", "α∗ρ"])
+    C
+end
+
+function haagerup_H3()
+    C = anyonwiki(6,1,2,8,1,0,1)
+    set_name!(C, "Fusion category ℋ₃")
+    set_simples_names(C, ["𝟙", "α", "α∗", "ρ", "αρ", "α∗ρ"])
+    C
+end
+
 function haagerup_H3_center()
     path = joinpath(@__DIR__, "../center_haagerup")
     load_fusion_category(path)
@@ -6,7 +20,7 @@ end
 
 """ 
 
-    haagerup_H3([p1 = 1, p2 = 2])
+    unitary_haagerup_H3([p1 = 1, p2 = 2])
 
 Build the Haagerup ℋ₃ subfactor category. The category is build as SixJCategory. The associators are taken from the paper 
 
@@ -14,7 +28,7 @@ https://arxiv.org/pdf/1906.01322
 
 where p1,p2 = ±1 are parameters for the different possible sets of associators.
 """
-function haagerup_H3(K::Ring = QQ; p1 = 1, p2 = 1)
+function unitary_haagerup_H3(K::Ring = QQ; p1 = 1, p2 = 1)
     _,x = QQ["x"]
     if K == QQ
         K,_ = number_field(x^16 - 4*x^14 + 13*x^12 + 4*x^10 + 53*x^8 + 4*x^6 + 13*x^4 - 4*x^2 + 1)

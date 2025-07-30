@@ -1,10 +1,10 @@
-# [Fusion Categories from `6j`-Symbols] (@id 6j_categories)
+# [Fusion Categories from `F`-Symbols] (@id 6j_categories)
 
 In most literature concerning fusion categories they are characterized by 
-so called ``6j``-symbols. Often only those and the fusion rules are provided or of interest. Thus we provide a datatype that allows to 
+so called ``F``-symbols. Often only those and the fusion rules are provided or of interest. Thus we provide a datatype that allows to 
 get a workable fusion category from provided ``6j`-symbols.
 
-## ``6j``-Symbols
+## ``F``-Symbols
 
 Let ``\mathcal C`` be a locally finite semisimple multitensor category.  Then, if ``\{X_i\mid i \in \mathcal I\}`` is a collection of the non-isomorphic simple objects, there is an equivalence of abelian categories 
 

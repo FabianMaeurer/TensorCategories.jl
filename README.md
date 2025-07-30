@@ -20,12 +20,10 @@ TensorCategories relies on the algebraic structures from the [OSCAR-System](http
 
 ```@repl
 using TensorCategories, Oscar;
-F = GF(5)
-G = symmetric_group(2)
-X = gset(G,[1,2,3])
-C = convolution_category(F,X)
-simples(C)
-grothendieck_ring(C)
+C = graded_vector_spaces(QQ, symmetric_goup(3))
+Z = center(C)
+simples(Z)
+smatrix(Z)
 ```
 
 ## Features

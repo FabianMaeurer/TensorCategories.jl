@@ -4,23 +4,26 @@ TensorCategories.jl is a software package based on the programming language [Jul
 
 ## Installation
 
-You need to have Julia installed. For reliable results Julia version at least 1.6 is required. To use TensorCategories
+You need to have Julia installed. For reliable results Julia version at least 1.10 is required. To use TensorCategories
 do the following:
 
 ```julia-repl
 julia> import Pkg
-julia> Pkg.add(url = "https://github.com/FabianMaeurer/TensorCategories.jl")
+julia> Pkg.add("TensorCategories.jl")
 ```
 
 ## Usage
 
 To use TensorCategories the structures from the [OSCAR-System](https://github.com/oscar-system/Oscar.jl) are required. Here a minimal usage example.
 
-```@repl
+```jldoctest 
 using TensorCategories;
-I = Ising()
-C = center(Ising())
+I = ising_category()
+C = center(I)
 S = smatrix(C)
+
+# output 
+1
 ```
 
 ## Acknowledgements

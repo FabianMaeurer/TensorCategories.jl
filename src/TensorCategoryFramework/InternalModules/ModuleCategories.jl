@@ -1552,6 +1552,51 @@ function is_bimodule(X::BiModuleObject)
 
     first == second
 end
+
+#=----------------------------------------------------------
+    Skelelization    
+----------------------------------------------------------=#
+
+function multiplicity_spaces(M::BimoduleCategory)
+    get_attribute!(M, :multiplicity_spaces) do 
+        S = simples(M)
+        r = length(S)
+
+        mult_spaces = []
+
+        for i ∈ 1:r, j ∈ 1:r 
+            XY = S[i] ⊗ S[j]
+            for k ∈ 1:r
+                if int_dim(Hom(object(XY), object(S[k]))) < int_dim(End(object(S[k])))
+                    continue 
+                end
+                push!(mult_spaces, (i,j,k) => basis(Hom(XY, S[k])))
+            end
+        end
+        Dict(mult_spaces)
+    end
+end
+
+function multiplication_table(M::BimoduleCategory) 
+    get_attribute!(M, :multiplication_table) do 
+        mult_spaces = multiplicity_spaces(M)
+        r = rank(M)
+        table = zeros(Int,r,r,r)
+        ends = int_dim.(End.(simples(M)))
+
+        for i ∈ 1:r, j ∈ 1:r 
+            if (i,j,k) ∈ keys(mult_spaces)
+                table[i,j,k] = div(length(mult_spaces[(i,j,k)]), *(ends[[i,j,k]]...))
+            end
+        end
+        table 
+    end
+end
+
+function six_j_symbols(M::BimoduleCategory, S = simples(M), mult = nothing) 
+    six_j_symbols_of_construction(M, S, mult)
+end
+
 #=----------------------------------------------------------
     Pretty printing
 ----------------------------------------------------------=#
