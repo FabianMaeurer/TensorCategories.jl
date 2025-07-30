@@ -1570,7 +1570,10 @@ function multiplicity_spaces(M::BiModuleCategory)
                 if int_dim(Hom(object(XY), object(S[k]))) < int_dim(End(object(S[k])))
                     continue 
                 end
-                push!(mult_spaces, (i,j,k) => Hom(XY, S[k]))
+                H = Hom(XY, S[k])
+                if int_dim(H) > 0
+                    push!(mult_spaces, (i,j,k) => H)
+                end
             end
         end
         Dict(mult_spaces)
