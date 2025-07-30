@@ -1570,7 +1570,7 @@ function multiplicity_spaces(M::BiModuleCategory)
                 if int_dim(Hom(object(XY), object(S[k]))) < int_dim(End(object(S[k])))
                     continue 
                 end
-                push!(mult_spaces, (i,j,k) => basis(Hom(XY, S[k])))
+                push!(mult_spaces, (i,j,k) => Hom(XY, S[k]))
             end
         end
         Dict(mult_spaces)
@@ -1587,7 +1587,7 @@ function multiplication_table(M::BiModuleCategory)
         for i ∈ 1:r, j ∈ 1:r 
             for k ∈ 1:r
                 if (i,j,k) ∈ keys(mult_spaces)
-                    table[i,j,k] = div(length(mult_spaces[(i,j,k)]), *(ends[[i,j,k]]...))
+                    table[i,j,k] = div(int_dim(mult_spaces[(i,j,k)]), *(ends[[i,j,k]]...))
                 end
             end
         end
