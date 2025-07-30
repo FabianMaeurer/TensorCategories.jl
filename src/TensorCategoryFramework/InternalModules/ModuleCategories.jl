@@ -1557,7 +1557,7 @@ end
     Skelelization    
 ----------------------------------------------------------=#
 
-function multiplicity_spaces(M::BimoduleCategory)
+function multiplicity_spaces(M::BiModuleCategory)
     get_attribute!(M, :multiplicity_spaces) do 
         S = simples(M)
         r = length(S)
@@ -1577,7 +1577,7 @@ function multiplicity_spaces(M::BimoduleCategory)
     end
 end
 
-function multiplication_table(M::BimoduleCategory) 
+function multiplication_table(M::BiModuleCategory) 
     get_attribute!(M, :multiplication_table) do 
         mult_spaces = multiplicity_spaces(M)
         r = rank(M)
@@ -1593,7 +1593,7 @@ function multiplication_table(M::BimoduleCategory)
     end
 end
 
-function six_j_symbols(M::BimoduleCategory, S = simples(M), mult = nothing) 
+function six_j_symbols(M::BiModuleCategory, S = simples(M), mult = nothing) 
     six_j_symbols_of_construction(M, S, mult)
 end
 
