@@ -1652,10 +1652,10 @@ end
 # end
 
 
-function six_j_symbols(C::CenterCategory, S = simples(C), mult = nothing)
+function six_j_symbols(C::CenterCategory, S = simples(C))
     @assert is_semisimple(C)
 
-    six_j_symbols_of_construction(C, S, multiplication_table(C))
+    six_j_symbols_of_construction(C, S)
 end
 
 

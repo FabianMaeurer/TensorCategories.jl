@@ -4,7 +4,9 @@ authors = ["Fabian Mäurer"]
 version = "0.5.0"
 
 [deps]
+Artifacts = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+LazyArtifacts = "4af54fe1-eca0-43a8-85a7-787d91b784e3"
 Oscar = "f1435218-dba5-11e9-1e4d-f1a5fab5fc13"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"

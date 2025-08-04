@@ -255,6 +255,18 @@ function left_module(M::BiModuleObject)
     LeftModuleObject(C, object(M), left_action(M))
 end
 
+function left_module(f::ModuleMorphism{BiModuleObject})
+    morphism(left_module(domain(f)),
+            left_module(codomain(f)),
+            morphism(f))
+end
+
+function right_module(f::ModuleMorphism{BiModuleObject})
+    morphism(right_module(domain(f)),
+            right_module(codomain(f)),
+            morphism(f))
+end
+
 function bimodule(X::RightModuleObject)
     M = parent(X)
     C = category(M)
@@ -643,6 +655,20 @@ function tensor_product(M::BiModuleObject, N::BiModuleObject)
 end
 
 function bimodule_tensor_product(M::BiModuleObject, N::BiModuleObject)
+    if M == one(parent(M)) 
+        return N, id(N)
+    elseif N == one(parent(N))
+        return M, id(M) 
+    end
+    
+    prods = get_attribute!(parent(M), :tensor_products) do 
+        Dict()
+    end
+
+    if haskey(prods, (M,N))
+        return prods[(M,N)]
+    end
+
     A = left_algebra(parent(M))
     B = right_algebra(parent(M))
     C = left_algebra(parent(N))
@@ -687,7 +713,11 @@ function bimodule_tensor_product(M::BiModuleObject, N::BiModuleObject)
         c
     )
 
-    BiModuleObject(C, P, left, right), c
+    P = BiModuleObject(C, P, left, right)
+
+    push!(prods, (M,N) => (P,c))
+
+    P,c
 end
 
 # function tensor_product(X::RightModuleObject, Y::RightModuleObject)
@@ -737,17 +767,21 @@ end
 #     S, morphism(id(S))
 # end
 
-function tensor_product(f::ModuleMorphism{T}, g::ModuleMorphism{T}) where T <: ModuleObject
-    T == BiModuleObject && (mod_tensor = bimodule_tensor_product)
-    T == RightModuleObject && (mod_tensor = right_module_tensor_product)
-    T == LeftModuleObject && (mod_tensor = left_module_tensor_product)
+function tensor_product(f::ModuleMorphism{S}, g::ModuleMorphism{T}) where {S,T <: ModuleObject}
+    S == T == BiModuleObject && (mod_tensor = bimodule_tensor_product)
+    S == T == RightModuleObject && (mod_tensor = right_module_tensor_product)
+    S == T == LeftModuleObject && (mod_tensor = left_module_tensor_product)
+
+    S != T && (mod_tensor = _tensor_product)
 
     dom, p_dom = mod_tensor(domain(f), domain(g))
     cod, p_cod = mod_tensor(codomain(f), codomain(g))
 
     inv_p_dom = right_inverse(p_dom)
 
-    ModuleMorphism(dom, cod, p_cod ∘ (morphism(f) ⊗ morphism(g)) ∘ inv_p_dom)
+    S == T && return ModuleMorphism(dom, cod, p_cod ∘ (morphism(f) ⊗ morphism(g)) ∘ inv_p_dom)
+
+    S != T && return p_cod ∘ (morphism(f) ⊗ morphism(g)) ∘ inv_p_dom
 end
 
 function tensor_product(V::HomSpace{T}, W::HomSpace{T}) where T <: ModuleObject 
@@ -1598,8 +1632,90 @@ function multiplication_table(M::BiModuleCategory)
     end
 end
 
-function six_j_symbols(M::BiModuleCategory, S = simples(M), mult = nothing) 
-    six_j_symbols_of_construction(M, S, mult)
+function six_j_symbols(C::BiModuleCategory, S = simples(C))
+    @assert is_semisimple(C)
+
+    N = length(S)
+    C_morphism_type = morphism_type(category(C))
+    F = base_ring(C) 
+
+    ass = Array{MatElem}(undef,N,N,N,N)
+
+    one_indices = findall(s -> int_dim(Hom(s,one(C))) > 0 , S)
+    one_components = simple_subobjects(one(C))
+
+    # Set unitors to identity
+    S[one_indices] = one_components
+
+    homs = multiplicity_spaces(C)
+
+    #prods = [domain(homs[(i,j,findfirst(k -> haskey(homs, (i,j,k)), 1:N))]) for i ∈ 1:N, j in 1:N]
+
+    homs = Dict(k => (basis(v)) for (k,v) in homs)
+    missed = [(i,j,k) => C_morphism_type[] for i in 1:N, j in 1:N, k in 1:N if !haskey(homs, (i,j,k))]
+    if length(missed) > 0
+        push!(homs, missed...)
+    end
+
+    #associators = [associator(X,Y,Z) for X ∈ S, Y ∈ S, Z ∈ S]
+
+
+
+    for i in 1:N 
+        for j ∈ 1:N, k ∈ 1:N
+            if !isempty([i,j,k] ∩ one_indices) 
+                for l ∈ 1:N
+                    n = sum([length(homs[i,j,v]) * length(homs[v,k,l]) for v ∈ 1:N])
+                    ass[i,j,k,l] = identity_matrix(F,n)
+                end
+                continue
+            end
+            @show i,j,k
+            a = associator((S[[i,j,k]])...)
+
+            for  l ∈ 1:N
+                #set trivial associators
+                
+                @show i,j,k,l
+                # Build a basis for Hom((X⊗Y)⊗Z,W)
+                B_XY_Z_W = C_morphism_type[]
+                for n ∈ 1:N
+                    @show n
+                    V = S[n]
+
+                    H_XY_V = homs[i,j,n]
+
+                    H_VZ_W = homs[n,k,l]
+
+                    B = [morphism(f) ∘ (right_module(g) ⊗ id(left_module(S[k]))) for f ∈ H_VZ_W, g ∈ H_XY_V][:]
+                    if length(B) == 0 continue end
+                    B_XY_Z_W = [B_XY_Z_W; B]
+                end
+
+                # Build a basis for Hom(X⊗(Y⊗Z),W)
+                B_X_YZ_W = C_morphism_type[]
+                for n ∈ 1:N
+                    V = S[n]
+
+                    H_YZ_V = homs[j,k,n]
+
+                    H_XV_W = homs[i,n,l]
+                            
+                    B = [morphism(f) ∘ (id(right_module(S[i])) ⊗ left_module(g)) for f ∈ H_XV_W, g ∈ H_YZ_V][:]
+                    if length(B) == 0 continue end
+                    B_X_YZ_W = [B_X_YZ_W; B]
+                end
+
+                @show length(B_XY_Z_W)
+                @show length(B_X_YZ_W)
+                associator_XYZ_W = hcat([express_in_basis(f ∘ morphism(a), B_XY_Z_W) for f ∈ B_X_YZ_W]...)
+            
+                ass[i,j,k,l] = matrix(F, length(B_XY_Z_W), length(B_X_YZ_W),  associator_XYZ_W)
+            end
+        end
+    end
+
+    return ass           
 end
 
 #=----------------------------------------------------------

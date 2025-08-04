@@ -215,12 +215,16 @@ Return the associator isomorphism ```(X⊗Y)⊗Z → X⊗(Y⊗Z)```.
 """
 function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     #@assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
-
     C = parent(X)
 
     if zero(C) == X ⊗ Y ⊗ Z
         return zero_morphism(zero(C),zero(C))
     end
+
+    if one(C) ∈ [X,Y,Z]
+        return id(X ⊗ Y ⊗ Z)
+    end
+
     F = base_ring(C)
     n = C.simples
     dom = X⊗Y⊗Z
@@ -291,18 +295,21 @@ function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     #distr_after = vertical_direct_sum([f⊗(g⊗h) for f ∈ px, g ∈ py, h ∈ pz][:])
 
     distr_after = horizontal_direct_sum([f⊗(g⊗h) for f ∈ ix, g ∈ iy, h ∈ iz][:])
-    
     return compose(distr_before, m , distr_after)
 end
 
 function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
     @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
-
     C = parent(X)
 
     if zero(C) == X ⊗ Y ⊗ Z
         return zero_morphism(zero(C),zero(C))
     end
+
+    if one(C) ∈ [X,Y,Z]
+        return id(X ⊗ Y ⊗ Z)
+    end
+
     F = base_ring(C)
     n = C.simples
     dom = X⊗Y⊗Z
@@ -437,6 +444,7 @@ function compose(f::SixJMorphism...)
     if length(f) == 1 
         return f[1]
     end
+     
     #@show [(codomain(f[i]), domain(f[i+1])) for i ∈ 1:length(f)-1]
     @assert all([codomain(f[i]) == domain(f[i+1]) for i ∈ 1:length(f)-1]) "Morphisms not compatible"
 

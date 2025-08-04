@@ -40,23 +40,24 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     permuted, change_base_ring, schur_index_over_center, issimple, cyclotomic_extension, ArbField, next_prime, AcbFieldElem,
     rationals_as_number_field
 
-# using Serialization
-import Oscar: @register_serialization_type,
-                save_data_dict,
-                save_data_array,
-                save_object,
-                save_type_params,
-                save_typed_object,
-                load_object,
-                load_type_params,
-                load_typed_object,
-                SerializerState,
-                DeserializerState,
-                load_array_node
+# # using Serialization
+# import Oscar: @register_serialization_type,
+#                 save_data_dict,
+#                 save_data_array,
+#                 save_object,
+#                 save_type_params,
+#                 save_typed_object,
+#                 load_object,
+#                 load_type_params,
+#                 load_typed_object,
+#                 SerializerState,
+#                 DeserializerState,
+#                 load_array_node
 
 using InteractiveUtils
 using SparseArrays
 using Base.Threads
+using Artifacts, LazyArtifacts
 
 
 export - 
@@ -447,6 +448,8 @@ export zero_morphism
 export ZPlusRing, ℕRing, ℤ₊Ring
 export ZPlusRingElem, ℕRingElem, ℤ₊RingElem
 
+const Anyon = artifact"AnyonWiki"
+
 include("CategoryFramework/AbstractTypes.jl")
 include("CategoryFramework/AbstractMethods.jl")
 include("CategoryFramework/DecompositionInAbelianCategories.jl")
@@ -535,9 +538,9 @@ include("Examples/SU(k)/SU(3)_3.jl")
 
 
 
-include("Serialization/SixJSerialization.jl")
-include("Serialization/CenterSerialization.jl")
-include("SixJCategoryDatabase/main.jl")
+#include("Serialization/SixJSerialization.jl")
+#include("Serialization/CenterSerialization.jl")
+#include("SixJCategoryDatabase/main.jl")
 include("AnyonWiki/AnyonWiki.jl")
 include("AnyonWiki/CheckAnyonwiki.jl")
 

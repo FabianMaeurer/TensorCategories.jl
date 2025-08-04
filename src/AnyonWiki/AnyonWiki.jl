@@ -5,7 +5,7 @@
 
 associator_path = joinpath(@__DIR__, "AnyonWikiData//")
 pivotal_path = joinpath(@__DIR__, "AnyonWikiData/PivotalStructures/")
-anyon_path = joinpath(@__DIR__, "AnyonWikiData/")
+anyon_path = artifact"AnyonWiki"
 
 
 
@@ -31,7 +31,7 @@ function anyonwiki(rank::Int,
 
     C = six_j_category(K, ["𝟙"; String["X$i" for i in 2:rank]])
 
-    ass = include(joinpath(@__DIR__, "AnyonWikiData/algebraic_F_symbols/$cat_string"))
+    ass = include(joinpath(anyon_path, "algebraic_F_symbols/$cat_string"))
 
     ass = Dict(k => K == QQ ? K(v...) : K(v) for (k,v) in ass)
 
@@ -42,13 +42,13 @@ function anyonwiki(rank::Int,
     set_one!(C, [i == 1 for i in 1:rank])
 
     if braiding != 0 
-        braid = include(joinpath(@__DIR__, "AnyonWikiData/algebraic_R_symbols/$cat_string"))
+        braid = include(joinpath(anyon_path, "algebraic_R_symbols/$cat_string"))
         braid = Dict(k =>  K == QQ ? K(v...) : K(v) for (k,v) in braid)
         braid = dict_to_braiding(rank, K, braid)
         set_braiding!(C, braid)
     end
 
-    piv = include(joinpath(@__DIR__, "AnyonWikiData/algebraic_P_symbols/$cat_string"))
+    piv = include(joinpath(anyon_path, "algebraic_P_symbols/$cat_string"))
 
     piv = Dict(k =>  K == QQ ? K(v...) : K(v) for (k,v) in piv)
 
@@ -60,12 +60,41 @@ function anyonwiki(rank::Int,
 end
 
 function anyonwiki_center(i,j,k,l,m,n,o)
-    name = join(["$(a)" for a ∈ [i,j,k,l,m,n,o]], "_")
-    path = joinpath(@__DIR__, "AnyonWikiData/Centers/center_$name")
+    path = anyonwiki_center_artifact_path(i,j,k,l,m,n,o)
 
     load_fusion_category(path)
 end
 
+function anyonwiki_center_artifact_path(i,j,k,l,m,n,o)
+    try 
+        if i ≤ 4 
+            path = @artifact_str "AnyonWikiCenters1to4"
+            path = joinpath(path, "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)")
+            open(path)
+            return path
+
+        elseif i == 5 && k == 0 && l ≤ 9
+            path = @artifact_str "AnyonWikiCenters_5_$(j)_0_$l"
+            path = joinpath(path, "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)")
+            open(path)
+            return path
+
+        elseif i == 5 && k == 2 
+            path = @artifact_str "AnyonWikiCenters_5_$(j)_2"
+            path = joinpath(path, "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)")
+            open(path)
+            return path
+
+        else
+            path = @artifact_str "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)"
+            path = joinpath(path, "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)")
+            open(path)
+            return path
+        end
+    catch 
+        error("There is no center saved for a fusion category with index $((i,j,k,l,m,n,o))")
+    end
+end
 function dict_to_associator(N::Int, K::Field, ass::Dict)
     # Transform associator dict to Matrices 
 
@@ -124,7 +153,7 @@ function anyonwiki_from_numerics(rank::Int,
                     pivotal::Int, 
                     K::Union{Ring,Nothing} = nothing ; minimal = false)
     
-    field_dict = include(joinpath(anyon_path, "base_field_generators.jl"))
+    field_dict = include(joinpath(@__DIR__, "base_field_generators.jl"))
 
     # if ! minimal && K === nothing 
     #     if n ∈ ZZ.(readlines(joinpath(anyon_path, "cycloPos.txt")))
@@ -261,7 +290,7 @@ function load_anyonwiki_number_field(rank::Int,
     braiding::Int, 
     pivotal::Int)
 
-    field_dict = include(joinpath(anyon_path, "base_field_generators.jl"))
+    field_dict = include(joinpath(@__DIR__, "base_field_generators.jl"))
 
     data = field_dict[[rank, multiplicity, non_self_dual, fusion_ring, associator, braiding, pivotal]]
 
@@ -459,38 +488,38 @@ function anyonwiki_cyclotomic(n::Int)
     anyonwiki_cyclotomic(n, K)
 end
 
-function anyonwiki_cyclotomic(n::Int, K::Field)
+# function anyonwiki_cyclotomic(n::Int, K::Field)
     
-    r = anyonwiki_cyclotomic_root(n)
-    root = root_of_unity(K,r)
-    eval(Meta.parse("z$r = $(root)"))
+#     r = anyonwiki_cyclotomic_root(n)
+#     root = root_of_unity(K,r)
+#     eval(Meta.parse("z$r = $(root)"))
 
 
-    associator_array = anyonwiki_cyclotomic_associator(n,K)
+#     associator_array = anyonwiki_cyclotomic_associator(n,K)
    
-    mult = multiplication_table_from_F_symbols(associator_array)
+#     mult = multiplication_table_from_F_symbols(associator_array)
 
 
-    C = six_j_category(K, mult)
-    set_name!(C, "Fusion category number $n from AnyonWiki")
-    set_associator!(C, associator_array)
-    set_one!(C, [i == 1 for i ∈ 1:C.simples])
+#     C = six_j_category(K, mult)
+#     set_name!(C, "Fusion category number $n from AnyonWiki")
+#     set_associator!(C, associator_array)
+#     set_one!(C, [i == 1 for i ∈ 1:C.simples])
 
-    pivotals = include(joinpath(anyon_path, "cyclic_P_Symbols/cat_$n.jl"))
+#     pivotals = include(joinpath(anyon_path, "cyclic_P_Symbols/cat_$n.jl"))
 
-    set_pivotal!(C, K.([pivotals[[i]] for i ∈ 1:length(pivotals)]))
+#     set_pivotal!(C, K.([pivotals[[i]] for i ∈ 1:length(pivotals)]))
 
-    attrs = load_anyonwiki_attributes(n)
+#     attrs = load_anyonwiki_attributes(n)
 
-    if attrs[:braided] 
+#     if attrs[:braided] 
        
-        braiding_array = anyonwiki_cyclotomic_braiding(n, K)
-        set_braiding!(C, braiding_array)
-    end
+#         braiding_array = anyonwiki_cyclotomic_braiding(n, K)
+#         set_braiding!(C, braiding_array)
+#     end
 
-    return C
+#     return C
     
-end
+# end
 
 function anyonwiki_finite(n::Int)
     r = anyonwiki_cyclotomic_root(n)
@@ -517,104 +546,104 @@ function multiplication_table_from_F_symbols(ass::Array{MatElem,4})
     return mult
 end
 
-function anyonwiki_braiding(rank::Int, 
-    multiplicity::Int, 
-    non_self_dual::Int,
-    fusion_ring::Int, 
-    associator::Int, 
-    braiding::Int, 
-    pivotal::Int,
-    K::Field, emb)
+# function anyonwiki_braiding(rank::Int, 
+#     multiplicity::Int, 
+#     non_self_dual::Int,
+#     fusion_ring::Int, 
+#     associator::Int, 
+#     braiding::Int, 
+#     pivotal::Int,
+#     K::Field, emb)
 
-    CC = AcbField(2048)
+#     CC = AcbField(2048)
 
-    cat_string = "cat_$(rank)_$(multiplicity)_$(non_self_dual)_$(fusion_ring)_$(associator)_$(braiding)_$(pivotal).jl"
+#     cat_string = "cat_$(rank)_$(multiplicity)_$(non_self_dual)_$(fusion_ring)_$(associator)_$(braiding)_$(pivotal).jl"
     
-    _braiding_dict = include(joinpath(anyon_path, "new_R_Symbols/$cat_string"))
-    braiding_dict = Dict{Vector{Int}, elem_type(K)}()
-    # for (k, str) ∈ _braiding_dict 
-    #     x = string_to_acb(CC, @show str)
-    #     x = preimage(emb, x, degree(K))
-    #     braiding_dict[k] = K(x)
-    # end
+#     _braiding_dict = include(joinpath(anyon_path, "new_R_Symbols/$cat_string"))
+#     braiding_dict = Dict{Vector{Int}, elem_type(K)}()
+#     # for (k, str) ∈ _braiding_dict 
+#     #     x = string_to_acb(CC, @show str)
+#     #     x = preimage(emb, x, degree(K))
+#     #     braiding_dict[k] = K(x)
+#     # end
 
-    braiding_dict = apply_preimage_to_anyon_file(emb, joinpath(anyon_path, "new_R_Symbols/$cat_string"))
-    N = rank
+#     braiding_dict = apply_preimage_to_anyon_file(emb, joinpath(anyon_path, "new_R_Symbols/$cat_string"))
+#     N = rank
 
-    braiding_array = Array{MatElem}(undef, N,N,N)
+#     braiding_array = Array{MatElem}(undef, N,N,N)
 
-    for a ∈ 1:N, b ∈ 1:N, c ∈ 1:N
-        ab_c = filter(e -> e[[1,2,3]] == [a,b,c], collect(keys(braiding_dict)))
-        l = Int(sqrt(length(ab_c)))
+#     for a ∈ 1:N, b ∈ 1:N, c ∈ 1:N
+#         ab_c = filter(e -> e[[1,2,3]] == [a,b,c], collect(keys(braiding_dict)))
+#         l = Int(sqrt(length(ab_c)))
 
-        M = matrix(K,l,l, [braiding_dict[v] for v ∈ ab_c])
-        braiding_array[a,b,c] = M
-    end
+#         M = matrix(K,l,l, [braiding_dict[v] for v ∈ ab_c])
+#         braiding_array[a,b,c] = M
+#     end
 
-    return braiding_array
-end
+#     return braiding_array
+# end
 
-function anyonwiki_cyclotomic_root(n::Int)
-    cyclopos = [parse(Int, s) for s ∈ readlines(joinpath(anyon_path, "cycloPos.txt"))]
+# function anyonwiki_cyclotomic_root(n::Int)
+#     cyclopos = [parse(Int, s) for s ∈ readlines(joinpath(anyon_path, "cycloPos.txt"))]
 
-    attrs = load_anyonwiki_attributes(n)
+#     attrs = load_anyonwiki_attributes(n)
 
-    if n ∉ cyclopos 
-        error("Category number $n is not cyclotomic")
-    end
+#     if n ∉ cyclopos 
+#         error("Category number $n is not cyclotomic")
+#     end
 
-    f_symbol_string = readlines(joinpath(anyon_path, "cyclic_6j_Symbols/cat_$n.jl"))[4]
+#     f_symbol_string = readlines(joinpath(anyon_path, "cyclic_6j_Symbols/cat_$n.jl"))[4]
     
-    p_symbol_string = readlines(joinpath(anyon_path, "cyclic_P_Symbols/cat_$n.jl"))[4]
+#     p_symbol_string = readlines(joinpath(anyon_path, "cyclic_P_Symbols/cat_$n.jl"))[4]
 
-    r_symbol_string = if attrs[:braided]
-        readlines(joinpath(anyon_path, "cyclic_R_Symbols/cat_$n.jl"))[4]
-    else 
-        ""
-    end
+#     r_symbol_string = if attrs[:braided]
+#         readlines(joinpath(anyon_path, "cyclic_R_Symbols/cat_$n.jl"))[4]
+#     else 
+#         ""
+#     end
 
-    # read root
-    i = findfirst(r"z\d*", f_symbol_string)
-    j = findfirst(r"z\d*", p_symbol_string)
-    k = if attrs[:braided]
-        findfirst(r"z\d*", r_symbol_string)
-    else 
-        nothing
-    end 
+#     # read root
+#     i = findfirst(r"z\d*", f_symbol_string)
+#     j = findfirst(r"z\d*", p_symbol_string)
+#     k = if attrs[:braided]
+#         findfirst(r"z\d*", r_symbol_string)
+#     else 
+#         nothing
+#     end 
 
-    if i === nothing && j === nothing && k == nothing
-        return 1 
-    else
-        roots = [l === nothing ? 1 : parse(Int, s[l][2:end]) for (s,l) ∈ zip([f_symbol_string,p_symbol_string, r_symbol_string], [i,j,k])]
+#     if i === nothing && j === nothing && k == nothing
+#         return 1 
+#     else
+#         roots = [l === nothing ? 1 : parse(Int, s[l][2:end]) for (s,l) ∈ zip([f_symbol_string,p_symbol_string, r_symbol_string], [i,j,k])]
 
-        return r = lcm(roots...)
-    end
-end
+#         return r = lcm(roots...)
+#     end
+# end
 
-function anyonwiki_cyclotomic_associator(n::Int, K::Field)
-    r = anyonwiki_cyclotomic_root(n)
-        root = root_of_unity(K,r)
-    eval(Meta.parse("z$r = $(root)"))
+# function anyonwiki_cyclotomic_associator(n::Int, K::Field)
+#     r = anyonwiki_cyclotomic_root(n)
+#         root = root_of_unity(K,r)
+#     eval(Meta.parse("z$r = $(root)"))
 
-    # read 6j-symbols 
-    associator_dict = include(joinpath(anyon_path, "cyclic_6j_Symbols/cat_$n.jl"))
+#     # read 6j-symbols 
+#     associator_dict = include(joinpath(anyon_path, "cyclic_6j_Symbols/cat_$n.jl"))
 
-    N = maximum([a[1] for a ∈ keys(associator_dict)])
+#     N = maximum([a[1] for a ∈ keys(associator_dict)])
 
-    associator_array = Array{MatElem}(undef, N,N,N,N)
+#     associator_array = Array{MatElem}(undef, N,N,N,N)
     
-    # Build matrices for 6j-Symbols
-    for a ∈ 1:N, b ∈ 1:N, c ∈ 1:N, d ∈ 1:N
-        abc_d = filter(e -> e[[1,2,3,4]] == [a,b,c,d], collect(keys(associator_dict)))
-        l = Int(sqrt(length(abc_d)))
-        abc_d = sort(abc_d, by = v -> v[6])
-        abc_d = sort(abc_d, by = v -> v[5])
+#     # Build matrices for 6j-Symbols
+#     for a ∈ 1:N, b ∈ 1:N, c ∈ 1:N, d ∈ 1:N
+#         abc_d = filter(e -> e[[1,2,3,4]] == [a,b,c,d], collect(keys(associator_dict)))
+#         l = Int(sqrt(length(abc_d)))
+#         abc_d = sort(abc_d, by = v -> v[6])
+#         abc_d = sort(abc_d, by = v -> v[5])
         
-        M = matrix(K,l,l, [associator_dict[v] for v ∈ abc_d])
-        associator_array[a,b,c,d] = M
-    end
-    return associator_array 
-end
+#         M = matrix(K,l,l, [associator_dict[v] for v ∈ abc_d])
+#         associator_array[a,b,c,d] = M
+#     end
+#     return associator_array 
+# end
 
 function finite_prime_field_with_root_of_unity(n::Int, lower_bound = 2)
     p = next_prime(maximum([n,lower_bound-1])) 
@@ -631,34 +660,36 @@ function anyonwiki_center(n::Int; cyclotomic = false)
         load(joinpath(@__DIR__, "AnyonWikiData/Centers/Center_$n.mrdi"))
     end
 end
-function load_anyonwiki_fusion_rules(n::Int)
 
-    data = []
 
-    open(joinpath(associator_path, "cat_$n")) do f 
+# function load_anyonwiki_fusion_rules(n::Int)
 
-        while ! eof(f)
+#     data = []
 
-            s = readline(f) 
-            s = filter(!=('\"'), s)
-            s = split(s, " ")
+#     open(joinpath(associator_path, "cat_$n")) do f 
 
-            push!(data, Int[eval(Meta.parse(a)) for a ∈ s[1:4]])
-        end
-    end
+#         while ! eof(f)
 
-    N = maximum([a[1] for a ∈ data])
+#             s = readline(f) 
+#             s = filter(!=('\"'), s)
+#             s = split(s, " ")
+
+#             push!(data, Int[eval(Meta.parse(a)) for a ∈ s[1:4]])
+#         end
+#     end
+
+#     N = maximum([a[1] for a ∈ data])
     
-    # Construct multiplication table from associators
-    mult = zeros(Int,N,N,N)
+#     # Construct multiplication table from associators
+#     mult = zeros(Int,N,N,N)
     
-    for (_,a,b,c) ∈ filter(e -> e[1] == 1, data) 
+#     for (_,a,b,c) ∈ filter(e -> e[1] == 1, data) 
         
-        mult[a,b,c] = 1 
-    end
+#         mult[a,b,c] = 1 
+#     end
 
-    return mult 
-end
+#     return mult 
+# end
 
 function fusion_ring_name(m::Array{Int,3})
     r = size(m,1)

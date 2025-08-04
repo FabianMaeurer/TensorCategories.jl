@@ -1,5 +1,0 @@
-Dict(
-	[6, 6, 3, 3, 4, 2] => QQFieldElem[-1, 0],
-	[6, 6, 3, 3, 5, 2] => QQFieldElem[-1, -2],
-	[6, 6, 3, 3, 4, 1] => QQFieldElem[-1, 0],
-	[6, 6, 3, 3, 5, 1] => QQFieldElem[1, 2])

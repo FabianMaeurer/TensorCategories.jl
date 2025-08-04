@@ -1,15 +1,15 @@
 
-function skeletalize(C::Category, names::Vector{String} = simples_names(C); multiplication_table = nothing)
-    six_j_category(C, names, multiplication_table = multiplication_table)
+function skeletalize(C::Category, names::Vector{String} = simples_names(C))
+    six_j_category(C, names)
 end
 
-function six_j_category(C::Category, names::Vector{String} = simples_names(C); multiplication_table = nothing)
-    F = six_j_category(simples(C), names, multiplication_table = multiplication_table)
+function six_j_category(C::Category, names::Vector{String} = simples_names(C))
+    F = six_j_category(simples(C), names)
     set_name!(F, "Skeletization of $C")
     return F
 end
 
-function six_j_category(S::Vector{<:Object}, names::Vector{String} = simples_names(parent(S[1])); multiplication_table = nothing)
+function six_j_category(S::Vector{<:Object}, names::Vector{String} = simples_names(parent(S[1])))
     C = parent(S[1])
     @assert is_ring(C)
 
@@ -32,15 +32,15 @@ function six_j_category(S::Vector{<:Object}, names::Vector{String} = simples_nam
     skel_C = six_j_category(F,names)
 
     # Extract 6j-Symbols
-    ass = six_j_symbols(C, S, multiplication_table)
+    ass = six_j_symbols(C, S)
 
     # Recover multiplication table 
     one_index = findfirst(s -> int_dim(Hom(one(C),s)) > 0, S)
     set_one!(skel_C, [i == one_index for i ∈ 1:n])
 
-    mult = multiplication_table !== nothing ? multiplication_table : [size(ass[i,j,one_index,k], 1) for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n]
+    mult = [size(ass[i,j,one_index,k], 1) for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n]
 
-    set_tensor_product!(skel_C,mult)
+    set_tensor_product!(skel_C, mult)
 
     set_associator!(skel_C, ass)
 
@@ -63,7 +63,7 @@ function six_j_category(S::Vector{<:Object}, names::Vector{String} = simples_nam
     return skel_C
 end
 
-function six_j_symbols(C::Category, S = simples(C), mult = nothing)
+function six_j_symbols(C::Category, S = simples(C))
     @assert is_semisimple(C)
 
     N = length(S)
@@ -78,62 +78,72 @@ function six_j_symbols(C::Category, S = simples(C), mult = nothing)
     # Set unitors to identity
     S[one_indices] = one_components
 
-    prods = [X ⊗ Y for X ∈ S, Y ∈ S]
+    homs = multiplicity_spaces(C)
 
-    if mult !== nothing 
-        global homs = [mult[i,j,k] > 0 ? basis(Hom(prods[i,j],S[k])) : C_morphism_type[] for i ∈ 1:N, j ∈ 1:N, k ∈ 1:N]
-    else
-        global homs = [basis(Hom(prods[i,j],S[k])) for i ∈ 1:N, j ∈ 1:N, k ∈ 1:N]
+    prods = [domain(homs[(i,j,findfirst(k -> haskey(homs, (i,j,k)), 1:N))]) for i ∈ 1:N, j in 1:N]
+
+    homs = Dict(k => (basis(v)) for (k,v) in homs)
+    missed = [(i,j,k) => C_morphism_type[] for i in 1:N, j in 1:N, k in 1:N if !haskey(homs, (i,j,k))]
+    if length(missed) > 0
+        push!(homs, missed...)
     end
 
-    associators = [associator(X,Y,Z) for X ∈ S, Y ∈ S, Z ∈ S]
+    #associators = [associator(X,Y,Z) for X ∈ S, Y ∈ S, Z ∈ S]
 
 
 
-    @threads for (i,j,k,l) ∈ collect(Base.product(1:N, 1:N, 1:N, 1:N))
+    for i in 1:N 
+        for j ∈ 1:N, k ∈ 1:N
+            if !isempty([i,j,k] ∩ one_indices) 
+                for l ∈ 1:N
+                    n = sum([length(homs[i,j,v]) * length(homs[v,k,l]) for v ∈ 1:N])
+                    ass[i,j,k,l] = identity_matrix(F,n)
+                end
+                continue
+            end
+            @show i,j,k
+            a = associator((S[[i,j,k]])...)
 
-        #set trivial associators
-        if !isempty([i,j,k] ∩ one_indices) 
-            n = sum([length(homs[i,j,v]) * length(homs[v,k,l]) for v ∈ 1:N])
-            ass[i,j,k,l] = identity_matrix(F,n)
-            continue
-        end
+            for  l ∈ 1:N
+                #set trivial associators
+                
+                @show i,j,k,l
+                # Build a basis for Hom((X⊗Y)⊗Z,W)
+                B_XY_Z_W = C_morphism_type[]
+                for n ∈ 1:N
+                    @show n
+                    V = S[n]
 
-        # Build a basis for Hom((X⊗Y)⊗Z,W)
-        B_XY_Z_W = C_morphism_type[]
-        for n ∈ 1:N
-            V = S[n]
+                    H_XY_V = homs[i,j,n]
 
-            H_XY_V = homs[i,j,n]
+                    H_VZ_W = homs[n,k,l]
 
-            H_VZ_W = homs[n,k,l]
+                    B = [f ∘ (g ⊗ id(S[k])) for f ∈ H_VZ_W, g ∈ H_XY_V][:]
+                    if length(B) == 0 continue end
+                    B_XY_Z_W = [B_XY_Z_W; B]
+                end
 
-            B = [f ∘ (g ⊗ id(S[k])) for f ∈ H_VZ_W, g ∈ H_XY_V][:]
-            if length(B) == 0 continue end
-            B_XY_Z_W = [B_XY_Z_W; B]
-        end
+                # Build a basis for Hom(X⊗(Y⊗Z),W)
+                B_X_YZ_W = C_morphism_type[]
+                for n ∈ 1:N
+                    V = S[n]
 
-        # Build a basis for Hom(X⊗(Y⊗Z),W)
-        B_X_YZ_W = C_morphism_type[]
-        for n ∈ 1:N
-            V = S[n]
+                    H_YZ_V = homs[j,k,n]
 
-            H_YZ_V = homs[j,k,n]
+                    H_XV_W = homs[i,n,l]
+                            
+                    B = [f ∘ (id(S[i]) ⊗ g) for f ∈ H_XV_W, g ∈ H_YZ_V][:]
+                    if length(B) == 0 continue end
+                    B_X_YZ_W = [B_X_YZ_W; B]
+                end
 
-            H_XV_W = homs[i,n,l]
-                    
-            B = [f ∘ (id(S[i]) ⊗ g) for f ∈ H_XV_W, g ∈ H_YZ_V][:]
-            if length(B) == 0 continue end
-            B_X_YZ_W = [B_X_YZ_W; B]
-        end
-        
-        # Express the asociator in the corresponding basis
-        a = associators[i,j,k]
-
-        associator_XYZ_W = hcat([express_in_basis(f ∘ a, B_XY_Z_W) for f ∈ B_X_YZ_W]...)
-       
-        ass[i,j,k,l] = matrix(F, length(B_XY_Z_W), length(B_X_YZ_W),  associator_XYZ_W)
+                @show length(B_XY_Z_W)
+                @show length(B_X_YZ_W)
+                associator_XYZ_W = hcat([express_in_basis(f ∘ a, B_XY_Z_W) for f ∈ B_X_YZ_W]...)
             
+                ass[i,j,k,l] = matrix(F, length(B_XY_Z_W), length(B_X_YZ_W),  associator_XYZ_W)
+            end
+        end
     end
 
     return ass           
