@@ -5,8 +5,8 @@
 
 @testset "6j-Categories" begin
     # test Ising
-    @test pentagon_axiom(Ising())
-    @test hexagon_axiom(Ising(cyclotomic_field(16)[1]))
+    @test pentagon_axiom(ising_category())
+    @test hexagon_axiom(ising_category(cyclotomic_field(16)[1]))
 
     # test Tambara Yamagami for A = [2,2]
     @test pentagon_axiom(tambara_yamagami(2,2))

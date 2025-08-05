@@ -11,7 +11,7 @@ V = graded_vector_spaces(QQ, symmetric_group(3))
 #     @test all(is_algebra.(algs2))
 # end
 
-I = Ising()
+I = ising_category()
 
 @testset "Algebras in Ising" begin 
     algs = algebra_structures(I[1,2])

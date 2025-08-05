@@ -4,7 +4,7 @@ using TensorCategories, Oscar
 ------------------------------------------------=#
 ising_category_time = @elapsed begin
 
-I = Ising()
+I = ising_category()
 
 𝟙, χ, X = simples(I)
 

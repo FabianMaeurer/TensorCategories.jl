@@ -2,7 +2,7 @@
     Test sets for internal Module Categories 
 ----------------------------------------------------------=#
 
-I = Ising()
+I = ising_category()
 
 𝟙,χ,X = simples(I)
 
