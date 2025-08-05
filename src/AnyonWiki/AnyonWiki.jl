@@ -811,7 +811,7 @@ function load_fusion_category(file::String)
     end
 
     set_name!(C, description)
-    set_simples_name!(C, simples_names)
+    set_simples_names!(C, simples_names)
     set_one!(C, one)
 
     C

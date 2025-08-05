@@ -2,7 +2,7 @@
     ising_category Category
 ------------------------------------------------=#
 
-I = Ising()
+I = ising_category()
 a,b,c = simples(I)
 
 @testset "Ising: Objects" begin

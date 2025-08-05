@@ -655,11 +655,11 @@ function tensor_product(M::BiModuleObject, N::BiModuleObject)
 end
 
 function bimodule_tensor_product(M::BiModuleObject, N::BiModuleObject)
-    if M == one(parent(M)) 
-        return N, id(N)
-    elseif N == one(parent(N))
-        return M, id(M) 
-    end
+    # if M == one(parent(M)) 
+    #     return N, id(object(N))
+    # elseif N == one(parent(N))
+    #     return M, id(object(M)) 
+    # end
     
     prods = get_attribute!(parent(M), :tensor_products) do 
         Dict()

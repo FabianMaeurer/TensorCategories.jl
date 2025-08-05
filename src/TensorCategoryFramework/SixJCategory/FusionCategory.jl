@@ -203,7 +203,7 @@ function set_name!(F::SixJCategory, name)
     F.name = name
 end
 
-function set_simples_name!(F::SixJCategory, names::Vector{String})
+function set_simples_names!(F::SixJCategory, names::Vector{String})
     F.simples_names = names
 end
 

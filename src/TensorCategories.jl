@@ -392,6 +392,7 @@ export set_canonical_spherical!
 export set_name!
 export set_one! 
 export set_pivotal! 
+export set_simples_names!
 export set_spherical!
 export set_tensor_product! 
 export set_trivial_spherical!

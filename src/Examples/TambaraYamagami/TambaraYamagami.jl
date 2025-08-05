@@ -274,7 +274,7 @@ function ising_category(F::Ring, sqrt_2::RingElem, q::Int)
     
     # C = tambara_yamagami(G)
 
-    # set_simples_name!(C,["𝟙","χ","X"])
+    # set_simples_names!(C,["𝟙","χ","X"])
 
     set_name!(C, "ising_category fusion category")
 

@@ -17,7 +17,7 @@ Return the fusion category ℋ₂.
 function haagerup_H2()
     C = anyonwiki(6,1,2,8,2,0,1)
     set_name!(C, "Fusion category ℋ₂")
-    set_simples_names(C, ["𝟙", "α", "α∗", "ρ", "αρ", "α∗ρ"])
+    set_simples_names!(C, ["𝟙", "α", "α∗", "ρ", "αρ", "α∗ρ"])
     C
 end
 
@@ -30,7 +30,7 @@ Return the fusion category ℋ₃.
 function haagerup_H3()
     C = anyonwiki(6,1,2,8,1,0,1)
     set_name!(C, "Fusion category ℋ₃")
-    set_simples_names(C, ["𝟙", "α", "α∗", "ρ", "αρ", "α∗ρ"])
+    set_simples_names!(C, ["𝟙", "α", "α∗", "ρ", "αρ", "α∗ρ"])
     C
 end
 

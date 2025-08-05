@@ -7,7 +7,7 @@
 
         # Test loading of simple categories
         @test try 
-            C = anyonwiki(2,1,2,1,3,0,1)
+            C = anyonwiki(2, 1, 0, 1, 2, 1, 1)
             true
         catch
             false
@@ -19,7 +19,7 @@
 
         # Test loading of simple centers
         @test try 
-            C = anyonwiki_center(2,1,2,1,3,0,1)
+            C = anyonwiki_center(2, 1, 0, 1, 2, 1, 1)
             true
         catch
             false
