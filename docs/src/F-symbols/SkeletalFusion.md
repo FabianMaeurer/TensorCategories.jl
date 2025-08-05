@@ -35,7 +35,7 @@ We provide a structure for fusion categories defined by fusion rules and ``F``-s
 
 ```@docs; canonical = false 
 six_j_category
-````
+```
 
 Moreover it is necessary to set some structures like associators, the unit and pivotal structure (if desired).
 

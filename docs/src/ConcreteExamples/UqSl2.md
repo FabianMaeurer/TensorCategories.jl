@@ -18,8 +18,8 @@ sl2_representations
 ## Verlinde type categories
 
 When specifying at a root of unity we arrive at the Verlinde category. 
-These categoryies have ``n`` simple objects ``V_0,...,V_{n-1}``and fusion rule 
+These categoryies have ``n`` simple objects ``V_0,...,V_{n-1}``. Access them via 
 
-```math
-V_i \otimes V_j = ⨁\limits_{l = 0}^{\min{(i,j)}} V_{i+j - 2l}.
+```@docs 
+verlinde_category
 ```

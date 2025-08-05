@@ -9,14 +9,14 @@ end
 
 Vector spaces in TensorCategories are of the abstract type
 
-```
+```julia
 abstract type VectorSpaceObject <: Object end
 ```
 
 All objects with vector space structure like hom-spaces are and should be implemented as a
 subtype of this type. They always need the following fields:
 
-```
+```julia
 basis::Vector
 parent::Category
 ```
@@ -26,20 +26,23 @@ parent::Category
 The simplest example to provide are the finite dimensional vector spaces over a field.
 This category has type
 
-```
+```julia
 VectorSpaces <: TensorCategory
 ```
 
 and can be constructed like so:
 
-```@example VS
+```jldoctest
 F = GF(5,2)
 Vec = VectorSpaces(F)
+
+# output
+Category of finite dimensional VectorSpaces over Finite field of degree 2 and characteristic 5
 ```
 
 Objects of this category are of the type
 
-```
+```julia
 VSObject <: VectorSpaceObject
 ```
 
@@ -79,7 +82,7 @@ G = symmetric_group(6)
 VecG = graded_vector_spaces(G)
 
 # output
-Category of G-graded vector spaces over Algebraic closure of rational field where G is Sym(6)
+Category of G-graded vector spaces over Rational field where G is Sym(6)
 ```
 
 To add a non-trivial associator (twist) there is another constructor. 
@@ -91,7 +94,7 @@ twisted_graded_vector_spaces
 Graded vector spaces decompose into direct sums of vector spaces for each element in
 ``G``.
 
-```
+```julia
 GVSObject <: VectorSpaceObject
 ```
 
@@ -109,7 +112,7 @@ PermGroupElem[(1,2,3,4,5), (1,2,3,4,5), (1,2,3,4,5), (1,2,3,4,5), (1,2,3,4,5), (
 
 Morphisms are implemented analogously by pairs of group elements and vector space objects.
 
-```
+```julia
 GVSMorphism <: Morphism
 ```
 

@@ -51,7 +51,13 @@ object_type(::SixJCategory) = SixJObject
 
 morphism(X::SixJObject, Y::SixJObject, m) = SixJMorphism(X,Y,m)
 
+@doc raw""" 
 
+    six_j_category(F::Ring, mult::Array{Int,3}, [names::Vector{String}])
+    six_j_category(F::Ring, names::Vector{String})
+
+Initialize a fusion category. Associativity constraints are all set to 1, i.e. are most likely false. 
+"""
 function six_j_category(F::Ring, mult::Array{Int,3}, names::Vector{String} = ["X$i" for i ∈ 1:length(mult[1,1,:])])
     C = SixJCategory()
     C.base_ring = F
@@ -76,6 +82,12 @@ end
 #   Setters/Getters
 #-------------------------------------------------------------------------------
 
+@doc raw""" 
+
+    set_tensor_product!(F::SixJCategory, mult::Array{Int,4})
+
+Set the fusion rules of ``F``.
+"""
 function set_tensor_product!(F::SixJCategory, tensor)
     F.tensor_product = tensor
     n = size(tensor,1)
@@ -96,7 +108,16 @@ function rank(C::SixJCategory)
     C.simples 
 end
 
+@doc raw""" 
+    set_associator!(F::SixJCategory, ass::Array{MatElem,4})
+    set_associator!(F::SixJCategory, i::Int, j::Int, k::Int, ass::Vector{<:MatElem})
+    set_associator!(F::SixJCategory, i::Int, j::Int, k::Int, l::Int, ass::Array{T,N}) where {T,N}
+    set_associator!(F::SixJCategory, i::Int, j::Int, k::Int, l::Int, m::Int, n::Int, v::RingElem) 
+
+Set the ``F``-symbols of ``F``.
+"""
 set_associator!(F::SixJCategory, ass) = F.ass = ass
+
 function set_associator!(F::SixJCategory, i::Int, j::Int, k::Int, ass::Vector{<:MatElem})
     F.ass[i,j,k,:] = ass
 end
@@ -113,6 +134,12 @@ function set_associator!(F::SixJCategory, i::Int, j::Int, k::Int, l::Int, m::Int
     F.ass[i,j,k,l][m,n] = v
 end
 
+@doc raw""" 
+
+    set_pivotal!(F::SixJCategory, p::Vector{<:RingElem})
+
+Set the pivotal structure of ``F``. Warning: No checks are performed.
+"""
 function set_pivotal!(F::SixJCategory, sp)
     F.pivotal = sp
 end
@@ -141,8 +168,15 @@ function set_canonical_spherical!(C::SixJCategory)
     @assert is_fusion(C)
     set_pivotal!(C, base_ring(C).([1 for _ ∈ 1:C.simples]))
     set_pivotal!(C, [fpdim(s)*inv(dim(s)) for s ∈ simples(C)])
-    end
+end
 
+@doc raw""" 
+
+    set_one!(F::SixJCategory, v::Vector{Int})
+    set_one!(F::SixJCategory, i::Int)   
+
+Set the unit of ``F``.
+"""
 function set_one!(F::SixJCategory, v::Vector) 
     F.one = v
 end 
@@ -159,6 +193,12 @@ function set_twist!(F::SixJCategory, t)
     F.twist = t
 end
 
+@doc raw""" 
+
+    set_name!(F::SixJCategory, name::String)    
+
+Set the display name of ``F``.
+"""
 function set_name!(F::SixJCategory, name)
     F.name = name
 end

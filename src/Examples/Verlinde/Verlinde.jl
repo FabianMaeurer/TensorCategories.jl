@@ -91,6 +91,12 @@ end
 #construct the Verlinde type categorie with m many objects,  l-th associator and k-th braiding; Need (m+1, l) coprime
 #furthermore for the braiding k we use even higher roots of unity,  but also need (m+1, k) coprime
 #Formulas come from "Temperley-Lieb Recoupling theory"
+@doc raw""" 
+
+	verlinde_category(K::Ring, m::Int)
+
+Return the Verlinde category specialized at a ``m``th rooth of unity.
+"""
 function verlinde_category(K::Ring, m::Int, l::Int = 1, t::Int = 1)
 	#K=Oscar.QQBarField()
 	z = root_of_unity(K, 2*m+2)
@@ -176,4 +182,10 @@ function verlinde_r_symbol(K::Ring, i::Int, j::Int, k::Int, m::Int, zz::RingElem
 	end
 end
 
+@doc raw""" 
+
+	verlinde_category(m::Int)
+
+Return the Verlinde category specialized at a ``m``th rooth of unity.
+"""
 verlinde_category(m::Int, l::Int = 1, k::Int = 1) = verlinde_category(cyclotomic_field(4*m+4)[1],m, l, k)

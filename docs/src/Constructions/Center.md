@@ -1,5 +1,7 @@
-```@setup ising_category
-using TensorCategories
+```@meta 
+DocTestSetup = quote 
+    using TensorCategories, Oscar
+end
 ```
 
 # [The Center Construction](@id center)
@@ -27,13 +29,44 @@ interface is supported.
 
 ## Example
 
-```@example ising_category
+```jldoctest
 I = ising_category()
 C = center(I)
 simples(C)
+
+# output
+5-element Vector{CenterObject}:
+ Central object: 𝟙
+ Central object: 𝟙
+ Central object: 𝟙 ⊕ χ
+ Central object: 2⋅χ
+ Central object: 4⋅X
 ```
 
-# Methods
+# Centers of the AnyonWiki
+
+Currently we are working at the task to compute all centers of multiplicity free fusion categories up to rank seven. At the moment all centers to rank 4 are available and some of rank five. Access them via 
+
+```@docs 
+anyonwiki_center
+```
+
+```jldoctest
+C = anyonwiki_center(3,1,0,2,1,1,1)
+
+print_multiplication_table(C)
+
+# output
+8×8 Matrix{String}:
+ "(𝟙, γ)"        "(X2, γ)"       …  "(X2 ⊕ X3, γ)"
+ "(X2, γ)"       "(𝟙, γ)"           "(𝟙 ⊕ X3, γ)"
+ "(𝟙 ⊕ X2, γ)"   "(𝟙 ⊕ X2, γ)"      "(𝟙 ⊕ X3, γ) ⊕ (X2 ⊕ X3, γ)"
+ "(X3, γ1)"      "(X3, γ1)"         "(𝟙 ⊕ X3, γ) ⊕ (X2 ⊕ X3, γ)"
+ "(X3, γ2)"      "(X3, γ2)"         "(𝟙 ⊕ X3, γ) ⊕ (X2 ⊕ X3, γ)"
+ "(X3, γ3)"      "(X3, γ3)"      …  "(𝟙 ⊕ X3, γ) ⊕ (X2 ⊕ X3, γ)"
+ "(𝟙 ⊕ X3, γ)"   "(X2 ⊕ X3, γ)"     "(X2, γ) ⊕ (𝟙 ⊕ X2, γ) ⊕ (X3, γ1) ⊕ (X3, γ2) ⊕ (X3, γ3)"
+ "(X2 ⊕ X3, γ)"  "(𝟙 ⊕ X3, γ)"      "(𝟙, γ) ⊕ (𝟙 ⊕ X2, γ) ⊕ (X3, γ1) ⊕ (X3, γ2) ⊕ (X3, γ3)"
+```
 
 ```@autodocs
 Modules = [TensorCategories]

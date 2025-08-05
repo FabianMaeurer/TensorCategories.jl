@@ -15,13 +15,13 @@ for the orbits.
 
 We provide the datatype
 
-```
+```julia
 CoherentSheafObject <: Object
 ```
 
 The category of equivariant coherent sheaves has type
 
-```
+```julia
 CohSheaves <: MultiTensorCategory
 ```
 
@@ -33,7 +33,7 @@ coherent_sheaves
 
 Morphisms are given by morphisms of representations of the stalks and are of type
 
-```
+```julia
 CohSheafMorphism{T,G} <: Morphism
 ```
 
@@ -61,13 +61,13 @@ morphisms.
 
 Objects in this category are of type
 
-```
+```julia
 ConvolutionObject <: Object
 ```
 
 while the convolution category is of type
 
-```
+```julia
 ConvolutionCategory <: MultiTensorCategory
 ```
 
@@ -79,7 +79,7 @@ convolution_category
 
 Morphisms are just morphisms of coherent sheaves with the new tensor product.
 
-```
+```julia
 ConvolutionMorphism <: Morphism
 ```
 

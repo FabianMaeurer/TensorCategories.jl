@@ -16,7 +16,7 @@ abstract type RepresentationCategory <:Category
 Let ``G`` be a finite group. We consider the category of finite dimensional
 ``k``-representations of ``G``.
 
-```
+```julia
 GroupRepresentationCategory <: RepresentationCategory
 ```
 
@@ -29,7 +29,7 @@ representation_category(::Field, ::Group)
 A group representation is defined by a group homomorphism from ``G`` into a
 finite dimensional vector space ``k^n``. These objects are of type
 
-```
+```julia
 GroupRepresentationObject <: RepresentationObject
 ```
 

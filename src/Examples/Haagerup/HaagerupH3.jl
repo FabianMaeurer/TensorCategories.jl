@@ -1,4 +1,19 @@
+@doc raw""" 
 
+    haagerup_H1()
+
+Return the fusion category ℋ₁. 
+"""
+function haagerup_H1()
+    error("Not yet")
+end
+
+@doc raw""" 
+
+    haagerup_H2()
+
+Return the fusion category ℋ₂. 
+"""
 function haagerup_H2()
     C = anyonwiki(6,1,2,8,2,0,1)
     set_name!(C, "Fusion category ℋ₂")
@@ -6,6 +21,12 @@ function haagerup_H2()
     C
 end
 
+@doc raw""" 
+
+    haagerup_H3()
+
+Return the fusion category ℋ₃. 
+"""
 function haagerup_H3()
     C = anyonwiki(6,1,2,8,1,0,1)
     set_name!(C, "Fusion category ℋ₃")

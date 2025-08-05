@@ -59,6 +59,12 @@ function anyonwiki(rank::Int,
     return C
 end
 
+@doc raw""" 
+
+    anyonwiki_center(i,j,k,l,m,n,o)
+
+Return the center of the fusion category with index (i,j,k,l,m,n,o) from the database.
+"""
 function anyonwiki_center(i,j,k,l,m,n,o)
     path = anyonwiki_center_artifact_path(i,j,k,l,m,n,o)
 
