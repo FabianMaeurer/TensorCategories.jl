@@ -1683,8 +1683,11 @@ function six_j_symbols(C::BiModuleCategory, S = simples(C))
                     H_XY_V = homs[i,j,n]
 
                     H_VZ_W = homs[n,k,l]
-
-                    B = [morphism(f) ∘ (right_module(g) ⊗ id(left_module(S[k]))) for f ∈ H_VZ_W, g ∈ H_XY_V][:]
+                    try 
+                        global B = [morphism(f) ∘ (right_module(g) ⊗ id(left_module(S[k]))) for f ∈ H_VZ_W, g ∈ H_XY_V][:]
+                    catch 
+                        Main.@infiltrate 
+                    end
                     if length(B) == 0 continue end
                     B_XY_Z_W = [B_XY_Z_W; B]
                 end

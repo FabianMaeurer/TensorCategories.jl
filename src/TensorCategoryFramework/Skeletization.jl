@@ -4,13 +4,12 @@ function skeletalize(C::Category, names::Vector{String} = simples_names(C))
 end
 
 function six_j_category(C::Category, names::Vector{String} = simples_names(C))
-    F = six_j_category(simples(C), names)
+    F = six_j_category(C, simples(C), names)
     set_name!(F, "Skeletization of $C")
     return F
 end
 
-function six_j_category(S::Vector{<:Object}, names::Vector{String} = simples_names(parent(S[1])))
-    C = parent(S[1])
+function six_j_category(C::Category, S::Vector{<:Object}, names::Vector{String} = simples_names(parent(S[1])))
     @assert is_ring(C)
 
     if typeof(C) == SixJCategory 
