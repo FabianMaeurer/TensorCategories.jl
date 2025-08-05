@@ -5,7 +5,7 @@
 
 associator_path = joinpath(@__DIR__, "AnyonWikiData//")
 pivotal_path = joinpath(@__DIR__, "AnyonWikiData/PivotalStructures/")
-anyon_path = artifact"AnyonWiki"
+anyon_path = joinpath(artifact"AnyonWiki", "AnyonWiki")
 
 
 

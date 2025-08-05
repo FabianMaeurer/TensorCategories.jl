@@ -1661,7 +1661,7 @@ function six_j_symbols(C::BiModuleCategory, S = simples(C))
 
 
 
-    for i in 1:N 
+    @threads for i in 1:N 
         for j ∈ 1:N, k ∈ 1:N
             if !isempty([i,j,k] ∩ one_indices) 
                 for l ∈ 1:N
@@ -1670,17 +1670,14 @@ function six_j_symbols(C::BiModuleCategory, S = simples(C))
                 end
                 continue
             end
-            @show i,j,k
             a = associator((S[[i,j,k]])...)
 
             for  l ∈ 1:N
                 #set trivial associators
                 
-                @show i,j,k,l
                 # Build a basis for Hom((X⊗Y)⊗Z,W)
                 B_XY_Z_W = C_morphism_type[]
                 for n ∈ 1:N
-                    @show n
                     V = S[n]
 
                     H_XY_V = homs[i,j,n]
@@ -1706,8 +1703,6 @@ function six_j_symbols(C::BiModuleCategory, S = simples(C))
                     B_X_YZ_W = [B_X_YZ_W; B]
                 end
 
-                @show length(B_XY_Z_W)
-                @show length(B_X_YZ_W)
                 associator_XYZ_W = hcat([express_in_basis(f ∘ morphism(a), B_XY_Z_W) for f ∈ B_X_YZ_W]...)
             
                 ass[i,j,k,l] = matrix(F, length(B_XY_Z_W), length(B_X_YZ_W),  associator_XYZ_W)
