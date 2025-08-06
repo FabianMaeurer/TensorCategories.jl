@@ -784,10 +784,9 @@ function save_fusion_category(C::SixJCategory, path::String, name::String)
     end
 end
 
-function load_fusion_category(file::String, name = nothing)
-    if name == nothing 
-        name = splitpath(file)[end]
-    end
+function load_fusion_category(file::String)
+    
+    name = splitpath(file)[end]
 
     meta = include(joinpath(file, "$(name)_meta"))
 
@@ -807,7 +806,7 @@ function load_fusion_category(file::String, name = nothing)
     set_associator!(C, F_symbols)
     set_pivotal!(C, P_symbols)
 
-    if isdir(joinpath(file, "$(name)_R_symbols"))
+    if isfile(joinpath(file, "$(name)_R_symbols"))
         R_symbols = load_R_symbols(rank,K,joinpath(file, "$(name)_R_symbols"))
         set_braiding!(C, R_symbols)
     end
