@@ -205,6 +205,7 @@ export GTensorAction
 export GVSHomSpace 
 export GVSMorphism 
 export GVSObject 
+export haagerup_H1
 export haagerup_H2
 export haagerup_H3 
 export haagerup_H3_center

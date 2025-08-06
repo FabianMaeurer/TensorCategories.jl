@@ -5,7 +5,7 @@
 Return the fusion category ℋ₁. 
 """
 function haagerup_H1()
-    error("Not yet")
+    load_fusion_category(joinpath(artifact"Haagerup_H1", "haagerup_H1"))
 end
 
 @doc raw""" 
@@ -35,8 +35,8 @@ function haagerup_H3()
 end
 
 function haagerup_H3_center()
-    path = joinpath(@__DIR__, "../center_haagerup")
-    load_fusion_category(path)
+    path = joinpath(artifact"center_haagerup")
+    load_fusion_category(joinpath(path, "center_haagerup"))
 end
 
 """ 

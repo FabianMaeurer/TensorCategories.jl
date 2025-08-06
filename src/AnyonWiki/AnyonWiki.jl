@@ -784,8 +784,10 @@ function save_fusion_category(C::SixJCategory, path::String, name::String)
     end
 end
 
-function load_fusion_category(file::String)
-    name = splitpath(file)[end]
+function load_fusion_category(file::String, name = nothing)
+    if name == nothing 
+        name = splitpath(file)[end]
+    end
 
     meta = include(joinpath(file, "$(name)_meta"))
 
