@@ -692,10 +692,11 @@ function bimodule_tensor_product(M::BiModuleObject, N::BiModuleObject)
     p = right_action(M)
     q = left_action(N)
 
-    P,c = coequilizer(
-        p ⊗ id(object(N)),
-        (id(object(M)) ⊗ q) ∘ associator(object(M), object(B), object(N))
-    )
+    P,c = _tensor_product(right_module(M), left_module(N))
+    #coequilizer(
+    #     p ⊗ id(object(N)),
+    #     (id(object(M)) ⊗ q) ∘ associator(object(M), object(B), object(N))
+    # )
 
     inv_c = right_inverse(c)
 
@@ -1632,87 +1633,90 @@ function multiplication_table(M::BiModuleCategory)
     end
 end
 
-function six_j_symbols(C::BiModuleCategory, S = simples(C))
-    @assert is_semisimple(C)
+# function six_j_symbols(C::BiModuleCategory, S = simples(C))
+#     @assert is_semisimple(C)
 
-    N = length(S)
-    C_morphism_type = morphism_type(category(C))
-    F = base_ring(C) 
+#     N = length(S)
+#     C_morphism_type = morphism_type(category(C))
+#     F = base_ring(C) 
 
-    ass = Array{MatElem}(undef,N,N,N,N)
+#     ass = Array{MatElem}(undef,N,N,N,N)
 
-    one_indices = findall(s -> int_dim(Hom(s,one(C))) > 0 , S)
-    one_components = simple_subobjects(one(C))
+#     one_indices = findall(s -> int_dim(Hom(s,one(C))) > 0 , S)
+#     one_components = simple_subobjects(one(C))
 
-    # Set unitors to identity
-    S[one_indices] = one_components
+#     # Set unitors to identity
+#     S[one_indices] = one_components
 
-    homs = multiplicity_spaces(C)
+#     homs = multiplicity_spaces(C)
 
-    #prods = [domain(homs[(i,j,findfirst(k -> haskey(homs, (i,j,k)), 1:N))]) for i ∈ 1:N, j in 1:N]
+#     #prods = [domain(homs[(i,j,findfirst(k -> haskey(homs, (i,j,k)), 1:N))]) for i ∈ 1:N, j in 1:N]
 
-    homs = Dict(k => (basis(v)) for (k,v) in homs)
-    missed = [(i,j,k) => C_morphism_type[] for i in 1:N, j in 1:N, k in 1:N if !haskey(homs, (i,j,k))]
-    if length(missed) > 0
-        push!(homs, missed...)
-    end
+#     homs = Dict(k => (basis(v)) for (k,v) in homs)
+#     missed = [(i,j,k) => C_morphism_type[] for i in 1:N, j in 1:N, k in 1:N if !haskey(homs, (i,j,k))]
+#     if length(missed) > 0
+#         push!(homs, missed...)
+#     end
 
-    #associators = [associator(X,Y,Z) for X ∈ S, Y ∈ S, Z ∈ S]
+#     #associators = [associator(X,Y,Z) for X ∈ S, Y ∈ S, Z ∈ S]
 
 
 
-    @threads for i in 1:N 
-        for j ∈ 1:N, k ∈ 1:N
-            if !isempty([i,j,k] ∩ one_indices) 
-                for l ∈ 1:N
-                    n = sum([length(homs[i,j,v]) * length(homs[v,k,l]) for v ∈ 1:N])
-                    ass[i,j,k,l] = identity_matrix(F,n)
-                end
-                continue
-            end
-            a = associator((S[[i,j,k]])...)
+#     @threads for i in 1:N 
+#         for j ∈ 1:N, k ∈ 1:N
+#             if !isempty([i,j,k] ∩ one_indices) 
+#                 for l ∈ 1:N
+#                     n = sum([length(homs[i,j,v]) * length(homs[v,k,l]) for v ∈ 1:N])
+#                     ass[i,j,k,l] = identity_matrix(F,n)
+#                 end
+#                 continue
+#             end
+#             a = associator((S[[i,j,k]])...)
 
-            for  l ∈ 1:N
-                #set trivial associators
+#             for  l ∈ 1:N
+#                 #set trivial associators
                 
-                # Build a basis for Hom((X⊗Y)⊗Z,W)
-                B_XY_Z_W = C_morphism_type[]
-                for n ∈ 1:N
-                    V = S[n]
+#                 # Build a basis for Hom((X⊗Y)⊗Z,W)
+#                 B_XY_Z_W = C_morphism_type[]
+#                 for n ∈ 1:N
+#                     V = S[n]
 
-                    H_XY_V = homs[i,j,n]
+#                     H_XY_V = homs[i,j,n]
 
-                    H_VZ_W = homs[n,k,l]
+#                     H_VZ_W = homs[n,k,l]
                     
-                    B = [morphism(f) ∘ (right_module(g) ⊗ id(left_module(S[k]))) for f ∈ H_VZ_W, g ∈ H_XY_V][:]
+#                     B = [morphism(f) ∘ (right_module(g) ⊗ id(left_module(S[k]))) for f ∈ H_VZ_W, g ∈ H_XY_V][:]
   
-                    if length(B) == 0 continue end
-                    B_XY_Z_W = [B_XY_Z_W; B]
-                end
+#                     if length(B) == 0 continue end
+#                     B_XY_Z_W = [B_XY_Z_W; B]
+#                 end
 
-                # Build a basis for Hom(X⊗(Y⊗Z),W)
-                B_X_YZ_W = C_morphism_type[]
-                for n ∈ 1:N
-                    V = S[n]
+#                 # Build a basis for Hom(X⊗(Y⊗Z),W)
+#                 B_X_YZ_W = C_morphism_type[]
+#                 for n ∈ 1:N
+#                     V = S[n]
 
-                    H_YZ_V = homs[j,k,n]
+#                     H_YZ_V = homs[j,k,n]
 
-                    H_XV_W = homs[i,n,l]
+#                     H_XV_W = homs[i,n,l]
                             
-                    B = [morphism(f) ∘ (id(right_module(S[i])) ⊗ left_module(g)) for f ∈ H_XV_W, g ∈ H_YZ_V][:]
-                    if length(B) == 0 continue end
-                    B_X_YZ_W = [B_X_YZ_W; B]
-                end
+#                     B = [morphism(f) ∘ (id(right_module(S[i])) ⊗ left_module(g)) for f ∈ H_XV_W, g ∈ H_YZ_V][:]
+#                     if length(B) == 0 continue end
+#                     B_X_YZ_W = [B_X_YZ_W; B]
+#                 end
 
-                associator_XYZ_W = hcat([express_in_basis(f ∘ morphism(a), B_XY_Z_W) for f ∈ B_X_YZ_W]...)
-            
-                ass[i,j,k,l] = matrix(F, length(B_XY_Z_W), length(B_X_YZ_W),  associator_XYZ_W)
-            end
-        end
-    end
+#                 try
+#                     global associator_XYZ_W = hcat([express_in_basis(f ∘ morphism(a), B_XY_Z_W) for f ∈ B_X_YZ_W]...)
+#                 catch
+#                     Main.@infiltrate 
+#                 end
+#                 ass[i,j,k,l] = matrix(F, length(B_XY_Z_W), length(B_X_YZ_W),  associator_XYZ_W)
+#             end
+#         end
+#     end
 
-    return ass           
-end
+#     return ass           
+# end
 
 #=----------------------------------------------------------
     Pretty printing

@@ -190,7 +190,7 @@ function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothi
     @threads for i ∈ 1:N 
         for j ∈ 1:N, k ∈ 1:N
             a = associator(object.(S[[i,j,k]])...)
-
+ 
             for l ∈ 1:N
                 if log !== nothing && isfile(joinpath(@__DIR__, "$log/$(i)_$(j)_$(k)_$(l)"))
                     _m =  load(joinpath(@__DIR__, "$log/$(i)_$(j)_$(k)_$(l)"))
@@ -248,6 +248,7 @@ function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothi
                     save(joinpath(@__DIR__, "$log/$(i)_$(j)_$(k)_$(l)"),associator_XYZ_W)
                 end
             end
+
         end
     end
 
