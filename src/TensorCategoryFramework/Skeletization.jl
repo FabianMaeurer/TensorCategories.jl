@@ -136,8 +136,6 @@ function six_j_symbols(C::Category, S = simples(C))
                     B_X_YZ_W = [B_X_YZ_W; B]
                 end
 
-                @show length(B_XY_Z_W)
-                @show length(B_X_YZ_W)
                 associator_XYZ_W = hcat([express_in_basis(f ∘ a, B_XY_Z_W) for f ∈ B_X_YZ_W]...)
             
                 ass[i,j,k,l] = matrix(F, length(B_XY_Z_W), length(B_X_YZ_W),  associator_XYZ_W)
