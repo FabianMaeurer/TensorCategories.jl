@@ -4,9 +4,9 @@ import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, lengt
 
 import Oscar.AbstractAlgebra.Generic: Poly
 import Oscar.AbstractAlgebra: Group
-import Oscar.Hecke: RelSimpleNumField, regular_module, meataxe, NumFieldEmb
+import Oscar.Hecke: RelSimpleNumField, regular_module, meataxe
 import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAlgebra, AssociativeAlgebraElem, ngens,
-    cyclotomic_field, Fac, Field, FieldElem, FinField, GF, GAP,QQ,
+    cyclotomic_field, Fac, Field, FieldElem, FinField, GF, GAP,QQ,AbsSimpleNumFieldEmbedding,
     GAPGroupHomomorphism, GL, GSet, GroupElem, Hecke.AbstractAssociativeAlgebra,
     Hecke.AbstractAssociativeAlgebraElem, Ideal, MPolyRingElem, MPolyIdeal, Map, MatElem, MatrixElem, conductor,
     MatrixGroup, matrix_space, ModuleIsomorphism, number_field, PcGroup, PolyRingElem, FqMPolyRingElem, FqPolyRingElem,
@@ -131,6 +131,8 @@ export coequilizer
 export coev 
 export coherent_sheaves 
 export cokernel 
+export complex_embedding
+export complex_embeddings
 export compose 
 export convolution_category 
 export coproduct 

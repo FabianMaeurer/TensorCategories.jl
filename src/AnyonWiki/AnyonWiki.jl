@@ -90,7 +90,11 @@ function anyonwiki_center_artifact_path(i,j,k,l,m,n,o)
             path = joinpath(path, "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)")
             open(path)
             return path
-
+        elseif i == 5 && k == 4
+            path = @artifact_str "AnyonWikiCenters_5_$(j)_4"
+            path = joinpath(path, "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)")
+            open(path)
+            return path
         else
             path = @artifact_str "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)"
             path = joinpath(path, "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)")
@@ -408,7 +412,7 @@ end
 #     end
 # end
 
-function apply_preimage_to_anyon_file(e::NumFieldEmb, file::String)
+function apply_preimage_to_anyon_file(e::AbsSimpleNumFieldEmbedding, file::String)
     str = read(file, String)
     reg = r"\"[^\"]*\""
     matches = unique(collect([m.match[2:end-1] for m in eachmatch(reg,str)]))

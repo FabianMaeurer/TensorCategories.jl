@@ -3,7 +3,7 @@
     along a complex embedding       
 ----------------------------------------------------------=#
 
-function preimage(e::NumFieldEmb, x, deg = 80; tol = 10^(-10))
+function preimage(e::AbsSimpleNumFieldEmbedding, x, deg = 80; tol = 10^(-10))
 
     # Get the number field in question
     K = number_field(e)

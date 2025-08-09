@@ -9,7 +9,7 @@ doi: 10.5281/zenodo.15805916
 url: "https://github.com/FabianMaeurer/TensorCategories.jl"
 authors:
   - given-names: Fabian
-    family-names: Mäurer
+    family-names: Maeurer
     affiliation: RPTU Kaiserslautern-Landau
 keywords:
   - Tensor Categories

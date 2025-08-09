@@ -1086,8 +1086,16 @@ function extension_of_scalars(C::SixJCategory, L::Ring; embedding = embedding(ba
     end
 end
 
-function extension_of_scalars(C::SixJCategory, K::QQBarField)
-    e = complex_embeddings(base_ring(C))[1]
+function complex_embedding(C::SixJCategory, e::AbsSimpleNumFieldEmbedding)
+    extension_of_scalars(C, QQBarField(), e)
+end
+
+function complex_embeddings(C::SixJCategory)
+    [extension_of_scalars(C, QQBarField(), e) for e ∈ complex_embeddings(base_ring(C))]
+end
+
+
+function extension_of_scalars(C::SixJCategory, K::QQBarField, e::AbsSimpleNumFieldEmbedding = complex_embeddings(base_ring(C))[1])
     if base_ring(C) == QQ 
         to_qqbar = QQBarField()
     else
@@ -1131,6 +1139,7 @@ function extension_of_scalars(m::SixJMorphism, L::Ring, CL = nothing; embedding 
         error("Extension of scalars not possible")
     end
 end
+
 
 function restriction_of_scalars(C::SixJCategory, K::Ring)
     b,f = is_subfield(K,base_ring(C))

@@ -61,6 +61,14 @@ lazy = true
     sha256 = "ecf3b08b01e34b0eed512f9797a19c3c93e6090f32dcf3b5ab880985cfe8c550"
     url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenters_5_1_2.tar.gz"
 
+[AnyonWikiCenters_5_1_4]
+git-tree-sha1 = "e1a53400bd24b77011297c083fe8ae27b814fb41"
+lazy = true
+
+    [[AnyonWikiCenters_5_1_4.download]]
+    sha256 = "70cd25de4a1c0a0bc09b4a56aa954a73bad7a5c443cfdc043696ffdfc7eef7b7"
+    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenters_5_1_4.tar.gz"
+
 [Haagerup_H1]
 git-tree-sha1 = "f282d134a3928ead038fd34b6f4514e2eef65adf"
 
