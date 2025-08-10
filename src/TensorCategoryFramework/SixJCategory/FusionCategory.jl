@@ -39,6 +39,7 @@ end
 function ==(C::SixJCategory, D::SixJCategory)
     base_ring(C) ≠ base_ring(D) && return false 
     multiplication_table(C) ≠ multiplication_table(D) && return false 
+    C.ass != D.ass && return false
     true 
 end
 

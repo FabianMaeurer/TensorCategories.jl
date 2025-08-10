@@ -130,7 +130,8 @@ function end_of_induction(X::Object, IX = induction(X))
 
     m = [zero_morphism(X,X) for _ in 1:length(simpls)]
 
-    dims = dim.(dual.(simpls))
+    dims = right_dim.((simpls))
+
     @threads for i ∈ 1:length(simpls)
         xi = simpls[i]
         dxi = dual(xi)
@@ -165,7 +166,7 @@ function induction_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = inducti
 
     C = parent(domain(H))
 
-    dims = dim.(dual.(simples(C)))
+    dims = right_dim.((simples(C)))
    
     simpls = simples(parent(H[1]))
     if typeof(base_ring(Y)) == CalciumField || base_ring(Y) == QQBarField()
@@ -266,7 +267,7 @@ function induction_adjunction(f::Morphism, Y::CenterObject, IX = induction(domai
 
     C = parent(domain(H))
 
-    dims = dim.(dual.(simples(C)))
+    dims = right_dim.(simples(C))
    
     simpls = simples(parent(H[1]))
     if typeof(base_ring(Y)) == CalciumField || base_ring(Y) == QQBarField()
@@ -335,7 +336,7 @@ function adjusted_pairing(f::Morphism, g::Morphism, S::Object, W::Object, T::Obj
     # natural Isomorphisms
     ϕ = (id(W)⊗ev(dual(T))) ∘ (id(W)⊗(pivotal(T)⊗id(dual(T)))) ∘ associator(W,T,dual(T)) ∘ (f⊗g) ∘ associator(S,dual(S),W) ∘ (coev(S)⊗id(W))
 
-    dim(End(W)) == 1 && return dim(W) * ϕ
+    int_dim(End(W)) == 1 && return dim(W) * ϕ
     
     return tr(ϕ)
 end

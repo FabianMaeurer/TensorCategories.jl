@@ -219,27 +219,42 @@ function is_invertible(X::Object)
 end
 
 #-------------------------------------------------------
-# Spherical structure
+# pivotal structure
 #-------------------------------------------------------
 
 function drinfeld_morphism(X::Object)
      (ev(X)⊗id(dual(dual(X)))) ∘ (braiding(X,dual(X))⊗id(dual(dual(X)))) ∘ inv_associator(X, dual(X), dual(dual(X))) ∘ (id(X)⊗coev(dual(X)))
  end
 
-function dim(X::Object) 
+function left_dim(X::Object) 
     C = parent(X)
     if is_tensor(C)
-        return base_ring(X)(tr(id(X)))
+        return base_ring(X)(left_trace(id(X)))
     elseif is_multitensor(C)
         𝟙 = simple_subobjects(one(C))
         incls = [basis(Hom(𝟙ᵢ, one(C)))[1] for 𝟙ᵢ ∈ 𝟙]
         projs = [basis(Hom(one(C), 𝟙ᵢ))[1] for 𝟙ᵢ ∈ 𝟙]
 
-        return sum([base_ring(X)(p∘tr(spherical(X))∘i) for p ∈ projs, i ∈ incls][:])
+        return sum([base_ring(X)(p∘left_trace(pivotal(X))∘i) for p ∈ projs, i ∈ incls][:])
     end
     error("No dimension defined")
 end
 
+function right_dim(X::Object)
+    C = parent(X)
+    if is_tensor(C)
+        return base_ring(X)(right_trace(id(X)))
+    elseif is_multitensor(C)
+        𝟙 = simple_subobjects(one(C))
+        incls = [basis(Hom(𝟙ᵢ, one(C)))[1] for 𝟙ᵢ ∈ 𝟙]
+        projs = [basis(Hom(one(C), 𝟙ᵢ))[1] for 𝟙ᵢ ∈ 𝟙]
+
+        return sum([base_ring(X)(p∘right_trace(pivotal(X))∘i) for p ∈ projs, i ∈ incls][:])
+    end
+    error("No dimension defined")
+end 
+
+dim(X::Object) = left_dimension(X)
 dim(C::Category) = sum(squared_norm(s) for s ∈ simples(C))
 #-------------------------------------------------------
 # S-Matrix

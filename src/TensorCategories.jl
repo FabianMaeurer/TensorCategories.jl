@@ -86,6 +86,7 @@ export AlgebraObject
 export AlgebraMorphism
 export anyonwiki
 export anyonwiki_center
+export anyonwiki_keys
 export ArrowCategory
 export ArrowObject
 export ArrowMorphism
@@ -286,6 +287,7 @@ export is_invertible
 export karoubian_envelope 
 export kernel 
 export left_action
+export left_dim
 export left_dual 
 export left_inverse 
 export LeftModule
@@ -367,6 +369,7 @@ export restriction
 export Restriction 
 export reverse_braiding
 export right_action
+export right_dim
 export right_dual 
 export right_inverse
 export right_module 
@@ -410,7 +413,7 @@ export simple_subobjects
 export simples 
 export simples_names 
 export six_j_symbols 
-export skeletalize
+export skeletonize
 export smatrix 
 export solve_groebner 
 export sort_simples_by_dimension! 
@@ -493,7 +496,7 @@ include("TensorCategoryFramework/SixJCategory/FusionCategory.jl")
 include("TensorCategoryFramework/SixJCategory/PivotalStructures.jl")
 #include("structures/MultiFusionCategories/FusionCategoryExperimental.jl")
 include("TensorCategoryFramework/6j-Solver.jl")
-include("TensorCategoryFramework/Skeletization.jl")
+include("TensorCategoryFramework/Skeletonization.jl")
 include("TensorCategoryFramework/TensorAxioms/PentagonAxiom.jl")
 include("TensorCategoryFramework/TensorAxioms/HexagonAxion.jl")
 include("TensorCategoryFramework/RingSubcategories.jl")

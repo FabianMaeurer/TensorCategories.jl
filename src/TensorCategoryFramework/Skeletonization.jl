@@ -1,11 +1,11 @@
 
-function skeletalize(C::Category, names::Vector{String} = simples_names(C))
+function skeletonize(C::Category, names::Vector{String} = simples_names(C))
     six_j_category(C, names)
 end
 
 function six_j_category(C::Category, names::Vector{String} = simples_names(C))
     F = six_j_category(C, simples(C), names)
-    set_name!(F, "Skeletization of $C")
+    set_name!(F, "Skeletonization of $C")
     return F
 end
 

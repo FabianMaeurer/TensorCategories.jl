@@ -158,13 +158,22 @@ Return the spherical structure ```X → X∗∗``` of ```X```.
 """
 spherical(X::CenterObject) = morphism(X,dual(dual(X)), spherical(X.object))
 
+"""
+    pivotal(X::CenterObject)
+
+Return the pivotal structure ```X → X∗∗``` of ```X```.
+"""
+pivotal(X::CenterObject) = morphism(X,dual(dual(X)), pivotal(X.object))
+
 (F::Field)(f::CenterMorphism) = F(f.m)
 
 #=-------------------------------------------------
     MISC 
 -------------------------------------------------=#
 
-==(f::CenterMorphism, g::CenterMorphism) = f.m == g.m
+==(f::CenterMorphism, g::CenterMorphism) = domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
+
+==(X::CenterObject, Y::CenterObject) = object(X) == object(Y) && half_braiding(X) == half_braiding(Y) 
 
 #-------------------------------------------------------------------------------
 #   Direct Sum & Tensor Product

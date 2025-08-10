@@ -68,7 +68,9 @@ Return the center of the fusion category with index (i,j,k,l,m,n,o) from the dat
 function anyonwiki_center(i,j,k,l,m,n,o)
     path = anyonwiki_center_artifact_path(i,j,k,l,m,n,o)
 
-    load_fusion_category(path)
+    C = load_fusion_category(path)
+    set_name!(C, replace(C.name, "Skeletization" => "Skeletonization"))
+    C
 end
 
 function anyonwiki_center_artifact_path(i,j,k,l,m,n,o)
@@ -125,6 +127,12 @@ function dict_to_associator(N::Int, K::Field, ass::Dict)
     end
 
     ass_matrices 
+end
+
+function anyonwiki_keys(n::Int = 7)
+    d = include(joinpath(@__DIR__, "base_field_generators.jl"))
+
+    return [k for (k,v) in sort(d) if k[1] ≤ n]
 end
 
 function group_dict_keys_by(f::Function, D::Dict)
