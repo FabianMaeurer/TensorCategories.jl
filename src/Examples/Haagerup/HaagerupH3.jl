@@ -36,7 +36,10 @@ end
 
 function haagerup_H3_center()
     path = joinpath(artifact"center_haagerup")
-    load_fusion_category(joinpath(path, "center_haagerup"))
+    C = load_fusion_category(joinpath(path, "center_haagerup"))
+    CC = AcbField() 
+    set_attribute!(C, :embedding, complex_embedding(base_ring(C), CC(1.29 + 0.25*im)))
+    C
 end
 
 """ 

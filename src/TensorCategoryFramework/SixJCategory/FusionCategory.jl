@@ -1087,10 +1087,28 @@ function extension_of_scalars(C::SixJCategory, L::Ring; embedding = embedding(ba
     end
 end
 
+@doc raw""" 
+
+    complex_embedding(C::SixJCategory)
+    complex_embedding(C::SixJCategory, e::AbsSimpleNumFieldEmbedding)
+
+Return the complex embedding of C if an embedding of the ground field is specified or given.
+"""
+function complex_embedding(C::SixJCategory)
+    !has_attribute(C, :embedding) && error("No embedding has been specified")
+    complex_embedding(C, get_attribute(C, :embedding))
+end
+
 function complex_embedding(C::SixJCategory, e::AbsSimpleNumFieldEmbedding)
     extension_of_scalars(C, QQBarField(), e)
 end
 
+@doc raw""" 
+
+    complex_embeddings(C::SixJCategory)
+
+Return all complex_embeddings of C.
+"""
 function complex_embeddings(C::SixJCategory)
     [extension_of_scalars(C, QQBarField(), e) for e ∈ complex_embeddings(base_ring(C))]
 end

@@ -24,7 +24,7 @@ function anyonwiki(rank::Int,
                     braiding::Int, 
                     pivotal::Int)
 
-    K,_ = load_anyonwiki_number_field(rank,multiplicity,non_self_dual,fusion_ring,associator,braiding, pivotal)
+    K,rt = load_anyonwiki_number_field(rank,multiplicity,non_self_dual,fusion_ring,associator,braiding, pivotal)
 
     cat_code = "$(rank)_$(multiplicity)_$(non_self_dual)_$(fusion_ring)_$(associator)_$(braiding)_$(pivotal)"
     cat_string = "cat_$cat_code.jl"
@@ -55,6 +55,7 @@ function anyonwiki(rank::Int,
     piv = [K(piv[[p]]) for p in 1:rank]
     set_pivotal!(C, piv)
 
+    set_attribute!(C, :embedding, rt)
     set_name!(C, "Fusion Category $cat_code")
     return C
 end
