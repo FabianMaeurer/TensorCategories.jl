@@ -1118,7 +1118,7 @@ function extension_of_scalars(C::SixJCategory, K::QQBarField, e::AbsSimpleNumFie
     if base_ring(C) == QQ 
         to_qqbar = QQBarField()
     else
-        to_qqbar = x -> guess(QQBarField(), e(x,2048), maximum([1,degree(x)]))
+        to_qqbar = x -> guess(QQBarField(), e(x,2048), maximum([1,degree(@show x)]))
     end   
     extension_of_scalars(C,K, embedding = to_qqbar)
 end
