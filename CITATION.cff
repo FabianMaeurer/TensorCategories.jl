@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 title: "TensorCategories.jl"
-version: 0.5.1
+version: 0.5.2
 license: "MIT"
 type: software
 abstract: "TensorCategories provides a vast framework to compute categorical constructions of fusion categories explictly. These include the center and module categories"

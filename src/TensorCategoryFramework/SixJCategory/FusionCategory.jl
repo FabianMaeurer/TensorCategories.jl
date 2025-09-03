@@ -1317,6 +1317,7 @@ function F_symbols(C::SixJCategory)
                                 #     id(C[a]) ⊗ h,
                                 #     h2
                                 # ))
+                                #a == b == c == d == 2 && println((f,j2,i2,e,j,i))
                                 F_dict[[a,b,c,d,f,j2,i2,e,j,i]] = popfirst!(sym)
                             end
                         end

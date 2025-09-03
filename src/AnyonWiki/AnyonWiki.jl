@@ -113,18 +113,24 @@ function dict_to_associator(N::Int, K::Field, ass::Dict)
 
     ass_matrices = Array{MatElem,4}(undef,N,N,N,N)
 
-    for a ∈ 1:N, b ∈ 1:N, c ∈ 1:N, d ∈ 1:N
-        abc_d = filter(e -> e[[1,2,3,4]] == [a,b,c,d], collect(keys(ass)))
-        l = Int(sqrt(length(abc_d)))
+    groups = group_dict_keys_by(e -> e[1:4], ass)
 
+    for a ∈ 1:N, b ∈ 1:N, c ∈ 1:N, d ∈ 1:N 
+        if !haskey(groups, [a,b,c,d])
+            ass_matrices[a,b,c,d] = zero_matrix(K,0,0)
+            continue
+        end
+        D = groups[[a,b,c,d]]
+        abc_d = collect(keys(D))
+        l = Int(sqrt(length(abc_d)))
         if length(first(keys(ass))) == 6 
             abc_d = sort(abc_d, by = v -> v[6])
             abc_d = sort(abc_d, by = v -> v[5])
         else
-            abc_d = sort(abc_d, by = v -> v[[8,9,10,5,7,6]])
+            abc_d = sort(abc_d, by = v -> v[[8,5,10,9,7,6]])
         end
-        M = matrix(K,l,l, [ass[v] for v ∈ abc_d])
-        ass_matrices[a,b,c,d] = (M)
+        M = matrix(K,l,l, [D[v] for v ∈ abc_d])
+        ass_matrices[a,b,c,d] = transpose(M)
     end
 
     ass_matrices 
@@ -843,12 +849,12 @@ function load_F_symbols(rank::Int, K::Field, path::String)
             if length(first(keys(symbols))) == 6 
                 symbols_keys = sort(symbols_keys, by = v -> v[[5,6]])
             else
-                symbols_keys = sort(symbols_keys, by = v -> v[[8,9,10,5,7,6]])
+                symbols_keys = sort(symbols_keys, by = v -> v[[8,5,10,9,7,6]])
             end
             n = Int(sqrt(length(symbols_keys)))
             vals = [K == QQ ? K(symbols[v]...) : K(symbols[v]) for v ∈ symbols_keys]
             M = matrix(K,n,n, vals)
-            ass[i,j,k,l] = M
+            ass[i,j,k,l] = transpose(M)
         else
             ass[i,j,k,l] = zero_matrix(K,0,0)
         end

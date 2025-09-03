@@ -50,8 +50,9 @@ function six_j_category(C::Category, S::Vector{<:Object}, names::Vector{String} 
     try 
         set_pivotal!(skel_C,[F(1) for s ∈ S])
         sp = [dim(S[i]) * inv(dim(skel_C[i])) for i ∈ 1:length(S)]
-        set_pivotal!(Skel_C, sp)
-    catch
+        set_pivotal!(skel_C, sp)
+    catch e 
+        print(e.msg)
     end
 
     if is_braided(C)
