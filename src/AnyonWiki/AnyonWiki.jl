@@ -130,7 +130,7 @@ function dict_to_associator(N::Int, K::Field, ass::Dict)
             abc_d = sort(abc_d, by = v -> v[[8,5,10,9,7,6]])
         end
         M = matrix(K,l,l, [D[v] for v ∈ abc_d])
-        ass_matrices[a,b,c,d] = transpose(M)
+        ass_matrices[a,b,c,d] = M
     end
 
     ass_matrices 
