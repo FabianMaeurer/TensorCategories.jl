@@ -54,11 +54,11 @@ lazy = true
     url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenters_5_1_0_7.tar.gz"
 
 [AnyonWikiCenters_5_1_2]
-git-tree-sha1 = "7e6458be7416d0f00f4c35580792ce247252074f"
+git-tree-sha1 = "6d94830aba396aa4332347665b246257a4825ceb"
 lazy = true
 
     [[AnyonWikiCenters_5_1_2.download]]
-    sha256 = "ecf3b08b01e34b0eed512f9797a19c3c93e6090f32dcf3b5ab880985cfe8c550"
+    sha256 = "493745c2949417bd8c2da57eaf114a788e9bfbd0fafcfa30dca5bca4e35bedc0"
     url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenters_5_1_2.tar.gz"
 
 [AnyonWikiCenters_5_1_4]

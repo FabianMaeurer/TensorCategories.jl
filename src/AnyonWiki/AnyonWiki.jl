@@ -803,6 +803,13 @@ function save_fusion_category(C::SixJCategory, path::String, name::String)
     end
 end
 
+function anyonwiki_center_meta(i,j,k,l,m,n,o)
+    p = anyonwiki_center_artifact_path(i,j,k,l,m,n,o)
+    name = splitpath(p)[end]
+
+    meta = include(joinpath(p, "$(name)_meta"))
+end
+
 function load_fusion_category(file::String)
     
     name = splitpath(file)[end]
@@ -837,6 +844,8 @@ function load_fusion_category(file::String)
     C
 end
 
+
+
 function load_F_symbols(rank::Int, K::Field, path::String)
     ass = Array{MatElem,4}(undef, rank,rank,rank,rank)
 
@@ -847,9 +856,9 @@ function load_F_symbols(rank::Int, K::Field, path::String)
             symbols = include(_file)
             symbols_keys = collect(keys(symbols))
             if length(first(keys(symbols))) == 6 
-                symbols_keys = sort(symbols_keys, by = v -> v[[5,6]])
+                symbols_keys = sort(symbols_keys, by = v -> v[[6,5]])
             else
-                symbols_keys = sort(symbols_keys, by = v -> v[[8,5,10,9,7,6]])
+               symbols_keys = sort(symbols_keys, by = v -> v[[8,5,10,9,7,6]])
             end
             n = Int(sqrt(length(symbols_keys)))
             vals = [K == QQ ? K(symbols[v]...) : K(symbols[v]) for v ∈ symbols_keys]
@@ -926,11 +935,12 @@ function save_fusion_category_meta_data(C::SixJCategory, file::String)
         else
             write(io, "\t\"field\" => number_field(polynomial(QQ,$(collect(coefficients(base_ring(C).pol)))))[1],\n")
         end
-        write(io, """
+        write(io, "
         \t\"rank\"=> $(rank(C)),\n
+        \t\"multiplicity\" => $(multiplicity(C)),\n
         \t\"simples_names\" => $(simples_names(C)),\n
         \t\"one\" => $(C.one)\n)
-        """)
+        ")
     end
 end
 
