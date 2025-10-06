@@ -5,69 +5,14 @@ git-tree-sha1 = "c2be770f9b9b51e1ccaec9c28ed19b12789da78b"
     sha256 = "4515aecb88748e6a2b56751507fcc50bdfa9a94f39cadcf6dc95584aec101ee2"
     url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWiki.tar.gz"
 
-[AnyonWikiCenters1to4]
-git-tree-sha1 = "a6521bdd26cde7206132028bf4fc6b3950d32b0d"
+[AnyonWikiCenter1to4]
+git-tree-sha1 = "773ebe517cdf5ef345c3de5aac282228534e7c79"
 lazy = true
 
-    [[AnyonWikiCenters1to4.download]]
-    sha256 = "4e69ff876c36a4076c573bf4c7626b29e5f18b711be33b3dc62838b941c83f47"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenters1to4.tar.gz"
+    [[AnyonWikiCenter1to4.download]]
+    sha256 = "e30dcedd22f644f24e437f41092c2b8811c19e389f135b83ed1715c6d305290a"
+    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenter1to4.tar.gz"
 
-[AnyonWikiCenters_5_1_0_1]
-git-tree-sha1 = "14fd1c50ac6225654945612bb6aeae9d3af869f9"
-lazy = true
-
-    [[AnyonWikiCenters_5_1_0_1.download]]
-    sha256 = "606f8732d8b04b5f0344d053364d7de2dbbec2acee02018253f3509fbb5fff0a"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenters_5_1_0_1.tar.gz"
-
-[AnyonWikiCenters_5_1_0_3]
-git-tree-sha1 = "b0534e96bf95e441bd0822c364db03ad2af569dc"
-lazy = true
-
-    [[AnyonWikiCenters_5_1_0_3.download]]
-    sha256 = "ff17469ac3a09808e885de1f712392fa195f61fc3404725e835bca4e2598189b"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenters_5_1_0_3.tar.gz"
-
-[AnyonWikiCenters_5_1_0_4]
-git-tree-sha1 = "52d7c5c359e88b772d0a5158267397bfa576e095"
-lazy = true
-
-    [[AnyonWikiCenters_5_1_0_4.download]]
-    sha256 = "3dc686357756dd66ee6cbd92c5a8cac605e6b92d1e0634ee130177015f893f5d"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenters_5_1_0_4.tar.gz"
-
-[AnyonWikiCenters_5_1_0_6]
-git-tree-sha1 = "5a5d14090232ee6501d137ca4ec3c0ac701e59e0"
-lazy = true
-
-    [[AnyonWikiCenters_5_1_0_6.download]]
-    sha256 = "ec074125f4c9a44ca0dbcdcb592ab334b48f61e37ff372b68fa7a40cff3002f9"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenters_5_1_0_6.tar.gz"
-
-[AnyonWikiCenters_5_1_0_7]
-git-tree-sha1 = "bf93c7a818c4071b772c93027ed2a2162040b4f1"
-lazy = true
-
-    [[AnyonWikiCenters_5_1_0_7.download]]
-    sha256 = "93212094e45b9f99629488cbf026351ef859ebff18398f9e04d373bf9a573e61"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenters_5_1_0_7.tar.gz"
-
-[AnyonWikiCenters_5_1_2]
-git-tree-sha1 = "6d94830aba396aa4332347665b246257a4825ceb"
-lazy = true
-
-    [[AnyonWikiCenters_5_1_2.download]]
-    sha256 = "493745c2949417bd8c2da57eaf114a788e9bfbd0fafcfa30dca5bca4e35bedc0"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenters_5_1_2.tar.gz"
-
-[AnyonWikiCenters_5_1_4]
-git-tree-sha1 = "e1a53400bd24b77011297c083fe8ae27b814fb41"
-lazy = true
-
-    [[AnyonWikiCenters_5_1_4.download]]
-    sha256 = "70cd25de4a1c0a0bc09b4a56aa954a73bad7a5c443cfdc043696ffdfc7eef7b7"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenters_5_1_4.tar.gz"
 
 [Haagerup_H1]
 git-tree-sha1 = "f282d134a3928ead038fd34b6f4514e2eef65adf"
@@ -76,86 +21,6 @@ git-tree-sha1 = "f282d134a3928ead038fd34b6f4514e2eef65adf"
     sha256 = "b23ada66e19b748997993c853652c1c13fffdee43e9a18f257a808a82e39e7d7"
     url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/Haagerup/haagerup_H1.tar.gz"
 
-[center_5_1_0_10_1_1_1]
-git-tree-sha1 = "26b795b09079aa15bf3d7e0403d2ad17aff7a932"
-lazy = true
-
-    [[center_5_1_0_10_1_1_1.download]]
-    sha256 = "3756ca26162e9734e542d92330204165c4fe6163a9043b878c718f117f8945dc"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/center_5_1_0_10_1_1_1.tar.gz"
-
-[center_5_1_0_10_1_2_1]
-git-tree-sha1 = "e6fa40f69fea09885e37e029533b6c77fd6cc107"
-lazy = true
-
-    [[center_5_1_0_10_1_2_1.download]]
-    sha256 = "ba09aa3af1b3fe31ba49e078c8ebd584eb1a62cff64be39e7f2b93ec692e3c3a"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/center_5_1_0_10_1_2_1.tar.gz"
-
-[center_5_1_0_10_2_1_1]
-git-tree-sha1 = "56df671cda3ff60b250ef247bbfd31987404aacb"
-lazy = true
-
-    [[center_5_1_0_10_2_1_1.download]]
-    sha256 = "5e3fde0eb83d7a4be06aa9937714b0945299683a3907d81082dad23a3b43d039"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/center_5_1_0_10_2_1_1.tar.gz"
-
-[center_5_1_0_10_2_2_1]
-git-tree-sha1 = "f59998a8c5b7052fb9a04002217de6f0851e0d94"
-lazy = true
-
-    [[center_5_1_0_10_2_2_1.download]]
-    sha256 = "72ff566e35567bf6527863c09191aed25e22d87fee1bcafbfc6abdd46ba14f2b"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/center_5_1_0_10_2_2_1.tar.gz"
-
-[center_5_1_0_10_3_1_1]
-git-tree-sha1 = "bd2d69956bfbb52f557d3c9a9aea93ff0356a88a"
-lazy = true
-
-    [[center_5_1_0_10_3_1_1.download]]
-    sha256 = "63ffc4f882d96ccdefc0719a406218baab2815d2eb1024cfb5835d6c45a80051"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/center_5_1_0_10_3_1_1.tar.gz"
-
-[center_5_1_0_10_3_2_1]
-git-tree-sha1 = "ccd4ef14904fbda8fff411131c1c0644750c3210"
-lazy = true
-
-    [[center_5_1_0_10_3_2_1.download]]
-    sha256 = "a50fcd90b72eb4ea3d200418a8c5e0dee94663bf6f9193d1f89e57b78733d71f"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/center_5_1_0_10_3_2_1.tar.gz"
-
-[center_5_1_0_10_4_1_1]
-git-tree-sha1 = "aa121604c8cabf10cfe143116875d5f158799fa2"
-lazy = true
-
-    [[center_5_1_0_10_4_1_1.download]]
-    sha256 = "51b6f649e83ccf7c5e923f82e01740049224a59fe586cd07a136332a1aa1bda6"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/center_5_1_0_10_4_1_1.tar.gz"
-
-[center_5_1_0_10_4_2_1]
-git-tree-sha1 = "a21b72c880742398e1a28e2ba68209d085b2e704"
-lazy = true
-
-    [[center_5_1_0_10_4_2_1.download]]
-    sha256 = "7276a2fbf4d4731db45b624c239934943534b7745a2f55f7546f12d649cc4921"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/center_5_1_0_10_4_2_1.tar.gz"
-
-[center_5_1_0_10_5_1_1]
-git-tree-sha1 = "3fec43402936ecda4885302bb7414e8e0720b0da"
-lazy = true
-
-    [[center_5_1_0_10_5_1_1.download]]
-    sha256 = "af89fa2b5d385de40e5352fbf037d362b906495f214d44b7f55cbaed6819d288"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/center_5_1_0_10_5_1_1.tar.gz"
-
-[center_5_1_0_10_5_2_1]
-git-tree-sha1 = "f327fa557c01224363651a1f1ab564632079e545"
-lazy = true
-
-    [[center_5_1_0_10_5_2_1.download]]
-    sha256 = "4b613b10dcc9b63bb358c8860545b36a6b9b81f79f675c4e77f47be108ac775f"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/center_5_1_0_10_5_2_1.tar.gz"
-
 [center_haagerup]
 git-tree-sha1 = "fad85949740f184ab5596b5e27cfd6386752aee5"
 lazy = true
@@ -163,3 +28,11 @@ lazy = true
     [[center_haagerup.download]]
     sha256 = "69df3e77bb12531fb0389c66ba5640ab56a71c759982749e1e16361046906da1"
     url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/Haagerup/center_haagerup.tar.gz"
+
+[AnyonWikiCenter5]
+git-tree-sha1 = "fece921d36f23a08139ff8f8fb8750c5c63a5115"
+lazy = true
+
+    [[AnyonWikiCenter5.download]]
+    sha256 = "336ac493711f8643495ab39ccb9e2f34fa2572364c6a9fee1d7669084e01ef93"
+    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenter5.tar.gz"

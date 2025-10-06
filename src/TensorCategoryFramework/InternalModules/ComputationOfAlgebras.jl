@@ -211,23 +211,21 @@ function fix_subalgebra(base::Vector{<:Morphism}, inclusion::Morphism)
     K = base_ring(parent(inclusion))
     n = length(base)
     Kx,vars = polynomial_ring(K, n)
-
     _basis = basis(Hom(domain(inclusion), codomain(inclusion)))
 
     eqs = [zero(Kx) for _ ∈ _basis]
     for (a,f) ∈ zip(vars, base) 
         eqs = eqs .+ (a .* express_in_basis(f ∘ inclusion, _basis))
     end
-
     # coefficients of inclusion
     m = length(_basis)
     _coeffs = matrix(K, m, 1, express_in_basis(inclusion, _basis))
 
     # extract coeffs as matrix 
-    M = matrix(K, n, m, vcat([[coeff(e,a) for a ∈ vars] for e ∈ eqs]...))
+    M = matrix(K, m,n, vcat([[coeff(e,a) for a ∈ vars] for e ∈ eqs]...))
 
-    sol = solve(transpose(M),_coeffs, side = :right)
-    _,nullsp = nullspace(transpose(M))
+    sol = solve(M,_coeffs, side = :right)
+    _,nullsp = nullspace(M)
 
     fixed_sol = sum(collect(sol)[:] .* base)
     

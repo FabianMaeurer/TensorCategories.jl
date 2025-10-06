@@ -8,9 +8,9 @@ time_log = open(joinpath(@__DIR__, "Logs/Centers_of_anyon_wiki_time.log"), "a")
 
 code_to_name(a,b,c,d,e,f,g) = "center_$(a)_$(b)_$(c)_$(d)_$(e)_$(f)_$g"
 
-codes = sort(collect(keys(include(joinpath(@__DIR__, "AnyonWikiData/base_field_generators.jl")))))
+codes = sort(collect(keys(include(joinpath(@__DIR__, "base_field_generators.jl")))))
 
-for c ∈ filter(e -> e[1] < 6, codes)
+for c ∈ filter(e -> e[1] == 6, codes)[1:5:end]
     file_name = code_to_name(c...)
 
     if isdir(joinpath(@__DIR__, "AnyonWikiData/Centers/$file_name"))
@@ -23,10 +23,18 @@ for c ∈ filter(e -> e[1] < 6, codes)
 
         t1 = @elapsed Z = center(C)
 
-        t2 = @elapsed Z = split(Z)
+        t2 = @elapsed Z,em = split(Z)
         
         t3 = @elapsed Z2 = six_j_category(Z)
-        
+
+        K = base_ring(C)
+        L = base_ring(Z2)
+
+        embs = embeddings(L)
+
+        j = argmin([abs(e(em(gen(K))) - getfield(C, :embedding)(gen(K))) for e ∈ embs])
+
+        setfield!(Z2, :embedding, embs[j])
 
         t4 = @elapsed save_fusion_category(Z2, joinpath(@__DIR__, "AnyonWikiData/Centers"), file_name)
 

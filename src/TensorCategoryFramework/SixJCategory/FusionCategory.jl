@@ -15,7 +15,7 @@
     twist::Vector
     one::Vector{Int}
     name::String
-    
+    embedding::AbsSimpleNumFieldEmbedding
 
     function SixJCategory()
         new()
@@ -210,7 +210,7 @@ end
 
 simples_names(C::SixJCategory) = C.simples_names
 indecomposables_names(C::SixJCategory) = C.simples_names
-
+multiplication_table(C::SixJCategory) = C.tensor_product
 #(::Type{Int})(x::QQFieldElem) = Int(numerator(x))
 
 function braiding(X::SixJObject, Y::SixJObject) 
@@ -912,9 +912,7 @@ end
 
 function sort_simples!(C::SixJCategory, order::Vector{Int})
     C.tensor_product = [C.tensor_product[i,j,k] for i ∈ order, j ∈ order, k ∈ order]
-    if has_attribute(C, :multiplication_table)
-        set_attribute!(C, :multiplication_table, C.tensor_product)
-    end
+
     n = C.simples
    
 
@@ -1095,8 +1093,8 @@ end
 Return the complex embedding of C if an embedding of the ground field is specified or given.
 """
 function complex_embedding(C::SixJCategory)
-    !has_attribute(C, :embedding) && error("No embedding has been specified")
-    complex_embedding(C, get_attribute(C, :embedding))
+    !isdefined(C, :embedding) && error("No embedding has been specified")
+    complex_embedding(C, getfield(C, :embedding))
 end
 
 function complex_embedding(C::SixJCategory, e::AbsSimpleNumFieldEmbedding)
@@ -1264,6 +1262,12 @@ end
     Export F-symbols as Dict 
 ----------------------------------------------------------=#
 
+@doc raw""" 
+
+    F_symbols(C::SixJCategory)
+
+Return a Dictionary of the F-symbols of ``C``.
+"""
 function F_symbols(C::SixJCategory)
 
     S = simples(C)
@@ -1330,6 +1334,30 @@ function F_symbols(C::SixJCategory)
     return F_dict           
 end 
 
+@doc raw""" 
+
+    numeric_F_symbols(C::SixJCategory; precision = 2048)
+    numeric_F_symbols(C::SixJCategory, e::AbsSimpleNumFieldEmbedding; precision = 2048)
+
+Return a Dictionary of the F-symbols of ``C`` evaluated under the embedding ``e``. 
+"""
+function numeric_F_symbols(C::SixJCategory, e::AbsSimpleNumFieldEmbedding; precision = 2048)
+    F = F_symbols(C)
+
+    Dict(k => e(v, precision) for (k,v) ∈ F)
+end
+
+function numeric_F_symbols(C::SixJCategory; precision = 2048)
+    !isdefined(C, :embedding) && error("No embedding has been specified")
+    numeric_F_symbols(C, getfield(C, :embedding), precision = precision)
+end
+
+@doc raw""" 
+
+    R_symbols(C::SixJCategory)
+
+Return a Dictionary of the R-symbols of ``C``.
+"""
 function R_symbols(C::SixJCategory)
 
     S = simples(C)
@@ -1376,6 +1404,76 @@ function R_symbols(C::SixJCategory)
     return R_dict           
 end
 
+@doc raw""" 
+
+    numeric_R_symbols(C::SixJCategory; precision = 2048)
+    numeric_R_symbols(C::SixJCategory, e::AbsSimpleNumFieldEmbedding; precision = 2048)
+
+Return a Dictionary of the R-symbols of ``C`` evaluated under the embedding ``e``.
+"""
+function numeric_R_symbols(C::SixJCategory, e::AbsSimpleNumFieldEmbedding; precision = 2048)
+    R = R_symbols(C)
+
+    Dict(k => e(v, precision) for (k,v) ∈ R)
+end
+
+function numeric_R_symbols(C::SixJCategory; precision = 2048)
+    !isdefined(C, :embedding) && error("No embedding has been specified")
+    numeric_R_symbols(C, getfield(C, :embedding), precision = precision)
+end
+
+@doc raw""" 
+
+    P_symbols(C::SixJCategory)
+
+Return a Dictionary of the Pivotal symbols of ``C``.
+"""
 function P_symbols(C::SixJCategory)
     Dict([k] => C.pivotal[k] for k in 1:rank(C)) 
 end
+
+@doc raw""" 
+
+    numeric_P_symbols(C::SixJCategory; precision = 2048)
+    numeric_P_symbols(C::SixJCategory, e::AbsSimpleNumFieldEmbedding; precision = 2048)
+
+Return a Dictionary of the Pivotal symbols of ``C`` evaluated under the embedding ``e``.
+"""
+function numeric_P_symbols(C::SixJCategory, e::AbsSimpleNumFieldEmbedding; precision = 2048)
+    P = P_symbols(C)
+
+    Dict(k => e(v, precision) for (k,v) ∈ P)
+end
+
+function numeric_P_symbols(C::SixJCategory; precision = 2048)
+    !isdefined(C, :embedding) && error("No embedding has been specified")
+    numeric_P_symbols(C, getfield(C, :embedding), precision = precision)
+end
+
+
+#=----------------------------------------------------------
+    save and load
+----------------------------------------------------------=#
+#@register_serialization_type SixJCategory "SixJCategory"
+
+# function save_object(s::SerializerState, C::SixJCategory)
+#     fields = collect(fieldnames(SixJCategory)[1:end-1])
+#     filter!(e -> isdefined(C, e), fields)
+
+#     # setup serialization. Every vector has to be a Tuple
+#     data= NamedTuple(Dict(e => getfield(C, e) isa Array ? Tuple(getfield(C, e)) : getfield(C, e) for e ∈ fields))
+#     @show typeof(data)
+#     save_object(s, data)
+# end
+
+# function load_object(s::DeserializerState, ::Type{SixJCategory})
+#     data = load_object(s, @NamedTuple{simples::Int64, base_ring::AbsSimpleNumField, tensor_product::NTuple{27, Int64}, ass::NTuple{81, MatSpaceElem{AbsSimpleNumFieldElem}}, simples_names::Tuple{String, String, String}, pivotal::Tuple{AbsSimpleNumFieldElem, AbsSimpleNumFieldElem, AbsSimpleNumFieldElem}, name::String, one::Tuple{Int64, Int64, Int64}}
+# )
+#     C = six_j_category(data.base_ring, data.tensor_product, collect(data.simples_names))
+#     for (k,v) ∈ pairs(data)
+#         if k != :base_ring && k != :tensor_product && k != :simples_names
+#             setfield!(C, k, v isa Tuple ? collect(v) : v)
+#         end
+#     end
+#     return C
+# end

@@ -2,6 +2,7 @@ module TensorCategories
 
 import Base: *, +, -, ==, ^, getindex, getproperty, in, issubset, iterate, length, show,div, rand, split
 
+import Oscar
 import Oscar.AbstractAlgebra.Generic: Poly
 import Oscar.AbstractAlgebra: Group
 import Oscar.Hecke: RelSimpleNumField, regular_module, meataxe
@@ -40,19 +41,18 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     permuted, change_base_ring, schur_index_over_center, issimple, cyclotomic_extension, ArbField, next_prime, AcbFieldElem,
     rationals_as_number_field
 
-# # using Serialization
-# import Oscar: @register_serialization_type,
-#                 save_data_dict,
-#                 save_data_array,
-#                 save_object,
-#                 save_type_params,
-#                 save_typed_object,
-#                 load_object,
-#                 load_type_params,
-#                 load_typed_object,
-#                 SerializerState,
-#                 DeserializerState,
-#                 load_array_node
+import Oscar.Serialization: @register_serialization_type,
+                 save_data_dict,
+                 save_data_array,
+                 save_object,
+                 save_type_params,
+                 save_typed_object,
+                 load_object,
+                 load_type_params,
+                 load_typed_object,
+                SerializerState,
+                DeserializerState,
+                 load_array_node
 
 using InteractiveUtils
 using SparseArrays
@@ -86,6 +86,7 @@ export AlgebraObject
 export AlgebraMorphism
 export anyonwiki
 export anyonwiki_center
+export anyonwiki_center_meta
 export anyonwiki_keys
 export ArrowCategory
 export ArrowObject
@@ -324,6 +325,9 @@ export multiplicity
 export NaturalTransformation
 export Nat
 export normalized_smatrix 
+export numeric_F_symbols
+export numeric_R_symbols
+export numeric_P_symbols
 export object 
 export object_type 
 export one 
@@ -544,8 +548,9 @@ include("Examples/Haagerup/ExtendedHaagerup.jl")
 include("Examples/SU(k)/SU(3)_3.jl")
 
 
+@register_serialization_type SixJCategory "SixJCategory"
 
-#include("Serialization/SixJSerialization.jl")
+include("Serialization/SixJSerialization.jl")
 #include("Serialization/CenterSerialization.jl")
 #include("SixJCategoryDatabase/main.jl")
 include("AnyonWiki/AnyonWiki.jl")

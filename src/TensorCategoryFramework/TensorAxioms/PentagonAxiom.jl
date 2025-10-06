@@ -15,16 +15,32 @@ end
 Check the pentagon axiom for all combinations of objects in ```objects```. If
 ```log = true``` an array with the failing combinations is returned
 """
-function pentagon_axiom(objects::Vector{<:Object}, log::Bool = false)
+function pentagon_axiom(objects::Vector{<:Object}, log::Bool = false; show_progress = false)
     failed = []
-    for x ∈ objects, y ∈ objects,
-        z ∈ objects, w ∈ objects
+    N = (length(objects)-1)^4
+    checked = 0
 
-        pentagon_axiom(x,y,z,w) ? nothing : push!(failed, (x,y,z,w))
-        if !log && length(failed) > 0 
-            return false
+    Threads.@threads for x ∈ objects
+
+        x == one(parent(x)) && continue
+        
+        for y ∈ objects,  z ∈ objects, w ∈ objects
+            one(parent(y)) ∈ [y,z,w] && continue
+
+            pentagon_axiom(x,y,z,w) ? nothing : push!(failed, (x,y,z,w))
+                
+            if !log && length(failed) > 0 
+                show_progress && print("\n")
+                return false
+            end
+
+            if show_progress
+                checked += 1
+                print("\e[2K\rChecked $(checked) / $N combinations ($(round(checked / N * 100, digits = 2))%)")
+            end
         end
     end
+    show_progress && print("\n")
 
     if log
         return length(failed) == 0, failed
@@ -55,4 +71,4 @@ end
 Check the pentagon axiom for all combinations of  simple objects of ```C```. If 
 ```log = true``` an array with the failing combinations is returned
 """
-pentagon_axiom(C::Category, log::Bool = false) = pentagon_axiom(simples(C), log)
+pentagon_axiom(C::Category, log::Bool = false; show_progress = false) = pentagon_axiom(simples(C), log, show_progress = show_progress)

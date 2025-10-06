@@ -276,7 +276,7 @@ function ising_category(F::Ring, sqrt_2::RingElem, q::Int)
 
     # set_simples_names!(C,["𝟙","χ","X"])
 
-    set_name!(C, "ising_category fusion category")
+    set_name!(C, "Ising fusion category")
 
     # set one of the four possible braidings 
     # http://arxiv.org/abs/2010.00847v1 (Ex. 4.13)

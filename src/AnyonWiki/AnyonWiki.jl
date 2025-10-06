@@ -55,7 +55,7 @@ function anyonwiki(rank::Int,
     piv = [K(piv[[p]]) for p in 1:rank]
     set_pivotal!(C, piv)
 
-    set_attribute!(C, :embedding, rt)
+    setfield!(C, :embedding, rt)
     set_name!(C, "Fusion Category $cat_code")
     return C
 end
@@ -77,29 +77,13 @@ end
 function anyonwiki_center_artifact_path(i,j,k,l,m,n,o)
     try 
         if i ≤ 4 
-            path = @artifact_str "AnyonWikiCenters1to4"
+            path = @artifact_str "AnyonWikiCenter1to4"
             path = joinpath(path, "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)")
             open(path)
             return path
 
-        elseif i == 5 && k == 0 && l ≤ 9
-            path = @artifact_str "AnyonWikiCenters_5_$(j)_0_$l"
-            path = joinpath(path, "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)")
-            open(path)
-            return path
-
-        elseif i == 5 && k == 2 
-            path = @artifact_str "AnyonWikiCenters_5_$(j)_2"
-            path = joinpath(path, "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)")
-            open(path)
-            return path
-        elseif i == 5 && k == 4
-            path = @artifact_str "AnyonWikiCenters_5_$(j)_4"
-            path = joinpath(path, "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)")
-            open(path)
-            return path
-        else
-            path = @artifact_str "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)"
+        elseif i == 5 
+            path = @artifact_str "AnyonWikiCenter5"
             path = joinpath(path, "center_$(i)_$(j)_$(k)_$(l)_$(m)_$(n)_$(o)")
             open(path)
             return path
@@ -279,21 +263,21 @@ function anyonwiki_from_numerics(rank::Int,
     
 
     set_pivotal!(C, load_anyonwiki_pivotal(rank::Int, 
-    multiplicity::Int, 
-    non_self_dual::Int,
-    fusion_ring::Int, 
-    associator::Int, 
-    braiding::Int, 
-    pivotal::Int, K, e))
-    
-    if braiding != 0
-        set_braiding!(C, anyonwiki_braiding(rank::Int, 
         multiplicity::Int, 
         non_self_dual::Int,
         fusion_ring::Int, 
         associator::Int, 
         braiding::Int, 
         pivotal::Int, K, e))
+    
+    if braiding != 0
+        set_braiding!(C, anyonwiki_braiding(rank::Int, 
+            multiplicity::Int, 
+            non_self_dual::Int,
+            fusion_ring::Int, 
+            associator::Int, 
+            braiding::Int, 
+            pivotal::Int, K, e))
     end
     C
 end
@@ -321,7 +305,7 @@ function load_anyonwiki_number_field(rank::Int,
 
     if typeof(data) == Int 
         if data == 0 
-            return QQ, complex_embedding(rationals_as_number_field()[1], 1)
+            return QQ, complex_embeddings(QQ)[1]
         end
 
         K,z = cyclotomic_field(data, "z$(data)")
@@ -821,7 +805,7 @@ function load_fusion_category(file::String)
     description = meta["name"]
     simples_names = meta["simples_names"]
     one = meta["one"]
-    
+
     # include F/P/R-symbols as coefficient vectors, convert to number field elements and then to matrices
     F_symbols = load_F_symbols(rank,K,joinpath(file, "$(name)_F_symbols"))
 
@@ -832,6 +816,15 @@ function load_fusion_category(file::String)
     set_associator!(C, F_symbols)
     set_pivotal!(C, P_symbols)
 
+    if haskey(meta, "embedding")
+        r = meta["embedding"]
+        if K == QQ
+            setfield!(C, :embedding, complex_embedding(rationals_as_number_field()[1], r))
+        else
+            setfield!(C, :embedding, complex_embedding(K, r))
+        end
+    end
+    
     if isfile(joinpath(file, "$(name)_R_symbols"))
         R_symbols = load_R_symbols(rank,K,joinpath(file, "$(name)_R_symbols"))
         set_braiding!(C, R_symbols)
@@ -844,6 +837,22 @@ function load_fusion_category(file::String)
     C
 end
 
+function anyonwiki_center_multiplication_table(i,j,k,l,m,n,o)
+    p = anyonwiki_center_artifact_path(i,j,k,l,m,n,o)
+    name = splitpath(p)[end]
+
+    meta = include(joinpath(p, "$(name)_meta"))
+
+    rank = meta["rank"]
+   
+    p2 = joinpath(p, "$(name)_F_symbols")
+
+    dir = filter(e -> e[1:3] == "[1,", readdir(p2))
+
+    multiplicities = Dict(eval(Meta.parse(q))[2:4] => length(include(joinpath(p2,q))) for q in dir)
+
+    [Int(sqrt(get(multiplicities, [i,j,k], 0))) for i in 1:rank, j in 1:rank, k in 1:rank]
+end
 
 
 function load_F_symbols(rank::Int, K::Field, path::String)
@@ -939,8 +948,14 @@ function save_fusion_category_meta_data(C::SixJCategory, file::String)
         \t\"rank\"=> $(rank(C)),\n
         \t\"multiplicity\" => $(multiplicity(C)),\n
         \t\"simples_names\" => $(simples_names(C)),\n
-        \t\"one\" => $(C.one)\n)
+        \t\"one\" => $(C.one)
         ")
+
+        if isdefined(C, :embedding)
+            r = getfield(C, :embedding).r
+            write(io, ",\n\t\"embedding\" => AcbField()(\"$(string(real(r)))\") + AcbField()(\"$(string(imag(r)))\")*AcbField()(im)\n")
+        end
+        write(io, ")")
     end
 end
 

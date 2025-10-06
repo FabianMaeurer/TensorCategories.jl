@@ -34,11 +34,18 @@ function haagerup_H3()
     C
 end
 
+function haagerup_H3(K::QQBarField)
+    C = haagerup_H3()
+    e = C.embedding
+    CC = AcbField()
+    extension_of_scalars(C,K, embedding = x -> argmin(y -> abs(e(x) - CC(y)), roots(QQBarField(), minpoly(x))))
+end
+
 function haagerup_H3_center()
     path = joinpath(artifact"center_haagerup")
     C = load_fusion_category(joinpath(path, "center_haagerup"))
     CC = AcbField() 
-    set_attribute!(C, :embedding, complex_embedding(base_ring(C), CC(1.29 + 0.25*im)))
+    setfield!(C, :embedding, complex_embedding(base_ring(C), CC(1.29 + 0.25*im)))
     C
 end
 

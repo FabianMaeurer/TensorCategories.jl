@@ -254,7 +254,7 @@ function right_dim(X::Object)
     error("No dimension defined")
 end 
 
-dim(X::Object) = left_dimension(X)
+dim(X::Object) = left_dim(X)
 dim(C::Category) = sum(squared_norm(s) for s ∈ simples(C))
 #-------------------------------------------------------
 # S-Matrix

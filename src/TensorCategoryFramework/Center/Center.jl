@@ -1247,7 +1247,12 @@ function split(C::CenterCategory; absolute = true)
     K = base_ring(C)
 
     if all([int_dim(e) == 1 for e ∈ Ends])
-        return C
+        if K == QQ
+            K,a == rationals_as_number_field()
+            return C, hom(K,K,a)
+        else
+            return C, hom(K,K, gen(K))
+        end
     end
 
     n = []
@@ -1283,35 +1288,60 @@ function split(C::CenterCategory; absolute = true)
     L_rel = splitting_field([change_base_ring(base_ring(C), f) for f in generators])
 
     if base_ring(C) == QQ || is_abelian(base_ring(C))
-        L2, iso1 = absolute_simple_field(L_rel)
+        global L2, iso1 = absolute_simple_field(L_rel)
         L3, iso2 = simplify(L2)
 
         if is_abelian(L3)
-            for m ∈ degree(L_rel.pol):degree(L3)^2 
-                L = cyclotomic_extension(base_ring(C), m)
-                if !isempty(roots(L.Kr,L_rel.pol))
-                    global L = L.Ka
-                    break
-                end
-            end
+            global L = cyclotomic_splitting_field(generators)
+            global L2 = codomain(L.mp[2])
+            # for m ∈ degree(L_rel.pol):degree(L3)^2 
+            #     global L = cyclotomic_extension(base_ring(C), m)
+            #     if !isempty(roots(L.Kr,L_rel.pol))
+            #         global L2 = codomain(L.mp[2])
+            #         @show L2.pol
+            #         break
+            #     end
+            # end
         else 
             return extension_of_scalars(C,L3, embedding = e -> preimage(iso2, preimage(iso1, (L_rel(e)))))
         end
     else 
-        for m ∈ degree(L_rel.pol):absolute_degree(L_rel)^2 
-            L = cyclotomic_extension(base_ring(C), m)
-            if !isempty(roots(Lr,L_rel.pol))
-                global L = L.Ka
+        global L = cyclotomic_splitting_field(generators)
+        global L2 = codomain(L.mp[2])
+        # for m ∈ degree(L_rel.pol):absolute_degree(L_rel)^2 
+        #     global L = cyclotomic_extension(base_ring(C), m)
+        #     @show m
+        #     if !isempty(roots(L.Kr,L_rel.pol))
+        #         global L2 = codomain(L.mp[2])
+        #         break
+        #     end
+        # end
+    end
+
+    if base_ring(C) == QQ
+        return extension_of_scalars(C,L2, embedding = e -> L(e)), hom(rationals_as_number_field()[1], L2, L2(1))
+    else
+        return extension_of_scalars(C,L2, embedding = L.mp[2]), L.mp[2]
+    end
+end
+
+function cyclotomic_splitting_field(polys::Vector{<:PolyRingElem})
+    K = base_ring(polys[1])
+    m = []
+    for f ∈ polys 
+        for n ∈ 1:degree(f)^2 
+            L = cyclotomic_extension(K,n)
+            if !isempty(roots(L.Kr,f))
+                @show push!(m,n)
                 break
             end
         end
     end
-
-    if base_ring(C) == QQ
-        return extension_of_scalars(C,L, embedding = e -> L(e))
-    else
-        return extension_of_scalars(C,L)
+    if length(m) != length(polys)
+        error("Could not find cyclotomic splitting field")
     end
+    n = lcm(m...)
+    return cyclotomic_extension(K,n)
 end
 
 cyclotomic_extension(K::QQField, n::Int) = cyclotomic_extension(rationals_as_number_field()[1], n)

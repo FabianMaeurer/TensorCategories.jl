@@ -11,7 +11,7 @@ function preimage(e::AbsSimpleNumFieldEmbedding, x, deg = 80; tol = 10^(-10))
     # Get the Complex Field 
     CC = parent(e(K(1)))
 
-    min = minpoly(x, deg) 
+    min = typeof(x) == AcbFieldElem ? minpoly(x, deg) : minpoly(x)
 
     # roots in domain 
     rs = roots(K, min)
