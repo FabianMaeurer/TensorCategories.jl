@@ -68,6 +68,12 @@ coefficients(x::ℕRingElem) = coefficients(AssociativeAlgebraElem(x))
 multiplication_table(R::ℕRing) = R.algebra.mult_table
 print_multiplication_table(R::ℕRing) = print_multiplication_table(multiplication_table(R))
 
+multiplicity(R::ℕRing) = maximum(multiplication_table(R))
+
+function ==(R::ℕRing, S::ℕRing) 
+    multiplication_table(R) == multiplication_table(S) && R.basis_names == S.basis_names
+end
+
 function ==(x::ℕRingElem, y::ℕRingElem) 
     parent(x) == parent(y) && coefficients(x) == coefficients(y)
 end
@@ -98,6 +104,8 @@ end
 
 dim(A::ℕRing) = dim(A.algebra)
 
+rank(A::ℕRing) = length(basis(A.algebra))
+
 #=----------------------------------------------------------
     Based Rings 
 ----------------------------------------------------------=#
@@ -119,6 +127,7 @@ end
 
 ⊗(A::ℕRing, K::Field) = extension_of_scalars(A,K)
 
+fpdim(R::ℕRing) = sum((fpdim.(basis(R))).^2)
 
 function fpdim(x::ℕRingElem)
     R = parent(x)
@@ -146,8 +155,33 @@ function involution(x::ℕRingElem)
 end
 
 
-function fusion_subrings(R::ℕRing)
-    subs = unique([_topologize(x) for x in basis(R)])
+function fusion_subring(x::ℕRingElem)
+    basis = _topologize(x)
+    ZPlusRing(parent(x).basis_names[basis], Int.(multiplication_table(parent(x))[basis, basis, basis]), Int.(parent(x).algebra.one[basis]))
+end
+
+function is_simple(R::ℕRing)
+    for x in basis(R)
+        if x != one(R)
+            S = fusion_subring(x)
+            if dim(S) != dim(R)
+                return false
+            end
+        end
+    end
+    return true
+end
+
+function simple_fusion_subrings(R::ℕRing)
+    simples = []
+    for x in basis(R)
+        S = fusion_subring(x)
+        if is_simple(S)
+            push!(simples, S)
+        end
+
+    end
+    return unique_without_hash(simples)
 end
 
 function _topologize(x::ℕRingElem)

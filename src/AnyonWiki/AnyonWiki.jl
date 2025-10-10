@@ -892,7 +892,7 @@ function load_R_symbols(rank::Int, K::Field, path::String)
         vals = [K == QQ ? K(D[v]...) : K(D[v]) for v ∈ symbols_keys]
 
         M = matrix(K,n,n, vals)
-        braid[i,j,k] = M
+        braid[i,j,k] = transpose(M)
     end
     braid 
 end

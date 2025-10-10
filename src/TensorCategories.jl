@@ -188,6 +188,7 @@ export functor
 export FusionCategory 
 export fusion_coefficient
 export fusion_ring_name
+export fusion_subcategory
 export gcrossed_product
 export generic_algebra
 export getindex 
@@ -413,6 +414,7 @@ export Sets
 export ShortExactSequence
 export ShortExactSequences
 export ShortExactSequenceMorphism
+export simple_fusion_subrings
 export simple_subobjects 
 export simples 
 export simples_names 
