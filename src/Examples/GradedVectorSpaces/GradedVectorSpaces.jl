@@ -339,7 +339,6 @@ Return the graded dual vector space of ``V``.
 """
 function dual(V::GVSObject)
     W = dual(V.V)
-    G = base_group(V)
     grading = [inv(j) for j ∈ V.grading]
     return GVSObject(parent(V), W, grading)
 end

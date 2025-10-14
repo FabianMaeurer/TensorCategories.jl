@@ -159,9 +159,9 @@ function witness_set(I::Ideal, bound = 100)
 
         rank(c) < d && continue 
         dim(J) > 0 && continue 
-        
+
         S = if is_finite(K) 
-             rational_solutions(J)
+            rational_solutions(J)
         else
             recover_solutions(real_solutions(J), K, symbols(base_ring(QI)), fix_solutions = fixed_sols, splitting_info = false) 
         end

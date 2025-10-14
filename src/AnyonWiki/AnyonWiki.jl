@@ -305,7 +305,7 @@ function load_anyonwiki_number_field(rank::Int,
 
     if typeof(data) == Int 
         if data == 0 
-            return QQ, complex_embeddings(QQ)[1]
+            return QQ, complex_embedding(rationals_as_number_field()[1], 1)
         end
 
         K,z = cyclotomic_field(data, "z$(data)")
@@ -958,4 +958,5 @@ function save_fusion_category_meta_data(C::SixJCategory, file::String)
         write(io, ")")
     end
 end
+
 
