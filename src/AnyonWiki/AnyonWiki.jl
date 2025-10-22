@@ -854,6 +854,13 @@ function anyonwiki_center_multiplication_table(i,j,k,l,m,n,o)
     [Int(sqrt(get(multiplicities, [i,j,k], 0))) for i in 1:rank, j in 1:rank, k in 1:rank]
 end
 
+function anyonwiki_center_grothendieck_ring(i,j,k,l,m,n,o)
+    meta = anyonwiki_center_meta(i,j,k,l,m,n,o)
+    names = meta["simples_names"]
+    m = anyonwiki_center_multiplication_table(i,j,k,l,m,n,o)
+    ℕRing(names, m, [1; zeros(Int, length(names)-1)])
+end
+
 
 function load_F_symbols(rank::Int, K::Field, path::String)
     ass = Array{MatElem,4}(undef, rank,rank,rank,rank)

@@ -18,11 +18,12 @@ a category whose objects are tuples ``(X,\gamma)`` such that ``X \in \mathcal C`
 \end{tikzcd}" /></p>
 ```
 
+
 commutes for all ``Y,Z \in \mathcal C`` and ``\gamma_{\mathbb 1} = \mathrm{id}_X``.
 
 # Computing the Center
 
-The Drinfeld center can be computed explicitely for reasonably small
+The Drinfeld center can be computed explicitly for reasonably small
 fusion categories using the algorithm described in [maurer2024computing](@cite). Any fusion category implementing the corresponding 
 interface is supported. 
 

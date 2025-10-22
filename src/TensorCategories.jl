@@ -346,8 +346,9 @@ export pentagon_equations
 export pivotal
 export pivotal_structures
 export preimage
+export print_module_action
 export print_multiplication_table 
-export print_multiplication_table 
+export print_multiplication_table_with_progress
 export product 
 export product_category 
 export product_morphism

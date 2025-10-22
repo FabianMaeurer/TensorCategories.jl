@@ -1,3 +1,9 @@
+@doc raw""" 
+
+    multiplication_table(C::Category)
+
+Compute the multiplication table of a finite tensor category.
+"""
 function multiplication_table(C::Category, indecomposables::Vector{<:Object} = indecomposables(C))
     #@assert is_multitensor(C) "Category needs to be multitensor"
     #m = [s⊗t for s ∈ indecomposables, t ∈ indecomposables]
@@ -20,6 +26,12 @@ function multiplication_table(C::Category, indecomposables::Vector{<:Object} = i
     end
 end
 
+@doc raw""" 
+
+    multiplication_table(indecomposables::Vector{<:Object})
+
+Compute the multiplication table of the indecomposables of a finite tensor category.
+"""
 function multiplication_table(indecomposables::Vector{<:Object})
     #@assert is_semisimple(parent(indecomposables[1])) "Category needs to be semi-simple"
 
@@ -33,6 +45,12 @@ function print_multiplication_table(indecomposables::Vector{<:Object}, names::Ve
     return [pretty_print_decomposable(s⊗t,indecomposables,names) for s ∈ indecomposables, t ∈ indecomposables]
 end
 
+@doc raw""" 
+
+    print_multiplication_table(C::Category)
+
+Print the multiplication table of C.
+"""
 function print_multiplication_table(C::Category)
     if is_semisimple(C) 
         print_multiplication_table(multiplication_table(C), simples_names(C))
@@ -93,7 +111,12 @@ function _coefficients(X::T, indecomposables::Vector{T} = indecomposables(parent
     return coeffs
 end
 
+@doc raw""" 
 
+    print_multiplication_table(A::Array{T,3}, [names::Vector{Stirng}])
+
+Print the three dimensional array as a multiplication table with optional labels.
+"""
 function print_multiplication_table(A::Array{T,3}, names::Vector{String} =    ["X$i" for i ∈ 1:size(A)[1]]) where T <: Union{Int, RingElem}
     n = size(A)[1]
     [print_sum(A[i,j,:], names) for i ∈ 1:n, j ∈ 1:n]
@@ -119,6 +142,12 @@ end
     print module action 
 ----------------------------------------------------------=#
 
+@doc raw""" 
+
+    print_module_action(M::T) where T <: Union{RightModuleCategory, LeftModuleCategory}
+
+Print the action of ``C`` on ``M``.
+"""
 function print_module_action(M::T, names = nothing) where T <: Union{RightModuleCategory, LeftModuleCategory}
     @assert is_semisimple(M)
 
@@ -133,6 +162,12 @@ end
     Live progress 
 ----------------------------------------------------------=#
 
+@doc raw""" 
+
+    print_multiplication_table_with_progress(C::Category)
+
+Print the multiplication table with live progress in the REPL.
+"""
 function multiplication_table_with_progress(C::Category, indecs::Vector{<:Object} = indecomposables(C); symmetric::Bool = false, names = simples_names(C), one = nothing)
 
     n = length(indecs)

@@ -1,3 +1,4 @@
+
 using Documenter, TensorCategories, Oscar, DocumenterCitations
 
 bib = CitationBibliography(joinpath(@__DIR__, "src", "MyBib.bib"))
@@ -9,7 +10,14 @@ makedocs(
     warnonly = true,
     format = Documenter.HTML(
         canonical = "https://juliadocs.github.io/Documenter.jl/stable/",
-        prettyurls = !("local" in ARGS)
+        prettyurls = !("local" in ARGS),
+        mathengine = MathJax3(Dict(
+            :tex => Dict(
+                "inlineMath" => [["\$","\$"], ["\\(","\\)"]],
+                "tags" => "ams",
+                "packages" => ["base", "ams", "autoload"],
+            ),
+        ))
     ),
     pages = [
         "Home" => "index.md",

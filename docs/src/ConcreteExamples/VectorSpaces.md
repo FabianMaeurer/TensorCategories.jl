@@ -82,7 +82,7 @@ G = symmetric_group(6)
 VecG = graded_vector_spaces(G)
 
 # output
-Category of G-graded vector spaces over Rational field where G is Sym(6)
+Category of G-graded vector spaces over Rational field where G is Symmetric group of degree 6
 ```
 
 To add a non-trivial associator (twist) there is another constructor. 
