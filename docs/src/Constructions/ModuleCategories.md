@@ -5,7 +5,7 @@ end
 ```
 # Internal Module Categories
 
-Let ``\mathcal C`` be a fusion category. Any finite module category over ``\mathcal C``can be realized as an internal module category ``\mathrm{Mod}_A(\mathcal C)`` for an algebra ``A``in ``\mathcal C``. 
+Let ``\mathcal C`` be a fusion category. Any finite module category over ``\mathcal C``can be realized as an internal module category ``\mathrm{Mod}_A(\mathcal C)`` for an algebra ``A`` in ``\mathcal C``. 
 
 ## Finding Algebras
 
