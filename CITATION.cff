@@ -5,7 +5,7 @@ license: "MIT"
 type: software
 abstract: "TensorCategories provides a vast framework to compute categorical constructions of fusion categories explictly. These include the center and module categories"
 message: "If you use this software, please cite it as below."
-doi: 10.5281/zenodo.15805916
+doi: 10.5281/zenodo.17440975
 url: "https://github.com/FabianMaeurer/TensorCategories.jl"
 authors:
   - given-names: Fabian
