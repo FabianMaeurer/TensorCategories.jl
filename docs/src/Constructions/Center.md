@@ -18,7 +18,6 @@ a category whose objects are tuples ``(X,\gamma)`` such that ``X \in \mathcal C`
 \end{tikzcd}" /></p>
 ```
 
-
 commutes for all ``Y,Z \in \mathcal C`` and ``\gamma_{\mathbb 1} = \mathrm{id}_X``.
 
 # Computing the Center
@@ -67,6 +66,17 @@ print_multiplication_table(C)
  "(X3, γ3)"      "(X3, γ3)"      …  "(𝟙 ⊕ X3, γ) ⊕ (X2 ⊕ X3, γ)"
  "(𝟙 ⊕ X3, γ)"   "(X2 ⊕ X3, γ)"     "(X2, γ) ⊕ (𝟙 ⊕ X2, γ) ⊕ (X3, γ1) ⊕ (X3, γ2) ⊕ (X3, γ3)"
  "(X2 ⊕ X3, γ)"  "(𝟙 ⊕ X3, γ)"      "(𝟙, γ) ⊕ (𝟙 ⊕ X2, γ) ⊕ (X3, γ1) ⊕ (X3, γ2) ⊕ (X3, γ3)"
+```
+
+## F- and R-Symbols
+
+We can export the ``F``- and ``R``-symbols as Dicts via the methods 
+
+```@docs
+F_symbols
+R_symbols
+numeric_F_symbols
+numeric_R_symbols
 ```
 
 ```@autodocs

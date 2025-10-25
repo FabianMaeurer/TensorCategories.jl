@@ -4,3 +4,11 @@ DocumenterCitations = "daee34ce-89f3-4625-b898-19384cb65244"
 Oscar = "f1435218-dba5-11e9-1e4d-f1a5fab5fc13"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 TensorCategories = "258c694e-7338-4d4d-b524-4851272a75cf"
+
+[compat]
+Documenter = "1.15.0"
+DocumenterCitations = "1.4.1"
+Oscar = "1.5"
+
+[sources]
+TensorCategories = {path = ".."}

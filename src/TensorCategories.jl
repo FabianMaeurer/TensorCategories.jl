@@ -76,7 +76,6 @@ export ⋊
 export AbstractHomSpace 
 export action
 export action_matrix
-export add_simple! 
 export add_to_local_database
 export algebra
 export algebra_extensions
@@ -215,7 +214,6 @@ export haagerup_H2
 export haagerup_H3 
 export haagerup_H3_center
 export half_braiding 
-export half_braidings 
 export hexagon_axiom
 export hom 
 export Hom 
@@ -448,6 +446,7 @@ export twisted_graded_vector_spaces
 export twisted_group_algebra
 export unit
 export unitary_cocycle
+export unitary_haagerup_H3
 export sl2_representations
 export VectorSpaceMorphism 
 export VectorSpaceObject 

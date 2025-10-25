@@ -14,8 +14,6 @@ struct ConvolutionObject <: Object
     parent::ConvolutionCategory
 end
 
-ConvolutionObject = ConvolutionObject
-
 struct ConvolutionMorphism <: Morphism
     domain::ConvolutionObject
     codomain::ConvolutionObject

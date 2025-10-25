@@ -413,7 +413,6 @@ function fpdim(X::Object)
 
     K = QQBarField()
 
- 
     A = Array{Int,2}(undef,n,n)
     end_dims = [int_dim(End(S[i])) for i ∈ 1:n]
     for i ∈ 1:n

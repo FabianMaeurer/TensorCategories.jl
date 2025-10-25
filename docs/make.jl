@@ -1,4 +1,3 @@
-
 using Documenter, TensorCategories, Oscar, DocumenterCitations
 
 bib = CitationBibliography(joinpath(@__DIR__, "src", "MyBib.bib"))
