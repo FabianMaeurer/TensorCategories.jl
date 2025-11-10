@@ -177,6 +177,7 @@ function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothi
     # end  
     
     homs = multiplicity_spaces(C)
+
     homs = Dict(k => morphism.(basis(v)) for (k,v) in homs)
     missed = [(i,j,k) => C_morphism_type[] for i in 1:N, j in 1:N, k in 1:N if !haskey(homs, (i,j,k))]
     if length(missed) > 0

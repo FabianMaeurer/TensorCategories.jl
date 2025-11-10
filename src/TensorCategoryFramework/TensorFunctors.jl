@@ -100,7 +100,21 @@ is_additive(T::RightTensorProductFunctor) = is_additive(domain(T))
 # end
 
 #=  =# function dual_monoidal_structure(X::Object, Y::Object)
-    (ev(X⊗Y)⊗id(dual(Y)⊗dual(X))) ∘ inv_associator(dual(X⊗Y),X⊗Y,dual(Y)⊗dual(X)) ∘ (id(dual(X⊗Y))⊗product_coev(X,Y))
+    #(ev(X⊗Y)⊗id(dual(Y)⊗dual(X))) ∘ inv_associator(dual(X⊗Y),X⊗Y,dual(Y)⊗dual(X)) ∘ (id(dual(X⊗Y))⊗product_coev(X,Y))
+    dXY = dual(X⊗Y)
+    dX = dual(X)
+    dY = dual(Y)
+    XY = (X ⊗ Y)
+    compose(
+        id(dXY) ⊗ compose(
+            coev(X),
+            (id(X) ⊗ coev(Y)) ⊗ id(dX),
+            inv_associator(X, Y, dual(Y)) ⊗ id(dX),
+        ),
+        inv_associator(dXY, XY ⊗ dY, dual(X)),
+        inv_associator(dXY, XY, dY) ⊗ id(dX),
+        ev(dXY) ⊗ id(dY) ⊗ id(dX)
+    )   
 end
 
 function product_coev(X::Object, Y::Object)

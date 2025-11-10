@@ -23,8 +23,8 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     hom, id, ideal, identity_matrix, image, index, inv, involution, irreducible_modules,
     is_abelian, is_central, is_finite, is_invertible, is_isomorphic, is_modular,
     is_rational, is_semisimple, is_simple, is_square, is_subfield, is_subgroup,
-    is_independent, is_invertible, is_separable, iso_oscar_gap,
-    jordan_normal_form, kernel, kronecker_product, lcm, leading_coefficient,
+    is_independent, is_invertible, is_separable, iso_oscar_gap, norm, is_exact, add_error!,
+    jordan_normal_form, kernel, kronecker_product, lcm, leading_coefficient, accuracy_bits,
     leading_monomial, left_transversal, lex, load, matrix, matrix_algebra, minpoly, quo,
     monomials, multiplication_table, multiplicity, nullspace, nvars, one, orbit,
     orbits, order, parent, permutation_matrix, preimage, primary_decomposition, product, rank, real_solutions, resultant, root_of_unity, roots, rref, save,
@@ -34,12 +34,12 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     number_of_rows, number_of_columns, is_squarefree, is_commutative,
     gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra,
     radical, is_zero, minimal_submodules, representation_matrix, QQBarField,
-    is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module, perm, fraction_field, simplify, CalciumField, CalciumFieldElem, FracFieldElem, PadicField, PadicFieldElem,
+    is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module, perm, fraction_field, simplify, CalciumField, CalciumFieldElem, FracFieldElem, PadicField, PadicFieldElem, root, AcbMatrix,
     QadicField, QadicFieldElem, FlintLocalField, FlintLocalFieldElem,
     MultTableGroup, is_isomorphic_with_map, subgroup_classes, representative,
-    pc_group, permutation_group, @req, is_constant, automorphism_group,
+    pc_group, permutation_group, @req, is_constant, automorphism_group, ComplexField,
     permuted, change_base_ring, schur_index_over_center, issimple, cyclotomic_extension, ArbField, next_prime, AcbFieldElem,
-    rationals_as_number_field
+    rationals_as_number_field, inner_product, orthogonal_basis, overlaps, BigComplex,ArbFieldElem, lindep
 
 import Oscar.Serialization: @register_serialization_type,
                  save_data_dict,
@@ -109,6 +109,7 @@ export category_of_left_modules
 export category_of_bimodules
 export commutative_algebra_structures
 export commutative_algebras
+export complex_lindep
 export HomSet 
 export HomSpace 
 export Morphism 
@@ -135,9 +136,11 @@ export cokernel
 export complex_embedding
 export complex_embeddings
 export compose 
+export composition_power
 export convolution_category 
 export coproduct 
 export cyclic_group_3cocycle 
+export dagger
 export decompose 
 export direct_sum_decomposition
 export DeligneProdMorphism 
@@ -149,6 +152,7 @@ export direct_sum
 export distribute_left 
 export distribute_right 
 export domain 
+export double_dual_monoidal_structure
 export drinfeld_morphism 
 export dual 
 export dual_basis 
@@ -234,6 +238,7 @@ export induction_right_adjunction
 export InductionMonad
 export inner_autoequivalence
 export inner_autoequivalences
+export inner_product
 export int_dim 
 export internal_hom
 export internal_hom_adjunction
@@ -279,6 +284,7 @@ export is_spherical
 export is_split_semisimple
 export is_subobject 
 export is_tensor 
+export is_unitary
 export is_zero
 export isequivariant 
 export isgraded 
@@ -323,7 +329,9 @@ export multiplication_table
 export multiplicity
 export NaturalTransformation
 export Nat
+export norm
 export normalized_smatrix 
+export numeric
 export numeric_F_symbols
 export numeric_R_symbols
 export numeric_P_symbols
@@ -336,6 +344,9 @@ export opposite_morphism
 export opposite_object
 export orbit_index 
 export orbit_stabilizers 
+export orthogonal_basis
+export orthonormal_basis
+export orthonormalisation
 export P_symbols
 export pairing 
 export parent 
@@ -483,6 +494,7 @@ include("Utility/SolveGroebner.jl")
 include("Utility/QuantumIntegers.jl")
 include("Utility/Technicallities.jl")
 include("Utility/QQBarToNumberfield.jl")
+include("Utility/AcbMat.jl")
 
 
 include("Examples/GradedVectorSpaces/VectorSpaces.jl")

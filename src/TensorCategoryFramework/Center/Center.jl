@@ -53,9 +53,10 @@ end
 
 is_multifusion(C::CenterCategory) = is_multifusion(category(C))
 
-is_modular(C::CenterCategory) = true 
+is_modular(C::CenterCategory) = is_fusion(category(C)) 
 is_braided(C::CenterCategory) = true
-is_rigid(C::CenterCategory) = true
+is_rigid(C::CenterCategory) = is_rigid(category(C))
+is_ring(C::CenterCategory) = is_ring(category(C))
 
 function induction_generators(C::CenterCategory) 
     if isdefined(C, :induction_gens)
@@ -166,7 +167,8 @@ Return the pivotal structure ```X → X∗∗``` of ```X```.
 pivotal(X::CenterObject) = morphism(X,dual(dual(X)), pivotal(X.object))
 
 (F::Field)(f::CenterMorphism) = F(f.m)
-
+(F::QQBarField)(f::CenterMorphism) = F(f.m)
+(F::AcbField)(f::CenterMorphism) = F(f.m)
 #=-------------------------------------------------
     MISC 
 -------------------------------------------------=#
@@ -893,18 +895,34 @@ Return a tuple ```(K,k)``` where ```K```is the kernel object and ```k```is the i
 """
 function kernel(f::CenterMorphism)
     ker, incl = kernel(f.m)
-    #f_inv = left_inverse(incl)
 
-    if ker == zero(parent(f.m))
-        return zero(parent(f)), zero_morphism(zero(parent(f)), domain(f))
+    C = parent(f)
+
+    if is_unitary(category(C))
+        incl = orthonormalisation(incl)
+    end
+    
+    pull_back_half_braiding(domain(f), incl)
+end
+
+function pull_back_half_braiding(X::CenterObject, incl::Morphism)
+    dom = domain(incl)
+    C = parent(incl)
+
+    if dom == zero(C)
+        return zero(C), zero_morphism(zero(C), codomain(incl))
     end
 
-    inv_incl = left_inverse(incl)
+    if is_unitary(C) && dagger(incl) ∘ incl == id(domain(incl))
+        global inv_incl = dagger(incl)
+    else
+        global inv_incl = left_inverse(incl)
+    end
 
-    braiding = [id(s)⊗inv_incl∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), domain(f).γ)]
+    braiding = [(id(s)⊗inv_incl)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(C), X.γ)]
 
-    Z = CenterObject(parent(domain(f)), ker, braiding)
-    return Z, morphism(Z,domain(f), incl)
+    Z = CenterObject(parent(X), dom, braiding)
+    return Z, morphism(Z,X, incl)
 end
 
 """
@@ -916,11 +934,18 @@ function cokernel(f::CenterMorphism)
     coker, proj = cokernel(f.m)
     #f_inv = right_inverse(proj)
 
+    if is_unitary(category(parent(f)))
+        proj = dagger(orthonormalisation(dagger(proj)))
+        global inv_proj = dagger(proj)
+    else
+        global inv_proj = right_inverse(proj)
+    end
+
     if coker == zero(parent(f.m))
         return zero(parent(f)), zero_morphism(codomain(f), zero(parent(f)))
     end
 
-    inv_proj = right_inverse(proj)
+    
     braiding = [(id(s)⊗proj)∘γ∘(inv_proj⊗id(s)) for (s,γ) ∈ zip(simples(parent(domain(f.m))), codomain(f).γ)]
 
     Z = CenterObject(parent(domain(f)), coker, braiding)
@@ -930,11 +955,18 @@ end
 function image(f::CenterMorphism)
     I, incl = image(f.m)
 
+    if is_unitary(category(parent(f)))
+        incl = orthonormalisation(incl)
+        inv_incl = dagger(incl)
+    else
+        inv_incl = left_inverse(incl)
+    end
+
     if I == zero(parent(f.m))
         return zero(parent(f)), zero_morphism(zero(parent(f)), domain(f))
     end
 
-    braiding = [id(s)⊗left_inverse(incl)∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(I)), codomain(f).γ)]
+    braiding = [id(s)⊗inv_incl∘γ∘(incl⊗id(s)) for (s,γ) ∈ zip(simples(parent(I)), codomain(f).γ)]
 
     Z = CenterObject(parent(domain(f)), I, braiding)
     return Z, morphism(Z,domain(f), incl)
@@ -1034,7 +1066,7 @@ function multiplicity_spaces(C::CenterCategory)
         m = multiplication_table(C) 
         indexed_simples = pairs(simples(C))
 
-        homs_chunks = [[] for i in 1:Threads.nthreads()]
+        homs = Array{HomSpace,3}(undef,size(m)...)
 
         Threads.@threads for (i,S) ∈ collect(indexed_simples)
             for (j,T) ∈ indexed_simples
@@ -1043,12 +1075,21 @@ function multiplicity_spaces(C::CenterCategory)
                     if m[i,j,k] == 0 
                         continue 
                     end
-                    
-                    push!(homs_chunks[Threads.threadid()], (i,j,k) => hom_by_linear_equations(ST,V))
+                    if typeof(base_ring(C)) <: Union{ArbField, ComplexField, AcbField}
+                        homs[i,j,k] = hom_by_adjunction(ST,V)
+                    else
+                        homs[i,j,k] = hom_by_linear_equations(ST,V)
+                    end
                 end
             end
         end
-        Dict(vcat(homs_chunks...))
+        mults = Dict(Tuple(k) => homs[k] for k ∈ keys(homs) if isassigned(homs,k))
+
+        if is_unitary(C)
+            Dict(k => HomSpace(domain(h), codomain(h), orthonormal_basis(h)) for (k,h) in mults)
+        else
+            mults 
+        end
     end
 end
 
@@ -1119,7 +1160,7 @@ function simples_by_induction!(C::CenterCategory, log = true)
         Is = induction_restriction(s, simpls)
         S_in_Z = []
 
-        if dim(category(C)) != 0
+        if dim(category(C)) != 0 && !is_unitary(category(C))
             #Test which simples in S are included
             multiplicities = K == QQBarField() || typeof(K) == CalciumField ? [int_dim(Hom(object(t),s)) for t ∈ S] : [div(int_dim(Hom(object(t),s)), int_dim(End(t))) for t ∈ S]
 
@@ -1133,15 +1174,20 @@ function simples_by_induction!(C::CenterCategory, log = true)
 
         Z = induction(s, simpls, parent_category = C)
 
-        if ! isempty(S_in_Z)
+        if ! isempty(S_in_Z) && !is_unitary(category(C))
             #factor out all already known simples
 
             incl_basis = vcat([basis(induction_right_adjunction(Hom(object(t),s), t, Z)) for (t,_) ∈ S_in_Z]...)
 
-            incl = horizontal_direct_sum(incl_basis)
-            
-            Q, proj = cokernel(incl)
 
+            incl = horizontal_direct_sum(incl_basis)
+
+          
+
+            @show dagger(incl) ∘ incl == id(domain(incl))
+
+            Q, proj = cokernel(incl)
+            @show proj ∘ dagger(proj) == id(codomain(proj)) 
             H = induction_right_adjunction(Hom(object(Q), s), Q, Z)
             
             H = HomSpace(Q,Q, [proj ∘ f for f ∈ basis(H)])
@@ -1332,7 +1378,7 @@ function cyclotomic_splitting_field(polys::Vector{<:PolyRingElem})
         for n ∈ 1:degree(f)^2 
             L = cyclotomic_extension(K,n)
             if !isempty(roots(L.Kr,f))
-                @show push!(m,n)
+                push!(m,n)
                 break
             end
         end
@@ -1401,24 +1447,58 @@ function hom_by_adjunction(X::CenterObject, Y::CenterObject)
 
     M = zero_matrix(base_ring(C),0,*(size(matrix(zero_morphism(X,Y)))...))
 
-    mors = []
+    mors = CenterMorphism[]
 
     @threads for i ∈ findall(==(true), candidates)
         s, X_s, s_Y = S[i], X_Homs[i], Y_Homs[i]
         Is = induction(s, parent_category = Z)
+        
         B = induction_right_adjunction(X_s, X, Is)
         B2 = induction_adjunction(s_Y, Y, Is)
-        
+
         # Take all combinations
         B3 = [h ∘ b for b ∈ B, h in B2][:]
-
+        
         mors = [mors; B3]
         # Build basis
     end
+
     mats = matrix.(mors)
-    M = transpose(matrix(base_ring(C), hcat(hcat([collect(m)[:] for m in mats]...))))
+
+    #Filter out zero matrices
+    if typeof(base_ring(C)) <: Union{ArbField, ComplexField, AcbField}
+        ind = findall(m -> overlaps(m, zero(parent(m))), mats)
+        mats = [m for (i,m) in pairs(mats) if i ∉ ind]
+        mors = [m for (i,m) in pairs(mors) if i ∉ ind]
+
+        ind = findall(f -> !is_central(f), mors)
+        mats = [m for (i,m) in pairs(mats) if i ∉ ind]
+        mors = [m for (i,m) in pairs(mors) if i ∉ ind]
+        if length(mats) == 0
+            return HomSpace(X,Y, CenterMorphism[])
+        end
+    end
+
+    M = transpose(matrix(base_ring(C), hcat([collect(m)[:] for m in mats]...)))
+
+    if typeof(base_ring(C)) <: Union{ArbField, ComplexField, AcbField}
+        M2 = collect(transpose(M))
+        m = minimum([Int(floor(minimum([a for a in Oscar.accuracy_bits.(M) if a > 0], init = precision(base_ring(C))))), Int(floor(precision(base_ring(C))))])
+
+        # Determine linear dependencies until there is none left
+        n = size(M2,2)
+        base = [1]
+        for i ∈ eachindex(mors[2:end])
+            c = complex_lindep(M2[:,[base;i]],m)
+            if sum(!iszero, c) ≤ 1
+                base = [base; i]
+            end
+        end
+        return HomSpace(X,Y, mors[base])
+    end
 
     Mrref = hnf(M)
+    
     base = CenterMorphism[]
     mats_morphisms = morphism.(mats)
 
@@ -1427,7 +1507,7 @@ function hom_by_adjunction(X::CenterObject, Y::CenterObject)
         f = sum([m*bi for (m,bi) ∈ zip(coeffs, mors)])
         push!(base, f)
     end
-
+    
     return HomSpace(X,Y, base)
 end
 
@@ -1471,6 +1551,14 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject, ind = 1:rank(
     for (i,e) ∈ zip(1:length(eqs),eqs)
         M[i,:] = [coeff(e, a) for a ∈ poly_basis]
     end
+    
+    # If Basering is numeric field, we need to be careful 
+    if typeof(F) <: Union{ArbField, ComplexField, AcbField}
+        basically_zero = findall(a -> overlaps(a, F(0)), M)
+        for i ∈ basically_zero
+            M[i] = F(0)
+        end
+    end
 
     N = nullspace(M)[2]
 
@@ -1494,6 +1582,7 @@ function hom_by_projection(X::CenterObject, Y::CenterObject)
     for i ∈ 1:length(proj_exprs)
         M[i,:] = proj_exprs[i]
     end
+
     r, M = rref(M)
     H_basis = CenterMorphism[]
     for i ∈ 1:r
@@ -1528,6 +1617,7 @@ function smatrix(C::CenterCategory)
     end
 end
 
+inner_product(f::CenterMorphism, g::CenterMorphism) = inner_product(morphism(f),morphism(g))
 #=----------------------------------------------------------
     extension_of_scalars 
 ----------------------------------------------------------=#    
@@ -1562,19 +1652,39 @@ function extension_of_scalars(C::CenterCategory, L::Field; embedding = is_subfie
     if isdefined(C, :induction_gens)
         CL.induction_gens = [extension_of_scalars(is, L, category(CL),  embedding = embedding) for is ∈ C.induction_gens]
     end
+    if has_attribute(C, :multiplication_table)
+        set_attribute!(CL, :multiplication_table, multiplication_table(C))
+    end
+    if has_attribute(C, :multiplicity_spaces)
+        mults = Dict(k => extension_of_scalars(h, L, CL, embedding = embedding) for (k,h) in multiplicity_spaces(C))
+        set_attribute!(CL, :multiplicity_spaces, mults)
+    end
+
     sort_simples_by_dimension!(CL)
     return CL
 end
 
-function _extension_of_scalars(C::CenterCategory, L::Field, cL = category(C)⊗L)
-    CenterCategory(L,cL)
+function _extension_of_scalars(C::CenterCategory, L::Field; embedding)
+    CenterCategory(L, extension_of_scalars(category(C),L, embedding = embedding))
 end
 
-function extension_of_scalars(X::CenterObject, L::Field, CL::CenterCategory = _extension_of_scalars(parent(X),L);  embedding = embedding(base_ring(X), L))
-    CenterObject(CL, extension_of_scalars(object(X), L, category(CL),  embedding = embedding), [extension_of_scalars(f, L, category(CL),  embedding = embedding) for f ∈ half_braiding(X)])
+# function _extension_of_scalars(C::CenterCategory, L::Field, cL::Category; embedding)
+#     CenterCategory(L,cL)
+# end
+
+function extension_of_scalars(X::CenterObject, L::Field;  embedding = embedding(base_ring(X), L))
+    extension_of_scalars(X,L,_extension_of_scalars(parent(X),L,embedding = embedding), embedding = embedding)
 end
 
-function extension_of_scalars(f::CenterMorphism, L::Field, CL::CenterCategory = _extension_of_scalars(parent(f),L),  embedding = embedding(base_ring(f), L))
+function extension_of_scalars(X::CenterObject, L::Field, CL::CenterCategory;  embedding = embedding(base_ring(X), L))
+    CenterObject(CL, extension_of_scalars(object(X), L, category(CL), embedding = embedding), [extension_of_scalars(f, L, category(CL),  embedding = embedding) for f ∈ half_braiding(X)])
+end
+
+function extension_of_scalars(f::CenterMorphism, L::Field;  embedding = embedding(base_ring(f), L))
+    extension_of_scalars(f, L, _extension_of_scalars(parent(f), L, embedding = embedding), embedding = embedding)
+end
+
+function extension_of_scalars(f::CenterMorphism, L::Field, CL::CenterCategory;  embedding = embedding(base_ring(f), L))
     dom = extension_of_scalars(domain(f), L, CL,  embedding = embedding)
     cod = extension_of_scalars(codomain(f), L, CL,  embedding = embedding)
     m = extension_of_scalars(morphism(f), L, category(CL),  embedding = embedding)
@@ -1603,6 +1713,18 @@ function center_simples_by_braiding(C::Category, Z::CenterCategory = center(C))
     S_rev_braided = [CenterObject(Z, s, [inv(braiding(t,s)) for t ∈ S]) for s ∈ S]
 
     [t⊗s for s ∈ S_braided, t ∈ S_rev_braided][:]
+end
+
+#=----------------------------------------------------------
+    Dagger structure
+----------------------------------------------------------=#
+
+function dagger(f::CenterMorphism)
+    morphism(codomain(f), domain(f), dagger(morphism(f)))
+end
+
+function is_unitary(C::CenterCategory)
+    is_unitary(category(C))
 end
 
 #=----------------------------------------------------------
@@ -1657,13 +1779,20 @@ function multiplication_table(C::CenterCategory)
 
         #duals = [findfirst(e -> is_isomorphic(e,dual(s))[1], S) for s ∈ S]
 
-        duals = [findfirst(!=(0), e) for e ∈ eachrow(S_matrix^2)]
+        duals = if typeof(base_ring(C)) <: Union{ArbField, ComplexField, AcbField} 
+            S2 = S_matrix^2
+            [findfirst(x -> !overlaps(zero(base_ring(C)), x), S2[:,i]) for i ∈ 1:size(S2,2)]
+        else
+            [findfirst(!=(0), e) for e ∈ eachrow(S_matrix^2)]
+        end
 
         for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n 
             verlinde_formula = sum([*(S_matrix[l,[i,j,duals[k]]]...)//dims[l] for l ∈ 1:n])
 
             if typeof(base_ring(C)) <: Union{PadicField, QadicField}
                 multiplicities[i,j,k] = Int(lift(coordinates(verlinde_formula//d)[1]))
+            elseif typeof(base_ring(C)) <: Union{ArbField, ComplexField, AcbField}
+                multiplicities[i,j,k] = Int(round(real(BigComplex(verlinde_formula//d))))
             else
                 multiplicities[i,j,k] = Int(QQ(verlinde_formula//d))
             end

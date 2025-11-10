@@ -39,7 +39,11 @@ end
 function ==(C::SixJCategory, D::SixJCategory)
     base_ring(C) ≠ base_ring(D) && return false 
     multiplication_table(C) ≠ multiplication_table(D) && return false 
-    C.ass != D.ass && return false
+    if !(typeof(base_ring(C)) <: Union{AcbField,ArbField})
+        C.ass != D.ass && return false
+    else
+        !all([overlaps(a,b) for (a,b) in zip(C.ass,D.ass)]) && return false
+    end
     true 
 end
 
@@ -158,6 +162,9 @@ end
 function is_spherical(F::SixJCategory)
     get_attribute!(F, :is_spherical) do
         if isdefined(F, :pivotal) 
+            if typeof(base_ring(F)) <: Union{ArbField, ComplexField,AcbField}
+                return all([overlaps(dim(x), dim(dual(x))) for x in simples(F)])
+            end
             return all([dim(x) == dim(dual(x)) for x in simples(F)])
         end
         false
@@ -340,7 +347,7 @@ function associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
 end
 
 function inv_associator(X::SixJObject, Y::SixJObject, Z::SixJObject)
-    @assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
+    #@assert parent(X) == parent(Y) == parent(Z) "Mismatching parents"
     C = parent(X)
 
     if zero(C) == X ⊗ Y ⊗ Z
@@ -443,6 +450,13 @@ function r_symbol(C::SixJCategory, i::Int, j::Int, k::Int)
     return C.braiding[i,j,k]
 end
 
+function (K::AcbField)(f::SixJMorphism)
+    x = matrix(f)[1,1]
+    if f != x*id(domain(f))
+        error("Not a scalar")
+    end
+    K(x)
+end
 
 #-------------------------------------------------------------------------------
 #   Functionality
@@ -469,7 +483,13 @@ end
 is_simple(X::SixJObject) = sum(X.components) == 1
 
 # ==(X::SixJObject, Y::SixJObject) = parent(X) == parent(Y) && X.components == Y.components
-==(f::SixJMorphism, g::SixJMorphism) = domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
+function ==(f::SixJMorphism, g::SixJMorphism) 
+    if typeof(base_ring(f)) <: Union{AcbField, ComplexField, ArbField}
+        domain(f) == domain(g) && codomain(f) == codomain(g) && overlaps(matrix(f), matrix(g))
+    else 
+        domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
+    end
+end
 
 
 decompose(X::SixJObject, simpls::Vector{SixJObject} = SixJObject[]) = [(x,k) for (x,k) ∈ zip(simples(parent(X)), X.components) if k != 0]
@@ -630,7 +650,16 @@ function simple_objects_coev(X::SixJObject)
 
     if sum(X.components) == 0 return zero_morphism(one(C), X) end
 
-    return basis(Hom(one(C), cod))[1]
+    unscaled_ev = basis(Hom(DX ⊗ X, one(C)))[1]
+    unscaled_coev = basis(Hom(one(C), cod))[1]
+
+    factor = F((id(X)⊗unscaled_ev)∘associator(X,DX,X)∘(unscaled_coev⊗id(X)))
+
+    try 
+        return inv(sqrt(factor)) * unscaled_coev
+    catch 
+    end
+    return unscaled_coev
     #mats = [diagonal_matrix(F(1),n,m) for (n,m) ∈ zip(C.one, cod.components)]
     #return morphism(one(C), cod, mats)
 end
@@ -659,9 +688,6 @@ function spherical(X::SixJObject)
     pivotal(X)
 end
 
-function is_pivotal(C::SixJCategory) 
-    all([pivotal(x)⊗pivotal(y) == double_dual_monoidal_structure(x,y) ∘ pivotal(x ⊗ y) for x ∈ simples(C), y ∈ simples(C)])
-end 
 
 function pivotal(X::SixJObject)
     C = parent(X)
@@ -1234,6 +1260,30 @@ function trivial_fusion_category(K::Field)
 end
 
 #=----------------------------------------------------------
+    Unitary
+----------------------------------------------------------=#    
+
+function is_unitary(C::SixJCategory)
+    for x ∈ simples(C), y ∈ simples(C), z ∈ simples(C) 
+        !is_unitary(associator(x,y,z)) && return false 
+    end 
+    true
+end
+
+function is_unitary(f::SixJMorphism)
+    !is_invertible(f) && return false
+    f ∘ dagger(f) == id(codomain(f))    
+end
+
+function dagger(f::SixJMorphism)
+    mats = [transpose(conj.(m)) for m ∈ matrices(f)]
+    morphism(codomain(f), domain(f), mats)
+end
+
+function inner_product(f::SixJMorphism, g::SixJMorphism)
+   base_ring(f)(tr(dagger(f) ∘ g))//dim(domain(g))
+end
+#=----------------------------------------------------------
     Reversed monoidal structure 
 ----------------------------------------------------------=#
 
@@ -1306,7 +1356,6 @@ function F_symbols(C::SixJCategory)
     S[one_indices] = one_components
 
     prods = [X ⊗ Y for X ∈ S, Y ∈ S]
-
 
     homs = [basis(Hom(prods[i,j],S[k])) for i ∈ 1:N, j ∈ 1:N, k ∈ 1:N]
 

@@ -402,9 +402,33 @@ zero_morphism(V::VectorSpaceObject,W::VectorSpaceObject) = morphism(V,W, zero(ma
 
 function express_in_basis(f::VectorSpaceMorphism, B::Vector{<:VectorSpaceMorphism})
     F = base_ring(f)
+
+    if typeof(F) <: Union{AcbField, ComplexField, ArbField}
+        return express_in_basis_numeric(f,B)
+    end
+
     B_mat = matrix(F,hcat([[x for x ∈ b.m][:] for b ∈ B]...))
     f_mat = matrix(F, 1, *(size(f.m)...), [x for x ∈ f.m][:])
+    
     return [x for x ∈ solve(transpose(B_mat),f_mat, side = :left)][:]
+end
+
+function express_in_basis_numeric(f::VectorSpaceMorphism, B::Vector{<:VectorSpaceMorphism})
+    F = base_ring(f)
+    #m = Int(floor(precision(F)/2))
+    
+    B_mat = matrix(F,hcat([[x for x ∈ b.m][:] for b ∈ B]...))
+    f_mat = matrix(F, *(size(f.m)...), 1, [x for x ∈ f.m][:])
+
+    m = minimum([Int(floor(minimum([a for a in Oscar.accuracy_bits.([B_mat f_mat]) if a > 0], init = precision(F)))), Int(floor(precision(F)))])
+
+    coeffs = complex_lindep(collect([f_mat B_mat]), m)
+
+    n = length(B)
+    lead = F(coeffs[1])
+    overlaps(lead,F(0)) && return zeros(F,n)
+
+    return  -1 .* coeffs[2:end]
 end
 
 (F::Field)(f::VectorSpaceMorphism) = F(matrix(f)[1,1])

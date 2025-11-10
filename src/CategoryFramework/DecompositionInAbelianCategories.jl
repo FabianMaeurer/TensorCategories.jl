@@ -13,7 +13,7 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false, is_indecomp
     =#
     # Over QQBar it's easier
     K = base_ring(X)
-    if K == QQBarField() || typeof(K) == CalciumField || typeof(K) <: Union{PadicField,QadicField}
+    if K == QQBarField() || typeof(K) <: Union{CalciumField, PadicField,QadicField, AcbField}
         return simple_subobjects_over_qqbar(X,E)
     end
 

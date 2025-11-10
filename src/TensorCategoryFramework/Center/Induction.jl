@@ -15,6 +15,7 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
     γ = Vector{Morphism}(undef, length(simples))
 
     C = parent(X)
+    is_uni = is_unitary(C)
 
     @threads for i ∈ 1:length(simples)
         W = simples[i]
@@ -34,7 +35,7 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
                  _,_,ic,p = direct_sum_decomposition(W⊗T, simples)
                 _basis = [f for f ∈ ic if domain(f) == S]
                 dual_basis = [f for f ∈ p if codomain(f) == S]
-                
+
                 #_,_,_,p = direct_sum_decomposition(dual(S)⊗W, dual.(simples))
 
                 if length(_basis) == 0 
@@ -46,15 +47,14 @@ function induction(X::Object, simples::Vector = simples(parent(X)); parent_categ
 
                 #_basis, basis_dual = adjusted_dual_basis(_basis, basis_dual, S, W, T)
 
-
                 #corrections = base_ring(X).([(id(W)⊗ev(dual(T))) ∘ (id(W)⊗(pivotal(T)⊗id(dual(T)))) ∘ a(W,T,dual(T)) ∘ (f⊗g) ∘ a(S,dual(S),W) ∘ (coev(S)⊗id(W)) for (f,g) ∈ zip(_basis,basis_dual)])
                 
-            
                 #@show "component_iso"
                 #component_iso = sum([a(W,T⊗X,dual(T)) ∘ (a(W,T,X)⊗id(dual(T))) ∘ ((f⊗id(X))⊗(inv(dim(W))*inv(k)*g)) ∘ a(S⊗X,dual(S),W) for (k,f,g) ∈ zip(corrections,_basis, basis_dual)])
 
                 component_iso = sum([a(W,T⊗X,dual(T)) ∘ (a(W,T,X)⊗id(dual(T))) ∘ ((f⊗id(X))⊗(g)) ∘ a(S⊗X,dual(S),W) for (f,g) ∈ zip(_basis, basis_dual)])
 
+                is_unitary(C) && (component_iso = sqrt(dim(T)//dim(S)) * component_iso)
                 #@show "sum"
                 γ_i_temp = vertical_direct_sum(γ_i_temp, (component_iso))
             end
@@ -129,14 +129,18 @@ function end_of_induction(X::Object, IX = induction(X))
     simpls = simples(parent(X))
 
     m = [zero_morphism(X,X) for _ in 1:length(simpls)]
-
-    dims = right_dim.((simpls))
+    C = parent(X)
+    dims = if is_unitary(C) 
+        sqrt.(dim.(simples(C)))
+    else
+        right_dim.((simples(C)))
+    end
 
     @threads for i ∈ 1:length(simpls)
         xi = simpls[i]
         dxi = dual(xi)
         d = dims[i]
-        if typeof(base_ring(X)) == CalciumField #|| base_ring(X) == QQBarField()
+        if typeof(base_ring(X)) == CalciumField || typeof(base_ring(X)) == ComplexField
             m[i] = d*compose(
                 associator(xi, object(IX), dxi),
                 id(xi) ⊗ half_braiding(IX, dxi),
@@ -166,10 +170,14 @@ function induction_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = inducti
 
     C = parent(domain(H))
 
-    dims = right_dim.((simples(C)))
-   
+    dims = if is_unitary(C) 
+        sqrt.(dim.(simples(C)))
+    else
+        right_dim.((simples(C)))
+    end
+
     simpls = simples(parent(H[1]))
-    if typeof(base_ring(Y)) == CalciumField || base_ring(Y) == QQBarField()
+    if typeof(base_ring(Y)) <: Union{ArbField, AcbField, CalciumField} || base_ring(Y) == QQBarField()  
         ind_f = [d * compose(
             associator(xi, object(Y), dual(xi)),
             id(xi) ⊗ half_braiding(Y, dual(xi)),
@@ -204,21 +212,21 @@ function induction_right_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = i
 
     C = parent(domain(H))
 
-
-    dims = if is_spherical(C)
-        dim.(simples(C))
+    dims = if is_unitary(C)
+        sqrt.(dim.(simples(C)))
     else
-        sqrt.(squared_norm.(simples(C)))
+        right_dim.(simples(C))
+        [1 for _ in simples(C)]
     end
 
 
     duals = dual.(simpls)
 
-    ind_f = [compose(
+    ind_f = [d * compose(
         id(object(Y))⊗coev(xi),
         inv_associator(object(Y),xi,dxi),
         half_braiding(Y,xi) ⊗ id(dxi)
-    ) for (xi, dxi) ∈ zip(simpls,duals)]
+    ) for (d, xi, dxi) ∈ zip(dims, simpls,duals)]
 
     # ind_f = [(dim(xi))*compose(
     #     (id(xi) ⊗ f) ⊗ id(dual(xi)),
@@ -237,20 +245,20 @@ function induction_right_adjunction(f::Morphism, Y::CenterObject, IX = induction
 
     simpls = simples(parent(H[1]))
 
-    dims = if is_spherical(C)
-        dim.(simples(C))
+    dims = if is_unitary(C)
+        sqrt.(dim.(simples(C)))
     else
-        sqrt.(squared_norm.(simples(C)))
+        right_dim.(simples(C))
+        [1 for _ in simples(C)]
     end
-
 
     duals = dual.(simpls)
 
-    ind_f = [compose(
+    ind_f = [d * compose(
         id(object(Y))⊗coev(xi),
         inv_associator(object(Y),xi,dxi),
         half_braiding(Y,xi) ⊗ id(dxi)
-    ) for (xi, dxi) ∈ zip(simpls,duals)]
+    ) for (d, xi, dxi) ∈ zip(dims,simpls,duals)]
     # ind_f = [(dim(xi))*compose(
     #     (id(xi) ⊗ f) ⊗ id(dual(xi)),
     #     associator(xi, object(Y), dual(xi)),
@@ -267,7 +275,11 @@ function induction_adjunction(f::Morphism, Y::CenterObject, IX = induction(domai
 
     C = parent(domain(H))
 
-    dims = right_dim.(simples(C))
+    dims = if is_unitary(C)
+        sqrt.(dim.(simples(C)))
+    else
+        right_dim.(simples(C))
+    end
    
     simpls = simples(parent(H[1]))
     if typeof(base_ring(Y)) == CalciumField || base_ring(Y) == QQBarField()

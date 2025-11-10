@@ -486,3 +486,148 @@ function topologize(S::Vector{<:Object})
     T = tensor_power_category(S)
     object.(indecomposables(T))
 end
+
+function is_pivotal(C::Category) 
+    if typeof(base_ring(C)) <: Union{ArbField, ComplexField, AcbField}
+        return is_pivotal_numeric(C)
+    end
+
+    all([pivotal(x)⊗pivotal(y) == double_dual_monoidal_structure(x,y) ∘ pivotal(x ⊗ y) for x ∈ simples(C), y ∈ simples(C)])
+end 
+
+function is_pivotal_numeric(C::Category) 
+    all([overlaps(matrix(pivotal(x)⊗pivotal(y)), matrix(double_dual_monoidal_structure(x,y) ∘ pivotal(x ⊗ y))) for x ∈ simples(C), y ∈ simples(C)])
+end
+
+function F_symbols(C::Category)
+    homs = multiplicity_spaces(C)    
+    N = rank(C)
+    m = multiplicity(C) 
+    mult = multiplication_table(C)
+
+    associators = [associator(C[[a,b,c]]...) for (a,b,c) ∈ collect(Base.product(1:N, 1:N, 1:N))]
+
+    K = base_ring(C) 
+
+    F_dict = Dict{Vector{Int}, elem_type(K)}()
+
+    for (a,b,c,d) ∈ collect(Base.product(1:N, 1:N, 1:N, 1:N))
+  
+        for e in 1:N, f in 1:N 
+            if mult[a,b,e] * mult[e,c,d] * mult[b,c,f] * mult[a,f,d] == 0 
+                continue 
+            end
+        
+            for (i,g) in pairs(basis(homs[(e, c, d)]))
+                for (j,g2) in pairs(basis(homs[(a, b, e)]))
+                    for (i2,h) in pairs(basis(homs[(b, c, f)]))
+                        for (j2,h2) in pairs(basis(homs[(a, f, d)]))
+                            c1 = inv(K(g ∘ dagger(g)))
+                            c2 = inv(K(g2 ∘ dagger(g2)))
+                            F = K(compose(
+                                c1*dagger(g),
+                                c2*dagger(g2) ⊗ id(C[c]),
+                                associator(C[[a,b,c]]...),
+                                id(C[a]) ⊗ h,
+                                h2
+                            ))
+                            if m == 1
+                                F_dict[[a,b,c,d,f,e]] = F
+                            else
+                                F_dict[[a,b,c,d,f,e,(j2,j),(i2,i)]] = F
+                            end
+                        end
+                    end
+                end
+            
+            end
+        end
+    end
+
+    return F_dict           
+end 
+
+
+function multiplicity_spaces(C::Category, S::Vector{<:Object} = simples(C))
+    mults = [(i,j,k) => Hom(x ⊗ y, z) for (i,x) ∈ pairs(S), (j,y) ∈ pairs(S), (k,z) ∈ pairs(S)]
+    Dict(p for p ∈ mults if int_dim(p[2]) > 0)
+end
+#=----------------------------------------------------------
+    Dagger
+----------------------------------------------------------=#
+
+function inner_product(f::Morphism, g::Morphism)
+    C = parent(f)
+    @assert parent(g) == C
+    @assert codomain(f) == codomain(g)
+    @assert domain(f) == domain(g)
+
+    return sqrt(fp_eigenvalue(matrix((dagger(f) ∘ g))))
+end
+
+function norm(f::Morphism)
+    maximum(abs.(eigenvalues(matrix(dagger(f) ∘ f))))
+end
+
+function orthogonal_basis(V::AbstractHomSpace)
+    orthogonal_basis(basis(V))
+end
+
+function orthogonal_basis(B::Vector{<:Morphism})
+    B_new = [B[1]]
+    for v ∈ B[2:end]
+        corr = sum([inner_product(b,v)//inner_product(b,b) * b for b ∈ B_new if inner_product(b,b) != 0], init = zero_morphism(domain(B[1]),codomain(B[1])))
+        push!(B_new, v - corr)
+    end
+    B_new
+end
+
+function orthonormal_basis(V::AbstractHomSpace)
+    orthonormal_basis(basis(V))
+end
+
+function orthonormal_basis(V::Vector{<:Morphism})
+    B = orthogonal_basis(V)
+    K = base_ring(V[1])
+    coeffs = [sqrt(K(tr(dagger(b) ∘ b))//dim(domain(b))) for b ∈ B]
+    coeffs = if typeof(K) == AcbField 
+        [overlaps(c, K(0)) ? K(0) : inv(c) for c in coeffs]
+    else
+        [c == 0 ? K(0) : inv(c) for c in coeffs]
+    end
+    [b * c for (b,c) ∈ zip(B,coeffs)]
+end
+
+function normalized_basis(V::AbstractHomSpace)
+    B = orthonormal_basis(V)
+    [b * root(dim(codomain(V))*inv(dim(domain(V))), 4) for b ∈ B]
+end
+
+function is_unitary(f::Morphism)
+    !is_invertible(f) && return false
+    id(codomain(f)) == f ∘ dagger(f)
+end
+
+function dagger(H::AbstractHomSpace)
+    HomSpace(codomain(H), domain(H), dagger.(basis(H)))
+end
+
+function orthonormalisation(f::Morphism)
+    f == 0 && return f
+
+    dom = domain(f)
+    cod = codomain(f)
+    _,_, i_dom, p_dom = direct_sum_decomposition(dom)
+    _,_, i_cod, p_cod = direct_sum_decomposition(cod)
+
+    S = simples(parent(f))
+    # collect incl/proj with equal co/domain
+    base = [vertical_direct_sum([p ∘ f ∘ i for p ∈ p_cod]) for i ∈ i_dom]
+    bases = [typeof(f)[v for v ∈ base if is_isomorphic(s,domain(v))[1]] for s ∈ S]
+    filter!(!isempty, bases)
+
+
+    normal_bases = [orthonormal_basis(b) for b ∈ bases] 
+
+    return horizontal_direct_sum(vcat(normal_bases...))
+end

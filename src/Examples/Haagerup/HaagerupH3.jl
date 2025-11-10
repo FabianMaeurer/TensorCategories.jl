@@ -49,9 +49,29 @@ function haagerup_H3_center()
     C
 end
 
+function unitary_haagerup_H3()
+    _,x = QQ[:x]
+    K,a = number_field(1 + x^2 - x^4 + x^6 + x^8)
+
+    ass = include(joinpath(@__DIR__, "UnitaryH3.jl"))
+    ass = Dict( k => K(v) for (k,v) ∈ ass)
+
+    ass_mats = dict_to_associator(6, K, ass)
+
+    mult = multiplication_table_from_F_symbols(ass_mats)
+
+    H = six_j_category(K, mult,  ["𝟙", "α", "α∗", "ρ", "αρ", "α∗ρ"])
+
+    set_associator!(H, ass_mats)
+    set_pivotal!(H, K.([1,1,1,1,1,1]))
+    set_one!(H, [1,0,0,0,0,0])
+    set_name!(H, "Fusion category ℋ₃")
+    H.embedding = complex_embedding(K, AcbField()(-0.908677010511985310037597243 + 0.41749980906223339057410 * im))
+    H
+end
 """ 
 
-    unitary_haagerup_H3([p1 = 1, p2 = 2])
+    unitary_haagerup_H3_wolf([p1 = 1, p2 = 2])
 
 Build the Haagerup ℋ₃ subfactor category. The category is build as SixJCategory. The associators are taken from the paper 
 
@@ -59,7 +79,7 @@ https://arxiv.org/pdf/1906.01322
 
 where p1,p2 = ±1 are parameters for the different possible sets of associators.
 """
-function unitary_haagerup_H3(K::Ring = QQ; p1 = 1, p2 = 1)
+function unitary_haagerup_H3_wolf(K::Ring = QQ; p1 = 1, p2 = 1)
     _,x = QQ["x"]
     if K == QQ
         K,_ = number_field(x^16 - 4*x^14 + 13*x^12 + 4*x^10 + 53*x^8 + 4*x^6 + 13*x^4 - 4*x^2 + 1)

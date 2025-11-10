@@ -245,7 +245,8 @@ function decompose_over_qqbar(X::Object, E = End(X))
     
     K = collect(values(eigenvalues(f)))
     subs = vcat([decompose_over_qqbar(k) for k ∈ K]...)
-    subs = typeof(X)[s for (s,_) ∈ subs]
+    subs = vcat([typeof(X)[s for _ ∈ 1:i] for (s,i) ∈ subs]...)
+
     unique_simples_with_multiplicity(subs)
 end
 
@@ -381,12 +382,22 @@ entries `λ => ker(f - λid)`.
 function eigenvalues(f::Morphism)
     @assert domain(f) == codomain(f) "Not an endomorphism"
 
-    #@show factor(minpoly(matrix(f)))
+    vals = if typeof(base_ring(f)) == AcbField 
+            min_p = minpoly(f)
+            F = base_ring(f)
+            rs = roots(min_p, initial_prec = precision(F))
+            m = minimum([Int(floor(minimum([a for a in Oscar.accuracy_bits.(collect(coefficients(min_p))) if a > 0], init = precision(F))/2)), Int(floor(precision(F)/ 2))])
+            real_p = [real(r) for r in rs]
+            imag_p = [imag(r) for r in rs]
+            R = ArbField(precision(F))
+            real_p = [r + R("+/- 1e-$m") for r in real_p]
+            [add_error!(r, R("+/- 1e-$m")) for r in imag_p]
+            [F(r,c) for (r,c) in zip(real_p, imag_p)]
+        else
+            eigenvalues(matrix(f))
+        end
 
-    vals = eigenvalues(matrix(f))
-
-
-    return Dict(λ => kernel(f-λ*id(domain(f)))[1] for λ ∈ vals)
+    vals = Dict(λ => kernel(f-λ*id(domain(f)))[1] for λ ∈ vals)
 end
 
 
@@ -427,15 +438,35 @@ Compute the minimal polynomial of an endomorphism ``f: X \to X``.
 function minpoly(f::Morphism)
     @assert domain(f) == codomain(f) "Not an edomorphism"
     
-    if hasmethod(matrix, Tuple{typeof(f)})
+    if hasmethod(matrix, Tuple{typeof(f)}) && typeof(base_ring(f)) != AcbField
         # if typeof(base_ring(f)) == CalciumField
         #     return change_base_ring(base_ring(f), minpoly(change_base_ring(QQBarField(), matrix(f))))
         # end
         return minpoly(matrix(f))
+    elseif typeof(base_ring(f)) == AcbField
+        R,x = base_ring(f)[:x]
+
+        f == zero_morphism(domain(f),codomain(f)) && return zero(R)
+        i = 0 
+        found = false
+        while !found 
+            basis = [composition_power(f,k) for k in 0:i]
+            j = i+1
+            coeffs = express_in_basis(composition_power(f,j), basis)
+            if !all(coeffs .== 0)
+                return x^j - sum([c*x^(k-1) for (k,c) in pairs(coeffs)])
+            end
+            i = j
+            if j > sqrt(abs(dim(domain(f))*dim(codomain(f))))
+                error("minpoly not found")
+            end
+        end
     else
         error("Generic minpoly coming soon")
     end
 end 
+
+(p::PolyRingElem)(f::Morphism) = sum([c * composition_power(f,i-1) for (i,c) in pairs(collect(coefficients(p)))])
 
 function subst(f::PolyRingElem{T}, m::Morphism) where T <: FieldElem
     @assert domain(m) == codomain(m)
@@ -780,3 +811,42 @@ function vertical_direct_sum(f::Vector{M}) where M <: Morphism
 
 end
 
+#=----------------------------------------------------------
+    numeric        
+----------------------------------------------------------=#
+
+function numeric(C::Category, precision = 64, max_bits = precision*8)
+    K = base_ring(C)
+    @assert typeof(K) <: Union{QQBarField, ArbField, AcbField} "This doesn't make sense here. Use 'extension_of_scalars'"
+    CC = AcbField(max_bits)
+    extension_of_scalars(C, CC, embedding = x -> qqbar_to_acb_with_error(x,precision,max_bits))
+end
+
+function numeric(X::Object, precision = 64, max_bits = precision*8)
+    K = base_ring(X)
+    @assert typeof(K) <: Union{QQBarField, ArbField, AcbField} "This doesn't make sense here. Use 'extension_of_scalars'"
+    CC = AcbField(precision)
+    extension_of_scalars(X, CC, embedding = x -> qqbar_to_acb_with_error(x,precision,max_bits))
+end
+
+function numeric(C::Morphism, precision = 64, max_bits = precision*8)
+    K = base_ring(C)
+    @assert typeof(K) <: Union{QQBarField, ArbField, AcbField} "This doesn't make sense here. Use 'extension_of_scalars'"
+    CC = AcbField(precision)
+    extension_of_scalars(C, CC, embedding = x -> qqbar_to_acb_with_error(x,precision,max_bits))
+end
+
+function qqbar_to_acb_with_error(x, precision, max_bits = precision*8)
+    CC = AcbField(max_bits)
+    R  = ArbField(max_bits)
+    z = CC(x)
+    r = real(z)
+    c = imag(z)
+    if !is_exact(r)
+        add_error!(r, R("+/- 1e-$precision"))
+    end
+    if !is_exact(c)
+        add_error!(c, R("+/- 1e-$precision"))
+    end
+    CC(r,c)
+end

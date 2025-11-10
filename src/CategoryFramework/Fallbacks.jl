@@ -126,6 +126,14 @@ Return the tensor product object.
 ⊗(X::Object, K::Field) = extension_of_scalars(X,K)
 ⊗(f::Morphism, K::Field) = extension_of_scalars(f,K)
 
+function extension_of_scalars(H::AbstractHomSpace, L::Field, CL::Category; embedding = embedding(base_ring(H),L)) 
+    HomSpace(
+        extension_of_scalars(domain(H), L, CL, embedding = embedding),
+        extension_of_scalars(codomain(H), L, CL, embedding = embedding),
+        [extension_of_scalars(f, L, CL, embedding = embedding) for f in basis(H)]
+    ) 
+end
+
 """
     ^(X::Object, n::Integer)
 
@@ -177,6 +185,14 @@ compose(f::T...) where T <: Morphism = reduce(compose, f)
 ∘(f::Morphism...) = compose(reverse(f)...)
 ∘(f::AbstractFunctor...) = compose(reverse(f)...)
 
+function composition_power(f::Morphism, k::Int) 
+    @assert domain(f) == codomain(f)
+    if k == 0
+        return id(domain(f))
+    end
+
+    compose([f for _ in 1:k]...)
+end
 
 -(f::Morphism, g::Morphism) = f + (-1)*g
 -(f::Morphism) = (-1)*f
@@ -211,6 +227,11 @@ end
 function (R::AcbField)(f::Morphism) 
     morphism_to_scalar(R,f)
 end
+
+function (R::ComplexField)(f::Morphism) 
+    morphism_to_scalar(R,f)
+end
+
 
 (R::QQBarField)(f::Morphism) = morphism_to_scalar(R,f)
 
@@ -284,3 +305,4 @@ function matrix(f::Morphism)
         error("matrix(::$(typeof(f))) not implemented")
     end
 end
+

@@ -4,9 +4,19 @@
 Check the pentagon axiom for ```X, Y, Z, W```.
 """
 function pentagon_axiom(X::T, Y::T, Z::T, W::T) where T <: Object
+    if typeof(base_ring(X)) <: Union{ArbField, ComplexField, AcbField}
+        return pentagon_axiom_numeric(X, Y, Z, W)
+    end 
+
     f = (id(X)⊗associator(Y,Z,W)) ∘ associator(X,Y⊗Z,W) ∘ (associator(X,Y,Z)⊗id(W))
     g = associator(X,Y,Z⊗W) ∘ associator(X⊗Y,Z,W)
     return f == g
+end
+
+function pentagon_axiom_numeric(X::T, Y::T, Z::T, W::T) where T <: Object
+    f = (id(X)⊗associator(Y,Z,W)) ∘ associator(X,Y⊗Z,W) ∘ (associator(X,Y,Z)⊗id(W))
+    g = associator(X,Y,Z⊗W) ∘ associator(X⊗Y,Z,W)
+    return overlaps(matrix(f), matrix(g))
 end
 
 """
