@@ -75,14 +75,12 @@ function kernel(Mat::AcbMatrix; side = :left)
     imag_ker = imag.(ker)
     for i ∈ eachindex(real_ker) 
         r = real_ker[i]
-        is_exact(r) && continue
         add_error!(r, real_err)
         real_ker[i] = r
     end
 
     for i ∈ eachindex(imag_ker)
         c = imag_ker[i] 
-        is_exact(c) && continue
         add_error!(c, imag_err)
         imag_ker[i] = c
     end
@@ -95,8 +93,7 @@ end
 cokernel(M::AcbMatrix, side = :left) = transpose(kernel(transpose(M), side = side))
 
 function complex_lindep(M::Matrix{AcbFieldElem}, m::Int)
-    @assert m > 0 
-
+    @assert m > 0
     if isempty(M) 
         return AcbFieldElem[]
     end
@@ -110,58 +107,63 @@ function complex_lindep(M::Matrix{AcbFieldElem}, m::Int)
 
     try 
         coeffs = R.(Oscar.lindep([M (F(im) .*M)], m))
-    catch
+    catch e
         return complex_lindep(M, m - 2)
     end
     n = div(length(coeffs), 2)
 
     #normalise 
+    coeffs = coeffs[1:n] .+ F(im) .* coeffs[n+1:end]
+
     j = findfirst(!=(0), coeffs)
+
     if j !== nothing 
-        coeffs = 1//coeffs[j] .* coeffs
+        coeffs = 1//(coeffs[j]) .* coeffs
     end
 
-    if sum(!=(0).(coeffs[1:n] .+ F(im) .* coeffs[n+1:end])) < 2
-        return coeffs[1:n] .+ (F(im) .* coeffs[n+1:end])
+    if sum(!=(0).(coeffs)) < 2
+        return coeffs
     end
 
-    if all(overlaps(x,F(0)) for x ∈ [sum(c * m for (c,m) in zip(coeffs[1:n] .+ F(im) .* coeffs[n+1:end],mm)) for mm in eachrow(M)])
-        return coeffs[1:n] .+ (F(im) .* coeffs[n+1:end])
+    if all(overlaps(x,F(0)) for x ∈ [sum(c * m for (c,m) in zip(coeffs,mm)) for mm in eachrow(M)])
+        return coeffs
+    end
+    
+    err = maximum(abs.([sum(c * m for (c,m) in zip(coeffs,mm)) for mm in eachrow(M)]))
+    if abs(err) > 10^(-8)
+        i = findfirst(!=(0), coeffs)
+        return insert!(complex_lindep(M[:, setdiff(1:n, i)], m), i, F(0))
+    end
+
+    while !all(overlaps(x,F(0)) for x ∈ [sum(c * m for (c,m) in zip(coeffs,mm)) for mm in eachrow(M)])
+        for i ∈ eachindex(coeffs)
+            r = coeffs[i]
+            r == 0 && continue
+            r = add_error(r, err)#R("+/- 1e-$err"))
+            coeffs[i] = r 
+        end
+        err = maximum(Oscar.midpoint.(abs.([sum(c * m for (c,m) in zip(coeffs,mm)) for mm in eachrow(M)])))
+        # @show all(overlaps(x,F(0)) for x ∈ [sum(c * m for (c,m) in zip(coeffs,mm)) for mm in eachrow(M)])
     end
    
-    err = maximum(abs.([sum(c * m for (c,m) in zip(coeffs[1:n] .+ F(im) .* coeffs[n+1:end],mm)) for mm in eachrow(M)]))
-
-    if abs(err) > 10^(-8)
-       coeffs = coeffs[1:n] .+ (F(im) .* coeffs[n+1:end])
-       i = findfirst(!=(0), coeffs)
-       return insert!(complex_lindep(M[:, setdiff(1:n, i)], m), i, F(0))
-    end
-
-    for i ∈ eachindex(coeffs)
-        r = R(coeffs[i])
-        r == 0 && continue
-        add_error!(r, err)#R("+/- 1e-$err"))
-        coeffs[i] = r 
-    end
-
-    return coeffs[1:n] .+ (F(im) .* coeffs[n+1:end])
+    return coeffs
 end
 
 function nullspace(M::AcbMatrix)
-    k = kernel(M)
-    (size(k,1), k)
+    k = kernel(transpose(M))
+    (size(k,1), transpose(k))
 end
 
 function add_error(x::AcbFieldElem, err::ArbFieldElem)
     r = real(x)
-    if !is_exact(r) 
-        add_error!(r, err)
-    end
+
+    add_error!(r, err)
+
 
     c = imag(x) 
-    if !is_exact(c)
-        add_error!(c, err)
-    end
+
+    add_error!(c, err)
+
 
     return parent(x)(r,c)
 end

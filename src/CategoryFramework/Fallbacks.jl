@@ -134,6 +134,14 @@ function extension_of_scalars(H::AbstractHomSpace, L::Field, CL::Category; embed
     ) 
 end
 
+function extension_of_scalars(X::T, L::Ring, CL::Category; embedding) where T <: Union{Object, Morphism}
+    extension_of_scalars(X,L,CL)
+end
+
+function extension_of_scalars(X::Category, L::Ring; embedding)
+    extension_of_scalars(X,L)
+end
+
 """
     ^(X::Object, n::Integer)
 

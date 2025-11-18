@@ -149,9 +149,17 @@ end
 
 function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothing; log = nothing)
     @assert is_semisimple(C)
+    if typeof(base_ring(C)) <: Union{AcbField,ArbField} && !is_unitary(C)
+        @warn("Computing F-symbols is buggy for non unitary numeric categories. Check Results afterwards")
+    end
 
-    if log !== nothing && !isdir(joinpath(@__DIR__, "$log"))
-        mkdir(joinpath(@__DIR__, "$log"))
+    if log !== nothing 
+        path = if isabspath(log) 
+            log 
+        else
+            joinpath(@__DIR__, "$log")
+        end
+        mkdir(path)
     end 
 
     N = length(S)
@@ -187,7 +195,7 @@ function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothi
 
 
 
-    @threads for i ∈ 1:N 
+    for i ∈ 1:N 
         for j ∈ 1:N, k ∈ 1:N
             a = associator(object.(S[[i,j,k]])...)
  
@@ -204,8 +212,12 @@ function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothi
                     ass[i,j,k,l] = identity_matrix(F,n)
 
                     if log !== nothing 
-                    save( joinpath(@__DIR__, "$log/$(i)_$(j)_$(k)_$(l)"),ass[i,j,k,l])
-                end
+                        if typeof(base_ring(C)) <: Union{ArbField,AcbField}
+                            Oscar.Serialization.serialize(joinpath(path,"$(i)_$(j)_$(k)_$(l)"), ComplexF64.(collect(ass[i,j,k,l])))
+                        else
+                            save( joinpath(@__DIR__, "$log/$(i)_$(j)_$(k)_$(l)"),ass[i,j,k,l])
+                        end
+                    end
                     continue
                 end
 
@@ -222,7 +234,7 @@ function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothi
                     B_XY_Z_W = [B_XY_Z_W; B]
                 end
 
-                # Build a basis for Hom(X⊗(Y⊗Z),W)
+                # Build a basis for Hom(X⊗(Y⊗Z),W) 
                 B_X_YZ_W = C_morphism_type[]
                 for n ∈ 1:N
                     V = S[n]
@@ -239,13 +251,30 @@ function six_j_symbols_of_construction(C::Category, S = simples(C), mult = nothi
 
                 # Express the asociator in the corresponding basis
                 #a = associators[i,j,k]
-                associator_XYZ_W = hcat([express_in_basis(f ∘ a, B_XY_Z_W) for f ∈ B_X_YZ_W]...)
-            
+
+                # if length(B_X_YZ_W) > 1
+                #     @show i,j,k,l
+                #     return B_XY_Z_W, B_X_YZ_W, a
+                # end
+
+                # Use a different method for the numeric case
+                associator_XYZ_W = if typeof(base_ring(C)) <: Union{AcbField,ArbField} && is_unitary(C)
+                    # Assumes orthogonal bases
+                    correction = [inv(F(f ∘ dagger(f))) for f ∈ B_XY_Z_W]
+                    [c * F(f ∘ a ∘ dagger(g)) for (g,c) in zip(B_XY_Z_W, correction), f in B_X_YZ_W]
+                else 
+                    # Usually faster if solving linear systems is stable
+                    hcat([express_in_basis(f ∘ a, B_XY_Z_W) for f ∈ B_X_YZ_W]...)
+                end
+                
                 ass[i,j,k,l] = matrix(F, length(B_XY_Z_W), length(B_X_YZ_W),  associator_XYZ_W) 
 
-                if log !== nothing && !isempty(associator_XYZ_W)
-                    @show (i,j,k,l)
-                    save(joinpath(@__DIR__, "$log/$(i)_$(j)_$(k)_$(l)"),associator_XYZ_W)
+                if log !== nothing 
+                    if typeof(base_ring(C)) <: Union{ArbField,AcbField}
+                        Oscar.Serialization.serialize(joinpath(path,"$(i)_$(j)_$(k)_$(l)"), ComplexF64.(collect(ass[i,j,k,l])))
+                    else
+                        save( joinpath(@__DIR__, "$log/$(i)_$(j)_$(k)_$(l)"),ass[i,j,k,l])
+                    end
                 end
             end
 
@@ -274,17 +303,27 @@ function skeletal_braiding(C::Category, S = simples(C))
         push!(homs, missed...)
     end
 
-    Threads.@threads for i ∈ 1:N
-        for j ∈ 1:N, l ∈ 1:N
-            X,Y,W = S[[i,j,l]]
-            # Basis for Hom(X⊗Y,W)
-            B_XY_W = (homs[i,j,l])
+    for i ∈ 1:N
+        for j ∈ 1:N
+            X,Y = S[[i,j]]
+            b = braiding(X,Y)
+            for l ∈ 1:N
+                W = S[l]
+                # Basis for Hom(X⊗Y,W)
+                B_XY_W = (homs[i,j,l])
 
-            # Basis for Hom(Y⊗X,W)
-            B_YX_W = (homs[j,i,l])
+                # Basis for Hom(Y⊗X,W)
+                B_YX_W = (homs[j,i,l])
 
-            braid_XY_W = hcat([express_in_basis(f ∘ braiding(X,Y), B_XY_W) for f ∈ B_YX_W]...)
-            braid[i,j,l] = matrix(F, length(B_XY_W), length(B_YX_W), braid_XY_W)
+                braid_XY_W = if typeof(base_ring(C)) <: Union{ArbField,AcbField} 
+                    correction = [inv(F(f ∘ dagger(f))) for f ∈ B_XY_W]
+                    [c * F(f ∘ b ∘ dagger(g)) for (g,c) in zip(B_XY_W, correction), f in B_YX_W]
+                else
+                    hcat([express_in_basis(f ∘ b, B_XY_W) for f ∈ B_YX_W]...)
+                end
+
+                braid[i,j,l] = matrix(F, length(B_XY_W), length(B_YX_W), braid_XY_W)
+            end
         end
     end
    return braid

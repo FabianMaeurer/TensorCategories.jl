@@ -38,7 +38,7 @@ function anyonwiki(rank::Int,
     ass = dict_to_associator(rank, K, ass)
 
     set_tensor_product!(C, multiplication_table_from_F_symbols(ass))
-    set_associator!(C, ass)
+    set_associator!(C, transpose.(ass))
     set_one!(C, [i == 1 for i in 1:rank])
 
     if braiding != 0 
@@ -92,6 +92,12 @@ function anyonwiki_center_artifact_path(i,j,k,l,m,n,o)
         error("There is no center saved for a fusion category with index $((i,j,k,l,m,n,o))")
     end
 end
+
+function dict_to_associator(ass::Dict)
+    N = length(filter(e -> all(e[[1,2]] .== 1), keys(ass)))
+    dict_to_associator(N, parent(first(ass)[2]), ass)
+end
+
 function dict_to_associator(N::Int, K::Field, ass::Dict)
     # Transform associator dict to Matrices 
 
@@ -114,7 +120,7 @@ function dict_to_associator(N::Int, K::Field, ass::Dict)
             abc_d = sort(abc_d, by = v -> v[[8,5,10,9,7,6]])
         end
         M = matrix(K,l,l, [D[v] for v ∈ abc_d])
-        ass_matrices[a,b,c,d] = M
+        ass_matrices[a,b,c,d] = transpose(M)
     end
 
     ass_matrices 
@@ -139,6 +145,11 @@ function group_dict_keys_by(f::Function, D::Dict)
     return groups 
 end
 
+function dict_to_braiding(ass::Dict)
+    N = length(filter(e -> all(e[[1,2]] .== 1), keys(ass)))
+    dict_to_braiding(N, parent(first(ass)[2]), ass)
+end
+
 function dict_to_braiding(N::Int, K::Field, braid::Dict)
     # Transform associator dict to Matrices 
     braiding_array = Array{MatElem,3}(undef,N,N,N)
@@ -148,7 +159,7 @@ function dict_to_braiding(N::Int, K::Field, braid::Dict)
         l = Int(sqrt(length(ab_c)))
         sort!(ab_c)
         M = matrix(K,l,l, [braid[v] for v ∈ ab_c])
-        braiding_array[a,b,c] = M
+        braiding_array[a,b,c] = transpose(M)
     end
     braiding_array
 end

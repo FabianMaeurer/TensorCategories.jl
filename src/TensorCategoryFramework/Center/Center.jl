@@ -999,7 +999,7 @@ end
 
 function Hom(X::CenterObject, Y::CenterObject) 
 
-    alg_closed = (base_ring(X) == QQBarField() || typeof(base_ring(X)) == CalciumField)
+    alg_closed = (base_ring(X) == QQBarField() || base_ring(X) isa Union{CalciumField, AcbField})
 
     if int_dim(Hom(object(X),object(Y))) == 0
         return HomSpace(X,Y,CenterMorphism[])
@@ -1012,7 +1012,7 @@ function Hom(X::CenterObject, Y::CenterObject)
         return hom_by_linear_equations(X,Y)
     end
 
-    if is_zero(dim(category(parent(X))))
+    if is_zero(dim(category(parent(X)))) || typeof(base_ring(X)) <: Union{AcbField, ArbField}
         return hom_by_linear_equations(X,Y)
     else 
         return hom_by_adjunction(X,Y)
@@ -1075,10 +1075,9 @@ function multiplicity_spaces(C::CenterCategory)
                     if m[i,j,k] == 0 
                         continue 
                     end
-                    if typeof(base_ring(C)) <: Union{ArbField, ComplexField, AcbField}
-                        homs[i,j,k] = hom_by_adjunction(ST,V)
-                    else
-                        homs[i,j,k] = hom_by_linear_equations(ST,V)
+                    homs[i,j,k] = hom_by_linear_equations(ST,V)
+                    if is_unitary(C) 
+                        homs[i,j,k] = HomSpace(ST, V, orthonormal_basis(homs[i,j,k]))
                     end
                 end
             end
@@ -1182,12 +1181,8 @@ function simples_by_induction!(C::CenterCategory, log = true)
 
             incl = horizontal_direct_sum(incl_basis)
 
-          
-
-            @show dagger(incl) ∘ incl == id(domain(incl))
-
             Q, proj = cokernel(incl)
-            @show proj ∘ dagger(proj) == id(codomain(proj)) 
+
             H = induction_right_adjunction(Hom(object(Q), s), Q, Z)
             
             H = HomSpace(Q,Q, [proj ∘ f for f ∈ basis(H)])
@@ -1294,7 +1289,7 @@ function split(C::CenterCategory; absolute = true)
 
     if all([int_dim(e) == 1 for e ∈ Ends])
         if K == QQ
-            K,a == rationals_as_number_field()
+            K,a = rationals_as_number_field()
             return C, hom(K,K,a)
         else
             return C, hom(K,K, gen(K))
@@ -1553,12 +1548,12 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject, ind = 1:rank(
     end
     
     # If Basering is numeric field, we need to be careful 
-    if typeof(F) <: Union{ArbField, ComplexField, AcbField}
-        basically_zero = findall(a -> overlaps(a, F(0)), M)
-        for i ∈ basically_zero
-            M[i] = F(0)
-        end
-    end
+    # if typeof(F) <: Union{ArbField, ComplexField, AcbField}
+    #     basically_zero = findall(a -> overlaps(a, F(0)), M)
+    #     for i ∈ basically_zero
+    #         M[i] = F(0)
+    #     end
+    # end
 
     N = nullspace(M)[2]
 
@@ -1668,9 +1663,9 @@ function _extension_of_scalars(C::CenterCategory, L::Field; embedding)
     CenterCategory(L, extension_of_scalars(category(C),L, embedding = embedding))
 end
 
-# function _extension_of_scalars(C::CenterCategory, L::Field, cL::Category; embedding)
-#     CenterCategory(L,cL)
-# end
+function _extension_of_scalars(C::CenterCategory, L::Field, cL::Category)
+    CenterCategory(L,cL)
+end
 
 function extension_of_scalars(X::CenterObject, L::Field;  embedding = embedding(base_ring(X), L))
     extension_of_scalars(X,L,_extension_of_scalars(parent(X),L,embedding = embedding), embedding = embedding)

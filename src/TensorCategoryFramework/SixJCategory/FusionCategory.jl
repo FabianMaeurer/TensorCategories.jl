@@ -174,9 +174,25 @@ end
 
 function set_canonical_spherical!(C::SixJCategory)
     @assert is_fusion(C)
-    set_pivotal!(C, base_ring(C).([1 for _ ∈ 1:C.simples]))
-    set_pivotal!(C, [fpdim(s)*inv(dim(s)) for s ∈ simples(C)])
+
+    K = base_ring(C)
+    
+    set_pivotal!(C, K.([1 for _ ∈ 1:C.simples]))
+    set_pivotal!(C, K.(real.([fpdim(s)*inv(dim(s)) for s ∈ simples(C)])))
+
+    if base_ring(C) isa Union{ArbField, AcbField}
+        p = C.pivotal 
+        for i in 1:rank(C)
+            if overlaps(p[i], K(1))
+                C.pivotal[i] = K(1)
+            elseif overlaps(p[i], K(-1))
+                C.pivotal[i] = K(-1)
+            end
+        end
+    end
+    C.pivotal
 end
+
 
 @doc raw""" 
 
@@ -485,7 +501,7 @@ is_simple(X::SixJObject) = sum(X.components) == 1
 # ==(X::SixJObject, Y::SixJObject) = parent(X) == parent(Y) && X.components == Y.components
 function ==(f::SixJMorphism, g::SixJMorphism) 
     if typeof(base_ring(f)) <: Union{AcbField, ComplexField, ArbField}
-        domain(f) == domain(g) && codomain(f) == codomain(g) && overlaps(matrix(f), matrix(g))
+        domain(f) == domain(g) && codomain(f) == codomain(g) && overlaps(matrix(f), matrix(g)) 
     else 
         domain(f) == domain(g) && codomain(f) == codomain(g) && f.m == g.m
     end
@@ -1264,10 +1280,12 @@ end
 ----------------------------------------------------------=#    
 
 function is_unitary(C::SixJCategory)
-    for x ∈ simples(C), y ∈ simples(C), z ∈ simples(C) 
-        !is_unitary(associator(x,y,z)) && return false 
-    end 
-    true
+    get_attribute!(C, :is_unitary) do 
+        for x ∈ simples(C), y ∈ simples(C), z ∈ simples(C) 
+            !is_unitary(associator(x,y,z)) && return false 
+        end 
+        true
+    end
 end
 
 function is_unitary(f::SixJMorphism)

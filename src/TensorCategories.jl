@@ -330,11 +330,14 @@ export multiplicity
 export NaturalTransformation
 export Nat
 export norm
+export normalized_basis
 export normalized_smatrix 
 export numeric
 export numeric_F_symbols
 export numeric_R_symbols
 export numeric_P_symbols
+export numeric_symbols_to_csv 
+export numeric_symbols_from_csv
 export object 
 export object_type 
 export one 
@@ -437,7 +440,7 @@ export spherical
 export split
 export split_cyclotomic
 export stalk 
-export stalks 
+export stalks
 export SubcategoryObject 
 export SubcategoryMorphism 
 export tambara_yamagami
@@ -461,6 +464,7 @@ export unitary_haagerup_H3
 export sl2_representations
 export VectorSpaceMorphism 
 export VectorSpaceObject 
+export vector_spaces
 export VectorSpaces 
 export verlinde_category
 export vertical_direct_sum
@@ -565,6 +569,7 @@ include("Examples/SU(k)/SU(3)_3.jl")
 @register_serialization_type SixJCategory "SixJCategory"
 
 include("Serialization/SixJSerialization.jl")
+include("Serialization/symbols_to_csv.jl")
 #include("Serialization/CenterSerialization.jl")
 #include("SixJCategoryDatabase/main.jl")
 include("AnyonWiki/AnyonWiki.jl")

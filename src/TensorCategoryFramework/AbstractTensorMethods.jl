@@ -411,8 +411,6 @@ function fpdim(X::Object)
     S = simples(parent(X))
     n = length(S)
 
-    K = QQBarField()
-
     A = Array{Int,2}(undef,n,n)
     end_dims = [int_dim(End(S[i])) for i ∈ 1:n]
     for i ∈ 1:n
@@ -420,11 +418,18 @@ function fpdim(X::Object)
         A[:,i] = [length(basis(Hom(X⊗Y,S[j])))//end_dims[i] for j ∈ 1:n]
     end
 
-    return fp_eigenvalue(matrix(QQ, A))
+    λ = fp_eigenvalue(matrix(QQ, A))
+    if base_ring(X) isa Union{ArbField, AcbField}
+        base_ring(X)(λ)
+    else
+        λ
+    end
 end
 
 function fp_eigenvalue(m::MatrixElem)
-    λ = eigenvalues(QQBarField(), m)
+    K = QQBarField()
+
+    λ = eigenvalues(K, m)
     filter!(e -> isreal(e), λ)
     return findmax(e -> abs(e), λ)[1]
 end
@@ -589,7 +594,7 @@ end
 function orthonormal_basis(V::Vector{<:Morphism})
     B = orthogonal_basis(V)
     K = base_ring(V[1])
-    coeffs = [sqrt(K(tr(dagger(b) ∘ b))//dim(domain(b))) for b ∈ B]
+    coeffs = [sqrt(inner_product(b,b)) for b ∈ B]
     coeffs = if typeof(K) == AcbField 
         [overlaps(c, K(0)) ? K(0) : inv(c) for c in coeffs]
     else
@@ -600,7 +605,7 @@ end
 
 function normalized_basis(V::AbstractHomSpace)
     B = orthonormal_basis(V)
-    [b * root(dim(codomain(V))*inv(dim(domain(V))), 4) for b ∈ B]
+    [b * sqrt(sqrt((dim(codomain(V))*inv(dim(domain(V)))))) for b ∈ B]
 end
 
 function is_unitary(f::Morphism)

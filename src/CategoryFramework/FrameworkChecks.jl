@@ -248,7 +248,7 @@ function is_krull_schmidt(C::Category)
     false
 end
 
-
+is_unitary(C::Category) = false
 #=----------------------------------------------------------
     Helpers 
 ----------------------------------------------------------=#

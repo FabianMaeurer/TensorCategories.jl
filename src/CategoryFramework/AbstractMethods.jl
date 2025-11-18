@@ -242,8 +242,9 @@ function decompose_over_qqbar(X::Object, E = End(X))
     end
 
     f = [f for f ∈ basis(E) if degree(minpoly(f)) > 1][1]
-    
+
     K = collect(values(eigenvalues(f)))
+
     subs = vcat([decompose_over_qqbar(k) for k ∈ K]...)
     subs = vcat([typeof(X)[s for _ ∈ 1:i] for (s,i) ∈ subs]...)
 
@@ -385,8 +386,9 @@ function eigenvalues(f::Morphism)
     vals = if typeof(base_ring(f)) == AcbField 
             min_p = minpoly(f)
             F = base_ring(f)
-            rs = roots(min_p, initial_prec = precision(F))
             m = minimum([Int(floor(minimum([a for a in Oscar.accuracy_bits.(collect(coefficients(min_p))) if a > 0], init = precision(F))/2)), Int(floor(precision(F)/ 2))])
+            rs = roots(min_p, initial_prec = m)
+
             real_p = [real(r) for r in rs]
             imag_p = [imag(r) for r in rs]
             R = ArbField(precision(F))
@@ -453,8 +455,9 @@ function minpoly(f::Morphism)
             basis = [composition_power(f,k) for k in 0:i]
             j = i+1
             coeffs = express_in_basis(composition_power(f,j), basis)
-            if !all(coeffs .== 0)
-                return x^j - sum([c*x^(k-1) for (k,c) in pairs(coeffs)])
+            if !all(coeffs .== 0) 
+                p = x^j - sum([c*x^(k-1) for (k,c) in pairs(coeffs)])
+                p(f) == 0 && return p
             end
             i = j
             if j > sqrt(abs(dim(domain(f))*dim(codomain(f))))
@@ -814,8 +817,11 @@ end
 #=----------------------------------------------------------
     numeric        
 ----------------------------------------------------------=#
+function numeric(X::Union{Category,Object,Morphism}, precision::Int = 64)
+    numeric(X,precision, precision)
+end
 
-function numeric(C::Category, precision = 64, max_bits = precision*8)
+function numeric(C::Category, precision, max_bits)
     K = base_ring(C)
     @assert typeof(K) <: Union{QQBarField, ArbField, AcbField} "This doesn't make sense here. Use 'extension_of_scalars'"
     CC = AcbField(max_bits)

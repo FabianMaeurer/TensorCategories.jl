@@ -31,6 +31,8 @@ is_fusion(::VectorSpaces) = true
 # end
 #
 
+vector_spaces(K::Field = QQ) = VectorSpaces(K)
+
 """
     VectorSpaceObject(Vec::VectorSpaces, n::Int64)
     VectorSpaceObject(K::Field, n::Int)
@@ -282,6 +284,17 @@ function tensor_product(f::VectorSpaceMorphism, g::VectorSpaceMorphism)
 end
 #
 
+function braiding(X::VectorSpaceObject, Y::VectorSpaceObject)
+    F = base_ring(X)
+    n,m = int_dim(X),int_dim(Y)
+    map = zero(matrix_space(F,n*m,n*m))
+    for i ∈ 1:n, j ∈ 1:m
+        v1 = matrix(F,transpose([k == i ? 1 : 0 for k ∈ 1:n]))
+        v2 = matrix(F,transpose([k == j ? 1 : 0 for k ∈ 1:m]))
+        map[(j-1)*n + i, :] = kronecker_product(v1,v2)
+    end
+    return morphism(X⊗Y, Y⊗X, transpose(map))
+end
 
 #-----------------------------------------------------------------
 #   Functionality: Morphisms
@@ -347,8 +360,8 @@ function extension_of_scalars(C::VectorSpaces, K::Ring)
     VectorSpaces(K)
 end
 
-function extension_of_scalars(V::VectorSpaceObject, K::Ring)
-    VSObject(basis(V), parent(V) ⊗ K)
+function extension_of_scalars(V::VectorSpaceObject, K::Ring; parent::VectorSpaces = parent(V) ⊗ K)
+    VSObject(basis(V), parent)
 end
 #---------------------------------------------------------------------------
 #   Associators

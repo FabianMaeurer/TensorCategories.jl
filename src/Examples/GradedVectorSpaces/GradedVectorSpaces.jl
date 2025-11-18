@@ -434,7 +434,7 @@ end
 
 function extension_of_scalars(C::GradedVectorSpaces, L::Ring)
     K = base_ring(C)
-    if K != QQ && characteristic(K) == 0 
+    if embedding === nothing && K != QQ && characteristic(K) == 0 
         if K isa AbsSimpleNumField && L isa RelSimpleNumField
             f = L
         else
@@ -444,8 +444,10 @@ function extension_of_scalars(C::GradedVectorSpaces, L::Ring)
                 f = L
             end
         end
-    else
+    elseif embedding === nothing 
         f = L
+    else 
+        f = embedding 
     end
     
     if C.twist.m === nothing 
@@ -456,11 +458,11 @@ function extension_of_scalars(C::GradedVectorSpaces, L::Ring)
     D = graded_vector_spaces(L, C.base_group, c)
 end
 
-function extension_of_scalars(X::GVSObject, L::Ring, parent = parent(X) ⊗ L)
+function extension_of_scalars(X::GVSObject, L::Ring, parent::GradedVectorSpaces = parent(X) ⊗ L)
     GVSObject(parent, X.V ⊗ L, X.grading)
 end
 
-function extension_of_scalars(m::VectorSpaceMorphism, L::Ring)
+function extension_of_scalars(m::VectorSpaceMorphism, L::Ring, parent::GradedVectorSpaces = parent(X) ⊗ L)
     
     K = base_ring(m)
     if K != QQ && characteristic(K) == 0 
@@ -478,7 +480,7 @@ function extension_of_scalars(m::VectorSpaceMorphism, L::Ring)
     end
 
     mat = matrix(L, size(matrix(m))..., f.(collect(matrix(m))))
-    morphism(domain(m)⊗L, codomain(m)⊗L, mat)
+    morphism(extension_of_scalars(domain(m), L, parent), extension_of_scalars(codomain(m), L, parent), mat)
 end
 
 #=----------------------------------------------------------
