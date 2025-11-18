@@ -1169,7 +1169,7 @@ end
 
 Return the object ``X`` as an object of the category ``C⊗K``.
 """
-function extension_of_scalars(X::SixJObject, L::Ring, CL = nothing; embedding = nothing)
+function extension_of_scalars(X::SixJObject, L::Ring, CL::SixJCategory; embedding = nothing)
     if CL === nothing
             CL = extension_of_scalars(parent(m), L, embedding = embedding)
     end
@@ -1182,7 +1182,7 @@ end
 
 Return the category ``C⊗K``.
 """
-function extension_of_scalars(m::SixJMorphism, L::Ring, CL = nothing; embedding = embedding(base_ring(m), L))
+function extension_of_scalars(m::SixJMorphism, L::Ring, CL::SixJCategory; embedding = embedding(base_ring(m), L))
     try 
         if CL === nothing
             CL = extension_of_scalars(parent(m), L, embedding = embedding)
@@ -1281,6 +1281,7 @@ end
 
 function is_unitary(C::SixJCategory)
     get_attribute!(C, :is_unitary) do 
+        !(base_ring(C) isa Union{QQBarField, AcbField, CalciumField}) && return false
         for x ∈ simples(C), y ∈ simples(C), z ∈ simples(C) 
             !is_unitary(associator(x,y,z)) && return false 
         end 

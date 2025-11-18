@@ -1260,8 +1260,8 @@ end
 
 function split(X::CenterObject, E = End(X), 
     C = _extension_of_scalars(parent(X), QQBarField(), 
-    extension_of_scalars(category(parent(X)), QQBarField())), 
-    e = complex_embeddings(base_ring(X))[1])
+            extension_of_scalars(category(parent(X)), QQBarField())), 
+            e = complex_embeddings(base_ring(X))[1])
     #Assume X simple
     # int_dim(E) ≤ 1 && return [X]
 
@@ -1360,7 +1360,7 @@ function split(C::CenterCategory; absolute = true)
     end
 
     if base_ring(C) == QQ
-        return extension_of_scalars(C,L2, embedding = e -> L(e)), hom(rationals_as_number_field()[1], L2, L2(1))
+        return extension_of_scalars(C,L2, embedding = e -> L2(e)), hom(rationals_as_number_field()[1], L2, L2(1))
     else
         return extension_of_scalars(C,L2, embedding = L.mp[2]), L.mp[2]
     end
