@@ -1540,6 +1540,15 @@ function numeric_P_symbols(C::SixJCategory; precision = 2048)
 end
 
 
+function numeric(C::SixJCategory, precision, max_bits)
+    K = base_ring(C)
+    CC = AcbField(max_bits)
+    if !(typeof(K) <: Union{QQBarField, ArbField, AcbField})
+        return extension_of_scalars(complex_embedding(C), CC, embedding = x -> qqbar_to_acb_with_error(x,precision,max_bits))
+    end
+    extension_of_scalars(C, CC, embedding = x -> qqbar_to_acb_with_error(x,precision,max_bits))
+end
+
 #=----------------------------------------------------------
     save and load
 ----------------------------------------------------------=#

@@ -24,13 +24,13 @@ function numeric_symbols_from_csv(file::String, K::Field = AcbField(64); delimit
     for l ∈ lines 
         chunks = split(l, delimiter)
         index = parse.(Int, chunks[1:end-1 - split_number])
-        
+
         real,imag = if split_number 
             K.(chunks[end-1:end])
         else
             K.(split(chunks[end][1:end-2], "+"))
         end
-
+        
         push!(F, index => real + imag*K(im))
     end
     return F 
