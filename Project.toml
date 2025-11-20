@@ -1,6 +1,6 @@
 name = "TensorCategories"
 uuid = "258c694e-7338-4d4d-b524-4851272a75cf"
-version = "0.5.2"
+version = "0.5.3"
 authors = ["Fabian Mäurer"]
 
 [deps]
