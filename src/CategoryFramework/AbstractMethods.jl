@@ -856,3 +856,68 @@ function qqbar_to_acb_with_error(x, precision, max_bits = precision*8)
     end
     CC(r,c)
 end
+
+#=----------------------------------------------------------
+    Find basis among morphisms
+----------------------------------------------------------=#
+
+function basis(mors::Vector{<:Morphism})
+    if length(mors) ≤ 1
+        return mors
+    end
+
+    X = domain(mors[1])
+    Y = codomain(mors[1])
+    C = parent(X)
+
+
+    M = zero_matrix(base_ring(C),0,*(size(matrix(zero_morphism(X,Y)))...))
+
+    mats = matrix.(mors)
+
+    #Filter out zero matrices
+    if typeof(base_ring(C)) <: Union{ArbField, ComplexField, AcbField}
+        ind = findall(m -> overlaps(m, zero(parent(m))), mats)
+        mats = [m for (i,m) in pairs(mats) if i ∉ ind]
+        mors = [m for (i,m) in pairs(mors) if i ∉ ind]
+
+        ind = findall(f -> !is_central(f), mors)
+        mats = [m for (i,m) in pairs(mats) if i ∉ ind]
+        mors = [m for (i,m) in pairs(mors) if i ∉ ind]
+        if length(mats) == 0
+            return HomSpace(X,Y, CenterMorphism[])
+        end
+    end
+
+    M = transpose(matrix(base_ring(C), hcat([collect(m)[:] for m in mats]...)))
+
+    if typeof(base_ring(C)) <: Union{ArbField, ComplexField, AcbField}
+        M2 = collect(transpose(M))
+        m = minimum([Int(floor(minimum([a for a in Oscar.accuracy_bits.(M) if a > 0], init = precision(base_ring(C))))), Int(floor(precision(base_ring(C))))])
+
+        # Determine linear dependencies until there is none left
+        n = size(M2,2)
+        base = [1]
+        for i ∈ eachindex(mors[2:end])
+            c = complex_lindep(M2[:,[base;i]],m)
+            if sum(!iszero, c) ≤ 1
+                base = [base; i]
+            end
+        end
+        return HomSpace(X,Y, mors[base])
+    end
+
+    Mrref = hnf(M)
+    
+    base = morphism_type(C)[]
+    mats_morphisms = morphism.(mats)
+
+    for k ∈ 1:rank(Mrref)
+        coeffs = express_in_basis(morphism(transpose(matrix(base_ring(C), size(mats[1])..., Mrref[k,:]))), mats_morphisms)
+        f = sum([m*bi for (m,bi) ∈ zip(coeffs, mors)])
+        push!(base, f)
+    end
+    
+    return base
+end
+

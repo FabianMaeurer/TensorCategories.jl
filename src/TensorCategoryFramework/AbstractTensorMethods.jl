@@ -268,6 +268,19 @@ Compute the S-matrix as defined in [EGNO](https://math.mit.edu/~etingof/egnobook
 """
 function smatrix(C::Category, simples = simples(C))
     @assert is_semisimple(C) "Category has to be semisimple"
+
+    if hasfield(typeof(C), :__attrs) 
+        return get_attribute!(C, :smatrix) do
+            F = base_ring(C)
+            m = [tr(braiding(s,t)∘braiding(t,s)) for s ∈ simples, t ∈ simples]
+            try
+                return matrix(F,[F(n) for n ∈ m])
+            catch
+            end
+            return matrix(F,m)
+        end
+    end
+
     F = base_ring(C)
     m = [tr(braiding(s,t)∘braiding(t,s)) for s ∈ simples, t ∈ simples]
     try
@@ -635,4 +648,20 @@ function orthonormalisation(f::Morphism)
     normal_bases = [orthonormal_basis(b) for b ∈ bases] 
 
     return horizontal_direct_sum(vcat(normal_bases...))
+end
+
+#=----------------------------------------------------------
+    Fusion subcategories
+----------------------------------------------------------=# 
+
+function simple_fusion_subcategories(C::Category)
+    @req is_fusion(C) "Category must be fusion"
+
+    R = split_grothendieck_ring(C)
+    
+    subs = [(i, _topologize(R[i])) for i ∈ 1:rank(R)]
+    filter!(e -> is_simple(fusion_subring(R[e[1]])), subs)
+
+    subs = unique!(e -> e[2], subs)
+    return [fusion_subcategory(C[i]) for (i,_) ∈ subs]
 end

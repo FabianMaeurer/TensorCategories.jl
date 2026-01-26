@@ -40,7 +40,9 @@ function ==(C::SixJCategory, D::SixJCategory)
     base_ring(C) ≠ base_ring(D) && return false 
     multiplication_table(C) ≠ multiplication_table(D) && return false 
     if !(typeof(base_ring(C)) <: Union{AcbField,ArbField})
-        C.ass != D.ass && return false
+        if !has_attribute(C, :six_j_symbol)
+            C.ass != D.ass && return false
+        end
     else
         !all([overlaps(a,b) for (a,b) in zip(C.ass,D.ass)]) && return false
     end
@@ -709,6 +711,34 @@ function pivotal(X::SixJObject)
     C = parent(X)
     F = base_ring(C)
     sp = C.pivotal
+    mats = [diagonal_matrix(θ, k) for (θ,k) ∈ zip(sp, X.components)]
+    return morphism(X,X,mats)
+end
+
+function twists(C::SixJCategory)
+    # if isdefined(C, :twist)
+    #     return C.twist
+    # end
+    K = base_ring(C)
+
+    if is_spherical(C)
+        t = [dim(X) * inv(K(tr(inv(braiding(X,X))))) for X in simples(C)]
+        C.twist = t
+        return t
+    end
+
+    if is_pivotal(C)
+        t = [K(inv(drinfeld_morphism(X)) ∘ pivotal(X)) for X in simples(C)]
+        t.twist = t
+        return t
+    end
+    throw(ErrorException("Cannot compute twists"))
+end
+
+function twist(X::SixJObject)
+    C = parent(X)
+    F = base_ring(C)
+    sp = twists(C)
     mats = [diagonal_matrix(θ, k) for (θ,k) ∈ zip(sp, X.components)]
     return morphism(X,X,mats)
 end
@@ -1539,6 +1569,41 @@ function numeric_P_symbols(C::SixJCategory; precision = 2048)
     numeric_P_symbols(C, getfield(C, :embedding), precision = precision)
 end
 
+@doc raw""" 
+
+    numeric_twists(C::SixJCategory; precision = 2048)
+    numeric_twists(C::SixJCategory, e::AbsSimpleNumFieldEmbedding; precision = 2048)
+
+Return an array containing the values for the twists of the simples of ``C`` evaluated under the embedding ``e``.
+"""
+function numeric_twists(C::SixJCategory, e::AbsSimpleNumFieldEmbedding; precision = 2048)
+    P = twists(C)
+
+    [e(v, precision) for v ∈ P]
+end
+
+function numeric_twists(C::SixJCategory; precision = 2048)
+    !isdefined(C, :embedding) && error("No embedding has been specified")
+    numeric_twists(C, getfield(C, :embedding), precision = precision)
+end
+
+@doc raw""" 
+
+    numeric_smatrix(C::SixJCategory, e::AbsSimpleNumFieldEmbedding; precision = 2048)
+
+Return the S-matrix of ``C`` evaluated under the embedding ``e``.
+"""
+function numeric_smatrix(C::SixJCategory, e::AbsSimpleNumFieldEmbedding; precision = 2048)
+    S = smatrix(C)
+
+    n = size(S,1)
+    M = [e(S[i,j], precision) for i ∈ 1:n, j ∈ 1:n]
+end
+
+function numeric_smatrix(C::SixJCategory; precision = 2048)
+    !isdefined(C, :embedding) && error("No embedding has been specified")
+    numeric_smatrix(C, getfield(C, :embedding), precision = precision)
+end
 
 function numeric(C::SixJCategory, precision, max_bits)
     K = base_ring(C)

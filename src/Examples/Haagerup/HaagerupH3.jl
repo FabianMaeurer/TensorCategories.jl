@@ -62,7 +62,7 @@ function unitary_haagerup_H3()
 
     H = six_j_category(K, mult,  ["𝟙", "α", "α∗", "ρ", "αρ", "α∗ρ"])
 
-    set_associator!(H, ass_mats)
+    set_associator!(H, transpose.(ass_mats))
     set_pivotal!(H, K.([1,1,1,1,1,1]))
     set_one!(H, [1,0,0,0,0,0])
     set_name!(H, "Fusion category ℋ₃")

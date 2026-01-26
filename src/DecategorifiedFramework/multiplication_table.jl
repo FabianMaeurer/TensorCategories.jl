@@ -51,9 +51,13 @@ end
 
 Print the multiplication table of C.
 """
-function print_multiplication_table(C::Category)
+function print_multiplication_table(C::Category; names = true)
     if is_semisimple(C) 
-        print_multiplication_table(multiplication_table(C), simples_names(C))
+        if names 
+            print_multiplication_table(multiplication_table(C), simples_names(C))
+        else
+            print_multiplication_table(multiplication_table(C))
+        end
     else
         print_multiplication_table(indecomposables(C), indecomposables_names(C))
     end

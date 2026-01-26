@@ -307,6 +307,10 @@ end
 
 
 function root_of_unity(K::Field, n::Int)
+    if characteristic(K) == 2 && iseven(n)
+        return root_of_unity(K,div(n,2))
+    end
+
     Kx, x = K[:x]
     rs = roots(x^n - 1)
     divs = filter(e -> e != n, divisors(n))

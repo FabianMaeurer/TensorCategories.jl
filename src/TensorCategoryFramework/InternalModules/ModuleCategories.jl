@@ -192,6 +192,8 @@ function ==(X::ModuleObject, Y::ModuleObject)
     true
 end
 
+is_zero(X::ModuleObject) = is_zero(object(X))
+
 morphism_type(C::LeftModuleCategory) = ModuleMorphism{LeftModuleObject}
 morphism_type(C::RightModuleCategory) = ModuleMorphism{RightModuleObject}
 morphism_type(C::BiModuleCategory) = ModuleMorphism{BiModuleObject}
@@ -380,7 +382,7 @@ function right_module_cokernel(f::ModuleMorphism)
 end
 
 function bimodule_cokernel(f::ModuleMorphism)
-    X = domain(f)
+    X = codomain(f)
     A = object(left_algebra(parent(X)))
     B = object(right_algebra(parent(X)))
 
@@ -388,6 +390,7 @@ function bimodule_cokernel(f::ModuleMorphism)
     inv_c = right_inverse(c)
 
     l = left_action(X)
+
     left_coker_action = c ∘ l ∘ (id(A) ⊗ inv_c)
 
     r = right_action(X)
@@ -543,7 +546,7 @@ function transposed_module(N::RightModuleObject)
     )
 
     C = LeftModuleCategory(
-        parent(M),
+        category(parent(N)),
         algebra(parent(N))
     )
 
@@ -582,7 +585,7 @@ function transposed_module(N::LeftModuleObject)
     ) 
 
     C = RightModuleCategory(
-        parent(N),
+        category(parent(N)),
         algebra(parent(N))
     )
 
@@ -877,6 +880,13 @@ function one(C::Union{RightModuleCategory, LeftModuleCategory})
     return free_module(one(category(C)), C)
 end
 
+function dual(M::RightModuleObject)
+    if !is_commutative(algebra(parent(M)))
+        error("Algebra must be commutative to define dual of right module")
+    end
+    transposed_module(left_module(M))
+end
+
 function dual(M::BiModuleObject)
     #@assert left_algebra(parent(M)) == right_algebra(parent(M))
 
@@ -903,15 +913,21 @@ function dual(M::BiModuleObject)
     )
 end
 
-# function ev(M::BiModuleObject)
+# function coev(M::BiModuleObject)
 #     dM = dual(M)
-#     dMM,p = bimodule_tensor_product(dM,M)
-#     inv_p = right_inverse(p)
-#     u = unit(right_algebra(parent(M)))
-#     morphism(dMM, one(parent(M)), u ∘ ev(object(M)) ∘ inv_p)
+#     MdM,p = bimodule_tensor_product(M,dM)
+#     A = right_algebra(parent(M))
+#     @show p
+#     @show c = compose(
+#         coev(object(M)) ⊗ id(object(A)),
+#         associator(object(M), object(dM), object(A)),
+#         id(object(M)) ⊗ right_action(dM),
+#         p
+#     )
+#     morphism(one(parent(M)), MdM, c)
 # end
 
-# function coev(M::BiModuleObject)
+# function ev(M::BiModuleObject)
 #     dM = dual(M)
 #     MdM, p = bimodule_tensor_product(M,dM)
 
@@ -1387,6 +1403,20 @@ function free_adjunction(X::RightModuleObject, M::BiModuleObject, hom::Vector{<:
     HomSpace(IX , M, base)
 end
 
+function free_adjunction(X::Object, M::BiModuleObject, hom::Vector{<:Morphism} = basis(Hom(X, object(M))))
+
+    A = left_algebra(parent(M))
+    B = right_algebra(parent(M))
+
+    after = compose(
+        left_action(M) ⊗ id(object(B)),
+        right_action(M)
+    )
+    base = [after ∘ ((id(object(A)) ⊗ f) ⊗ id(object(B))) for f ∈ hom]
+    IX = free_bimodule(X,A,B, parent(M))
+    base = [morphism(IX,M, f) for f ∈ base]
+    HomSpace(IX , M, base)
+end
 
 function end_of_free_bimodule(X::Object, A::AlgebraObject, B::AlgebraObject)
     M = free_bimodule(X, A, B)
@@ -1410,6 +1440,20 @@ end
 function (R::Ring)(f::ModuleMorphism)
     R(morphism(f))
 end
+
+# function hom_by_adjunction(M::T, N::T) where T <: Union{LeftModuleObject, RightModuleObject}
+#     Free_M, proj_M = free_cover(M)
+#     Free_N, proj_N = free_cover(N)
+# end
+
+# function free_cover(M::ModuleObject)
+#     components = simple_subobjects(object(M))
+#     take = []
+#     C = parent(M)
+
+#     free_images = [free_module(c, C) for c ∈ components]
+
+
 #=----------------------------------------------------------
     isomorphic 
 ----------------------------------------------------------=#
@@ -1511,6 +1555,9 @@ function bimodule_simples(M::BiModuleCategory)
     A = left_algebra(M)
     B = right_algebra(M)
 
+    S = simples(category(M))
+
+    #simpls = vcat([simple_subobjects_of_free_object(m, X -> free_bimodule(X, A, B), free_adjunction) for m in S]...)
     right_modules = category_of_right_modules(B)
     simple_right_modules = simples(right_modules)
 
@@ -1614,6 +1661,8 @@ function multiplicity_spaces(M::BiModuleCategory)
         Dict(mult_spaces)
     end
 end
+
+
 
 function multiplication_table(M::BiModuleCategory) 
     get_attribute!(M, :multiplication_table) do 

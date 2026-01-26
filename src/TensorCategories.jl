@@ -14,7 +14,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     polynomial_ring, QQ, QQBarField, QQField, QQFieldElem, QQMPolyRingElem, Ring, RingElem, ZZ, QQBarFieldElem,
     ZZRingElem, abelian_closure, abelian_group, absolute_simple_field, action, base_field, defining_polynomial,
     base_ring, basis, central_primitive_idempotents, change_base_ring, 
-     characteristic, NumField, rational_solutions,
+     characteristic, NumField, rational_solutions, twist, twists,
     charpoly, codomain, coeff, coefficients, cokernel, complex_embeddings, compose, centralizer, embedding, complex_embedding,
     cyclotomic_field, decompose, degree, det, diagonal_matrix, dim, direct_sum, divisors, set_name!, coordinates,
     domain, dual, eigenspace, eigenspaces, eigenvalues, elem_type, elements, exponent, lift, prime_field, absolute_coordinates,
@@ -179,6 +179,7 @@ export express_in_basis
 export extension_of_scalars
 export F_symbols
 export factor 
+export free_adjunction
 export free_bimodule
 export free_left_module
 export free_module
@@ -336,8 +337,10 @@ export numeric
 export numeric_F_symbols
 export numeric_R_symbols
 export numeric_P_symbols
+export numeric_smatrix
 export numeric_symbols_to_csv 
 export numeric_symbols_from_csv
+export numeric_twists
 export object 
 export object_type 
 export one 
@@ -360,7 +363,7 @@ export pivotal_structures
 export preimage
 export print_module_action
 export print_multiplication_table 
-export print_multiplication_table_with_progress
+export multiplication_table_with_progress
 export product 
 export product_category 
 export product_morphism
@@ -427,6 +430,7 @@ export Sets
 export ShortExactSequence
 export ShortExactSequences
 export ShortExactSequenceMorphism
+export simple_fusion_subcategories
 export simple_fusion_subrings
 export simple_subobjects 
 export simples 
@@ -455,6 +459,7 @@ export tr
 export trivial_3_cocylce 
 export trivial_fusion_category
 export twist
+export twists
 export twisted_graded_vector_spaces
 export twisted_graded_vector_spaces 
 export twisted_group_algebra
