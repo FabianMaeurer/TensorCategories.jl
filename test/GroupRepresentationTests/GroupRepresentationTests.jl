@@ -10,3 +10,8 @@ simple_objects = simples(RepG)
     @test dim.(simple_objects) == [1,1,2]
    # @test dual.(simple_objects) == simple_objects
 end
+
+@testset "Rep center" begin 
+    S = simples(center(RepG))
+    @test length(S) == 8
+end
