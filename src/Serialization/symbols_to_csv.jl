@@ -7,7 +7,14 @@ function numeric_symbols_to_csv(destination::String, F::Dict{Vector{Int}, AcbFie
         sorted = collect(sort(F))
 
         for (k,v) ∈ sorted 
-            s = join([string.(k); string(BigComplex(v))], delimiter) * "\n"
+            m = max(accuracy_bits(v),0)
+            if m in [typemax(Int), 0]
+                m = 64
+            end
+
+            real_str = overlaps(real(v), zero(parent(real(v)))) ? "0.0" : string(BigFloat(BigFloat(real(v)), m))
+            imag_str = overlaps(imag(v), zero(parent(imag(v)))) ? "0.0" : string(BigFloat(BigFloat(imag(v)), m))
+            s = join([string.(k); [real_str, imag_str]], delimiter) * "\n"
             write(io, s)
         end
     end
@@ -17,20 +24,13 @@ function numeric_symbols_from_csv(file::String, K::Field = AcbField(64); delimit
     F = Dict{Vector{Int}, elem_type(K)}()
 
     lines = readlines(file) 
-
-    # check wether complex numbers are given as one or two columns
-    split_number = length(split(first(lines), delimiter)) ∈ [8,12]
     
     for l ∈ lines 
         chunks = split(l, delimiter)
-        index = parse.(Int, chunks[1:end-1 - split_number])
+        index = parse.(Int, chunks[1:end-2])
 
-        real,imag = if split_number 
-            K.(chunks[end-1:end])
-        else
-            K.(split(chunks[end][1:end-2], "+"))
-        end
-        
+        real,imag = K.(chunks[end-1:end])
+
         push!(F, index => real + imag*K(im))
     end
     return F 

@@ -1070,6 +1070,7 @@ function multiplicity_spaces(C::CenterCategory)
 
         Threads.@threads for (i,S) ∈ collect(indexed_simples)
             for (j,T) ∈ indexed_simples
+                @show i,j
                 ST = S ⊗ T
                 for  (k,V) ∈ indexed_simples
                     if m[i,j,k] == 0 
@@ -1084,11 +1085,11 @@ function multiplicity_spaces(C::CenterCategory)
         end
         mults = Dict(Tuple(k) => homs[k] for k ∈ keys(homs) if isassigned(homs,k))
 
-        if is_unitary(C)
-            Dict(k => HomSpace(domain(h), codomain(h), orthonormal_basis(h)) for (k,h) in mults)
-        else
-            mults 
-        end
+        # if is_unitary(C)
+        #     Dict(k => HomSpace(domain(h), codomain(h), orthonormal_basis(h)) for (k,h) in mults)
+        # else
+        #     mults 
+        # end
     end
 end
 

@@ -146,7 +146,7 @@ function group_dict_keys_by(f::Function, D::Dict)
 end
 
 function dict_to_braiding(ass::Dict)
-    N = length(filter(e -> all(e[[1,2]] .== 1), keys(ass)))
+    N = length(filter(e -> all(e[1] == 1), keys(ass)))
     dict_to_braiding(N, parent(first(ass)[2]), ass)
 end
 
@@ -554,7 +554,7 @@ function anyonwiki_finite(n::Int)
     anyonwiki_cyclotomic(n,K)
 end
 
-function multiplication_table_from_F_symbols(ass::Array{MatElem,4})
+function multiplication_table_from_F_symbols(ass::Array{<:MatElem,4})
     # Build multiplication_table
     N, = size(ass)
 

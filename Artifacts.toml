@@ -13,6 +13,13 @@ lazy = true
     sha256 = "e30dcedd22f644f24e437f41092c2b8811c19e389f135b83ed1715c6d305290a"
     url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenter1to4.tar.gz"
 
+[AnyonWikiCenter5]
+git-tree-sha1 = "fece921d36f23a08139ff8f8fb8750c5c63a5115"
+lazy = true
+
+    [[AnyonWikiCenter5.download]]
+    sha256 = "336ac493711f8643495ab39ccb9e2f34fa2572364c6a9fee1d7669084e01ef93"
+    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenter5.tar.gz"
 
 [Haagerup_H1]
 git-tree-sha1 = "f282d134a3928ead038fd34b6f4514e2eef65adf"
@@ -21,6 +28,14 @@ git-tree-sha1 = "f282d134a3928ead038fd34b6f4514e2eef65adf"
     sha256 = "b23ada66e19b748997993c853652c1c13fffdee43e9a18f257a808a82e39e7d7"
     url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/Haagerup/haagerup_H1.tar.gz"
 
+[NumericUnitaryCenterH3]
+git-tree-sha1 = "48ceb96a2d010f323559afe1dce2fe685fd2b392"
+lazy = true
+
+    [[NumericUnitaryCenterH3.download]]
+    sha256 = "5e9e342e931bdb6017582eeb9bd3a2c9219eeedd79f835a30b136935a7395928"
+    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/Haagerup/NumericUnitaryCenterH3.tar.gz"
+
 [center_haagerup]
 git-tree-sha1 = "fad85949740f184ab5596b5e27cfd6386752aee5"
 lazy = true
@@ -28,11 +43,3 @@ lazy = true
     [[center_haagerup.download]]
     sha256 = "69df3e77bb12531fb0389c66ba5640ab56a71c759982749e1e16361046906da1"
     url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/Haagerup/center_haagerup.tar.gz"
-
-[AnyonWikiCenter5]
-git-tree-sha1 = "fece921d36f23a08139ff8f8fb8750c5c63a5115"
-lazy = true
-
-    [[AnyonWikiCenter5.download]]
-    sha256 = "336ac493711f8643495ab39ccb9e2f34fa2572364c6a9fee1d7669084e01ef93"
-    url = "https://github.com/FabianMaeurer/TensorCategoriesDatabase/raw/refs/heads/main/AnyonWikiCenters/AnyonWikiCenter5.tar.gz"

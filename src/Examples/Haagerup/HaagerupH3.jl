@@ -49,6 +49,15 @@ function haagerup_H3_center()
     C
 end
 
+function numeric_unitary_center_H3()
+    path = joinpath(artifact"NumericUnitaryCenterH3", "NumericUnitaryCenterH3")
+    F_path = joinpath(path, "F_symbols.csv")
+    R_path = joinpath(path, "R_symbols.csv")
+
+    load_numeric_fusion_category(F_path,R_path)
+end
+
+
 function unitary_haagerup_H3()
     _,x = QQ[:x]
     K,a = number_field(1 + x^2 - x^4 + x^6 + x^8)

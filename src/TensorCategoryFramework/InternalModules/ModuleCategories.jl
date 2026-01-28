@@ -166,7 +166,9 @@ is_weak_fusion(C::BiModuleCategory) = is_weak_multifusion(C) &&
 is_multifusion(C::BiModuleCategory) = is_weak_multifusion(C) &&
                                     all(int_dim(End(s)) == 1 for s ∈ simples(C))
 
-is_fusion(C::BiModuleCategory) = is_multifusion(C) && int_dim(End(one(C))) == 1
+is_fusion(C::BiModuleCategory) = get_attribute!(C, :is_fusion) do 
+    is_multifusion(C) && int_dim(End(one(C))) == 1
+end
 
 function ==(M::ModuleCategory, N::ModuleCategory)
     typeof(M) != typeof(N) && return false

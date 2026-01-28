@@ -101,17 +101,17 @@ function six_j_symbols(C::Category, S = simples(C))
                 end
                 continue
             end
-            @show i,j,k
+            #@show i,j,k
             a = associator((S[[i,j,k]])...)
 
             for  l ∈ 1:N
                 #set trivial associators
                 
-                @show i,j,k,l
+                #@show i,j,k,l
                 # Build a basis for Hom((X⊗Y)⊗Z,W)
                 B_XY_Z_W = C_morphism_type[]
                 for n ∈ 1:N
-                    @show n
+                    #@show n
                     V = S[n]
 
                     H_XY_V = homs[i,j,n]
@@ -456,7 +456,7 @@ function with_gauge_freedom(C::SixJCategory)
     D.ass = [change_base_ring(L,m) for m in C.ass]
 
     # Bases for Hom spaces Hom(ij,k)
-    @show homs = [(i,j,k) => [popfirst!(g) * f for f ∈ basis(Hom(D[i]⊗D[j], D[k]))] for (i,j,k) ∈ Tuple.(non_trivial_indices)]
+    homs = [(i,j,k) => [popfirst!(g) * f for f ∈ basis(Hom(D[i]⊗D[j], D[k]))] for (i,j,k) ∈ Tuple.(non_trivial_indices)]
 
     return gauge_transform(D, Dict(homs))
 end
