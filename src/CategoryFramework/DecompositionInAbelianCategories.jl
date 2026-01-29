@@ -6,7 +6,7 @@
     methods to compute simple subobjects. 
 ----------------------------------------------------------=#
 
-function simple_subobjects(X::Object, E = End(X), is_simple = false, is_indecomposable = false)
+function simple_subobjects(X::Object, E = End(X), _is_simple = false, is_indecomposable = false)
     #=  Compute all simple subobjects in a tensor category
 
         The approach is the MeatAxe algorithm. 
@@ -26,7 +26,7 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false, is_indecomp
 
     #A simple algebra of squarefree dimension is a division algebra
 
-    if is_simple && is_squarefree(div(dim(E),dim(center(R)[1]))) 
+    if _is_simple && is_squarefree(div(dim(E),dim(center(R)[1]))) 
         return [X]
     end
 
@@ -35,7 +35,7 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false, is_indecomp
         if length(img) == int_dim(E)
             return img
         end
-        return vcat([simple_subobjects(i, End(i), is_simple, true) for i in img]...)
+        return vcat([simple_subobjects(i, End(i), _is_simple, true) for i in img]...)
     end
 
  
@@ -63,7 +63,7 @@ function simple_subobjects(X::Object, E = End(X), is_simple = false, is_indecomp
 
 
 
-    if is_squarefree(div(dim(E),dim(center(R)[1]))) && issimple(R)
+    if is_squarefree(div(dim(E),dim(center(R)[1]))) && is_simple(R)
         return [X]
     end
 

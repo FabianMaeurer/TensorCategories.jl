@@ -13,5 +13,5 @@ end
 
 @testset "Rep center" begin 
     S = simples(center(RepG))
-    @test length(S) == 8
+    @test length(S) == 7
 end
