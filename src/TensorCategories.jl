@@ -58,6 +58,7 @@ using InteractiveUtils
 using SparseArrays
 using Base.Threads
 using Artifacts, LazyArtifacts
+using Images
 
 
 export - 
@@ -135,6 +136,7 @@ export coherent_sheaves
 export cokernel 
 export complex_embedding
 export complex_embeddings
+export complex_matrix_to_hsv
 export compose 
 export composition_power
 export convolution_category 
@@ -325,6 +327,7 @@ export monoidal_structures
 export monoidal_functor
 export MonoidalFunctor
 export Morphism, morphism 
+export morphism_to_image
 export multiplication
 export multiplication_table 
 export multiplicity
@@ -341,6 +344,7 @@ export numeric_smatrix
 export numeric_symbols_to_csv 
 export numeric_symbols_from_csv
 export numeric_twists
+export numeric_unitary_center_H3
 export object 
 export object_type 
 export one 
@@ -504,6 +508,7 @@ include("Utility/QuantumIntegers.jl")
 include("Utility/Technicallities.jl")
 include("Utility/QQBarToNumberfield.jl")
 include("Utility/AcbMat.jl")
+include("Utility/Visualization.jl")
 
 
 include("Examples/GradedVectorSpaces/VectorSpaces.jl")

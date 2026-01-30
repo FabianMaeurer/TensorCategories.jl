@@ -54,7 +54,9 @@ function numeric_unitary_center_H3()
     F_path = joinpath(path, "F_symbols.csv")
     R_path = joinpath(path, "R_symbols.csv")
 
-    load_numeric_fusion_category(F_path,R_path)
+    Z = load_numeric_fusion_category(F_path,R_path)
+    set_simples_names!(Z, ["𝟙", "π₁", "π₂","σ₀", "σ₁", "σ₂", "μ₁", "μ₂", "μ₃", "μ₄", "μ₅", "μ₆"])
+    Z
 end
 
 

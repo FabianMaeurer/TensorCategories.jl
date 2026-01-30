@@ -5,12 +5,14 @@ authors = ["Fabian Mäurer"]
 
 [deps]
 Artifacts = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
+Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 LazyArtifacts = "4af54fe1-eca0-43a8-85a7-787d91b784e3"
 Oscar = "f1435218-dba5-11e9-1e4d-f1a5fab5fc13"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
+Images = "0.26.2"
 Oscar = "1.5"
 julia = "1.10,1.11,1.12"
 
