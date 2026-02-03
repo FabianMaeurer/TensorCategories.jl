@@ -541,17 +541,30 @@ end
     
 # end
 
-function anyonwiki_finite(n::Int)
-    r = anyonwiki_cyclotomic_root(n)
+function anyonwiki_finite(K::FqField,i,j,k,l,m,n,o)
+    C = anyonwiki(i,j,k,l,m,n,o)
 
-    f_symbol_string = readlines(joinpath(anyon_path, "cyclic_6j_Symbols/cat_$n.jl"))[4]
+    denom = lcm([isempty(m) ? ZZ(1) : lcm(denominator.(hcat(coefficients.(collect(m))[:]...))) for m ∈ C.ass][:])
 
-    ind = findall(r"\//\d+", f_symbol_string)
-    inverse = lcm([parse(Int, f_symbol_string[i[3:end]]) for i in ind])
+    gcd(denom, characteristic(K)) > 1 && error("Not able to define over $K")
 
-    K = finite_prime_field_with_root_of_unity(r, inverse + 1)
+    rs = roots(change_base_ring(K, minpoly(gen(base_ring(C)))))
 
-    anyonwiki_cyclotomic(n,K)
+    length(rs) == 0 && error("Not able to define over $K")
+    r = rs[1]
+    conv = x -> sum([K(numerator(c))//K(denominator(c)) * r^i for (i,c) in enumerate(coefficients(x)) ]) 
+
+    extension_of_scalars(C, K, embedding = conv)
+    # r = anyonwiki_cyclotomic_root(n)
+
+    # f_symbol_string = readlines(joinpath(anyon_path, "cyclic_6j_Symbols/cat_$n.jl"))[4]
+
+    # ind = findall(r"\//\d+", f_symbol_string)
+    # inverse = lcm([parse(Int, f_symbol_string[i[3:end]]) for i in ind])
+
+    # K = finite_prime_field_with_root_of_unity(r, inverse + 1)
+
+    # anyonwiki_cyclotomic(n,K)
 end
 
 function multiplication_table_from_F_symbols(ass::Array{<:MatElem,4})
@@ -771,7 +784,7 @@ function fusion_ring_name(m::Array{Int,3})
             for i ∈ p3, j ∈ p3, k ∈ p3 
                 val = val * "$(m[i,j,k])"
             end
-            @show val
+
             push!(signatures, parse(ZZRingElem, val, base))
         end
     end

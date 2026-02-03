@@ -34,7 +34,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     number_of_rows, number_of_columns, is_squarefree, is_commutative,
     gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra,
     radical, is_zero, minimal_submodules, representation_matrix, QQBarField,
-    is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module, perm, fraction_field, simplify, CalciumField, CalciumFieldElem, FracFieldElem, PadicField, PadicFieldElem, root, AcbMatrix,
+    is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module, perm, fraction_field, simplify, CalciumField, CalciumFieldElem, FracFieldElem, PadicField, PadicFieldElem, root, AcbMatrix, FqField,
     QadicField, QadicFieldElem, FlintLocalField, FlintLocalFieldElem,
     MultTableGroup, is_isomorphic_with_map, subgroup_classes, representative,
     pc_group, permutation_group, @req, is_constant, automorphism_group, ComplexField,
@@ -58,7 +58,8 @@ using InteractiveUtils
 using SparseArrays
 using Base.Threads
 using Artifacts, LazyArtifacts
-using Images
+
+import Images: HSV
 
 
 export - 
@@ -356,7 +357,7 @@ export orbit_index
 export orbit_stabilizers 
 export orthogonal_basis
 export orthonormal_basis
-export orthonormalisation
+export orthonormalization
 export P_symbols
 export pairing 
 export parent 

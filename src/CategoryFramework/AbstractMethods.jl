@@ -212,7 +212,11 @@ function decompose_by_endomorphism_ring(X::Object, E = End(X))
     _images = [image(f)[1] for f ∈ idems]
 
     # Check for matrix algebras
-    images = hcat([simple_subobjects(i, End(i), true) for i ∈ _images]...)
+    images = if is_finite(base_ring(X))
+        _images
+    else
+        hcat([simple_subobjects(i, End(i), true) for i ∈ _images]...)
+    end
     
 
     tuples = Tuple{typeof(X), Int}[]
@@ -240,8 +244,11 @@ function decompose_over_qqbar(X::Object, E = End(X))
         end
         return [(X,1)]
     end
+    if int_dim(E) == 0 
+        return Tuple{typeof(X), Int}[] 
+    end
 
-    f = [f for f ∈ basis(E) if degree(minpoly(f)) > 1][1]
+    f = E[findfirst(f -> degree(minpoly(f)) > 1, basis(E))]
 
     K = collect(values(eigenvalues(f)))
 
@@ -386,9 +393,8 @@ function eigenvalues(f::Morphism)
     vals = if typeof(base_ring(f)) == AcbField 
             min_p = minpoly(f)
             F = base_ring(f)
-            m = minimum([Int(floor(minimum([a for a in Oscar.accuracy_bits.(collect(coefficients(min_p))) if a > 0], init = precision(F))/2)), Int(floor(precision(F)/ 2))])
+            m = minimum([Int(floor(minimum([a for a in Oscar.accuracy_bits.(collect(coefficients(min_p))) if a > 0], init = precision(F)))), Int(floor(precision(F)))])
             rs = roots(min_p, initial_prec = m)
-
             real_p = [real(r) for r in rs]
             imag_p = [imag(r) for r in rs]
             R = ArbField(precision(F))
@@ -821,21 +827,21 @@ function numeric(X::Union{Category,Object,Morphism}, precision::Int = 64)
     numeric(X,precision, precision)
 end
 
-function numeric(C::Category, precision, max_bits)
+function numeric(C::Category, precision = 64)
     K = base_ring(C)
     @assert typeof(K) <: Union{QQBarField, ArbField, AcbField} "This doesn't make sense here. Use 'extension_of_scalars'"
     CC = AcbField(max_bits)
     extension_of_scalars(C, CC, embedding = x -> qqbar_to_acb_with_error(x,precision,max_bits))
 end
 
-function numeric(X::Object, precision = 64, max_bits = precision*8)
+function numeric(X::Object, precision, max_bits)
     K = base_ring(X)
     @assert typeof(K) <: Union{QQBarField, ArbField, AcbField} "This doesn't make sense here. Use 'extension_of_scalars'"
     CC = AcbField(precision)
     extension_of_scalars(X, CC, embedding = x -> qqbar_to_acb_with_error(x,precision,max_bits))
 end
 
-function numeric(C::Morphism, precision = 64, max_bits = precision*8)
+function numeric(C::Morphism, precision, max_bits)
     K = base_ring(C)
     @assert typeof(K) <: Union{QQBarField, ArbField, AcbField} "This doesn't make sense here. Use 'extension_of_scalars'"
     CC = AcbField(precision)

@@ -115,6 +115,7 @@ function is_central_numeric(f::Morphism, X::CenterObject, Y::CenterObject)
     for (s,γ,δ) ∈ zip(S, half_braiding(X), half_braiding(Y))
         if !overlaps(matrix((id(s)⊗f) ∘ γ), matrix(δ ∘ (f ⊗ id(s))))
             # @show matrix((id(s)⊗f) ∘ γ)- matrix(δ ∘ (f ⊗ id(s)))
+            return matrix((id(s)⊗f) ∘ γ - δ ∘ (f ⊗ id(s)))
             return false
         end
     end

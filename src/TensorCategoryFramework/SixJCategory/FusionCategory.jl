@@ -559,9 +559,7 @@ end
 
 function tr(f::SixJMorphism)
     # Make use of the fact that the trace is invariant under basis transformation.
-
     return sum([left_trace(f[i]) for i ∈ 1:parent(f).simples])
-
 end
 
 """
@@ -672,6 +670,15 @@ function simple_objects_coev(X::SixJObject)
     unscaled_coev = basis(Hom(one(C), cod))[1]
 
     factor = F((id(X)⊗unscaled_ev)∘associator(X,DX,X)∘(unscaled_coev⊗id(X)))
+
+    # Delete close to zero part if inexact
+    if base_ring(C) isa Union{AcbField,ComplexField,ArbField}
+        if overlaps(F(real(factor)), zero(base_ring(C)))
+            factor = Fac(imag(factor))
+        elseif overlaps(F(imag(factor)), zero(base_ring(C)))
+            factor = F(real(factor))
+        end
+    end
 
     try 
         return inv(sqrt(factor)) * unscaled_coev
@@ -1011,8 +1018,11 @@ function kernel(f::SixJMorphism)
     kernels = [kernel(m, side = :left) for m ∈ f.m]
     
     ker = SixJObject(C,[number_of_rows(k) for k ∈ kernels])
-
-    return ker, morphism(ker, domain(f), [m for m ∈ kernels])
+    k = morphism(ker, domain(f), [m for m ∈ kernels])
+    if is_unitary(C)
+        k = orthonormalization(k)
+    end
+    return ker, k
 end
 
 function cokernel(f::SixJMorphism)
@@ -1021,13 +1031,17 @@ function cokernel(f::SixJMorphism)
     cokernels = [kernel(m, side = :right) for m ∈ f.m]
     
     coker = SixJObject(C,[number_of_columns(k) for k ∈ cokernels])
+    c = morphism(codomain(f),coker, [m for m ∈ cokernels])
 
-    return coker, morphism(codomain(f),coker, [m for m ∈ cokernels])
+    if is_unitary(C)
+        c = orthonormalization(c)
+    end
+    return coker, c
 end
 
 
 function left_inverse(f::SixJMorphism)
-     inverses = [left_inverse(morphism(m)) for m ∈ matrices(f)]
+    inverses = [left_inverse(morphism(m)) for m ∈ matrices(f)]
     mats = [matrix(m) for m ∈ inverses]
     return morphism(codomain(f), domain(f), mats)
 end
@@ -1141,7 +1155,7 @@ function extension_of_scalars(C::SixJCategory, L::Ring; embedding = embedding(ba
             D.one = C.one
         end
         if isdefined(C, :pivotal)
-            D.pivotal = embedding.(C.pivotal)
+            D.pivotal = L.(embedding.(C.pivotal))
         end
         if  isdefined(C, :braiding)
             D.braiding = [matrix(L, size(a)..., embedding.(collect(a))) for a ∈ C.braiding]
@@ -1609,7 +1623,7 @@ function numeric(C::SixJCategory, precision, max_bits)
     K = base_ring(C)
     CC = AcbField(max_bits)
     if !(typeof(K) <: Union{QQBarField, ArbField, AcbField})
-        return extension_of_scalars(complex_embedding(C), CC, embedding = x -> qqbar_to_acb_with_error(x,precision,max_bits))
+        return extension_of_scalars(C, CC, embedding = x -> CC(C.embedding(x, max_bits)))
     end
     extension_of_scalars(C, CC, embedding = x -> qqbar_to_acb_with_error(x,precision,max_bits))
 end

@@ -111,7 +111,7 @@ function complex_lindep(M::Matrix{AcbFieldElem}, m::Int)
         return complex_lindep(M, m - 2)
     end
     n = div(length(coeffs), 2)
-
+  
     #normalise 
     coeffs = coeffs[1:n] .+ F(im) .* coeffs[n+1:end]
 
@@ -130,7 +130,8 @@ function complex_lindep(M::Matrix{AcbFieldElem}, m::Int)
     end
     
     err = maximum(abs.([sum(c * m for (c,m) in zip(coeffs,mm)) for mm in eachrow(M)]))
-    if abs(err) > 10^(-8)
+
+    if abs(err) > 10^(-m/10)
         i = findfirst(!=(0), coeffs)
         return insert!(complex_lindep(M[:, setdiff(1:n, i)], m), i, F(0))
     end

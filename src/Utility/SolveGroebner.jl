@@ -23,7 +23,7 @@ function recover_solutions(p::Tuple, K::Field, var_order, deg = -1; splitting_in
         end
     end
   
-    if length(p.lf_cfs) == 0
+    if length(p.cfs_lf) == 0
         perm = indexin(var_order, p.vars)
         for r ∈ rs
             solutions = [solutions; Tuple([[K(vi(r)*inv(g(r))) for vi ∈ v];K(r)])[perm]]

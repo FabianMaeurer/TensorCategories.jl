@@ -71,7 +71,7 @@ function relative_induction(X::Object, ind_simples::Vector{<:Object}, simples::V
         # factor out such that the left and right tensor product coincide.
         r = direct_sum([horizontal_direct_sum([image(f⊗id(X)⊗id(dual(b)) - id(b)⊗id(X)⊗dual(f))[2] for f in End(b)]) for b in simples])
 
-        @show Z,r = cokernel(r)
+        Z,r = cokernel(r)
         ir = right_inverse(r)
 
         γ = [(id(b)⊗r) ∘ γᵢ ∘ (ir ⊗ id(b)) for (γᵢ,b) ∈ zip(γ, simples)]

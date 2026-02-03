@@ -103,6 +103,9 @@ function morphism(X::T, Y::T, m::Morphism) where T <: ModuleObject
     ModuleMorphism(X,Y,m)
 end
 
+object_type(M::BiModuleCategory) = BiModuleObject
+object_type(M::LeftModuleCategory) = LeftModuleObject
+object_type(M::RightModuleCategory) = RightModuleObject
 
 #=----------------------------------------------------------
     Getter/Setter 
@@ -951,6 +954,12 @@ function spherical(M::BiModuleObject)
     morphism(M, ddM, spherical(object(M)))
 end
 
+function spherical(M::RightModuleObject)
+    !is_commutative(algebra(parent(M))) && error("Algebra must be commutative to define spherical structure on right module")
+    ddM = dual(dual(M))
+    morphism(M, ddM, spherical(object(M)))
+end
+
 function tr(f::ModuleMorphism{BiModuleObject}) 
     C = parent(f)
     A,B = left_algebra(C), right_algebra(C)
@@ -1641,7 +1650,7 @@ end
     Skelelization    
 ----------------------------------------------------------=#
 
-function multiplicity_spaces(M::BiModuleCategory)
+function multiplicity_spaces(M::T) where T <: ModuleCategory
     get_attribute!(M, :multiplicity_spaces) do 
         S = simples(M)
         r = length(S)

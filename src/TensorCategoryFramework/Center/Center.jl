@@ -52,7 +52,7 @@ function isequal_without_parent(X::CenterObject, Y::CenterObject)
 end
 
 is_multifusion(C::CenterCategory) = is_multifusion(category(C))
-
+is_semisimple(C::CenterCategory) = dim(category(C)) != 0 && is_semisimple(category(C))
 is_modular(C::CenterCategory) = is_fusion(category(C)) 
 is_braided(C::CenterCategory) = true
 is_rigid(C::CenterCategory) = is_rigid(category(C))
@@ -118,8 +118,15 @@ Return the image under the forgetful functor.
 morphism(f::CenterMorphism) = f.m
 
 is_weakly_fusion(C::CenterCategory) = dim(category(C)) != 0
-is_fusion(C::CenterCategory) = get_attribute!(C, :is_fusion) do 
-    dim(category(C)) != 0 && dim(C) == sum(squared_norm(object(x)) for x ∈ simples(C))
+function is_fusion(C::CenterCategory) 
+    get_attribute!(C, :is_fusion) do 
+        dim(category(C)) == 0 && return false 
+        if base_ring(C) isa Union{ArbField,AcbField} 
+            overlaps(dim(C), sum(squared_norm(object(x)) for x ∈ simples(C)))
+        else
+            dim(C) == sum(squared_norm(object(x)) for x ∈ simples(C))
+        end
+    end
 end
 is_abelian(C::CenterCategory) = true
 is_linear(C::CenterCategory) = true
@@ -693,6 +700,18 @@ function decompose(X::CenterObject, S::Vector{CenterObject})
     decompose_by_simples(X,S)
 end
 
+function simple_subobjects(X::CenterObject, E = End(X))
+    if is_semisimple(parent(X))
+       return simple_subobjects_semisimple(X,E)
+    end 
+
+    r = endomorphism_ring(X,E)
+    m = regular_module(r)
+    m.action_of_gens = representation_matrix.(gens(r))
+    fi = [sum(collect(s)[1,:] .* basis(E)) for s in minimal_submodules(m)]
+    [x for (x,_) ∈ image.(fi)]
+end
+
 # function indecomposable_subobjects(X::CenterObject)
 
 #     !is_split_semisimple(category(parent(X))) && return _indecomposable_subobjects(X)
@@ -899,7 +918,7 @@ function kernel(f::CenterMorphism)
     C = parent(f)
 
     if is_unitary(category(C))
-        incl = orthonormalisation(incl)
+        incl = orthonormalization(incl)
     end
     
     pull_back_half_braiding(domain(f), incl)
@@ -935,7 +954,7 @@ function cokernel(f::CenterMorphism)
     #f_inv = right_inverse(proj)
 
     if is_unitary(category(parent(f)))
-        proj = dagger(orthonormalisation(dagger(proj)))
+        proj = dagger(orthonormalization(dagger(proj)))
         global inv_proj = dagger(proj)
     else
         global inv_proj = right_inverse(proj)
@@ -956,7 +975,7 @@ function image(f::CenterMorphism)
     I, incl = image(f.m)
 
     if is_unitary(category(parent(f)))
-        incl = orthonormalisation(incl)
+        incl = orthonormalization(incl)
         inv_incl = dagger(incl)
     else
         inv_incl = left_inverse(incl)
@@ -1012,7 +1031,7 @@ function Hom(X::CenterObject, Y::CenterObject)
         return hom_by_linear_equations(X,Y)
     end
 
-    if is_zero(dim(category(parent(X)))) || typeof(base_ring(X)) <: Union{AcbField, ArbField}
+    if is_zero(dim(category(parent(X)))) #|| typeof(base_ring(X)) <: Union{AcbField, ArbField}
         return hom_by_linear_equations(X,Y)
     else 
         return hom_by_adjunction(X,Y)
@@ -1070,7 +1089,6 @@ function multiplicity_spaces(C::CenterCategory)
 
         Threads.@threads for (i,S) ∈ collect(indexed_simples)
             for (j,T) ∈ indexed_simples
-                @show i,j
                 ST = S ⊗ T
                 for  (k,V) ∈ indexed_simples
                     if m[i,j,k] == 0 
@@ -1162,11 +1180,16 @@ function simples_by_induction!(C::CenterCategory, log = true)
 
         if dim(category(C)) != 0 && !is_unitary(category(C))
             #Test which simples in S are included
-            multiplicities = K == QQBarField() || typeof(K) == CalciumField ? [int_dim(Hom(object(t),s)) for t ∈ S] : [div(int_dim(Hom(object(t),s)), int_dim(End(t))) for t ∈ S]
+            multiplicities = K == QQBarField() || typeof(K) <: Union{CalciumField,AcbField,ComplexField} ? [int_dim(Hom(object(t),s)) for t ∈ S] : [div(int_dim(Hom(object(t),s)), int_dim(End(t))) for t ∈ S]
 
             S_in_Z = [(t, k) for (t,k) ∈ zip(S, multiplicities) if k != 0]
 
             if !isempty(S_in_Z) && sum([fpdim(t)*k for (t,k) ∈ S_in_Z]) == fpdim(Is)
+                push!(remove_gens, s)
+                continue
+            end
+
+            if typeof(K) <: Union{CalciumField,AcbField,ComplexField} && !isempty(S_in_Z) && overlaps(sum([fpdim(t)*k for (t,k) ∈ S_in_Z]), fpdim(Is))
                 push!(remove_gens, s)
                 continue
             end
@@ -1179,13 +1202,12 @@ function simples_by_induction!(C::CenterCategory, log = true)
 
             incl_basis = vcat([basis(induction_right_adjunction(Hom(object(t),s), t, Z)) for (t,_) ∈ S_in_Z]...)
 
-
             incl = horizontal_direct_sum(incl_basis)
 
             Q, proj = cokernel(incl)
-
-            H = induction_right_adjunction(Hom(object(Q), s), Q, Z)
             
+            H = induction_right_adjunction(Hom(object(Q), s), Q, Z)
+   
             H = HomSpace(Q,Q, [proj ∘ f for f ∈ basis(H)])
 
             Z = Q
@@ -1547,7 +1569,7 @@ function hom_by_linear_equations(X::CenterObject, Y::CenterObject, ind = 1:rank(
     for (i,e) ∈ zip(1:length(eqs),eqs)
         M[i,:] = [coeff(e, a) for a ∈ poly_basis]
     end
-    
+    M
     # If Basering is numeric field, we need to be careful 
     # if typeof(F) <: Union{ArbField, ComplexField, AcbField}
     #     basically_zero = findall(a -> overlaps(a, F(0)), M)

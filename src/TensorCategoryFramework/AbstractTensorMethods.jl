@@ -630,7 +630,7 @@ function dagger(H::AbstractHomSpace)
     HomSpace(codomain(H), domain(H), dagger.(basis(H)))
 end
 
-function orthonormalisation(f::Morphism)
+function orthonormalization(f::Morphism)
     f == 0 && return f
 
     dom = domain(f)

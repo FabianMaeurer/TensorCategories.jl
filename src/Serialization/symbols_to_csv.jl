@@ -37,6 +37,7 @@ function numeric_symbols_from_csv(file::String, K::Field = AcbField(64); delimit
 end
 
 function load_numeric_fusion_category(F::String, K::AcbField = AcbField(64); delimiter = ", ", transpose = false)
+
     F = numeric_symbols_from_csv(F, K, delimiter = delimiter)
 
     ass = dict_to_associator(F)

@@ -341,17 +341,33 @@ is_invertible(f::VectorSpaceMorphism) = rank(f.m) == int_dim(domain(f)) == int_d
 
 function left_inverse(f::VectorSpaceMorphism)
     k = matrix(f)
-    d = rank(k)
+   
+    if isempty(matrix(f))
+        return zero_morphism(codomain(f),domain(f))
+    end
+
     F = base_ring(f)
-    
+
+    if typeof(F) <: Union{AcbField, ComplexField, ArbField}
+        cat = dagger(f) ∘ f 
+        return  inv(cat) ∘ dagger(f)
+    end
+    d = rank(k)
     k_inv = transpose(solve(transpose(k), one(matrix_space(F,d,d))))
     return morphism(codomain(f), domain(f), k_inv)
 end
 
 function right_inverse(f::VectorSpaceMorphism)
     k = matrix(f)
-    d = rank(k)
     F = base_ring(f)
+
+    if typeof(F) <: Union{AcbField, ComplexField, ArbField}
+        cat = f ∘ dagger(f) 
+        return  dagger(f) ∘ inv(cat)
+    end
+
+    d = rank(k)
+
     c_inv = solve(k, one(matrix_space(F,d,d)))
     return morphism(codomain(f),domain(f), c_inv)
 end
@@ -362,6 +378,10 @@ end
 
 function extension_of_scalars(V::VectorSpaceObject, K::Ring; parent::VectorSpaces = parent(V) ⊗ K)
     VSObject(basis(V), parent)
+end
+
+function dagger(f::VectorSpaceMorphism)
+    return morphism(codomain(f), domain(f), transpose(conj.(matrix(f))))
 end
 #---------------------------------------------------------------------------
 #   Associators

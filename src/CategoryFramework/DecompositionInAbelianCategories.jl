@@ -7,10 +7,24 @@
 ----------------------------------------------------------=#
 
 function simple_subobjects(X::Object, E = End(X), _is_simple = false, is_indecomposable = false)
+    #=  Compute all simple subobjects in an abelian category
+
+        The approach is the MeatAxe algorithm. 
+    =#
+
+    if is_semisimple(parent(X))
+        return simple_subobjects_semisimple(X,E,_is_simple,is_indecomposable)
+    end
+
+    error("Not implemented for non-semisimple categories yet.")
+end
+
+function simple_subobjects_semisimple(X::Object, E = End(X), _is_simple = false, is_indecomposable = false)
     #=  Compute all simple subobjects in a tensor category
 
         The approach is the MeatAxe algorithm. 
     =#
+
     # Over QQBar it's easier
     K = base_ring(X)
     if K == QQBarField() || typeof(K) <: Union{CalciumField, PadicField,QadicField, AcbField}
@@ -30,7 +44,7 @@ function simple_subobjects(X::Object, E = End(X), _is_simple = false, is_indecom
         return [X]
     end
 
-    if !is_indecomposable #&& is_semisimple(endomorphism_ring(X,E))
+    if !is_indecomposable
         img = [image(i)[1] for i ∈ central_primitive_idempotents(E)]
         if length(img) == int_dim(E)
             return img

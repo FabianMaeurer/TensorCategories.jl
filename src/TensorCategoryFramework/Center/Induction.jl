@@ -215,7 +215,7 @@ function induction_right_adjunction(H::AbstractHomSpace, Y::CenterObject, IX = i
     dims = if is_unitary(C)
         sqrt.(dim.(simples(C)))
     else
-        right_dim.(simples(C))
+        #right_dim.(simples(C))
         [1 for _ in simples(C)]
     end
 

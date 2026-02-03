@@ -227,9 +227,9 @@ end
 
 function is_braided(C::Category)
     if hasfield(typeof(C), :__attrs) 
-        return get_attribute!(C, :spherical) do
+        return get_attribute!(C, :is_braided) do
             T = object_type(C)
-            is_monoidal(C) && hasmethod(braiding, Tuple{T,T})
+            hasmethod(braiding, Tuple{T,T})
         end
     end
     T = object_type(C)

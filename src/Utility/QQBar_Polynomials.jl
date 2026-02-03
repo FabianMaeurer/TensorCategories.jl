@@ -140,7 +140,7 @@ function rational_lift(I::MPolyIdeal)
     end
 
     if K == QQ 
-        return I
+        return I,[]
     end
 
     G = [g for g ∈ groebner_basis(I) if g != 0]

@@ -11,7 +11,6 @@ mutable struct AdditiveNaturalTransformation <: NaturalTransformation
 end
 
 function AdditiveNaturalTransformation(F::AbstractFunctor, G::AbstractFunctor, indecs::Vector{<:Object}, maps::Vector{<:Pair})
-    @show [x ∈ keys(maps) for x in indecs]
     maps = [x ∈ keys(maps) ? maps[x] : zero_morphism(F(x),G(x)) for x ∈ indecs]
     AdditiveNaturalTransformation(F,G,indecs,maps)
 end

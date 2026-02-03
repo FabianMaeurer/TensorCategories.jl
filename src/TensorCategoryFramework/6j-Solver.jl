@@ -129,7 +129,7 @@ function _solve_fewnomial_system(I::Ideal, i::Int = 1)
     Bi = B[degree.(B,i) .> 0]
     Ci = filter(r -> r ∉ Bi, B)
     f = popfirst!(Bi)
-    @show Bi = resultant.(f,Bi,i)
+    Bi = resultant.(f,Bi,i)
     unique!(Bi)
     filter!(r -> r ≠ 0, Bi)
 
