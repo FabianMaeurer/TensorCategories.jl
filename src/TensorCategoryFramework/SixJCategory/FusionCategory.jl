@@ -1034,7 +1034,7 @@ function cokernel(f::SixJMorphism)
     c = morphism(codomain(f),coker, [m for m ∈ cokernels])
 
     if is_unitary(C)
-        c = orthonormalization(c)
+        c = dagger(orthonormalization(dagger(c)))
     end
     return coker, c
 end
@@ -1169,6 +1169,25 @@ function extension_of_scalars(C::SixJCategory, L::Ring; embedding = embedding(ba
     catch 
         error("Extension of scalars not possible")
     end
+end
+
+function extension_of_scalars(C::SixJCategory, K::FqField)
+    denom = lcm([isempty(m) ? ZZ(1) : lcm(denominator.(hcat(coefficients.(collect(m))[:]...))) for m ∈ C.ass][:])
+
+    gcd(denom, characteristic(K)) > 1 && error("Not able to define over $K. $denom is not coprime to $(characteristic(K))")
+
+    rs = roots(change_base_ring(K, minpoly(gen(base_ring(C)))))
+
+    length(rs) == 0 && error("Not able to define over $K. \n Minpoly has no roots: $(minpoly(gen(base_ring(C)))) \n Denomitator is $(denom)")
+    
+    conv = [x -> sum([K(numerator(c))//K(denominator(c)) * r^(i-1) for (i,c) in enumerate(coefficients(x)) ]) for r ∈ rs]
+
+    for c ∈ conv 
+        F = extension_of_scalars(C, K, embedding = c)
+        pentagon_axiom(F) && return F
+    end
+
+    error("Not able to define over $K.")
 end
 
 @doc raw""" 
@@ -1325,7 +1344,14 @@ end
 
 function is_unitary(C::SixJCategory)
     get_attribute!(C, :is_unitary) do 
-        !(base_ring(C) isa Union{QQBarField, AcbField, CalciumField}) && return false
+        if (base_ring(C) isa AbsSimpleNumField) 
+            !is_normal(base_ring(C)) && return false
+            !all(is_square(dim(a)) for a ∈ simples(C)) && return false
+        elseif base_ring(C) isa RelSimpleNumField
+            return false
+        elseif (base_ring(C) isa FqField)
+            return false 
+        end
         for x ∈ simples(C), y ∈ simples(C), z ∈ simples(C) 
             !is_unitary(associator(x,y,z)) && return false 
         end 

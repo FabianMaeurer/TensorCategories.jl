@@ -14,7 +14,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     polynomial_ring, QQ, QQBarField, QQField, QQFieldElem, QQMPolyRingElem, Ring, RingElem, ZZ, QQBarFieldElem,
     ZZRingElem, abelian_closure, abelian_group, absolute_simple_field, action, base_field, defining_polynomial,
     base_ring, basis, central_primitive_idempotents, change_base_ring, 
-     characteristic, NumField, rational_solutions, twist, twists,
+     characteristic, NumField, rational_solutions, twist, twists, 
     charpoly, codomain, coeff, coefficients, cokernel, complex_embeddings, compose, centralizer, embedding, complex_embedding,
     cyclotomic_field, decompose, degree, det, diagonal_matrix, dim, direct_sum, divisors, set_name!, coordinates,
     domain, dual, eigenspace, eigenspaces, eigenvalues, elem_type, elements, exponent, lift, prime_field, absolute_coordinates,
@@ -28,10 +28,10 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     leading_monomial, left_transversal, lex, load, matrix, matrix_algebra, minpoly, quo,
     monomials, multiplication_table, multiplicity, nullspace, nvars, one, orbit,
     orbits, order, parent, permutation_matrix, preimage, primary_decomposition, product, rank, real_solutions, resultant, root_of_unity, roots, rref, save,
-    set_attribute!, size, solve, sparse_matrix, splitting_field,
+    set_attribute!, size, solve, sparse_matrix, splitting_field, is_normal,
     stabilizer, sub, subst, symbols, symmetric_group, tensor_power, tensor_product, tr, absolute_degree,
     trivial_subgroup, unit, zero, zero_matrix, ∘, ⊕, ⊗, AbsSimpleNumField,
-    number_of_rows, number_of_columns, is_squarefree, is_commutative,
+    number_of_rows, number_of_columns, is_squarefree, is_commutative, pullback,
     gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra,
     radical, is_zero, minimal_submodules, representation_matrix, QQBarField,
     is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module, perm, fraction_field, simplify, CalciumField, CalciumFieldElem, FracFieldElem, PadicField, PadicFieldElem, root, AcbMatrix, FqField,
@@ -88,6 +88,7 @@ export AlgebraMorphism
 export anyonwiki
 export anyonwiki_center
 export anyonwiki_center_meta
+export anyonwiki_finite
 export anyonwiki_keys
 export ArrowCategory
 export ArrowObject
@@ -470,7 +471,7 @@ export twisted_graded_vector_spaces
 export twisted_group_algebra
 export unit
 export unitary_cocycle
-export unitary_haagerup_H3
+export unitary_haagerup_H2
 export sl2_representations
 export VectorSpaceMorphism 
 export VectorSpaceObject 

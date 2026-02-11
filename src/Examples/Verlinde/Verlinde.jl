@@ -99,17 +99,17 @@ Return the Verlinde category specialized at a ``m``th rooth of unity.
 """
 function verlinde_category(K::Ring, m::Int, l::Int = 1, t::Int = 1)
 	#K=Oscar.QQBarField()
-	z = root_of_unity(K, 2*m+2)
-   	q = quantum(z^l+z^-l, 2*m+2)
+	z = root_of_unity(K, 2*m+4)
+   	q = quantum(z^l+z^-l, 2*m+4)
 	
    	#println(q)
 
-   	M = verlindefusionmultmatrix(m)
-   	C = six_j_category(K, ["X$i" for i in 0:m-1])
+   	M = verlindefusionmultmatrix(m+1)
+   	C = six_j_category(K, ["X$i" for i in 0:m])
    	set_tensor_product!(C, M)
-	C.ass = Array{MatElem}(undef,m,m,m,m)
+	C.ass = Array{MatElem}(undef,m+1,m+1,m+1,m+1)
 
-	a = (i,j,k,l) -> verlinde_six_j_symbol(K,q,i,j,k,l,m)
+	a = (i,j,k,l) -> verlinde_six_j_symbol(K,q,i,j,k,l,m+1)
 	set_attribute!(C, :six_j_symbol, a)
 
    	# for lx in 0:m-1,  ly in 0:m-1,  lz in 0:m-1,  lw in 0:m-1
@@ -125,10 +125,10 @@ function verlinde_category(K::Ring, m::Int, l::Int = 1, t::Int = 1)
 	has_braiding = K == QQBarField() || typeof(K) == CalciumField || is_square(z)
 	if has_braiding
 		zz = sqrt(z)
-		braid = Array{MatElem, 3}(undef,  m, m, m) #slight mistake,  need to check formulas again
+		braid = Array{MatElem, 3}(undef,  m+1, m+1, m+1) #slight mistake,  need to check formulas again
 		set_braiding!(C, braid)
 
-		b = (i,j,k) -> verlinde_r_symbol(K,i,j,k,m,zz,t)
+		b = (i,j,k) -> verlinde_r_symbol(K,i,j,k,m+1,zz,t)
 		set_attribute!(C, :r_symbol, b)
 		# for a in 0:m-1
 		# 	for b in 0:m-1
@@ -151,7 +151,7 @@ function verlinde_category(K::Ring, m::Int, l::Int = 1, t::Int = 1)
 
 
 
-   	set_one!(C,  [mod(i, m) == 1 ? 1 : 0 for i ∈ 1:m])
+   	set_one!(C,  [mod(i, m+1) == 1 ? 1 : 0 for i ∈ 1:m+1])
 	if has_braiding 
 	   	set_name!(C,  "Verlinde Category $m with associator $l and braiding $t")
 	else
@@ -188,4 +188,4 @@ end
 
 Return the Verlinde category specialized at a ``m``th rooth of unity.
 """
-verlinde_category(m::Int, l::Int = 1, k::Int = 1) = verlinde_category(cyclotomic_field(4*m+4)[1],m, l, k)
+verlinde_category(m::Int, l::Int = 1, k::Int = 1) = verlinde_category(cyclotomic_field(4*m+8)[1],m, l, k)

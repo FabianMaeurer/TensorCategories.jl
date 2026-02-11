@@ -173,6 +173,8 @@ is_fusion(C::BiModuleCategory) = get_attribute!(C, :is_fusion) do
     is_multifusion(C) && int_dim(End(one(C))) == 1
 end
 
+is_unitary(C::ModuleCategory) = is_unitary(category(C))
+
 function ==(M::ModuleCategory, N::ModuleCategory)
     typeof(M) != typeof(N) && return false
 
@@ -618,7 +620,6 @@ function _tensor_product(M::RightModuleObject, N::LeftModuleObject)
         p ⊗ id(object(N)),
         (id(object(M)) ⊗ q) ∘ associator(object(M), object(A), object(N))
     )
-
     return C,c
 end
 
@@ -1656,7 +1657,7 @@ function multiplicity_spaces(M::T) where T <: ModuleCategory
         r = length(S)
 
         mult_spaces = []
-
+        _unitary = is_unitary(M)
         for i ∈ 1:r, j ∈ 1:r 
             XY = S[i] ⊗ S[j]
             for k ∈ 1:r
@@ -1665,6 +1666,9 @@ function multiplicity_spaces(M::T) where T <: ModuleCategory
                 end
                 H = Hom(XY, S[k])
                 if int_dim(H) > 0
+                    if _unitary
+                        H = HomSpace(domain(H),codomain(H), orthonormal_basis(H))
+                    end
                     push!(mult_spaces, (i,j,k) => H)
                 end
             end
@@ -1777,6 +1781,14 @@ end
 
 #     return ass           
 # end
+
+function dagger(f::ModuleMorphism)
+    morphism(codomain(f), domain(f), dagger(morphism(f)))
+end
+
+function inner_product(f::ModuleMorphism, g::ModuleMorphism)
+    inner_product(morphism(f), morphism(g))
+end
 
 #=----------------------------------------------------------
     Pretty printing

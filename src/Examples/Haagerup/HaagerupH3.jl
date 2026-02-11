@@ -61,7 +61,7 @@ function numeric_unitary_center_H3(acc::Int = 64)
 end
 
 
-function unitary_haagerup_H3()
+function unitary_haagerup_H2()
     _,x = QQ[:x]
     K,a = number_field(1 + x^2 - x^4 + x^6 + x^8)
 
@@ -77,7 +77,7 @@ function unitary_haagerup_H3()
     set_associator!(H, transpose.(ass_mats))
     set_pivotal!(H, K.([1,1,1,1,1,1]))
     set_one!(H, [1,0,0,0,0,0])
-    set_name!(H, "Fusion category ℋ₃")
+    set_name!(H, "Fusion category ℋ₂")
     H.embedding = complex_embedding(K, AcbField()(-0.908677010511985310037597243 + 0.41749980906223339057410 * im))
     H
 end

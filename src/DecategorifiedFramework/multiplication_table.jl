@@ -53,8 +53,10 @@ Print the multiplication table of C.
 """
 function print_multiplication_table(C::Category; names = true)
     if is_semisimple(C) 
-        if names 
+        if names === true
             print_multiplication_table(multiplication_table(C), simples_names(C))
+        elseif names isa Vector{String}
+            print_multiplication_table(multiplication_table(C), names)
         else
             print_multiplication_table(multiplication_table(C))
         end

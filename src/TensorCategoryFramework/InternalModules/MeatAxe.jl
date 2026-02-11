@@ -96,15 +96,19 @@ function meataxe(M::RightModuleObject, incl::Vector{T}, proj::Vector{T}) where T
         polys = sort(polys, by = degree)
         for p ∈ polys 
             p(θ) == 0 && continue 
-            ξ = p(θ)
-
+            ξ = p(θ)  
+            @show rank(matrix(ξ))
             action_of_a = compose(
                 id(object(M)) ⊗ ξ,
                 right_action(M)
             )
+            action_of_a = compose(
+                id(object(M)) ⊗ image(ξ)[2],
+                right_action(M)
+            )
 
             kernel_of_a, kernel_inclusion = kernel(action_of_a)
-            
+            @show int_dim(Hom(kernel_of_a, object(M)))
             if !is_zero(int_dim(Hom(kernel_of_a, object(M))))
                 kernel_non_zero = true
                 break
@@ -129,14 +133,14 @@ function meataxe(M::RightModuleObject, incl::Vector{T}, proj::Vector{T}) where T
     # end
 
     for f ∈ basis(Hom(kernel_of_a, object(M)))
-        N, inclusion = spin_submodule(M,f)
+        N, inclusion = spin_submodule(M,image(f)[2])
         if !is_invertible(inclusion) && int_dim(End(N)) != 0
             return (false, N, morphism(N,M,inclusion))
         end 
     end
 
     f = Hom(dual(kernel_of_a), dual(object(M)))[1]
-    N, inclusion = spin_submodule(transposed_module(M), f) 
+    N, inclusion = spin_submodule(transposed_module(M), image(f)[2]) 
     
     if !is_invertible(inclusion) && int_dim(End(N)) != 0
         N = transposed_module(N)

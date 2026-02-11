@@ -26,8 +26,8 @@ function pivotal_structures(C::SixJCategory)
 
         append!(eqs, filter!(!=(0), collect(matrix(eq))[:]))
     end
-
-    sols = real_solutions_over_base_field(ideal(eqs))
+    
+    sols = real_solutions_over_base_field(ideal(collect(groebner_basis(ideal(eqs)))))
 
     return [[p(s...) for p ∈ piv] for s ∈ sols]
 end

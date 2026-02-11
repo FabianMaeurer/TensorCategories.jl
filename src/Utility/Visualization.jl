@@ -23,3 +23,10 @@ end
 function morphism_to_image(f::Morphism)
     complex_matrix_to_hsv(matrix(f))
 end
+
+function finite_field_matrix_to_hsv(M::MatElem)
+    n = Int(order(base_ring(M)))
+    elems = collect(base_ring(M))
+    color_map = Dict([x => HSV(360*i/n,1,1) for (i,x) ∈ enumerate(elems)])
+    [color_map[x] for x ∈ M]
+end

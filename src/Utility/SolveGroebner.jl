@@ -59,6 +59,7 @@ function real_solutions_over_base_field(I::MPolyIdeal; splitting_info = true)
     G = gens(I)
 
     if is_finite(K) 
+        dim(I) < 0 && return NTuple{length(gens(base_ring(I))),elem_type(K)}[]
         R = base_ring(I)
         d = dim(R) 
         elems_K = collect(K)

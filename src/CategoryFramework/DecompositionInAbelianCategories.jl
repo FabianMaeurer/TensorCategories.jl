@@ -44,7 +44,8 @@ function simple_subobjects_semisimple(X::Object, E = End(X), _is_simple = false,
         return [X]
     end
 
-    if !is_indecomposable
+    if #= !(K isa FinField) &&=# !is_indecomposable 
+        
         img = [image(i)[1] for i ∈ central_primitive_idempotents(E)]
         if length(img) == int_dim(E)
             return img

@@ -58,6 +58,8 @@ is_braided(C::CenterCategory) = true
 is_rigid(C::CenterCategory) = is_rigid(category(C))
 is_ring(C::CenterCategory) = is_ring(category(C))
 
+dim(C::CenterCategory) = dim(category(C))^2
+
 function induction_generators(C::CenterCategory) 
     if isdefined(C, :induction_gens)
         return C.induction_gens
@@ -1640,8 +1642,16 @@ inner_product(f::CenterMorphism, g::CenterMorphism) = inner_product(morphism(f),
     extension_of_scalars 
 ----------------------------------------------------------=#    
 
-function extension_of_scalars(C::CenterCategory, L::Field; embedding = is_subfield(base_ring(C), L)[2])
 
+function extension_of_scalars(C::CenterCategory, L::Field; embedding = nothing)
+    K = base_ring(C)
+    if embedding === nothing 
+        if typeof(K) == typeof(L)
+            embedding = is_subfield(base_ring(C), L)[2]
+        else
+            embedding = L 
+        end
+    end
     CL = _extension_of_scalars(C,L, extension_of_scalars(category(C), L, embedding = embedding))
 
     S = simples(C)
@@ -1779,7 +1789,7 @@ end
 function multiplication_table(C::CenterCategory)
     get_attribute!(C, :multiplication_table) do
 
-        if characteristic(base_ring(C)) > 0 || !is_split_semisimple(C) || !is_spherical(C)
+        if #=characteristic(base_ring(C)) > 0 ||=# !is_split_semisimple(C) || !is_spherical(C)
             return multiplication_table(simples(C))
         end
 
@@ -1811,6 +1821,8 @@ function multiplication_table(C::CenterCategory)
                 multiplicities[i,j,k] = Int(lift(coordinates(verlinde_formula//d)[1]))
             elseif typeof(base_ring(C)) <: Union{ArbField, ComplexField, AcbField}
                 multiplicities[i,j,k] = Int(round(real(BigComplex(verlinde_formula//d))))
+            elseif is_finite(base_ring(C))
+                multiplicities[i,j,k] = lift(ZZ,verlinde_formula//d)
             else
                 multiplicities[i,j,k] = Int(QQ(verlinde_formula//d))
             end

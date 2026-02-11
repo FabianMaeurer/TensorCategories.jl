@@ -544,17 +544,7 @@ end
 function anyonwiki_finite(K::FqField,i,j,k,l,m,n,o)
     C = anyonwiki(i,j,k,l,m,n,o)
 
-    denom = lcm([isempty(m) ? ZZ(1) : lcm(denominator.(hcat(coefficients.(collect(m))[:]...))) for m ∈ C.ass][:])
-
-    gcd(denom, characteristic(K)) > 1 && error("Not able to define over $K")
-
-    rs = roots(change_base_ring(K, minpoly(gen(base_ring(C)))))
-
-    length(rs) == 0 && error("Not able to define over $K")
-    r = rs[1]
-    conv = x -> sum([K(numerator(c))//K(denominator(c)) * r^i for (i,c) in enumerate(coefficients(x)) ]) 
-
-    extension_of_scalars(C, K, embedding = conv)
+    extension_of_scalars(C,K)
     # r = anyonwiki_cyclotomic_root(n)
 
     # f_symbol_string = readlines(joinpath(anyon_path, "cyclic_6j_Symbols/cat_$n.jl"))[4]
