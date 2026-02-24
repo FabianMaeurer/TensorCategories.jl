@@ -24,6 +24,7 @@ function anyonwiki(rank::Int,
                     braiding::Int, 
                     pivotal::Int)
 
+
     K,rt = load_anyonwiki_number_field(rank,multiplicity,non_self_dual,fusion_ring,associator,braiding, pivotal)
 
     cat_code = "$(rank)_$(multiplicity)_$(non_self_dual)_$(fusion_ring)_$(associator)_$(braiding)_$(pivotal)"
@@ -541,6 +542,10 @@ end
     
 # end
 
+function anyonwiki(K::Field, i,j,k,l,m,n,o)
+    anyonwiki(i,j,k,l,m,n,o) ⊗ K 
+end
+
 function anyonwiki_finite(K::FqField,i,j,k,l,m,n,o)
     C = anyonwiki(i,j,k,l,m,n,o)
 
@@ -676,13 +681,13 @@ function finite_prime_field_with_root_of_unity(n::Int, lower_bound = 2)
     return GF(p)
 end
 
-function anyonwiki_center(n::Int; cyclotomic = false)
-    if cyclotomic 
-        load(joinpath(@__DIR__, "AnyonWikiData/CyclotomicCenters/CyclotomicCenter_$n.mrdi"))
-    else 
-        load(joinpath(@__DIR__, "AnyonWikiData/Centers/Center_$n.mrdi"))
-    end
-end
+# function anyonwiki_center(n::Int; cyclotomic = false)
+#     if cyclotomic 
+#         load(joinpath(@__DIR__, "AnyonWikiData/CyclotomicCenters/CyclotomicCenter_$n.mrdi"))
+#     else 
+#         load(joinpath(@__DIR__, "AnyonWikiData/Centers/Center_$n.mrdi"))
+#     end
+# end
 
 
 # function load_anyonwiki_fusion_rules(n::Int)

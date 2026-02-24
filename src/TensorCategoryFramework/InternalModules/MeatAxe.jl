@@ -68,6 +68,55 @@ function meataxe(M::RightModuleObject)
     meataxe(M, incl, proj)
 end
 
+function basis(A::AlgebraObject)
+    get_attribute!(A, :basis) do 
+        C = parent(A)
+        S = object(A)
+        i,p = direct_sum_decomposition(S)[3:4]
+        i
+    end
+end
+
+function associative_algebra(A::AlgebraObject)
+    get_attribute!(A, :associative_algebra) do 
+        C = parent(A)
+        m = multiplication(A)
+        K = base_ring(C)
+        # get basis 
+        base = basis(A)
+
+        # Define the multiplication of A
+        images = [image(m ∘ (f ⊗ g))[2] for f ∈ base, g ∈ base]
+        images = [[incl ∘ pullback(f,incl)[2][2] for incl ∈ base] for f ∈ images]
+
+        mult = Array{elem_type(K),3}(undef, length(base), length(base), length(base))
+
+        for i ∈ 1:length(base), j ∈ 1:length(base)
+            for k ∈ 1:length(base)
+                if !is_isomorphic(domain(images[i,j][k]), domain(base[k]))[1]
+                    mult[i,j,k] = zero(K)
+                else
+                    mult[i,j,k] = express_in_basis(images[i,j][k], [base[k]])[1]
+                end
+            end 
+        end
+        return mult
+
+        one_ind = [Int(is_isomorphic(domain(incl), one(C))[1]) for incl ∈ base]
+        # The associative algebra is the endomorphism algebra of A as a bimodule
+        associative_algebra = Oscar.associative_algebra(base_ring(C), mult, one = one_ind)
+    end
+end
+
+function module_object_to_algebra_module(M::RightModuleObject)
+    A = algebra(parent(M))
+    M = object(M)
+
+    
+    action_of_gens = [representation_matrix(right_action(M), i) for i ∈ 1:length(simples(category(parent(M))))]
+    return A, M, action_of_gens
+end
+
 function meataxe(M::RightModuleObject, incl::Vector{T}, proj::Vector{T}) where T <: Morphism
     # Apply the MeatAxe approach to a module object
     # over an algebra object in a fusion category. 

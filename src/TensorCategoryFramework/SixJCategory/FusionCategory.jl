@@ -1009,6 +1009,10 @@ function sort_simples!(C::SixJCategory, order::Vector{Int})
     return C
 end
 
+function sort_simples_by_dimension!(C::SixJCategory)
+    sort_simples!(C, sortperm(fpdim.(simples(C))))
+end
+
 #-------------------------------------------------------------------------------
 #   Kernel and Cokernel
 #-------------------------------------------------------------------------------
@@ -1172,15 +1176,23 @@ function extension_of_scalars(C::SixJCategory, L::Ring; embedding = embedding(ba
 end
 
 function extension_of_scalars(C::SixJCategory, K::FqField)
-    denom = lcm([isempty(m) ? ZZ(1) : lcm(denominator.(hcat(coefficients.(collect(m))[:]...))) for m ∈ C.ass][:])
+    denom = if base_ring(C) == QQ 
+        lcm([isempty(m) ? ZZ(1) : lcm(denominator.(collect(m))[:]) for m ∈ C.ass][:])
+    else 
+        lcm([isempty(m) ? ZZ(1) : lcm(denominator.(hcat(coefficients.(collect(m))[:]...))) for m ∈ C.ass][:])
+    end
 
     gcd(denom, characteristic(K)) > 1 && error("Not able to define over $K. $denom is not coprime to $(characteristic(K))")
 
-    rs = roots(change_base_ring(K, minpoly(gen(base_ring(C)))))
+    rs = base_ring(C) == QQ ? [nothing] : roots(change_base_ring(K, minpoly(gen(base_ring(C)))))
 
     length(rs) == 0 && error("Not able to define over $K. \n Minpoly has no roots: $(minpoly(gen(base_ring(C)))) \n Denomitator is $(denom)")
     
-    conv = [x -> sum([K(numerator(c))//K(denominator(c)) * r^(i-1) for (i,c) in enumerate(coefficients(x)) ]) for r ∈ rs]
+    conv = if base_ring(C) == QQ 
+        [x -> K(numerator(x))//K(denominator(x))]
+    else 
+        [x -> sum([K(numerator(c))//K(denominator(c)) * r^(i-1) for (i,c) in enumerate(coefficients(x)) ]) for r ∈ rs]
+    end
 
     for c ∈ conv 
         F = extension_of_scalars(C, K, embedding = c)

@@ -1,6 +1,6 @@
 mutable struct TensorPowerCategory <: Category
     generator::Vector{Object}
-    simples::Vector
+    indecomposables::Vector
     complete::Bool
     max_exponent::Int
     #multiplication_table::Dict
@@ -12,7 +12,7 @@ end
 function tensor_power_category(X::Object...) 
     C = TensorPowerCategory()
     C.generator = unique_indecomposables(vcat([[k for (k,_) ∈ decompose(x)] for x ∈ X]...))
-    C.simples = typeof(X)[]
+    C.indecomposables = typeof(X)[]
     
     C.complete = X == zero(parent(X[1])) ? true : false
     C.max_exponent = 0
@@ -23,7 +23,7 @@ function tensor_power_category(X::Vector{<:Object})
     C = TensorPowerCategory()
     C.generator = unique_indecomposables(vcat([[k for (k,_) ∈ decompose(x)] for x ∈ X]...))
 
-    C.simples = typeof(X)[]
+    C.indecomposables = typeof(X)[]
     
     C.complete = X == zero(parent(X[1])) ? true : false
     C.max_exponent = 0
@@ -57,6 +57,9 @@ base_ring(C::TensorPowerCategory) = base_ring(category(C))
 
 dim(X::TensorPowerObject) = dim(object(X))
 
+tr(f::TensorPowerMorphism) = TensorPowerMorphism(domain(f), codomain(f), tr(morphism(f)))
+
+(F::Ring)(f::TensorPowerMorphism) =F(morphism(f))
 
 """ 
 
@@ -133,29 +136,29 @@ function indecomposable_subobjects(X::TensorPowerObject)
 end
 
 # function simples(C::TensorPowerCategory, k = Inf)
-#     simpls = object_type(category(C))[]
+#     indecomposabls = object_type(category(C))[]
 #     n1 = 0
 #     j = 0
 #     X = C.generator
 #     Y = one(category(C))
 #     while j ≤ k+1
-#         simpls = unique_simples([simpls; simple_subobjects(Y)])
-#         if length(simpls) == n1
-#             simpls = [TensorPowerObject(C,s) for s ∈ simpls]
-#             C.simples = simpls
+#         indecomposabls = unique_simples([indecomposabls; simple_subobjects(Y)])
+#         if length(indecomposabls) == n1
+#             indecomposabls = [TensorPowerObject(C,s) for s ∈ indecomposabls]
+#             C.indecomposables = indecomposabls
 #             C.complete = true
 #             C.max_exponent = j-1
-#             return simpls
+#             return indecomposabls
 #         end
-#         n1 = length(simpls)
+#         n1 = length(indecomposabls)
 #         Y = Y ⊗ X
 #         j = j+1
 #     end
-#     simpls = [TensorPowerObject(C,s) for s ∈ simpls]
-#     C.simples = simpls
+#     indecomposabls = [TensorPowerObject(C,s) for s ∈ indecomposabls]
+#     C.indecomposables = indecomposabls
 #     C.complete = false
 #     C.max_exponent = k
-#     return simpls
+#     return indecomposabls
 # end
 
 function braiding(X::TensorPowerObject, Y::TensorPowerObject)
@@ -194,7 +197,7 @@ end
 
 function indecomposables(C::TensorPowerCategory, k = Inf)
     if C.complete
-        return C.simples
+        return C.indecomposables
     end
 
    
@@ -204,33 +207,33 @@ function indecomposables(C::TensorPowerCategory, k = Inf)
     indecs_in_X = C.generator
     new_indecs = [one(category(C))]
     new_indecs = unique_indecomposables([new_indecs; indecs_in_X])
-    simpls = new_indecs
+    indecomposabls = new_indecs
 
     while j ≤ k
         new_indecs_temp = []
         for V ∈ indecs_in_X, W ∈ new_indecs
             summands_of_VW = [x for (x,k) ∈ decompose(W ⊗ V)]
             new_indecs_temp = [new_indecs_temp; [x for x ∈ summands_of_VW]]
-            simpls = unique_indecomposables(Object[simpls; new_indecs_temp])
+            indecomposabls = unique_indecomposables(Object[indecomposabls; new_indecs_temp])
         end
         new_indecs = new_indecs_temp
-        if length(simpls) == n1
-            simpls = TensorPowerObject[TensorPowerObject(C,s) for s ∈ simpls]
-            C.simples = simpls
+        if length(indecomposabls) == n1
+            indecomposabls = TensorPowerObject[TensorPowerObject(C,s) for s ∈ indecomposabls]
+            C.indecomposables = indecomposabls
             C.complete = true
             C.max_exponent = j-1
-            return simpls
+            return indecomposabls
         end
-        n1 = length(simpls)
+        n1 = length(indecomposabls)
         #Y = Y ⊗ X
         j = j+1
     end
-    simpls = [TensorPowerObject(C,s) for s ∈ simpls]
-    C.simples = simpls
+    indecomposabls = [TensorPowerObject(C,s) for s ∈ indecomposabls]
+    C.indecomposables = indecomposabls
     C.complete = false
     C.max_exponent = k
 
-    return simpls
+    return indecomposabls
  
 end
 

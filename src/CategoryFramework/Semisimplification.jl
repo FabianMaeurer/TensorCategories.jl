@@ -72,7 +72,7 @@ function semisimplify(f::Morphism, C::Semisimplification)
     SemisimplifiedMorphism(dom,cod,f)
 end
 
-semisimplify(f::Morphism) = SemisimplifiedMorphism(f,semisimplify(parent(f)))
+semisimplify(f::Morphism) = semisimplify(f,semisimplify(parent(f)))
 
 #=----------------------------------------------------------
     Morphism functionality 
@@ -109,7 +109,9 @@ end
 function is_negligible(f::Morphism)
     X = domain(f)
     Y = codomain(f)
-    iszero([tr(f ∘ g) == zero_morphism(Y,Y) for g ∈ Hom(Y,X)])
+    K = base_ring(f)
+    m = [K(tr(f ∘ g)) for g ∈ Hom(Y,X)]
+    return all(e -> e == 0, m)
 end
 
 function ==(f::SemisimplifiedMorphism, g::SemisimplifiedMorphism)
@@ -133,21 +135,21 @@ function Hom(X::SemisimplifiedObject, Y::SemisimplifiedObject, XY = Hom(object(X
     
 
     m = [F(tr(f ∘ g)) for f ∈ base_XY, g ∈ base_YX]
-    
+
     M = matrix(F, length(base_XY), length(base_YX), m)
 
     # The image of M except 0 are all non-negligible morphisms
-    base_coeffs = hnf(M)
+    base_coeffs = nullspace(M)
     #base_coeffs = base_coeffs[1:rank(base_coeffs), 1]
     
     # Basis 
-    base =  [sum(collect(base_coeffs[i,:])[:] .* base_XY) for i ∈ 1:length(base_coeffs[:,1])]
+    null_base = [sum(collect(c) .* base_XY) for c ∈ eachrow(base_coeffs)]
 
-    filter!(e -> e != zero_morphism(object(X), object(Y)), base)
+    # base = [f for f ∈ base_XY if !morphism_in_subspace(f, null_base)[1]]
 
-    base = [SemisimplifiedMorphism(X,Y, f) for f ∈ base]
+    # base = [SemisimplifiedMorphism(X,Y, f) for f ∈ base]
 
-    HomSpace(X,Y,base)
+    HomSpace(X,Y,null_base)
 end
 
 function semisimplify(H::AbstractHomSpace)
@@ -246,6 +248,8 @@ function coev(X::SemisimplifiedObject)
     cod = SemisimplifiedObject(C, codomain(c))
     morphism(dom, cod, c)
 end
+
+(F::Ring)(f::SemisimplifiedMorphism) = F(morphism(f))
 
 #=----------------------------------------------------------
     Printing 

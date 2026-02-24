@@ -35,7 +35,7 @@ import Oscar: +, @alias, @attributes, AbstractSet, AcbField, StructureConstantAl
     gens, center, graph_from_adjacency_matrix, connected_components, weakly_connected_components, Directed, Undirected, morphism, algebra,
     radical, is_zero, minimal_submodules, representation_matrix, QQBarField,
     is_irreducible, polynomial, is_univariate, action, is_equivalent, extension_of_scalars, free_module, perm, fraction_field, simplify, CalciumField, CalciumFieldElem, FracFieldElem, PadicField, PadicFieldElem, root, AcbMatrix, FqField,
-    QadicField, QadicFieldElem, FlintLocalField, FlintLocalFieldElem,
+    QadicField, QadicFieldElem, FlintLocalField, FlintLocalFieldElem, associative_algebra,
     MultTableGroup, is_isomorphic_with_map, subgroup_classes, representative,
     pc_group, permutation_group, @req, is_constant, automorphism_group, ComplexField,
     permuted, change_base_ring, schur_index_over_center, issimple, cyclotomic_extension, ArbField, next_prime, AcbFieldElem,
@@ -93,6 +93,7 @@ export anyonwiki_keys
 export ArrowCategory
 export ArrowObject
 export ArrowMorphism
+export associative_algebra
 export automorphisms
 export associator 
 export base_ring 

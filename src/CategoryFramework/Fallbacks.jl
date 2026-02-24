@@ -244,9 +244,19 @@ end
 (R::QQBarField)(f::Morphism) = morphism_to_scalar(R,f)
 
 function morphism_to_scalar(R::Ring, f::Morphism)  
+
     if is_zero(f)
         return zero(R)
     end
+
+    try 
+        m = matrix(f)
+        b, k = is_scalar_multiple(m, matrix(id(domain(f))))
+        if b 
+            return k
+        end
+    catch end
+
     B = basis(Hom(domain(f), codomain(f)))
     if length(B) == 0 
         return 0
@@ -260,14 +270,17 @@ function morphism_to_scalar(R::Ring, f::Morphism)
 
     try 
         m = matrix(f)
+
         if m == zero(parent(m))
-            return zero(F)
+            return zero(R)
         end
         b,c = is_scalar_multiple(m, matrix(id(domain(f))))
         if b 
             return c
         end
-    catch end
+    catch e
+        showerror(e)
+    end
     # m = collect(m)[m .!= 0]
     # if size(m) == (1,)
     #     return F(m[1,1])

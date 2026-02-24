@@ -883,9 +883,19 @@ function is_isomorphic(X::CenterObject, Y::CenterObject)
 
     S = simples(parent(X))
 
+    if !is_semisimple(parent(X))  
+        if !is_semisimple(EX) == is_semisimple(EY)
+            return false, nothing 
+        elseif !is_semisimple(EX) 
+            if sum(is_invertible.(basis(Hom(object(X), object(Y))))) > 0 
+                return true, nothing
+            end
+        end
+    end
+
     if [dim(Hom(X,s)) for s ∈ S] == [dim(Hom(Y,s)) for s ∈ S]
         _, iso = is_isomorphic(X.object, Y.object)
-        return true, central_projection(X,Y,[iso])[1]
+        return true, !is_semisimple(parent(X)) ? nothing : central_projection(X,Y,[iso])[1]
     else
         return false, nothing
     end

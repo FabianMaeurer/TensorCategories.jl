@@ -140,6 +140,10 @@ matrix(f::GroupRepresentationMorphism) = f.map
 base_group(Rep::GroupRepresentationCategory) = Rep.group
 base_group(ρ::GroupRepresentation) = ρ.group
 
+tr(ρ::GroupRepresentationMorphism) = morphism(one(parent(ρ)), one(parent(ρ)), matrix(base_ring(ρ),1,1,[tr(matrix(ρ))]))
+
+is_zero(f::GroupRepresentationMorphism) = iszero(matrix(f))
+
 """
     parent(ρ::GroupRepresentation)
 
@@ -268,7 +272,7 @@ end
 #-------------------------------------------------------------------------
 
 function compose(f::GroupRepresentationMorphism, g::GroupRepresentationMorphism)
-    @assert codomain(f) == domain(g) "Morphisms not compatible"
+    #@assert codomain(f) == domain(g) "Morphisms not compatible"
     return GroupRepresentationMorphism(domain(f),codomain(g), matrix(f)*matrix(g))
 end
 
@@ -540,6 +544,8 @@ function simple_subobjects(σ::GroupRepresentation)
     end
     ret
 end
+
+is_simple(σ::GroupRepresentation) = length(simple_subobjects(σ)) == 1
 
 function regular_representation(C::GroupRepresentationCategory)
     G = base_group(C)

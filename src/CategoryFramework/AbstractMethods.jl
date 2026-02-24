@@ -22,7 +22,7 @@ endomorphism_ring(X::Object)
 Return the endomorphism ring of ``X`` as a matrix algebra.
 """
 function endomorphism_ring(X::Object, base = basis(End(X)))
-    @assert is_abelian(parent(X))
+    #@assert is_abelian(parent(X))
     if length(base) == 0
         return matrix_algebra(base_ring(X), [zero_matrix(base_ring(X),1,1)], isbasis = true)
     end
@@ -41,6 +41,18 @@ end
 function endomorphism_ring(X::Object, H::AbstractHomSpace)
     @assert domain(H) == codomain(H) == X
     endomorphism_ring(X, basis(H))
+end
+
+function is_semisimple(H::AbstractHomSpace)
+    @assert domain(H) == codomain(H)
+    A = endomorphism_ring(H.X, basis(H))
+    is_semisimple(A)
+end
+
+function multiplication_table(R::AbstractHomSpace)
+    @assert domain(R) == codomain(R)
+    A = endomorphism_ring(R.X, basis(R))
+    multiplication_table(A)
 end
 
 function extension_of_scalars(R::AbstractAssociativeAlgebra, F::Ring)
@@ -376,6 +388,14 @@ function is_isomorphic(X::Object, Y::Object)
     @error "Not implemented"
 end
 
+function morphism_in_subspace(f::T, B::Vector{T}) where T <: Morphism
+    try 
+        c = express_in_basis(f, B)
+        return true,c 
+    catch 
+    end 
+    false, nothing  
+end
 #-------------------------------------------------------
 # Semisimple: Subobjects
 #-------------------------------------------------------
