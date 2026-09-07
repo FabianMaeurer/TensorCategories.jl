@@ -1,10 +1,15 @@
 # [Grothendieck rings](@id grothendieck-rings)
 
-The Grothendieck ring is a decategorification of a tensor category: objects are
+The Grothendieck ring is a decategorification of a multiring category: objects are
 replaced by their classes, short exact sequences give additive relations, and
 tensor products give multiplication. In a semisimple category the additive
 relations are precisely the direct-sum relations. For a fusion category, the
 multiplication table is exactly the table of fusion rules.
+
+[EGNO; Chapter 3](@citet) develops the resulting combinatorics as the theory of
+$\mathbb Z_+$-rings; §§4.5 and 4.9 explain how these rings arise from tensor
+and fusion categories. TensorCategories.jl implements both passage from a
+category to its ring and direct computation with the resulting based ring.
 
 ## Classes of objects
 
@@ -57,6 +62,11 @@ semisimple category.
 The ring also contains virtual classes with negative coefficients. Its
 coefficient ring is $\mathbb Z$ even when the category is defined over a field of
 positive characteristic.
+
+The package type is `ZPlusRing`; `ℤ₊Ring` and `ℕRing` are aliases for the same
+type. The last alias reflects nonnegative structure constants, but the
+mathematical terminology used in this manual is EGNO's
+$\mathbb Z_+$-ring.
 
 For a split semisimple rigid category, duality induces a basis permutation
 $b_i^*=[S_i^*]$ and an anti-involution $(xy)^*=y^*x^*$. Let $I_0$ be the
@@ -149,26 +159,24 @@ these endomorphism-algebra factors for every supported semisimple input. The
 ring method `fpdim(R)` always sums the squares without these factors, so it does
 not give `fpdim(C)` in the non-split case.
 
-## From fusion rules to categories
+## What decategorification forgets
 
-Decategorification retains the tensor-product multiplicities but not the
-associator maps. In a skeletal model, the ring determines the multiplicity
-vector of a tensor product; $F$-symbols specify the associator in fusion-space
-bases and must satisfy the pentagon equation. Braiding and pivotal structures
-are further data. This is the passage from fusion rings to their
-categorifications discussed in [EGNO; §§4.9--4.10](@citet).
+Decategorification retains tensor-product multiplicities but forgets the actual
+objects, morphisms, associator, and any additional monoidal structure. A
+**categorification** of a based ring is a category whose Grothendieck ring is
+the given based ring. A based ring can have inequivalent categorifications or
+none at all [EGNO; §§4.9--4.10](@cite).
 
 For example, $\operatorname{Gr}(\operatorname{Vec}_k(G))=\mathbb Z[G]$, with
 one basis element for each group element.
 A 3-cocycle twist changes the associator but leaves this ring unchanged.
-For $\operatorname{Rep}_k(G)$, decategorification gives the representation ring, computed
-from tensor products of representations. Neither concrete model requires
-$F$-symbols to compute its Grothendieck ring.
+For $\operatorname{Rep}_k(G)$, decategorification gives the representation
+ring, computed from tensor products of representations. These computations use
+the concrete categorical models introduced above.
 
-An exact tensor functor induces a ring homomorphism $[X]\mapsto[F(X)]$.
-In particular, a fiber functor to vector spaces induces the integer dimension
-homomorphism $[X]\mapsto\dim_k F(X)$. The categorical meaning of a fiber functor
-is discussed under [Fiber functors and semisimple coordinates](@ref fiber-functors).
+An exact tensor functor induces a ring homomorphism
+$[X]\mapsto[F(X)]$. The converse is false: a homomorphism between
+Grothendieck rings does not determine a functor between the categories.
 
 Continue with [Computing with fusion rings](@ref computing-fusion-rings) for
 the package interface and examples, including a non-split representation ring.

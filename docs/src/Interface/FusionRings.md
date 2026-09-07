@@ -5,48 +5,48 @@ It first constructs the ring of a category, then enters fusion rules without a
 categorification, and finally compares a non-split category with its splitting
 field.
 
-## The Ising ring
+## A split representation ring
 
-The Ising category has simples $(\mathbb 1,\chi,X)$, with
-$\chi^2=\mathbb 1$, $\chi X=X$, and $X^2=\mathbb 1+\chi$.
+Over $\mathbb F_3$, the cyclic group $C_2$ has the trivial and sign
+representations. Their classes satisfy $[\varepsilon]^2=[\mathbb 1]$.
 
-```@example grothising
+```@example grothsplit
 using TensorCategories, Oscar
-C = ising_category()
+G = cyclic_group(2)
+C = representation_category(GF(3), G)
 S = simples(C)
 R = split_grothendieck_ring(C)
-u, chi, x = basis(R)
-@assert u == one(R)
-@assert chi*chi == u && chi*x == x
-@assert x*x == u+chi
-@assert involution(x) == x
-x*x
-show(stdout, MIME"text/plain"(), x*x); println() # hide
+unit_index = only(findall(X -> is_isomorphic(X, one(C))[1], S))
+sign_index = only(setdiff(eachindex(S), [unit_index]))
+u, e = R[unit_index], R[sign_index]
+@assert u == one(R) && e*e == u
+@assert involution(e) == e
+e*e
+show(stdout, MIME"text/plain"(), e*e); println() # hide
 ```
 
 The basis of `R` follows the simple-object order of `C`. To obtain the class
 of an object, pass its integer multiplicities to `R`:
 
-```@example grothising
-Y = S[3] ⊗ (S[1] ⊕ S[3])
+```@example grothsplit
+Y = S[sign_index] ⊕ S[sign_index]
 y = R(ZZ.(coefficients(Y,S)))
-@assert y == u+chi+x
+@assert y == 2*e
 coefficients(y)
 ```
 
 Here `ZZ.(...)` converts each multiplicity to an OSCAR integer. A virtual
-class such as `x-u` is also an element of `R`:
+class such as `e-u` is also an element of `R`:
 
-```@example grothising
+```@example grothsplit
 @assert base_ring(R) == ZZ
-@assert coefficients(x-u) == ZZ.([-1,0,1])
-@assert fpdim(x)^2 == 2 && fpdim(x) > 0
-@assert fpdim(R) == 4
+@assert fpdim(e) == 1
+@assert fpdim(R) == 2
 fpdim.(basis(R))
 ```
 
-The Frobenius--Perron dimensions are $1,1,\sqrt2$, and their squared sum is
-$4$. The main ring operations are:
+Both Frobenius–Perron dimensions are $1$, and their squared sum is $2$.
+The main ring operations are:
 
 | Operation | Result |
 |:---|:---|
@@ -83,9 +83,8 @@ show(stdout, MIME"text/plain"(), d); println() # hide
 ```
 
 Thus $\operatorname{FPdim}(t)=(1+\sqrt5)/2$. No associator or coefficient
-field for a categorification was needed. A category with this ring additionally
-requires the structural data described under
-[Skeletal fusion categories](@ref skeletal-fusion).
+field for a categorification was needed. Constructing a category with this
+Grothendieck ring requires substantially more data.
 The constructor converts the supplied table and unit coordinates to integers;
 it does not itself certify nonnegativity, associativity, the unit equations, or
 the based-ring identities. These are assumptions on directly entered data.
@@ -140,4 +139,4 @@ rank(Rs)
 The field extension changes the simple basis and hence the Grothendieck ring;
 its multiplication coefficients are integers over both fields.
 
-Continue with [Functors and natural transformations](AdvancedInterface.md).
+Continue with [pivotal and spherical structures](@ref pivotal-braided).

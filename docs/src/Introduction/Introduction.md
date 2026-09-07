@@ -69,13 +69,4 @@ Equality of the two represented endpoint objects does not make the associator
 an identity morphism. A composite that changes parenthesization must use the
 stored structural map.
 
-The next page is an optional [anyon and CFT terminology bridge](@ref physics-bridge).
-Readers who do not need that translation can continue directly with
-[Models and the category interface](@ref interface-philosophy). Later routes
-through the manual are:
-
-- the [implementation tutorial](@ref implementing-matrices) for a new concrete
-  category model;
-- [skeletal fusion categories](@ref skeletal-fusion) for a category specified
-  by fusion data; and
-- the [catalogue](@ref category-catalogue) for existing implementations.
+Continue with [working with fusion data](@ref working-with-fusion-data).

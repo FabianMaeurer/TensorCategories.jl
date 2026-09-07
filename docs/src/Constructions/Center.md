@@ -41,8 +41,8 @@ $\widetilde\gamma_X=\gamma_X^{-1}$. This componentwise inversion also reverses
 the displayed braiding. The package uses
 $c_{(Z,\gamma),(W,\delta)}=\gamma_W$, whereas
 [EGNO; Proposition 8.5.1, Equation (8.15)](@citet) use
-$c_{(Z,\widetilde\gamma),(W,\widetilde\delta)}=
-\widetilde\delta_Z=(\delta_Z)^{-1}$. Thus, under the direct identification by
+$c_{(Z,\widetilde\gamma),(W,\widetilde\delta)}=\widetilde\delta_Z=(\delta_Z)^{-1}$.
+Thus, under the direct identification by
 inverse half-braidings, the two conventions give reverse braided structures.
 
 A morphism $f:(Z,\gamma)\to(Z',\gamma')$ is a morphism $f:Z\to Z'$ satisfying
@@ -91,7 +91,7 @@ Once the simple objects of $\mathcal Z(\mathcal C)$ over $k$ have been
 computed, one chooses a common splitting field for their endomorphism algebras.
 After scalar extension, primitive idempotents in these algebras give the split
 simple central summands. This is an application of the general
-[algorithmic splitting procedure](@ref algorithmic-splitting), and is
+[splitting procedure](@ref splitting-and-scalars), and is
 Algorithm 4 of [maurer2024computing; §5.2](@citet). It is a separate stage from
 computing the center over $k$: a center can be fully computed while some of
 its simple objects remain non-split over that field.
@@ -246,8 +246,7 @@ checks probe different parts of the construction. The displayed identity uses
 the pivotal categorical dimension; sphericality is not required
 [maurer2024computing; Theorem 2.1](@cite). Independently, in the usual
 characteristic-zero fusion setting,
-$\operatorname{FPdim}(\mathcal Z(\mathcal C))=
-\operatorname{FPdim}(\mathcal C)^2$
+$\operatorname{FPdim}(\mathcal Z(\mathcal C))=\operatorname{FPdim}(\mathcal C)^2$
 [EGNO; Theorem 7.16.6](@cite).
 
 Continue with [The Ising center over two fields](@ref ising-center), which

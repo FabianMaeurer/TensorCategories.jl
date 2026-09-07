@@ -7,9 +7,9 @@ vectors, morphisms become blocks of matrices over $k$, and the tensor structure
 is described by fusion rules and associator matrices in chosen bases.
 TensorCategories.jl implements this model as `SixJCategory`. We use the
 definitions of semisimple and fusion
-categories in [EGNO; Chapters 1, 2, and 4](@citet). The reconstruction in
-terms of multiplicity vectors, matrix blocks, and fusion rules is described in
-[maeurer2026thesis; §1.7](@citet).
+categories in [EGNO; Chapters 1, 2, and 4](@citet). The implementation of this
+model and its use in the package are described by
+[maurer2024computing; §2](@citet).
 
 The name `SixJCategory` refers to this general skeletal data model. It allows
 arbitrary fusion multiplicities, and its associator entries need not be literal
@@ -63,8 +63,8 @@ This description uses
 $\operatorname{End}_{\mathcal C}(S_i)=k$. In a non-split semisimple category,
 the blocks have coefficients in the division algebras
 $\operatorname{End}_{\mathcal C}(S_i)$ instead. `SixJCategory` implements the
-split case; see [Fusion and splitting](@ref tensor-conventions) for the
-non-split setting.
+split case; see [splitting and scalar extension](@ref splitting-and-scalars)
+for the non-split setting.
 
 The matrix blocks describe maps between multiplicity spaces. Their existence
 does not require a monoidal fiber functor

@@ -29,6 +29,6 @@ The reference is organized by mathematical role.
 | [Utilities](API/Utilities.md) | Grothendieck rings, numerical conversion, and persistence |
 
 For a linear introduction to the package, begin with [models and the category
-interface](Interface/Philosophy.md). The [catalogue](F-symbols/Examples.md)
+interface](Interface/Categories.md). The [catalogue](F-symbols/Examples.md)
 records the coefficient fields, conventions, limitations, and references for
 the supplied category families.

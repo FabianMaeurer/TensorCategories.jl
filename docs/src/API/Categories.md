@@ -9,7 +9,7 @@ table.
 
 | Family | Principal constructors and types | Catalogue entry |
 |:---|:---|:---|
-| Finite sets and maps | `Sets`, `SetObject`, `SetMorphism`, `SetHomSet` | [Finite sets](../ConcreteExamples/Sets.md) |
+| Finite sets and maps | `Sets`, `SetObject`, `SetMorphism`, `SetHomSet` | [Finite sets](../Interface/Categories.md#finite-sets) |
 | Finite-dimensional vector spaces | `vector_spaces`, `VectorSpaces`, `VectorSpaceObject`, `VectorSpaceMorphism`, `VSObject`, `VSHomSpace` | [Vector spaces and gradings](../ConcreteExamples/VectorSpaces.md) |
 | Group-graded vector spaces | `graded_vector_spaces`, `twisted_graded_vector_spaces`, `GradedVectorSpaces`, `GVSObject`, `GVSMorphism`, `GVSHomSpace`, `Cocycle`, `cyclic_group_3cocycle`, `unitary_cocycle` | [Vector spaces and gradings](../ConcreteExamples/VectorSpaces.md) |
 | Finite-group representations | `representation_category`, `GroupRepresentationCategory`, `GroupRepresentation`, `GroupRepresentationMorphism`, `GRHomSpace`, `Representation` | [Group representations](../ConcreteExamples/Representations.md) |

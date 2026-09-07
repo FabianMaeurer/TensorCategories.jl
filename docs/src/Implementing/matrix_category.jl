@@ -112,6 +112,5 @@ TensorCategories.associator(X::MatObject, Y::MatObject, Z::MatObject) =
 TensorCategories.is_linear(::MatCategory) = true
 TensorCategories.is_abelian(::MatCategory) = true
 TensorCategories.is_monoidal(::MatCategory) = true
-TensorCategories.is_ring(::MatCategory) = true
 
 end
