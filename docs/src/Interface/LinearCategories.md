@@ -3,7 +3,8 @@
 Fix a coefficient field $k$. More information about constructing exact and
 numerical coefficient fields is given in the [next section](@ref base-fields).
 Here we first describe the mathematical structures and the corresponding Julia
-interfaces. Only afterwards do we implement a complete example.
+interfaces. We then illustrate them with the built-in categories of vector
+spaces and finite-group representations.
 
 ## Linear categories
 
@@ -45,10 +46,45 @@ A finite-dimensional $k$-linear model should provide the following methods:
 | `zero_morphism(X,Y)` | the zero morphism $X\to Y$ |
 | `express_in_basis(f,H)` | the coordinates of $f$ in the ordered basis of $H$ |
 
-The last method can be obtained from a faithful matrix realization, but a
-matrix realization is not required: a model may implement coordinates by any
-valid method. After providing these operations and checking bilinearity, the
-model reports the structure through `is_linear(C)`.
+The last method can be obtained from a matrix realization, but matrices are not
+part of the definition of a linear category: a model may implement coordinates
+by any valid method. After providing these operations and checking
+bilinearity, the model reports the structure through `is_linear(C)`.
+
+#### [Matrix realizations](@id matrix-realizations)
+
+A **matrix realization** of a $k$-linear category is a faithful $k$-linear
+functor
+
+```math
+\label{eq:matrix-realization-functor}
+U:\mathcal C\longrightarrow\operatorname{Vec}_k
+```
+
+together with an ordered basis of every vector space $U(X)$. The implementation
+need not store $U$ as a Julia functor; it may be implicit in the data used to
+represent objects and morphisms. If the model supplies `matrix(f)` for
+$f:X\to Y$, it must return the matrix $M_f$ of $U(f)$ in these chosen bases.
+
+TensorCategories.jl uses row coordinates in its concrete matrix models. Thus
+`matrix(f)` has entries in $k$ and size
+$\dim_k U(X)\times\dim_k U(Y)$, a row vector $v\in U(X)$ is sent to
+$vM_f$, and the matrices must satisfy
+
+```math
+\label{eq:matrix-realization-composition}
+M_{\operatorname{id}_X}=I,
+\qquad
+M_{g\circ f}=M_fM_g,
+\qquad
+M_{af+bg}=aM_f+bM_g.
+```
+
+Faithfulness means that two parallel morphisms are equal whenever their
+matrices are equal. A model providing `matrix(f)` must document the underlying
+realization, the ordered bases, and the direction in which its matrices act.
+No compatibility with a monoidal structure is assumed here; that additional
+condition belongs to the later notion of a fiber functor.
 
 ### Generic consequences
 
@@ -78,8 +114,15 @@ biproducts are supplied. This is equivalent to the axioms in
 
 ### What an implementation must provide
 
-For an additive model, implement `zero(C)` and binary `direct_sum(X,Y)`. The
-latter returns
+An additive model should provide the following methods in addition to the
+preadditive Hom-group operations:
+
+| Required method | Meaning |
+|:---|:---|
+| `zero(C)` | a chosen zero object of $\mathcal C$ |
+| `direct_sum(X,Y)` | the binary biproduct $X\oplus Y$ with its inclusions and projections |
+
+The second method returns
 
 ```julia
 D, i, p = direct_sum(X, Y)
@@ -153,241 +196,130 @@ These functions rely on the abelian-category contract. A matrix nullspace is
 not yet a categorical kernel: the implementation must reconstruct an object of
 the category and the corresponding universal morphism.
 
-## [Example: Matrix category](@id implementing-matrices)
+## [Working with built-in abelian categories](@id built-in-abelian-categories)
 
-Let $\operatorname{Mat}_k$ be the category whose objects are the nonnegative
-integers. The object $n$ represents the standard coordinate space $k^n$, and
+### Vector spaces
 
-```math
-\label{eq:matrix-category-hom}
-\operatorname{Hom}_{\operatorname{Mat}_k}(n,m)
-=\operatorname{Mat}_{n\times m}(k).
-```
+The category $\operatorname{Vec}_k$ has finite-dimensional $k$-vector spaces
+as objects and linear maps as morphisms; see
+[EGNO; Example 2.3.3, p. 26](@citet). TensorCategories.jl uses the coordinate
+model constructed by `vector_spaces(k)`. An object created by
+`VectorSpaceObject(V,n)` represents $k^n$ with its standard ordered basis, and
+`morphism(X,Y,M)` constructs the linear map whose row-coordinate matrix is
+$M$. Consequently, $M$ must have size
+$\dim_k(X)\times\dim_k(Y)$.
 
-We use row coordinates, so a matrix in equation
-\eqref{eq:matrix-category-hom} acts from the left on row vectors. Identities
-are identity matrices and
+The category implements the linear, additive, and abelian operations described
+above. For example, we can compute Hom and endomorphism spaces, direct
+sums, kernels, cokernels, and images through the common interface:
 
-```math
-\label{eq:matrix-category-composition}
-M_{g\circ f}=M_fM_g.
-```
-
-This is a skeletal, or ``discrete'', coordinate model of the category
-$\operatorname{Vec}_k$ of finite-dimensional vector spaces: every vector space
-is replaced by the standard space of its dimension. It is not a discrete
-category in the categorical sense, since it has many nonidentity morphisms.
-
-The following blocks form one continuous Julia session. We begin with the
-represented data and the basic category interface:
-
-```@example matrix_category_tutorial
+```@example linear_abelian_tour
 using TensorCategories, Oscar
 
-struct MatCategory <: Category
-    base_ring::Field
-end
-
-struct MatObject <: Object
-    parent::MatCategory
-    n::Int
-    function MatObject(C::MatCategory, n::Int)
-        n >= 0 || throw(ArgumentError("dimension must be nonnegative"))
-        new(C, n)
-    end
-end
-
-struct MatMorphism <: Morphism
-    domain::MatObject
-    codomain::MatObject
-    matrix::MatElem
-end
-
-Base.:(==)(C::MatCategory, D::MatCategory) = base_ring(C) === base_ring(D)
-Base.:(==)(X::MatObject, Y::MatObject) =
-    parent(X) == parent(Y) && X.n == Y.n
-Base.:(==)(f::MatMorphism, g::MatMorphism) =
-    domain(f) == domain(g) && codomain(f) == codomain(g) && matrix(f) == matrix(g)
-
-function TensorCategories.morphism(X::MatObject, Y::MatObject, M::MatElem)
-    parent(X) == parent(Y) || throw(ArgumentError("different categories"))
-    base_ring(M) === base_ring(X) || throw(ArgumentError("different fields"))
-    size(M) == (X.n, Y.n) || throw(ArgumentError("wrong matrix dimensions"))
-    MatMorphism(X, Y, M)
-end
-
-TensorCategories.matrix(f::MatMorphism) = f.matrix
-TensorCategories.int_dim(X::MatObject) = X.n
-TensorCategories.id(X::MatObject) =
-    morphism(X, X, identity_matrix(base_ring(X), X.n))
-
-function TensorCategories.compose(f::MatMorphism, g::MatMorphism)
-    codomain(f) == domain(g) || throw(ArgumentError("incompatible endpoints"))
-    morphism(domain(f), codomain(g), matrix(f)*matrix(g))
-end
-```
-
-The field name `base_ring` and the endpoint field names activate the generic
-accessors. We now add the linear interface. The basis of a Hom space consists
-of the elementary matrices.
-
-```@example matrix_category_tutorial
-function Base.:+(f::MatMorphism, g::MatMorphism)
-    domain(f) == domain(g) && codomain(f) == codomain(g) ||
-        throw(ArgumentError("maps must be parallel"))
-    morphism(domain(f), codomain(f), matrix(f) + matrix(g))
-end
-
-Base.:*(a, f::MatMorphism) =
-    morphism(domain(f), codomain(f), base_ring(f)(a)*matrix(f))
-
-TensorCategories.zero_morphism(X::MatObject, Y::MatObject) =
-    morphism(X, Y, zero_matrix(base_ring(X), X.n, Y.n))
-
-function TensorCategories.Hom(X::MatObject, Y::MatObject)
-    parent(X) == parent(Y) || throw(ArgumentError("different categories"))
-    B = MatMorphism[]
-    for j in 1:Y.n, i in 1:X.n
-        M = zero_matrix(base_ring(X), X.n, Y.n)
-        M[i,j] = 1
-        push!(B, morphism(X, Y, M))
-    end
-    HomSpace(X, Y, B)
-end
-
-TensorCategories.is_linear(::MatCategory) = true
-```
-
-The additive structure uses the zero-dimensional object and the standard block
-inclusions and projections:
-
-```@example matrix_category_tutorial
-Base.zero(C::MatCategory) = MatObject(C, 0)
-
-function TensorCategories.direct_sum(X::MatObject, Y::MatObject)
-    parent(X) == parent(Y) || throw(ArgumentError("different categories"))
-    D = MatObject(parent(X), X.n + Y.n)
-    K = base_ring(X)
-    ix = zero_matrix(K, X.n, D.n)
-    iy = zero_matrix(K, Y.n, D.n)
-    for j in 1:X.n
-        ix[j,j] = 1
-    end
-    for j in 1:Y.n
-        iy[j,X.n+j] = 1
-    end
-    i = [morphism(X,D,ix), morphism(Y,D,iy)]
-    p = [morphism(D,X,transpose(ix)), morphism(D,Y,transpose(iy))]
-    D, i, p
-end
-
-TensorCategories.is_additive(::MatCategory) = true
-```
-
-Finally, matrix nullspaces give kernels and cokernels. The methods turn the
-resulting matrices back into objects and morphisms of our category:
-
-```@example matrix_category_tutorial
-function TensorCategories.kernel(f::MatMorphism)
-    M = kernel(matrix(f))
-    K = MatObject(parent(domain(f)), number_of_rows(M))
-    K, morphism(K, domain(f), M)
-end
-
-function TensorCategories.cokernel(f::MatMorphism)
-    M = kernel(matrix(f), side=:right)
-    Q = MatObject(parent(f), number_of_columns(M))
-    Q, morphism(codomain(f), Q, M)
-end
-
-TensorCategories.is_abelian(::MatCategory) = true
-```
-
-We can now use generic linear, additive, and abelian functions on this model:
-
-```@example matrix_category_tutorial
-C = MatCategory(QQ)
-X, Y = MatObject(C, 2), MatObject(C, 3)
-f = morphism(X, Y, matrix(QQ, [1 0 0; 0 0 0]))
-
-H = Hom(X,Y)
-@assert int_dim(H) == 6
-@assert int_dim(End(X)) == 4
-
-D, i, p = direct_sum(X,Y)
-@assert p[1] ∘ i[1] == id(X) && p[2] ∘ i[2] == id(Y)
-@assert is_zero(p[1] ∘ i[2]) && is_zero(p[2] ∘ i[1])
-@assert i[1] ∘ p[1] + i[2] ∘ p[2] == id(D)
-
-K, inclusion = kernel(f)
-Q, projection = cokernel(f)
-@assert int_dim(K) == 1 && int_dim(Q) == 2
-@assert is_zero(f ∘ inclusion) && is_zero(projection ∘ f)
-
-I, image_inclusion = image(f)
-@assert int_dim(I) == 1
-(int_dim(H), int_dim(D), int_dim(K), int_dim(Q), int_dim(I))
-```
-
-## [Matrix realizations and built-in models](@id matrix-realizations)
-
-The method `matrix(f)` is meaningful only when a category supplies compatible
-coordinates. Frequently these coordinates come from a faithful $k$-linear
-functor
-
-```math
-\label{eq:matrix-realization-functor}
-U:\mathcal C\longrightarrow\operatorname{Vec}_k
-```
-
-that is implicit in the stored data. A model need not store $U$ as a separate
-Julia functor. It must nevertheless document the bases and the direction in
-which its matrices act.
-
-`vector_spaces(k)` is the built-in version of the matrix category above:
-
-```@example built_in_linear_models
-using TensorCategories, Oscar
 V = vector_spaces(QQ)
 X = VectorSpaceObject(V, 2)
 Y = VectorSpaceObject(V, 3)
-f = morphism(X, Y, matrix(QQ, [1 0 2; 0 1 3]))
-@assert size(matrix(f)) == (2,3)
-@assert int_dim(Hom(X,Y)) == 6
-matrix(f)
-show(stdout, MIME"text/plain"(), matrix(f)); println() # hide
+f = morphism(X, Y, matrix(QQ, [1 0 0; 0 0 0]))
+
+H = Hom(X, Y)
+E = End(X)
+@assert int_dim(H) == 6
+@assert int_dim(E) == 4
+
+D, inclusions, projections = direct_sum(X, Y)
+@assert projections[1] ∘ inclusions[1] == id(X)
+@assert projections[2] ∘ inclusions[2] == id(Y)
+@assert is_zero(projections[1] ∘ inclusions[2])
+@assert is_zero(projections[2] ∘ inclusions[1])
+
+K, kernel_inclusion = kernel(f)
+Q, cokernel_projection = cokernel(f)
+I, image_inclusion = image(f)
+@assert is_zero(f ∘ kernel_inclusion)
+@assert is_zero(cokernel_projection ∘ f)
+(int_dim(H), int_dim(E), int_dim(D), int_dim(K), int_dim(Q), int_dim(I))
 ```
 
-## [Example: Group representations](@id concrete-models)
+The result is `(6,4,5,1,2,1)`: the dimensions of the Hom and endomorphism
+spaces are the expected matrix dimensions, while the last three entries record
+rank–nullity for the rank-one map $f$. The function `endomorphism_ring(X)`
+turns `End(X)` into an explicit $k$-algebra when that representation is needed.
 
-Let $G$ be a finite group. The category $\operatorname{Rep}_k(G)$ is another
-$k$-linear abelian category, but not every matrix between underlying vector
-spaces is a morphism. With the package's row-vector convention, a matrix
-$M:X\to Y$ is a morphism precisely when
+### [Finite-group representations](@id concrete-models)
+
+Let $G$ be a finite group. An object of $\operatorname{Rep}_k(G)$ is a
+finite-dimensional $k$-vector space $X$ together with a representation
+$\rho_X:G\to\operatorname{GL}(X)$, and a morphism $f:X\to Y$ is a
+$G$-equivariant linear map; see
+[EGNO; Examples 2.3.4 and 2.10.13, pp. 26 and 43](@citet). This is a
+$k$-linear abelian category over any field $k$. Its forgetful functor
+
+```math
+\label{eq:representation-forgetful-functor}
+U:\operatorname{Rep}_k(G)\longrightarrow\operatorname{Vec}_k
+```
+
+is a matrix realization: it is faithful, though generally not full.
+The implementation records dimensions, action matrices, and intertwiner
+matrices; it does not store this forgetful functor as a separate Julia value.
+
+TensorCategories.jl constructs this category with
+`representation_category(k,G)`. An explicit representation can be given by
+the images of group generators:
+
+```julia
+Representation(C, generators, matrices; check=true)
+```
+
+The keyword `check=true` verifies that the matrices satisfy the relations of
+$G$. The implementation uses row coordinates. Thus an action matrix
+$\rho_X(g)$ acts on the right of a row vector, and a matrix $M:X\to Y$ is an
+intertwiner precisely when
 
 ```math
 \label{eq:representation-intertwiner-foundations}
 \rho_X(g)M=M\rho_Y(g)
 ```
 
-for every chosen generator $g$ of $G$. The constructor
-`representation_category(k,G)` stores this model, and `Hom(X,Y)` solves these
-intertwining equations. Forgetting the action gives the faithful functor in
-equation \eqref{eq:matrix-realization-functor}, but it is generally not full.
+for every generator $g$. The function `Hom(X,Y)` solves these simultaneous
+linear equations, and `matrix(f)` returns the matrix $M$ of a represented
+intertwiner.
 
-```@example built_in_linear_models
+For $G=C_3$ over $\mathbb Q$, the following matrix has order three and defines
+a two-dimensional representation. We compare it with the trivial
+one-dimensional representation and then use abelian operations on their direct
+sum:
+
+```@example linear_abelian_tour
 G = cyclic_group(3)
-R = representation_category(QQ, G)
+C = representation_category(QQ, G)
 A = matrix(QQ, [0 1; -1 -1])
-X = Representation(R, gens(G), [A]; check=true)
+X = Representation(C, gens(G), [A]; check=true)
+T = Representation(C, gens(G), [identity_matrix(QQ, 1)]; check=true)
+
 @assert A^3 == identity_matrix(QQ, 2)
-@assert int_dim(X) == 2
+@assert int_dim(Hom(T, X)) == 0
+@assert int_dim(Hom(X, T)) == 0
+@assert int_dim(End(T)) == 1
 @assert int_dim(End(X)) == 2
-int_dim(End(X))
+@assert length(basis(End(X))) == 2
+@assert all(size(matrix(f)) == (2, 2) for f in basis(End(X)))
+
+D, inclusions, projections = direct_sum(T, X)
+K, kernel_inclusion = kernel(projections[1])
+Q, cokernel_projection = cokernel(inclusions[1])
+@assert int_dim(K) == 2 && is_zero(projections[1] ∘ kernel_inclusion)
+@assert int_dim(Q) == 2 && is_zero(cokernel_projection ∘ inclusions[1])
+(int_dim(D), int_dim(K), int_dim(Q))
 ```
 
-The coefficient field affects the solutions of the intertwining equations and
-the resulting abelian category. We therefore discuss coefficient fields before
-turning to simple objects and composition factors.
+The two-dimensional endomorphism space of $X$ consists of matrices commuting
+with $A$. The kernel and cokernel computations return representations, not
+merely vector-space nullspaces: the implementation restricts or descends the
+$G$-action to the computed subspace or quotient.
+
+The coefficient field affects the intertwining equations and the resulting
+abelian category. We therefore discuss coefficient fields before turning to
+simple objects and composition factors.
 
 Continue with [coefficient fields and numeric computations](@ref base-fields).

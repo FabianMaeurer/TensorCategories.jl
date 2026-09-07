@@ -64,14 +64,14 @@ with the correct domains and codomains. These identities should be tested on
 examples that exercise the representation rather than inferred from the mere
 existence of Julia methods.
 
-### Equality and isomorphism
-
 The operation `==` means equality in the chosen representation. An
 implementation must decide when two category values are equal, then compare
-objects and morphisms together with their parents and endpoints. Equality of
-objects is different from isomorphism. Where it is implemented,
-`is_isomorphic(X,Y)` returns `(true,f)`, with an isomorphism $f:X\to Y$, or
-`(false,nothing)`. The returned pair is not itself a Boolean.
+objects and morphisms together with their parents and endpoints. Mathematically,
+equality is already part of the ambient set- or class-theoretic language in
+which a category is defined. Computationally, it must be made effective for
+the chosen representation: generic operations use it, for example, to compare
+the middle endpoints of two morphisms. It is not an additional categorical
+structure, and equality of represented objects is different from isomorphism.
 
 ### Extending the interface
 
@@ -80,7 +80,7 @@ added by defining further Julia methods for the represented types. A
 categorical construction can be exposed by `product(X,Y)` or `kernel(f)`. A
 chosen monoidal structure is exposed by methods such as `tensor_product(X,Y)`,
 `one(C)`, and `associator(X,Y,Z)`. Properties and relations are reported by
-predicates such as `is_invertible(f)` and `is_isomorphic(X,Y)`.
+predicates such as `is_invertible(f)`.
 
 Thus the Julia mechanism is uniform even though the mathematics is not: some
 functions return chosen structure, some compute universal constructions, and
@@ -105,7 +105,7 @@ a Julia `Set` for each object and a complete table of values for each
 morphism. The following blocks form one continuous Julia session.
 
 ```@example finite_set_tutorial
-using TensorCategories, Oscar
+using TensorCategories
 
 struct FinSetCategory <: Category end
 
@@ -142,12 +142,12 @@ end
 
 Next we define equality and the elementary Julia operations needed to inspect
 objects and evaluate morphisms. The names `==`, `length`, `iterate`, and `in`
-belong to Julia's module `Base`, whereas `id`, `compose`, and `product` are
-exported by `TensorCategories`. The generic function `is_isomorphic` comes
-from OSCAR and is also used internally by TensorCategories.jl. Qualifying a
-method definition with a module that contains the relevant function tells
-Julia which existing generic function is being extended. It does not affect
-how an exported function is called after the module has been loaded.
+belong to Julia's module `Base`, whereas `id` and `compose` are exported by
+`TensorCategories`. This is why the method definitions below begin with
+`Base.:(==)` but `TensorCategories.id` and `TensorCategories.compose`.
+Qualifying a definition tells Julia which existing generic function is being
+extended. It does not affect how an exported function is called after the
+module has been loaded.
 
 ```@example finite_set_tutorial
 Base.:(==)(::FinSetCategory, ::FinSetCategory) = true
@@ -164,18 +164,6 @@ Base.in(x, X::FinSetObject) = x in X.elements
 function (f::FinSetMorphism)(x)
     x in domain(f) || throw(ArgumentError("argument outside the domain"))
     f.values[x]
-end
-```
-
-Two finite sets are isomorphic precisely when they have the same cardinality.
-When they do, pairing their elements supplies one possible isomorphism:
-
-```@example finite_set_tutorial
-function TensorCategories.is_isomorphic(X::FinSetObject, Y::FinSetObject)
-    parent(X) == parent(Y) || return false, nothing
-    length(X) == length(Y) || return false, nothing
-    values = Dict{Any,Any}(x => y for (x, y) in zip(X, Y))
-    true, FinSetMorphism(X, Y, values)
 end
 ```
 
@@ -196,21 +184,21 @@ We can now construct and compose morphisms through the common interface:
 C = FinSetCategory()
 X = FinSetObject(C, [1, 2, 3])
 Y = FinSetObject(C, [0, 1])
-X′ = FinSetObject(C, [:a, :b, :c])
 f = FinSetMorphism(X, Y, x -> x % 2)
 g = FinSetMorphism(Y, Y, x -> 1 - x)
 h = g ∘ f
 @assert domain(h) == X && codomain(h) == Y
 @assert h(1) == 0 && h(2) == 1 && h(3) == 0
 @assert id(Y) ∘ f == f && f ∘ id(X) == f
-flag, u = is_isomorphic(X, X′)
-@assert flag && Set(u(x) for x in X) == X′.elements
-@assert is_isomorphic(X, Y) == (false, nothing)
 nothing # hide
 ```
 
-As a first additional construction, we implement binary products. The method
-returns the Cartesian product together with its two projections:
+### Extending the tutorial category
+
+The code above is a complete implementation of the bare category. We can now
+add optional algorithms and constructions. As an example, we implement binary
+products. The method returns the Cartesian product together with its two
+projections:
 
 ```@example finite_set_tutorial
 function TensorCategories.product(X::FinSetObject, Y::FinSetObject)
@@ -239,13 +227,6 @@ Z, projections = product(X, Y, true)
 @assert length(Z) == 6
 nothing # hide
 ```
-
-!!! warning "Current built-in model"
-    The built-in model is suitable for elementary experiments, but its current
-    object-equality method is defective. Its dictionary constructor may also
-    accept a partial map, and its inverse method does not fully test
-    bijectivity. The tutorial implementation above uses correct object equality
-    and constructs a value for every element of the domain.
 
 ## Example: Positive integers ordered by divisibility
 
