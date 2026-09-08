@@ -1,7 +1,7 @@
 # [Idempotents and Krull–Schmidt categories](@id karoubian-categories)
 
 Let $\mathcal C$ be an additive category. An endomorphism
-$e\colon X\to X$ is idempotent if $e^2=e$. It **splits** if there are an
+$e\colon X\to X$ is **idempotent** if $e^2=e$. It **splits** if there are an
 object $Y$ and morphisms
 
 ```math
@@ -24,65 +24,112 @@ envelope formally adjoins objects $(X,e)$ for idempotents
 $e\in\operatorname{End}(X)$; a morphism $(X,e)\to(Y,d)$ is a morphism
 $f\colon X\to Y$ satisfying $f=d\circ f\circ e$.
 
-TensorCategories.jl does not currently provide a general Karoubi-envelope type
-for every category. Abelian implementations split idempotents through their
-image algorithms. The public function `karoubian_envelope` is currently
-specialized to center and centralizer categories, where this completion is
-needed by the corresponding construction.
+Idempotents encode direct-sum decompositions. If
 
-For example, the projection onto the first coordinate of
-$\mathbb Q^2$ splits through its one-dimensional image:
-
-```@example split_idempotent
-using TensorCategories, Oscar
-C = vector_spaces(QQ)
-X = VectorSpaceObject(C, 2)
-e = morphism(X, X, QQ[1 0; 0 0])
-Y, i = image(e)
-p = left_inverse(i) ∘ e
-@assert int_dim(Y) == 1
-@assert p ∘ i == id(Y)
-@assert i ∘ p == e
-Y
+```math
+\label{eq:direct-sum-components}
+X\cong X_1\oplus\cdots\oplus X_n
 ```
 
-Here `image(e)` returns the image object $Y$ and its inclusion
-$i\colon Y\to X$. Restricting $e$ to this image gives the projection
-$p\colon X\to Y$, and the assertions verify both equations in
-\eqref{eq:idempotent-splitting}. The image alone is enough for the generic
-decomposition algorithms described below.
+has inclusions $i_r\colon X_r\to X$ and projections
+$p_r\colon X\to X_r$, then
 
-## Krull–Schmidt decomposition
+```math
+\label{eq:orthogonal-idempotents}
+p_r\circ i_r=\operatorname{id}_{X_r},
+\qquad
+p_r\circ i_s=0\quad(r\ne s),
+\qquad
+\operatorname{id}_X=\sum_{r=1}^n i_r\circ p_r.
+```
 
-An additive category is a **Krull–Schmidt category** if every object is a finite
-direct sum of objects having local endomorphism rings. These summands are
-indecomposable, and the resulting decomposition is unique up to permutation and
-isomorphism. Equivalently, an additive category is Krull–Schmidt when it has
-split idempotents and every endomorphism ring is semiperfect
+Consequently, $e_r=i_r\circ p_r$ are pairwise orthogonal idempotents whose
+sum is $\operatorname{id}_X$. Conversely, splitting any such family recovers
+the direct sum in equation \eqref{eq:direct-sum-components}. Decomposing an
+object into indecomposable summands therefore amounts to decomposing its
+identity into primitive pairwise orthogonal idempotents.
+
+An additive category is a **Krull–Schmidt category** if every object is a
+finite direct sum of objects with local endomorphism rings. These summands are
+indecomposable, and the decomposition is unique up to permutation and
+isomorphism. In this setting an object is indecomposable precisely when its
+endomorphism ring is local. An additive category with split idempotents and
+semiperfect endomorphism rings is Krull–Schmidt
 [krause2015krull; Corollary 4.4](@cite). In particular, a Hom-finite
-$k$-linear additive category is Krull–Schmidt precisely when it is
-idempotent complete.
+$k$-linear additive category is Krull–Schmidt precisely when it is idempotent
+complete. Every locally finite abelian category is therefore Krull–Schmidt;
+compare [EGNO; Definition 1.8.1 and the paragraph following it](@cite).
 
-The distinction between *indecomposable* and *simple* matters outside a
-semisimple category. An indecomposable object has a local endomorphism ring,
-while Schur's lemma only says that a simple object has a division endomorphism
-ring. A representation in modular characteristic can be indecomposable without
-being simple.
+The number of indecomposable isomorphism classes is a separate finiteness
+question. A finite abelian category has only finitely many simple isomorphism
+classes, but it may have infinitely many indecomposable ones. For an
+algebraically closed field $k$ of characteristic $p$, the category
+$\operatorname{Rep}_k(G)$ has finite representation type precisely when the
+Sylow $p$-subgroups of $G$ are cyclic [higman1954indecomposable](@cite).
+Thus finite cyclic groups have only finitely many indecomposable
+representations, whereas the Klein four group in characteristic $2$ already
+has infinitely many.
 
-The package uses:
+## The interface
+
+As with simple-object computations, determining indecomposability and finding
+a decomposition are generally difficult, category-specific problems. An
+implementation may provide:
 
 | Operation | Meaning |
 |:---|:---|
 | `is_indecomposable(X)` | test whether $X$ is indecomposable |
-| `decompose(X)` | return pairs `(Y,m)` of indecomposable summands and multiplicities |
-| `TensorCategories.is_krull_schmidt(C)` | report that the implementation treats $\mathcal C$ as Krull–Schmidt |
+| `decompose(X)` | return pairs `(Y,m)` of indecomposable summands and their multiplicities |
+| `TensorCategories.is_krull_schmidt(C)` | record that the implementation treats $\mathcal C$ as Krull–Schmidt |
 
-The generic decomposition algorithm is not uniform over all fields. Over a
-finite field it decomposes the regular right module of
-$\operatorname{End}(X)$, obtains primitive idempotents, and forms their
-images. In a semisimple category over supported exact fields it instead uses
-the semisimple endomorphism algebra. Other nonsemisimple coefficient fields
-require a category-specific backend. Central primitive idempotents only split
-blocks; they need not give the individual indecomposable summands.
+Over a finite field, the generic decomposition backend forms
+$A=\operatorname{End}_{\mathcal C}(X)$ and decomposes the regular right
+$A$-module. Projecting $1_A$ onto its indecomposable summands gives primitive
+idempotents in $A$, and their images give the indecomposable summands of $X$.
+The group-representation backend instead applies GAP's
+`MTX.Indecomposition` directly to the representation. Hecke.jl's `ModAlgAss`
+MeatAxe routines provide related irreducibility and composition-series
+algorithms, as discussed in the preceding section.
+
+## Example: Modular group representations
+
+Let $G=C_5$ and $k=\mathbb F_5$. This category has one simple isomorphism
+class, while the unipotent Jordan blocks $J_r$, for $1\leq r\leq5$, are its
+five indecomposable isomorphism classes. The two-dimensional block $J_2$ is
+not simple, and
+$\operatorname{End}(J_2)\cong k[t]/(t^2)$ is local.
+
+```@example krull_schmidt_representations
+using TensorCategories, Oscar
+
+function jordan_representation(C, n)
+    J = identity_matrix(base_ring(C), n)
+    for i in 1:n-1
+        J[i, i+1] = 1
+    end
+    Representation(C, gens(base_group(C)), [J])
+end
+
+C = representation_category(GF(5), cyclic_group(5))
+J1 = jordan_representation(C, 1)
+J2 = jordan_representation(C, 2)
+@assert is_indecomposable(J2) && !is_simple(J2)
+
+X, inclusions, projections = direct_sum(J1, J2)
+e1 = inclusions[1] ∘ projections[1]
+e2 = inclusions[2] ∘ projections[2]
+@assert e1 ∘ e1 == e1 && e2 ∘ e2 == e2
+@assert e1 ∘ e2 == zero_morphism(X, X)
+@assert e2 ∘ e1 == zero_morphism(X, X)
+@assert e1 + e2 == id(X)
+
+sort([(int_dim(Y), m) for (Y, m) in decompose(X)])
+```
+
+The two primitive idempotents split $X$ into summands of dimensions $1$ and
+$2$, and `decompose(X)` returns `[(1,1),(2,1)]` after recording each summand by
+its dimension and multiplicity. This is a direct-sum decomposition into
+indecomposables; it is different from the composition series of $J_2$
+discussed in the preceding section.
 
 Continue with [finite and semisimple categories](@ref semisimple-categories).

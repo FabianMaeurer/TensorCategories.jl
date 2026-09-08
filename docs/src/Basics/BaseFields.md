@@ -4,30 +4,42 @@ DocTestSetup = :(using TensorCategories, Oscar)
 
 # [Coefficient fields and numeric computations](@id base-fields)
 
-For a linear category, the coefficient field is part of the mathematical input.
-It determines the available scalars, the meaning of equality, and the algebra
-algorithms that can be used. TensorCategories.jl calls it `base_ring(C)`, even
-when a particular construction requires a field. A Julia method accepting a
-value of type `Ring` does not by itself assert that its algorithm is valid over
-every ring.
+For a linear category, the field $k$ is part of the mathematical input, and
+`base_ring(C)` returns the corresponding coefficient parent of a category
+`C`. For exact computations, this parent may in principle be any field
+provided by OSCAR. For numerical computations over $\mathbb R$ or $\mathbb C$,
+it may instead be a parent whose elements are rigorous ball enclosures. In
+either case, this does not imply that every theorem or algorithm applies: its
+hypotheses may restrict the characteristic, require an algebraically closed or
+splitting field, or depend on operations that have only been implemented for
+certain coefficient types.
 
-For example, the category of finite-dimensional vector spaces remembers its
-coefficient field:
+Most fields used in TensorCategories.jl are represented exactly. Their
+elements are symbolic algebraic objects, and arithmetic and equality are exact.
+Numerical computations are also possible using arbitrary-precision real or
+complex ball arithmetic, as described below.
 
-```@example coefficient_fields
-using TensorCategories, Oscar
-C = vector_spaces(QQ)
-X = VectorSpaceObject(C, 2)
-@assert base_ring(C) == QQ
-@assert base_ring(X) == QQ
-base_ring(C)
-```
+## Exact symbolic computations
 
-## Exact scalars
+OSCAR provides several exact fields that commonly occur in tensor-category
+computations. For further coefficient fields, constructors, and conversion
+functions, see the [Fields chapter of the OSCAR
+manual](https://docs.oscar-system.org/stable/Fields/intro/).
 
-Ordinary division of Julia integers produces a floating-point number. Use
-OSCAR's rational field `QQ` when exact rational arithmetic and a parent field
-are required:
+| Field | OSCAR constructor | Description |
+|:---|:---|:---|
+| $\mathbb Q$ | `QQ` | the rational numbers |
+| a number field $K/\mathbb Q$ | `number_field(f, "a")`, `quadratic_field(d)` | a finite extension given by algebraic generators and relations |
+| an embedded real number field $K\subset\mathbb R$ | `embedded_number_field(f,r)` | a number field together with a chosen real embedding |
+| $\mathbb Q^{\mathrm{ab}}$ | `abelian_closure(QQ)` | the maximal abelian extension of $\mathbb Q$, containing all roots of unity |
+| $\overline{\mathbb Q}$ | `algebraic_closure(QQ)` | the field of algebraic numbers |
+| $\mathbb F_p$ | `GF(p)` | the prime field of characteristic $p$ |
+| $\mathbb F_{p^n}$ | `GF(p,n)` | the finite field with $p^n$ elements |
+| $\overline{\mathbb F}_p$ | `algebraic_closure(GF(p))` | the algebraic closure of the prime field $\mathbb F_p$ |
+
+Ordinary division of Julia integers produces a floating-point number. Use the
+OSCAR field `QQ` when an exact rational number and its mathematical parent
+field are required:
 
 ```jldoctest
 julia> a = QQ(1)/3;
@@ -39,74 +51,124 @@ julia> parent(a) == QQ
 true
 ```
 
-Other useful exact coefficient fields include prime fields `GF(p)`, number
-fields, and the algebraic closure `algebraic_closure(QQ)`. Characteristic is
-part of the input, rather than an implementation detail. For example,
-representation categories can be semisimple in characteristic zero and
-nonsemisimple when the characteristic divides the group order.
-
-## Number fields
-
 A number field is a finite extension of $\mathbb Q$. OSCAR presents it by
 generators and polynomial relations. The following constructs
 $K=\mathbb Q(s)$ with $s^2=2$:
 
 ```@example coefficient_fields
+using TensorCategories, Oscar
 K, s = quadratic_field(2)
 @assert s^2 == 2
 (K, minpoly(s))
 ```
 
 The element $s$ is an exact algebraic element. The abstract field does not
-declare that it is the positive real square root of $2$; that interpretation
-requires a chosen embedding of $K$ into the complex numbers.
+declare that it is the positive real square root of $2$. An embedding
+$\sigma\colon K\hookrightarrow\mathbb C$ specifies which complex root the
+generator represents. In this example there are two real embeddings,
+$\sigma_+(s)=\sqrt{2}$ and $\sigma_-(s)=-\sqrt{2}$, exchanged by the
+nontrivial element of $\operatorname{Gal}(K/\mathbb Q)$. Applying different
+embeddings to algebraic coefficients produces their Galois-conjugate
+realizations. When an ordered realization inside $\mathbb R$ is required,
+OSCAR records the chosen real embedding with `embedded_number_field`.
 
 Computations are often more efficient over a small number field containing the
 required coefficients than over a large algebraic closure. Working over the
 smaller field also retains arithmetic information that disappears after
 choosing one complex realization. It can, however, prevent objects from
 decomposing into absolutely simple summands. The resulting questions of
-splitness, scalar extension, embeddings, and Galois conjugacy are treated after
-semisimple categories have been introduced.
+splitness and scalar extension, together with the categorical effect of
+embeddings and Galois conjugacy, are treated in
+[Splitting and scalar extension](@ref splitting-and-scalars).
 
-## Algebraic closures
-
-OSCAR can work exactly over the field of algebraic numbers:
+The algebraic and abelian closures are exact fields rather than numerical
+approximations to $\mathbb C$:
 
 ```jldoctest
-julia> Qbar = algebraic_closure(QQ)
-Algebraic closure of rational field
+julia> Qab, z = abelian_closure(QQ);
+
+julia> Qbar = algebraic_closure(QQ);
+
+julia> F25 = GF(5, 2);
+
+julia> order(F25)
+25
+
+julia> Fbar = algebraic_closure(GF(5))
+Algebraic closure of prime field of characteristic 5
 ```
 
-This is an exact algebraically closed field, not a numerical approximation to
-$\mathbb C$. Algebraically closed coefficient fields remove division-algebra
-phenomena for finite-dimensional endomorphism algebras of simple objects, but
-they are not automatically the best computational choice. Support for a
-particular package algorithm can also be narrower than the collection of
-coefficient fields available in OSCAR.
+Here $\mathbb Q^{\mathrm{ab}}$ is the union of the cyclotomic fields, whereas
+$\overline{\mathbb Q}$ contains every algebraic number. Algebraically closed
+coefficient fields remove division-algebra phenomena for finite-dimensional
+endomorphism algebras of simple objects, but they are not automatically the
+best computational choice. The positive-characteristic constructor currently
+takes a prime field `GF(p)` and represents
+$\overline{\mathbb F}_p$ as the union of its finite extensions.
 
 TensorCategories.jl supports positive-characteristic coefficient fields as a
 first-class use case. Field extension within one characteristic can split
 objects, but it cannot repair a failure of semisimplicity caused by modular
 representation theory.
 
+OSCAR can work exactly with a finite real number field $K\subset\mathbb R$ by
+choosing a real embedding with `embedded_number_field`, and every finite
+collection of real algebraic numbers is contained in such a field. OSCAR can
+also represent real algebraic numbers as elements of $\overline{\mathbb Q}$ and
+test whether an element is real. It does not, however, provide the real closed
+field $\mathbb R_{\mathrm{alg}}=\overline{\mathbb Q}\cap\mathbb R$ as a
+separate exact coefficient field. The parent of a real element represented in
+`algebraic_closure(QQ)` is still all of $\overline{\mathbb Q}$, so this does not
+model a category whose coefficient field is $\mathbb R_{\mathrm{alg}}$. Exact
+computations over a chosen embedded real number field are possible in
+principle, but a universal exact real closed coefficient field is not currently
+available in OSCAR. Investigating exact and numerical computations with fusion
+categories over real fields is ongoing work in TensorCategories.jl.
+
 ## [Numerical computations](@id numerical-computations)
 
-A numerical computation begins with a choice of coefficient field, just as an
-exact computation does. TensorCategories.jl uses arbitrary-precision ball
-arithmetic: the user chooses a working precision, and arithmetic propagates
-rigorous enclosures for the represented quantities.
+A numerical computation begins with an intended coefficient field
+$\mathbb R$ or $\mathbb C$ and a computational parent representing its scalars,
+just as an exact computation begins with an exact coefficient field.
+TensorCategories.jl uses arbitrary-precision ball arithmetic: the user chooses
+a working precision, and arithmetic propagates rigorous enclosures for the
+represented quantities.
 
-### Arbitrary-precision ball arithmetic
+OSCAR provides two interfaces to Arb's real and complex ball arithmetic.
+The constructors `real_field()` and `complex_field()` return parents of types
+`RealField` and `ComplexField`; their precision is controlled through the
+global `Balls` precision. In OSCAR examples, `RR` and `CC` are conventional
+variable names assigned with `RR = real_field()` and `CC = complex_field()`.
+They are not exact symbolic models of $\mathbb R$ and $\mathbb C$.
 
-`ArbField(p)` and `AcbField(p)` provide real and complex ball arithmetic at a
-user-selected working precision of $p$ bits. A ball records a midpoint and an
-error radius. The precision may be chosen as large as needed, but a particular
-field, category, and computation use one chosen precision. The implementation
-does not automatically increase it unless an algorithm explicitly says so.
-See [johansson2017arb](@citet) for the arithmetic model and
-[maeurer2026thesis; §5.2.3](@citet) for its use in numerical center and symbol
-computations in TensorCategories.jl.
+These parents belong to AbstractAlgebra's `Field` type hierarchy because they
+implement its computational field interface. This is not an assertion that
+the ball objects themselves form a field in the algebraic sense: a ball is an
+enclosure, and a ball containing zero cannot be inverted. Exactness is a
+separate part of the interface. For an exact field such as `QQ`,
+`is_exact_type(elem_type(QQ))` is `true`; for `RealField`, `ComplexField`,
+`ArbField`, and `AcbField` elements it is `false`. Thus a category with
+`base_ring(C) == real_field()` is a numerical model of a category over
+$\mathbb R$, computed using rigorous enclosures at the selected precision.
+
+The constructors `ArbField(p)` and `AcbField(p)` instead return real and
+complex ball fields whose working precision of $p$ bits is stored in the
+parent. TensorCategories.jl currently uses these explicit-precision parents
+for its principal numerical workflows, and `numeric(E,p)` produces a category
+over an `AcbField`. A ball records a midpoint and an error radius. The
+precision may be chosen as large as needed, but a particular field, category,
+and computation use one chosen precision. The implementation does not
+automatically increase it unless an algorithm explicitly says so. See
+[johansson2017arb](@citet) for the arithmetic model.
+
+Unlike `Float64`, ball fields are not restricted to 53 binary digits and retain
+uncertainty as part of every scalar. They provide controlled numerical
+computation rather than point-valued floating-point arithmetic with untracked
+rounding error. In `ArbField(p)` and `AcbField(p)`, the precision belongs to the
+field and hence to a category over that field. For reproducible category
+computations, prefer these explicit-precision parents.
+
+Here is a scalar computation over a real ball field:
 
 ```@example numerical_scalars
 using Oscar
@@ -116,17 +178,42 @@ x = sqrt(R(2))
 precision(R)
 ```
 
-Unlike `Float64`, these fields are not restricted to 53 binary digits and
-retain uncertainty as part of every scalar. In `ArbField(p)` and `AcbField(p)`,
-the precision belongs to the field and hence to a category over that field.
-`ComplexField()` instead uses Nemo's mutable global ball precision. For
-reproducible category computations, prefer `AcbField(p)`; conversions produced
-by `numeric` use it.
+These numerical coefficient parents can also be used directly by a supported
+category. For example, the usual coordinate model of vector spaces and its
+matrix operations work over a real ball field:
 
-### Exact and numerical models
+```@example numerical_vector_spaces
+using TensorCategories, Oscar
+R = ArbField(128)
+C = vector_spaces(R)
+X = VectorSpaceObject(C, 2)
+A = matrix(R, [sqrt(R(2)) 0; 0 R(1)/3])
+f = morphism(X, X, A)
+g = f ∘ f
+@assert base_ring(C) == R
+(int_dim(X), contains_zero(matrix(g)[1,1] - R(2)))
+```
 
-Exact fields support algebraic equality and symbolic field operations.
-Numerical fields support high-precision analytic and linear-algebra
+This returns `(2,true)`: the first diagonal entry of $g$ is a ball containing
+the exact value $2$.
+
+!!! warning "Current numerical limitations"
+    TensorCategories.jl and its OSCAR/Nemo backends do not yet provide every
+    algorithm required by the numerical side of the package. Basic category
+    models can often be constructed over a real or complex ball field, and
+    specified objects and morphisms can be manipulated using the available
+    matrix operations. This does not imply that every higher algorithm is
+    implemented for that field type.
+
+    In particular, simple-object enumeration for group representations over
+    ball fields is not currently implemented. Direct computation and
+    skeletonization of Drinfeld centers over real ball fields also require
+    further support for scalar extraction, numerical decomposition and linear
+    dependence, and the recovery of fusion multiplicities. Extending these
+    interfaces and algorithms is ongoing work.
+
+Exact field types support algebraic equality and symbolic field operations.
+Inexact ball types support high-precision analytic and linear-algebra
 computations and retain an enclosure for every result. When exact source data
 are available, keep them and construct a numerical model for the required
 computation. The exact source records the algebraic object; the numerical
@@ -139,15 +226,11 @@ the conversion also requires a complex embedding. Increasing the precision
 cannot recover information already lost through decimal or low-precision
 input.
 
-### Equality and overlap
-
 Structural equality `==` remains an equivalence relation. It is not replaced by
 ball overlap, because overlap is not transitive. Numerical algorithms instead
 use explicit tests such as `overlaps(x,y)` and `contains_zero(x)` where the
 mathematics asks whether two enclosures are compatible or whether a quantity
 may vanish.
-
-### Rigorous enclosures and mathematical conclusions
 
 Suppose that a ball $B$ contains an exact quantity $b$.
 
@@ -162,7 +245,11 @@ still enclosures rather than exact algebraic expressions.
 
 Categorical predicates over a ball field use the corresponding numerical
 criterion at the field's working precision. They do not reject an input merely
-because it lacks an exact symbolic certificate. The pages introducing each
-categorical structure state the equations tested by its predicate.
+because it lacks an exact symbolic certificate. Unless a predicate explicitly
+documents a rigorous certificate, a successful result means that the defining
+equations hold to the chosen working precision. Ball arithmetic can
+nevertheless certify particular conclusions, such as nonvanishing or strict
+separation, when the computed enclosures imply them. The pages introducing
+each categorical structure state the equations tested by its predicate.
 
 Continue with [simple objects and finite-length categories](@ref simple-objects).

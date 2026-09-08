@@ -15,11 +15,16 @@ on the chosen composition series; see [EGNO; §1.5](@cite).
 
 A $k$-linear abelian category is **locally finite** if its Hom spaces are
 finite-dimensional and every object has finite length
-[EGNO; Definition 1.8.1](@cite). Both conditions are required:
-finite-dimensional Hom spaces alone do not imply finite length. Every finite
-abelian category is locally finite. The converse requires additional
-hypotheses, including enough projectives and only finitely many simple
-isomorphism classes; see [EGNO; Definitions 1.8.5--1.8.6](@cite).
+[EGNO; Definition 1.8.1](@cite). A $k$-linear abelian category is **finite** if
+it is equivalent to the category of finite-dimensional modules over a
+finite-dimensional $k$-algebra. Equivalently, it is locally finite, has enough
+projectives, and has only finitely many isomorphism classes of simple objects
+[EGNO; Definitions 1.8.5--1.8.6](@cite). Thus every finite abelian category is
+locally finite and has only finitely many simple isomorphism classes. Indeed,
+if $\mathcal C\simeq A\text{-mod}$ for a finite-dimensional $k$-algebra $A$,
+then every simple object occurs as a composition factor of the regular
+$A$-module. In particular, $\operatorname{Rep}_k(G)$ is finite when $G$ is a
+finite group, since $kG$ is finite-dimensional.
 
 Simple composition factors are subquotients. They need not be subobjects or
 direct summands. In particular, a nonsplit extension of two simple objects has
@@ -28,7 +33,13 @@ especially visible in positive characteristic.
 
 ## The interface
 
-The relevant public functions have different computational requirements:
+The predicate `is_finite(C)` records that an implementation declares
+$\mathcal C$ to be a finite abelian category. A `false` result may mean only
+that the property has not been declared.
+
+Within a finite-length category, an implementation may provide the following
+computational functions. They are optional capabilities rather than part of
+the axioms of an abelian or finite category:
 
 | Function | Meaning |
 |:---|:---|
@@ -37,30 +48,15 @@ The relevant public functions have different computational requirements:
 | `simple_subobjects(X)` | return the simple isomorphism types occurring in the socle, when supported |
 | `simples(C)` | enumerate representatives of all simple isomorphism classes, when this is finite and computable |
 
-There is no general algorithm for `composition_factors(X)` from the bare
-abelian interface. A category of finite length must supply a
-category-specific method if it supports this computation. In particular, the
-endomorphism algebra $\operatorname{End}(X)$ alone does not determine a
-composition series. Splitting idempotent endomorphisms detects direct summands,
-not the successive subquotients in a composition series. A model must likewise
-supply a valid simplicity test unless its additional structure supports an
-applicable generic method.
-
-!!! note "MeatAxe functionality in Hecke"
-    Hecke.jl provides the matrix-module type `ModAlgAss` together with
-    `meataxe`, `composition_series`, `composition_factors`, and
-    `composition_factors_with_multiplicity` [fieker2017nemo](@cite). These
-    algorithms take modules described by generator matrices; the current Hecke
-    test suite exercises them over finite fields, $\mathbb Q$, and a number
-    field. TensorCategories.jl does not currently use this interface for group
-    representations: its `composition_factors` method converts the
-    representation to a GAP module and calls `MTX.CollectedFactors` directly.
-    The Hecke implementation may therefore provide a broader future backend for
-    the categorical function.
-
-Enumeration by `simples(C)` is a further problem. Knowing how to test one
-given object for simplicity does not provide an algorithm that finds every
-simple object of a category.
+None of these computations follows from the abstract abelian or finite-length
+interface. Testing whether an object is simple, finding its composition
+factors or simple subobjects, and enumerating all simple objects are generally
+difficult problems that require algorithms specific to the category and its
+coefficient field. These capabilities are therefore implemented separately.
+For representations of finite groups over finite fields, established modular
+representation algorithms are available; TensorCategories.jl uses GAP's
+irreducible-representation routines and MeatAxe functionality, as illustrated
+below.
 
 ## Example: Modular group representations
 
@@ -119,6 +115,18 @@ nothing # hide
 
 This example shows why composition factors and direct-sum decompositions need
 separate interfaces. We discuss direct summands next.
+
+!!! note "MeatAxe functionality in Hecke"
+    Hecke.jl provides the matrix-module type `ModAlgAss` together with
+    `meataxe`, `composition_series`, `composition_factors`, and
+    `composition_factors_with_multiplicity` [fieker2017nemo](@cite). These
+    algorithms take modules described by generator matrices; the current Hecke
+    test suite exercises them over finite fields, $\mathbb Q$, and a number
+    field. TensorCategories.jl does not currently use this interface for group
+    representations: its `composition_factors` method converts the
+    representation to a GAP module and calls `MTX.CollectedFactors` directly.
+    The Hecke implementation may therefore provide a broader future backend for
+    the categorical function.
 
 Continue with [idempotents and direct-sum decompositions](@ref
 karoubian-categories).
