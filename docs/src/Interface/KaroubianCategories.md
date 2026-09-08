@@ -31,8 +31,7 @@ objects, and recognize isomorphic summands. All of these are
 category-dependent algorithmic problems. In an abelian category an image is
 known to exist, but an implementation must still provide a way to compute it.
 The function `karoubian_envelope(C)` is therefore a construction which a
-concrete category model may implement; the current methods construct it for
-center and relative-center models.
+concrete category model may implement.
 
 Idempotents encode direct-sum decompositions. If
 

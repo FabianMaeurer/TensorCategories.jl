@@ -54,7 +54,7 @@ try
                 "Simple objects and finite length" => "Interface/SimpleObjects.md",
                 "Idempotents and Krull–Schmidt categories" => "Interface/KaroubianCategories.md",
                 "Finite and semisimple categories" => "Interface/SemisimpleCategories.md",
-                "Splitting and scalar extension" => "Interface/SplittingFields.md",
+                "Scalar extension and splitting" => "Interface/SplittingFields.md",
                 "Functors and natural transformations" => "Interface/Functors.md",
             ],
             "Monoidal categories" => [

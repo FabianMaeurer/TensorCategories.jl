@@ -68,7 +68,6 @@ coefficient field.
 
 When a semisimple category has only finitely many simple isomorphism classes,
 it is finite: every object is projective, so the direct sum of representatives
-of the simples is a projective generator. This is the finiteness condition used
-later in the definitions of fusion and multifusion categories.
+of the simples is a projective generator.
 
-Continue with [splitting and scalar extension](@ref splitting-and-scalars).
+Continue with [scalar extension and splitting](@ref splitting-and-scalars).

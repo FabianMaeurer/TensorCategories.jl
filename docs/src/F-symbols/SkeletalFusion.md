@@ -63,7 +63,7 @@ This description uses
 $\operatorname{End}_{\mathcal C}(S_i)=k$. In a non-split semisimple category,
 the blocks have coefficients in the division algebras
 $\operatorname{End}_{\mathcal C}(S_i)$ instead. `SixJCategory` implements the
-split case; see [splitting and scalar extension](@ref splitting-and-scalars)
+split case; see [scalar extension and splitting](@ref splitting-and-scalars)
 for the non-split setting.
 
 The matrix blocks describe maps between multiplicity spaces. Their existence

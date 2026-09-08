@@ -79,7 +79,7 @@ choosing one complex realization. It can, however, prevent objects from
 decomposing into absolutely simple summands. The resulting questions of
 splitness and scalar extension, together with the categorical effect of
 embeddings and Galois conjugacy, are treated in
-[Splitting and scalar extension](@ref splitting-and-scalars).
+[Scalar extension and splitting](@ref splitting-and-scalars).
 
 The algebraic and abelian closures are exact fields rather than numerical
 approximations to $\mathbb C$:
