@@ -1,45 +1,45 @@
 # [Implementing a monoidal category](@id implementing-monoidal)
 
-We extend the matrix category from the preceding chapter by giving it the
-standard tensor product of vector spaces. The complete version is available as
-[matrix_category.jl](matrix_category.jl); its linear and abelian methods agree
-with the earlier tutorial.
+To add a monoidal structure to a category model, implement the tensor product
+on both objects and morphisms, a tensor unit, and the associator described in
+the preceding chapter:
 
-On objects and morphisms the additional methods are:
+| Required method | Meaning |
+|:---|:---|
+| `tensor_product(X,Y)` | the object $X\otimes Y$ |
+| `tensor_product(f,g)` | the morphism $f\otimes g$ |
+| `one(C)` | the tensor unit $\mathbb 1$ |
+| `associator(X,Y,Z)` | $a_{X,Y,Z}\colon (X\otimes Y)\otimes Z\to X\otimes(Y\otimes Z)$ |
 
-```julia
-function TensorCategories.tensor_product(X::MatObject, Y::MatObject)
-    parent(X) == parent(Y) || throw(ArgumentError("different categories"))
-    MatObject(parent(X), X.n*Y.n)
-end
+The object and morphism methods for `tensor_product` must define the same
+bifunctor. In particular, they must preserve identities and composition. The
+represented tensor unit is strict: tensoring a represented object with
+$\mathbb 1$ must return that object. The associator must be natural and satisfy
+the pentagon equation. These requirements are mathematical obligations of the
+implementation; defining methods with the correct signatures does not verify
+them.
 
-TensorCategories.tensor_product(f::MatMorphism, g::MatMorphism) =
-    morphism(domain(f)⊗domain(g), codomain(f)⊗codomain(g),
-             kronecker_product(matrix(f), matrix(g)))
+For a category with a matrix realization, the implementation must also specify
+the ordered basis of $U(X\otimes Y)$. In the built-in model of vector spaces,
+the coordinate from the right tensor factor varies fastest. The matrix of a
+tensor product is therefore the Kronecker product
 
-Base.one(C::MatCategory) = MatObject(C, 1)
-
-TensorCategories.associator(X::MatObject, Y::MatObject, Z::MatObject) =
-    id((X⊗Y)⊗Z)
+```math
+\label{eq:implemented-tensor-kronecker}
+M_{f\otimes g}=M_f\mathbin{\operatorname{\otimes}_{\mathrm{Kr}}}M_g.
 ```
 
-The ordered tensor basis has the coordinate from the right factor varying
-fastest. This makes the morphism formula the usual Kronecker product and makes
-the canonical rebracketing matrix an identity. Other basis orders would require
-corresponding permutation matrices; the identity associator is a feature of
-this representation, not part of the definition of a monoidal category.
-
-The implementation declares `is_monoidal(C) == true` only after providing the
-tensor product on both objects and morphisms, the unit, and the associator. The
-declaration does not check bifunctoriality or the pentagon automatically.
+The induced bases on $(X\otimes Y)\otimes Z$ and
+$X\otimes(Y\otimes Z)$ have the same order, so the associator is represented
+by an identity matrix:
 
 ```@example monoidal_implementation
 using TensorCategories, Oscar
-include("matrix_category.jl")
-using .MatrixCategoryTutorial
-C = MatCategory(QQ)
-X, Y = MatObject(C, 2), MatObject(C, 3)
+C = vector_spaces(QQ)
+X = VectorSpaceObject(C, 2)
+Y = VectorSpaceObject(C, 3)
 f = morphism(X, Y, matrix(QQ, [1 0 0; 0 0 0]))
+
 @assert int_dim(X ⊗ Y) == 6
 @assert matrix(f ⊗ id(X)) ==
     kronecker_product(matrix(f), matrix(id(X)))
@@ -47,7 +47,14 @@ f = morphism(X, Y, matrix(QQ, [1 0 0; 0 0 0]))
 is_monoidal(C)
 ```
 
-This tutorial has not implemented duality, so it does not declare rigidity or
-any of the stronger structures introduced next.
+This identity associator is a feature of the chosen coordinate model. A
+different ordering of tensor-product bases requires the corresponding change
+of basis, and a general monoidal category may have a nontrivial associator or
+no matrix realization at all.
+
+An implementation should declare `is_monoidal(C) == true` only after supplying
+this structure and verifying bifunctoriality, naturality, the strict unit
+conditions, and the pentagon. The declaration does not perform those checks
+automatically.
 
 Continue with [rigidity](@ref rigid-categories).
