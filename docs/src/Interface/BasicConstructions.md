@@ -40,24 +40,37 @@ category.
 | `karoubian_envelope(Z)` | Add images of idempotents in supported center and relative-center models |
 | `semisimplify(C)` | Quotient negligible morphisms in supported pivotal models |
 
-Mathematically, one first forms the coefficient extension
-$\mathcal C\otimes_k L$, with the same objects as $\mathcal C$ and
+Mathematically, one first forms the Hom-space extension
+$\mathcal C\otimes_k^{\mathrm{Hom}} L$, with the same objects as $\mathcal C$
+and
 ```math
 \label{eq:scalar-extension-hom}
-\operatorname{Hom}_{\mathcal C\otimes_k L}(X,Y)
+\operatorname{Hom}_{\mathcal C\otimes_k^{\mathrm{Hom}} L}(X,Y)
 =\operatorname{Hom}_{\mathcal C}(X,Y)\otimes_k L.
 ```
-New idempotents need not have images in this category, so it need not remain
-abelian. For a semisimple category, scalar extension means the Karoubi
-completion
+New idempotents need not have images in this category. For a Hom-finite
+Krull–Schmidt category, the idempotent-complete additive scalar extension is
+the Karoubi completion
 ```math
 \label{eq:scalar-extension-karoubi-envelope}
-\mathcal C\boxtimes_k L=\operatorname{Kar}(\mathcal C\otimes_k L).
+\mathcal C_L
+=\operatorname{Kar}(\mathcal C\otimes_k^{\mathrm{Hom}} L).
 ```
-For a weak fusion category this agrees with the Deligne product
+It records the new indecomposable summands which appear after extending the
+endomorphism algebras. For a semisimple category over a perfect field, or more
+generally when the relevant endomorphism algebras are separable, this is again
+semisimple abelian. For a weak fusion category it agrees with the Deligne product
 $\mathcal C\boxtimes_k\operatorname{Vec}_L$; see
-[maurer2024computing; §5.1](@cite) and
-[maeurer2026thesis; §1.4.5](@cite).
+[etingof2012descent; §3.1](@cite) and
+[lopezfranco2013tensor; Theorem 3 and §5](@cite). The
+[splitting chapter](@ref splitting-and-scalars) explains the distinction
+between the Hom-space extension and its completion in detail.
+
+For a nonsemisimple abelian category, Karoubi completion alone need not
+preserve abelianness. The abelian scalar extension, when it exists, is the
+Deligne product $\mathcal C\boxtimes_k\operatorname{Vec}_L$; for
+$\mathcal C\simeq A\text{-mod}$ this is $(A\otimes_kL)\text{-mod}$. The two
+constructions agree when $L/k$ is finite separable.
 
 The function `extension_of_scalars` realizes this construction according to
 the category model. For split skeletal input no simple endomorphism algebra

@@ -24,6 +24,16 @@ envelope formally adjoins objects $(X,e)$ for idempotents
 $e\in\operatorname{End}(X)$; a morphism $(X,e)\to(Y,d)$ is a morphism
 $f\colon X\to Y$ satisfying $f=d\circ f\circ e$.
 
+This formal definition is simple, but realizing the Karoubi envelope
+effectively can be difficult. One must compute idempotents in endomorphism
+algebras, find their primitive decompositions, construct their images as
+objects, and recognize isomorphic summands. All of these are
+category-dependent algorithmic problems. In an abelian category an image is
+known to exist, but an implementation must still provide a way to compute it.
+The function `karoubian_envelope(C)` is therefore a construction which a
+concrete category model may implement; the current methods construct it for
+center and relative-center models.
+
 Idempotents encode direct-sum decompositions. If
 
 ```math
@@ -61,14 +71,30 @@ complete. Every locally finite abelian category is therefore Krull–Schmidt;
 compare [EGNO; Definition 1.8.1 and the paragraph following it](@cite).
 
 The number of indecomposable isomorphism classes is a separate finiteness
-question. A finite abelian category has only finitely many simple isomorphism
-classes, but it may have infinitely many indecomposable ones. For an
-algebraically closed field $k$ of characteristic $p$, the category
+question. A finite-dimensional $k$-algebra has **finite representation type**
+if it has only finitely many isomorphism classes of finite-dimensional
+indecomposable modules; the same terminology is used for its representation
+category. A finite abelian category has only finitely many simple isomorphism
+classes, but it may have infinitely many indecomposable ones.
+
+Every finite cyclic group $C_n$ has finite representation type over every
+field $k$. Indeed, $kC_n\cong k[x]/(x^n-1)$. Write
+$x^n-1=\prod_i f_i(x)^{e_i}$ with the $f_i$ distinct monic irreducible
+polynomials in $k[x]$. By the structure theorem for finitely generated modules
+over $k[x]$, the indecomposable $kC_n$-modules are precisely
+
+```math
+\label{eq:cyclic-indecomposable-modules}
+k[x]/\bigl(f_i(x)^a\bigr),
+\qquad 1\leq a\leq e_i.
+```
+
+Thus there are only finitely many even when $k$ is not algebraically closed.
+More generally, if $k$ is algebraically closed of characteristic $p$, then
 $\operatorname{Rep}_k(G)$ has finite representation type precisely when the
-Sylow $p$-subgroups of $G$ are cyclic [higman1954indecomposable](@cite).
-Thus finite cyclic groups have only finitely many indecomposable
-representations, whereas the Klein four group in characteristic $2$ already
-has infinitely many.
+Sylow $p$-subgroups of $G$ are cyclic [higman1954indecomposable](@cite). The
+Klein four group in characteristic $2$ therefore has infinitely many
+indecomposable representations.
 
 ## The interface
 
@@ -90,6 +116,11 @@ The group-representation backend instead applies GAP's
 `MTX.Indecomposition` directly to the representation. Hecke.jl's `ModAlgAss`
 MeatAxe routines provide related irreducibility and composition-series
 algorithms, as discussed in the preceding section.
+
+Scalar extension can create new idempotents in endomorphism algebras and hence
+new decompositions of formerly indecomposable objects. This is one reason that
+the [scalar-extension construction](@ref splitting-and-scalars) generally
+includes a Karoubi envelope.
 
 ## Example: Modular group representations
 
