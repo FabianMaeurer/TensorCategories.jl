@@ -112,12 +112,12 @@ $\operatorname{End}(S_L)=D_S\otimes_kL$. A field $L$ is a **splitting
 field** for $\mathcal C$ if $\mathcal C_L$ is split; compare
 [EGNO; §4.16](@cite).
 
-If $\mathcal C$ is split semisimple, then its Hom-space extension is already
-idempotent complete, so the Karoubi envelope introduces no new objects. When
-scalar extension remains semisimple, extending a simple object $S$ amounts to
-finding primitive idempotents in $D_S\otimes_kL$ and taking their images.
-Every simple object of $\mathcal C_L$ arises in this way from a simple object
-of $\mathcal C$.
+If $\mathcal C$ is finite split semisimple, then its Hom-space extension is
+already idempotent complete, so the Karoubi envelope introduces no new objects.
+When scalar extension remains semisimple, extending a simple object $S$
+amounts to finding primitive idempotents in $D_S\otimes_kL$ and taking their
+images. Every simple object of $\mathcal C_L$ arises in this way from a simple
+object of $\mathcal C$.
 
 ## The interface
 

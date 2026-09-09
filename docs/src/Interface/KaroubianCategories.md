@@ -66,8 +66,9 @@ indecomposable modules; the same terminology is used for its representation
 category. A finite abelian category has only finitely many simple isomorphism
 classes, but it may have infinitely many indecomposable ones.
 
-Every finite cyclic group has finite representation type over every field.
-More generally, if $k$ is algebraically closed of characteristic $p$, then
+Every finite cyclic group has finite representation type over every field. In
+characteristic zero this follows from Maschke's theorem. In characteristic
+$p>0$ it follows from Higman's theorem, which more generally states that
 $\operatorname{Rep}_k(G)$ has finite representation type precisely when the
 Sylow $p$-subgroups of $G$ are cyclic [higman1954indecomposable](@cite). The
 Klein four group in characteristic $2$ therefore has infinitely many

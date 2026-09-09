@@ -2,7 +2,7 @@
 
 An abelian category $\mathcal C$ is **semisimple** if every object is a direct
 sum of simple objects [EGNO; Definition 1.5.1](@cite). If $\mathcal C$ is
-locally finite, these direct sums are finite. It is then a Krull--Schmidt
+locally finite, these direct sums are finite. It is then a Krull–Schmidt
 category, and its simple objects are precisely its indecomposable objects.
 Thus every object $X$ admits a decomposition
 
@@ -67,8 +67,8 @@ Equation \eqref{eq:maschke-condition} concerns semisimplicity only. Even when it
 holds, the simple representations need not remain simple after extending the
 coefficient field.
 
-When a semisimple category has only finitely many simple isomorphism classes,
-it is finite: every object is projective, so the direct sum of representatives
-of the simples is a projective generator.
+When a locally finite semisimple category has only finitely many simple
+isomorphism classes, it is finite: every object is projective, so the direct
+sum of representatives of the simples is a projective generator.
 
 Continue with [scalar extension and splitting](@ref splitting-and-scalars).

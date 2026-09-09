@@ -67,8 +67,7 @@ required coefficients than over a large algebraic closure. Working over the
 smaller field also retains arithmetic information that disappears after
 choosing one complex realization. It can, however, prevent objects from
 decomposing into absolutely simple summands. The resulting questions of
-splitness and scalar extension, together with the categorical effect of
-embeddings and Galois conjugacy, are treated in
+splitness and scalar extension are treated in
 [Scalar extension and splitting](@ref splitting-and-scalars).
 
 The algebraic and abelian closures are exact fields rather than numerical
@@ -201,13 +200,14 @@ example, a determinant ball excluding zero certifies nonvanishing. This does
 not turn every ball-valued calculation into symbolic algebra: its scalars are
 still enclosures rather than exact algebraic expressions.
 
-Categorical predicates over a ball field use the corresponding numerical
-criterion at the field's working precision. They do not reject an input merely
-because it lacks an exact symbolic certificate. Unless a predicate explicitly
-documents a rigorous certificate, a successful result means that the defining
-equations hold to the chosen working precision. Ball arithmetic can
-nevertheless certify particular conclusions, such as nonvanishing or strict
-separation, when the computed enclosures imply them. The pages introducing
-each categorical structure state the equations tested by its predicate.
+Supported categorical predicates over a ball field use the corresponding
+numerical criterion at the field's working precision. They do not reject an
+input merely because it lacks an exact symbolic certificate. Unless a predicate
+explicitly documents a rigorous certificate, a successful result means that
+the defining equations hold to the chosen working precision. Ball arithmetic
+can nevertheless certify particular conclusions, such as nonvanishing or
+strict separation, when the computed enclosures imply them. The pages
+introducing each categorical structure state the equations tested by its
+predicate.
 
 Continue with [simple objects and finite-length categories](@ref simple-objects).

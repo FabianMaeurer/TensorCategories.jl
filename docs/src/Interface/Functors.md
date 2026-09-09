@@ -90,6 +90,11 @@ reconstructs the component on $X$ as
 Thus `eta(X)` is available for decomposable objects as soon as the category can
 compute `direct_sum_decomposition(X, indecomposables)`.
 
+The generic `direct_sum_decomposition` method uses decomposition into simple
+objects and therefore applies to semisimple categories. A nonsemisimple
+Krull–Schmidt model can use the same representation of natural transformations
+after providing its own `direct_sum_decomposition` method.
+
 The constructor does not check naturality. The supplied components define a
 natural transformation only if
 
@@ -105,11 +110,15 @@ each indecomposable, not only morphisms between distinct objects.
 
 The function `Nat(F,G; indecomposables=objects)` computes the vector space of
 additive natural transformations by solving these linear equations. If the
-keyword is omitted, it calls `indecomposables(domain(F))`. The solver requires
-additive functors with the same domain and codomain, finite bases for the
-relevant Hom spaces, a common coefficient field, and effective direct-sum
-decompositions. It returns a `NaturalTransformations` Hom space; its basis
-elements can be obtained with `basis`.
+keyword is omitted, it calls `indecomposables(domain(F))`; the generic fallback
+can enumerate indecomposables only in the semisimple case. A nonsemisimple
+Krull–Schmidt model must provide its own method or pass a suitable list
+explicitly. The solver requires additive functors with the same domain and
+codomain, finite bases for the relevant Hom spaces, and a common coefficient
+field. Evaluating the resulting transformations away from the supplied
+representatives additionally requires effective direct-sum decompositions. The
+solver returns a `NaturalTransformations` Hom space; its basis elements can be
+obtained with `basis`.
 
 ### Example: Components on indecomposable objects
 

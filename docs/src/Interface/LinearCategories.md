@@ -44,12 +44,14 @@ A finite-dimensional $k$-linear model should provide the following methods:
 | `f + g` | addition of parallel morphisms |
 | `a*f` | scalar multiplication for $a\in k$ |
 | `zero_morphism(X,Y)` | the zero morphism $X\to Y$ |
-| `express_in_basis(f,H)` | the coordinates of $f$ in the ordered basis of $H$ |
+| `express_in_basis(f,B)` | the coordinates of $f$ in the ordered basis $B$ |
 
-The last method can be obtained from a matrix realization, but matrices are not
-part of the definition of a linear category: a model may implement coordinates
-by any valid method. After providing these operations and checking
-bilinearity, the model reports the structure through `is_linear(C)`.
+The convenience method `express_in_basis(f,H)` calls the basis-vector method
+with `basis(H)`. The latter can be obtained from a matrix realization, but
+matrices are not part of the definition of a linear category: a model may
+implement coordinates by any valid method. After providing these operations
+and checking bilinearity, the model reports the structure through
+`is_linear(C)`.
 
 #### [Matrix realizations](@id matrix-realizations)
 
