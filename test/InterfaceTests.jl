@@ -37,6 +37,7 @@ end
     C = UndeclaredAuditCategory()
     # Previously these two queries called each other indefinitely.
     @test !is_additive(C) && !is_abelian(C) && !is_linear(C) && !is_monoidal(C)
+    @test !is_finite(C) && !is_locally_finite(C)
 
     # EGNO (2015), Section 8.13 requires a braided spherical fusion category:
     # an arbitrary nonsingular matrix does not establish modularity.
@@ -56,11 +57,35 @@ end
     @test is_additive(D) && !is_linear(D)
     @test TensorCategories.is_rigid(D) && TensorCategories.is_krull_schmidt(D)
 
+    K = DeclaredAuditCategory(Dict{Symbol, Any}(:krull_schmidt => true))
+    @test TensorCategories.is_krull_schmidt(K) && is_additive(K)
+    @test !is_abelian(K) && !is_linear(K)
+
     S = DeclaredAuditCategory(Dict{Symbol, Any}(:spherical => true))
     # Spherical structure is rigid monoidal structure, but does not by itself
     # assert the finiteness hypotheses used for Krull--Schmidt decomposition.
     @test TensorCategories.is_rigid(S) && is_monoidal(S)
     @test !TensorCategories.is_krull_schmidt(S)
+
+    SS = DeclaredAuditCategory(Dict{Symbol, Any}(:semisimple => true))
+    @test is_semisimple(SS) && is_abelian(SS) && is_additive(SS)
+    @test !is_linear(SS) && !is_locally_finite(SS)
+    @test !TensorCategories.is_krull_schmidt(SS)
+
+    L = DeclaredAuditCategory(Dict{Symbol, Any}(:locally_finite => true))
+    @test is_locally_finite(L) && is_linear(L) && is_abelian(L) && is_additive(L)
+    @test TensorCategories.is_krull_schmidt(L)
+    @test !is_finite(L) && !is_semisimple(L)
+
+    Fin = DeclaredAuditCategory(Dict{Symbol, Any}(:finite => true))
+    @test is_finite(Fin) && is_locally_finite(Fin)
+    @test is_linear(Fin) && is_abelian(Fin) && is_additive(Fin)
+    @test TensorCategories.is_krull_schmidt(Fin) && !is_semisimple(Fin)
+
+    MR = DeclaredAuditCategory(Dict{Symbol, Any}(:multiring => true))
+    @test is_multiring(MR) && is_locally_finite(MR)
+    @test is_linear(MR) && is_abelian(MR) && is_additive(MR)
+    @test TensorCategories.is_krull_schmidt(MR) && !is_finite(MR)
 
     W = DeclaredAuditCategory(Dict{Symbol, Any}(:weak_fusion => true))
     @test is_weak_fusion(W) && is_weak_multifusion(W) && is_semisimple(W)
@@ -92,8 +117,26 @@ end
     V = vector_spaces(QQ)
     @test is_braided(V) && is_spherical(V)
     @test is_additive(id(V)) && is_linear(id(V))
+
+    R = representation_category(GF(5), cyclic_group(5))
+    @test is_finite(R) && is_locally_finite(R)
+    @test is_linear(R) && is_abelian(R) && is_additive(R)
+    @test TensorCategories.is_krull_schmidt(R) && !is_semisimple(R)
+
     A = ArrowCategory(V)
-    @test is_linear(A) && TensorCategories.is_krull_schmidt(A)
+    @test is_finite(A) && is_locally_finite(A)
+    @test is_linear(A) && is_abelian(A) && TensorCategories.is_krull_schmidt(A)
+
+    P = product_category(R, R)
+    @test is_finite(P) && is_locally_finite(P)
+    @test is_linear(P) && is_abelian(P) && TensorCategories.is_krull_schmidt(P)
+    @test is_finite(op(R)) && is_locally_finite(op(R))
+
+    # A product over unrelated coefficient fields is still abelian, but this
+    # model does not equip it with a common linear structure.
+    mixed = product_category(vector_spaces(QQ), vector_spaces(GF(5)))
+    @test is_abelian(mixed) && !is_linear(mixed) && !is_locally_finite(mixed)
+    @test !is_multiring(mixed) && !is_multitensor(mixed)
 end
 
 # The categorical product has objects and arrows componentwise, with
@@ -134,6 +177,7 @@ end
     end
     C = six_j_category(F, M, ["1", "g"])
     set_one!(C, [1, 0])
+    @test is_finite(C) && is_locally_finite(C)
     D = fibonacci_category(F)
     g, X = simples(C)[2], simples(D)[2]
 

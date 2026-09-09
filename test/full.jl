@@ -44,6 +44,7 @@ include("GroupActionsTests/EquivariantizationTests.jl")
 include("Anyonwiki/QuickTest.jl")
 include("Anyonwiki/AnyonwikiTest.jl")
 
+include("CoherentSheaves/CategoryPropertyTests.jl")
 #include("CoherentSheaves/ConvolutionCategoryTests.jl")
 
 include("SixJCategoryTests/SymbolConventions.jl")

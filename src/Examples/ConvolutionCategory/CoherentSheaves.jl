@@ -19,6 +19,9 @@ struct CohSheafMorphism <: Morphism
 end
 
 is_multitensor(::CohSheaves) = true
+# Equivariant sheaves on a finite G-set are assembled from the finite
+# representation categories of its orbit stabilizers.
+is_finite(C::CohSheaves) = is_finite(C.group)
 # The tensor product is pointwise on stalk representations and is symmetric.
 is_braided(::CohSheaves) = true
 is_multifusion(C::CohSheaves) = mod(order(C.group),characteristic(base_ring(C))) != 0

@@ -26,6 +26,9 @@ struct GroupRepresentationMorphism <: RepresentationMorphism
 end
 
 is_tensor(::GroupRepresentationCategory) = true
+# For finite G, Rep_k(G) is the module category of the finite-dimensional
+# algebra kG, independently of Maschke's semisimplicity condition.
+is_finite(C::GroupRepresentationCategory) = is_finite(base_group(C))
 # The ordinary flip is equivariant for the diagonal action in every
 # characteristic, so Rep(G) is symmetric monoidal.
 is_braided(::GroupRepresentationCategory) = true

@@ -274,6 +274,7 @@ export is_half_braiding
 export is_irreducible
 export is_left_module 
 export is_linear 
+export is_locally_finite
 export is_modular 
 export is_monoidal 
 export is_monomorphism

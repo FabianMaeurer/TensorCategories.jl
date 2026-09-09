@@ -32,9 +32,10 @@ the split condition must impose it separately.
 
 The corresponding package predicates are `is_multiring`, `is_ring`,
 `is_multitensor`, and `is_tensor`. Stronger structural declarations imply the
-weaker ones through generic fallbacks. The predicates report what a backend has
-declared or established; they do not reconstruct the axioms from the available
-methods.
+weaker ones through generic fallbacks. In particular, every multiring category
+reports `is_locally_finite(C) == true`. The predicates report what a backend
+has declared or established; they do not reconstruct the axioms from the
+available methods.
 
 In the non-split convention, a category with a simple but non-scalar tensor
 unit can be reported as

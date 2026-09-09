@@ -28,10 +28,12 @@ simple, and an indecomposable object need not be simple.
 ## The interface
 
 The predicate `is_semisimple(C)` records that this property is known for the
-implemented category. When the backend can enumerate the simple objects,
-`simples(C)` returns chosen representatives of their isomorphism classes. The
-order of this list belongs to the implementation and must not be treated as a
-mathematical invariant.
+implemented category and consequently implies `is_abelian(C)`. Semisimplicity
+alone does not assert local finiteness: the Krull--Schmidt conclusion above
+uses that additional hypothesis. When the backend can enumerate the simple
+objects, `simples(C)` returns chosen representatives of their isomorphism
+classes. The order of this list belongs to the implementation and must not be
+treated as a mathematical invariant.
 
 For an object $X$, `decompose(X)` returns pairs `(S,m)` representing the
 decomposition in equation \eqref{eq:semisimple-decomposition}. The generic
