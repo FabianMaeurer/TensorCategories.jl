@@ -1,6 +1,8 @@
 name: Runtests
 on:
   push:
+    branches:
+      - master
   pull_request:
   workflow_dispatch:
 
@@ -15,11 +17,11 @@ jobs:
     env:
       TENSORCATEGORIES_TEST_SUITE: ${{ github.event_name == 'workflow_dispatch' && 'full' || 'quick' }}
     strategy:
-      # Run expensive full-suite coverage once; keep the quick compatibility matrix.
+      # Pull requests test supported Julia versions on Linux. A master build
+      # adds one macOS integration check. Manual runs execute the full suite
+      # once on Linux.
       matrix:
-        julia-version: ${{ fromJSON(github.event_name == 'workflow_dispatch' && '["1.12"]' || '["1.11", "1.12"]') }}
-        julia-arch: [x64]
-        os: ${{ fromJSON(github.event_name == 'workflow_dispatch' && '["ubuntu-latest"]' || '["ubuntu-latest", "macOS-latest"]') }}
+        include: ${{ fromJSON(github.event_name == 'workflow_dispatch' && '[{"os":"ubuntu-latest","julia-version":"1.12"}]' || github.event_name == 'push' && '[{"os":"ubuntu-latest","julia-version":"1.11"},{"os":"ubuntu-latest","julia-version":"1.12"},{"os":"macos-latest","julia-version":"1.12"}]' || '[{"os":"ubuntu-latest","julia-version":"1.11"},{"os":"ubuntu-latest","julia-version":"1.12"}]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@latest
