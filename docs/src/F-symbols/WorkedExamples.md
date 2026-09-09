@@ -157,10 +157,13 @@ available for computations on graded vectors and matrices.
 The related function `six_j_symbols(V)` computes only the array of associator
 blocks in such chosen bases. The generic `skeletonize(V)` packages these blocks
 with the fusion rules and unit, transports a braiding when one is present, and
-attempts to transport the pivotal or spherical structure. If that transport is
-not available, the skeletal initializer's coefficients $P_i=1$ remain in
-place; use `is_pivotal(C; check=true)` before treating them as a pivotal
-structure.
+transports the pivotal or spherical structure in the same multiplicity-space
+bases. The [pivotal-coefficient discussion](@ref pivotal-coefficients)
+gives the precise trace-coordinate formula. If the required pivotal traces
+cannot be evaluated, or a numerical enclosure does not resolve their
+nonvanishing, skeletonization reports an error rather than retaining the
+initializer's default coefficients. Pass `check=true` to `skeletonize` for
+explicit pentagon, hexagon, pivotal, and spherical verification.
 
 For `GradedVectorSpaces` there is also a specialized direct conversion
 `six_j_category(V)`. It reads the group multiplication, cocycle associator, and

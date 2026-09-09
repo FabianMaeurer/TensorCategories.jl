@@ -131,6 +131,29 @@ end
     @test U.pivotal == [QQ(2)]
 end
 
+# EGNO Proposition 4.8.4 makes the pivotal trace a nonzero coordinate on the
+# double-dual Hom space of a split simple. Skeletonization uses that coordinate
+# in the same fusion bases as its associator and braiding.
+@testset "Pivotal transport under skeletonization" begin
+    G = cyclic_group(3)
+
+    K,z = cyclotomic_field(3)
+    C = graded_vector_spaces(K,G)
+    g = first(gens(G))
+    C.spherical = Dict(g^i => z^i for i in 0:2)
+    D = skeletonize(C;check=true)
+    @test D.pivotal == [C.spherical[x] for x in elements(G)]
+    @test is_pivotal(D;check=true) && !is_spherical(D;check=true)
+
+    F = GF(7)
+    E = graded_vector_spaces(F,G)
+    E.spherical = Dict(g^i => F(2)^i for i in 0:2)
+    H = skeletonize(E;check=true)
+    @test H.pivotal == [E.spherical[x] for x in elements(G)]
+    @test all(!iszero,dim.(simples(H)))
+    @test is_pivotal(H;check=true) && !is_spherical(H;check=true)
+end
+
 # EGNO Section 4.6: the Deligne square of pointed Vec_C2 has componentwise
 # strict associator. Lazy symbols must survive construction and checking.
 @testset "Lazy associators in a pointed Deligne product" begin

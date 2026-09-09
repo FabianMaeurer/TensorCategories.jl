@@ -134,7 +134,11 @@ skeletal `SixJCategory` input. It does not return every subcategory generated
 by a single simple object.
 
 Skeletonization changes the presentation of a supported split semisimple
-category; it does not adjoin new half-braidings. The
+category; it does not adjoin new half-braidings. Its associator, braiding, and
+pivotal coefficients are expressed using one shared ordered system of simple
+representatives and multiplicity-space bases. Thus these data describe one
+skeletal gauge; the individual pivotal coefficients need not remain unchanged
+under another choice of bases. The
 [skeletal-model chapter](@ref skeletal-fusion) describes the resulting
 coordinates, while the [Drinfeld-center chapter](@ref center) describes the
 different construction performed by `center(C)`.

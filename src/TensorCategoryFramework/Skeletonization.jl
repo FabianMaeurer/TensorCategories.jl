@@ -6,18 +6,70 @@ function _require_split_semisimple_coordinates(C::Category, operation::String)
         "$operation requires split simple endomorphism rings"))
 end
 
-function skeletonize(C::Category, names::Vector{String} = simples_names(C))
-    six_j_category(C, names)
+function _check_skeletal_structure(C::SixJCategory, spherical::Bool)
+    pentagon_axiom(C) || throw(ArgumentError(
+        "the transported associator does not satisfy the pentagon equation"))
+    if is_braided(C)
+        hexagon_axiom(C) || throw(ArgumentError(
+            "the transported braiding does not satisfy the hexagon equations"))
+    end
+    is_pivotal(C;check=true) || throw(ArgumentError(
+        "the transported pivotal structure is not monoidal"))
+    if spherical
+        is_spherical(C;check=true) || throw(ArgumentError(
+            "the transported pivotal structure is not spherical"))
+    end
+    C
 end
 
-function six_j_category(C::Category, names::Vector{String} = simples_names(C))
-    F = six_j_category(C, simples(C), names)
+function _require_resolved_nonzero_dimension(d, i::Int, source::String)
+    if !Oscar.is_exact_type(typeof(d)) && applicable(Oscar.contains_zero,d)
+        Oscar.contains_zero(d) && throw(ArgumentError(
+            "$source dimension of simple $i contains zero at the working precision; " *
+            "increase the precision before skeletonization"))
+    elseif iszero(d)
+        throw(ArgumentError(
+            "$source dimension of simple $i is zero; this contradicts the " *
+            "split semisimple pivotal hypotheses of skeletonization"))
+    end
+    d
+end
+
+function _skeletal_pivotal_coefficients(C::Category, S::Vector{<:Object},
+                                         skel_C::SixJCategory)
+    source_dims = try
+        dim.(S)
+    catch e
+        e isa InterruptException && rethrow()
+        throw(ArgumentError(
+            "skeletonization could not evaluate the source pivotal structure: " *
+            sprint(showerror,e)))
+    end
+    skeletal_dims = dim.(simples(skel_C))
+    for i in eachindex(S)
+        _require_resolved_nonzero_dimension(source_dims[i],i,"source pivotal")
+        _require_resolved_nonzero_dimension(skeletal_dims[i],i,"reference skeletal")
+    end
+    source_dims ./ skeletal_dims
+end
+
+function skeletonize(C::Category, names::Vector{String} = simples_names(C);
+                     check::Bool=false)
+    six_j_category(C, names;check)
+end
+
+function six_j_category(C::Category, names::Vector{String} = simples_names(C);
+                        check::Bool=false)
+    F = six_j_category(C, simples(C), names;check)
     set_name!(F, "Skeletonization of $C")
     return F
 end
 
-function six_j_category(C::Category, S::Vector{<:Object}, names::Vector{String} = simples_names(parent(S[1])))
+function six_j_category(C::Category, S::Vector{<:Object},
+                        names::Vector{String} = simples_names(parent(S[1]));
+                        check::Bool=false)
     if C isa SixJCategory
+        check && _check_skeletal_structure(C,is_spherical(C))
         return C
     end
     is_ring(C) || throw(ArgumentError(
@@ -29,7 +81,8 @@ function six_j_category(C::Category, S::Vector{<:Object}, names::Vector{String} 
     F = base_ring(C)
     source_is_spherical = try
         is_spherical(C)
-    catch
+    catch e
+        e isa InterruptException && rethrow()
         false
     end
 
@@ -62,20 +115,17 @@ function six_j_category(C::Category, S::Vector{<:Object}, names::Vector{String} 
 
     set_associator!(skel_C, ass)
 
-    # if multiplicity(C) > 1
-    #     @warn "6j-Symbols might be wrong since multiplicity is greater than one"
-    # end
-    # Try to set spherical
-    try 
-        set_pivotal!(skel_C,[F(1) for s ∈ S])
-        sp = [dim(S[i]) * inv(dim(skel_C[i])) for i ∈ 1:length(S)]
-        if source_is_spherical
-            set_spherical!(skel_C,sp)
-        else
-            set_pivotal!(skel_C,sp)
-        end
-    catch e 
-        print(e.msg)
+    # The trace of an isomorphism from a split simple to its double dual is
+    # nonzero in a semisimple tensor category (EGNO, Proposition 4.8.4).
+    # Hence traces give faithful coordinates on these one-dimensional Hom
+    # spaces, including in positive characteristic.  The reference traces
+    # below use the skeletal duality determined by the same `homs` bases as
+    # the F- and R-symbols.
+    sp = _skeletal_pivotal_coefficients(C,S,skel_C)
+    if source_is_spherical
+        set_spherical!(skel_C,sp)
+    else
+        set_pivotal!(skel_C,sp)
     end
 
     if is_braided(C)
@@ -86,6 +136,8 @@ function six_j_category(C::Category, S::Vector{<:Object}, names::Vector{String} 
         skel_C.embedding = complex_embedding_of_base_ring(C)
     catch
     end
+
+    check && _check_skeletal_structure(skel_C,source_is_spherical)
 
     return skel_C
 end
