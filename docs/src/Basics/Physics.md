@@ -2,10 +2,9 @@
 
 !!! note "Optional terminology bridge"
     This page is for readers coming from anyons or rational conformal field
-    theory (RCFT). It translates familiar terminology and indicates where the
-    corresponding structures occur in the package. It is not needed for the
-    linear development of the manual; other readers may continue directly with
-    [Models and the category interface](@ref interface-philosophy).
+    theory (RCFT). It translates the categorical structures and skeletal
+    coordinates introduced above into common physics terminology. Other readers
+    may proceed directly to numerical fusion categories.
 
 The categorical language follows [EGNO](@citet). The anyon conventions and
 fusion-tree language follow [bonderson2007thesis; Chapter 2](@citet).
@@ -121,10 +120,10 @@ $R$-matrices depend on the chosen projection and splitting bases, on the
 direction of the structural maps, and on the ordering of multiplicity indices.
 They are not determined by the fusion rules alone.
 
-TensorCategories.jl first introduces the underlying
-[skeletal fusion model](@ref skeletal-fusion), where the abstract model is
-followed by the [precise symbol conventions](@ref f-conventions). This order is
-essential when translating formulas or data from the physics literature.
+The [skeletal fusion model](@ref skeletal-fusion) defines these symbols from
+the structural morphisms and chosen fusion bases. Those definitions, rather
+than the names of array entries, must be used when translating formulas or data
+from the physics literature.
 
 ## $S$, $T$, topological spins, and CFT conventions
 
@@ -169,7 +168,8 @@ described by [moore1989classical](@citet).
 Fusion data may be stored exactly over a number field or evaluated over complex
 balls at a chosen working precision. Exact coefficients can have several
 complex embeddings, and different embeddings can change unitarity or phases.
-The [coefficient-field chapter](@ref base-fields) explains these choices. The
+The [splitting and scalar-extension chapter](@ref splitting-and-scalars)
+explains these choices. The
 [numerical-computation chapter](@ref numerical-computations) explains ball
 arithmetic, and the later
 [numerical fusion-category chapter](@ref numerical-fusion-categories) applies
@@ -193,8 +193,4 @@ that accepts a braid word and returns its matrix in a chosen multi-anyon
 fusion-tree basis. The ordinary `braiding(X,Y)` method is a categorical
 structural map, not such a braid-word interface.
 
-Continue with [Models and the category interface](@ref interface-philosophy).
-Readers interested primarily in fusion data can later follow
-[skeletal fusion categories](@ref skeletal-fusion),
-[precise symbol conventions](@ref f-conventions), and
-[numerical fusion categories](@ref numerical-fusion-categories), in that order.
+Continue with [numerical fusion categories](@ref numerical-fusion-categories).

@@ -7,7 +7,7 @@ TensorCategories.jl is an open-source software package for computations with ten
 
 Current highlights include:
 
-* A general, extensible [category framework](@ref interface-philosophy) together with additive, linear, abelian, monoidal, tensor, and fusion structures.
+* A general, extensible [category framework](@ref category-interface) together with additive, linear, abelian, monoidal, tensor, and fusion structures.
 
 * Support for [skeletal fusion categories](@ref skeletal-fusion), including exact and numerical access to $F$-symbols, $R$-symbols, pivotal data, and related invariants.
 
@@ -25,7 +25,7 @@ Current highlights include:
 Here is a showcase example computing the [center](@ref center)
 $\mathcal{Z}(\mathcal{C})$ of the Ising fusion category $\mathcal{C}$ over the
 field $\mathbb{Q}(\sqrt{2})$. The computation shows that
-$\mathcal{Z}(\mathcal{C})$ is [not split](@ref tensor-conventions) over
+$\mathcal{Z}(\mathcal{C})$ is [not split](@ref splitting-and-scalars) over
 $\mathbb{Q}(\sqrt{2})$, i.e. some simple objects will decompose after scalar
 extension to $\mathbb{C}$. We then compute the multiplication table of its
 [Grothendieck ring](@ref grothendieck-rings) and the

@@ -47,8 +47,8 @@ numeric fields is not sufficient.
 `direct_sum(X,Y)` returns an object and two lists of structural maps.
 When supported, `is_isomorphic(X,Y)` returns a Boolean and a morphism witness;
 use its first entry as a condition. A backend may instead throw when it cannot
-decide isomorphism over the chosen coefficient field. See the worked
-[matrix implementation](../Implementing/MatrixCategory.md).
+decide isomorphism over the chosen coefficient field. See the
+[built-in abelian examples](@ref built-in-abelian-categories).
 
 Do not implement two fallbacks in terms of each other. Test each primitive
 before testing operations that depend on it. Read the implementation of a
@@ -74,4 +74,5 @@ numerical-fusion-categories).
 
 For API signatures and source links, use the [API reference](../API.md).
 
-Continue with the [complete matrix implementation](@ref implementing-matrices).
+Return to the [built-in abelian examples](@ref built-in-abelian-categories), or
+consult the [API reference](../API.md) for signatures and source links.

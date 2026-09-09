@@ -2,18 +2,34 @@
 DocTestSetup = :(using TensorCategories, Oscar)
 ```
 
-# [Base fields and exact computation](@id base-fields)
+# [Coefficient fields and numeric computations](@id base-fields)
 
-For a linear category, the coefficient field or ring is part of the input. It
-specifies the available scalars, how equality is decided, and which algebra
-algorithms can be used. The interface calls it the `base_ring`, even when the
-mathematics requires a field. A method accepting `::Ring` does not imply that
-its algorithm works over every ring.
+Working with linear categories requires a coefficient field $k$, together with
+arithmetic and linear algebra over $k$. TensorCategories.jl supports two
+approaches: exact symbolic computation and numerical computation. The function
+`base_ring(C)` returns the coefficient parent used by a category `C`.
 
-## Exact scalars and number fields
+## Exact symbolic computations
 
-Ordinary division of Julia integers produces floating-point numbers. For exact
-rational arithmetic, work in `QQ`:
+OSCAR provides several exact fields that commonly occur in tensor-category
+computations. For further coefficient fields, constructors, and conversion
+functions, see the [Fields chapter of the OSCAR
+manual](https://docs.oscar-system.org/stable/Fields/intro/).
+
+| Field | OSCAR constructor | Description |
+|:---|:---|:---|
+| $\mathbb Q$ | `QQ` | the rational numbers |
+| a number field $K/\mathbb Q$ | `number_field(f, "a")`, `quadratic_field(d)` | a finite extension given by algebraic generators and relations |
+| an embedded real number field $K\subset\mathbb R$ | `embedded_number_field(f,r)` | a number field together with a chosen real embedding |
+| $\mathbb Q^{\mathrm{ab}}$ | `abelian_closure(QQ)` | the maximal abelian extension of $\mathbb Q$, containing all roots of unity |
+| $\overline{\mathbb Q}$ | `algebraic_closure(QQ)` | the field of algebraic numbers |
+| $\mathbb F_p$ | `GF(p)` | the prime field of characteristic $p$ |
+| $\mathbb F_{p^n}$ | `GF(p,n)` | the finite field with $p^n$ elements |
+| $\overline{\mathbb F}_p$ | `algebraic_closure(GF(p))` | the algebraic closure of the prime field $\mathbb F_p$ |
+
+Ordinary division of Julia integers produces a floating-point number. Use the
+OSCAR field `QQ` when an exact rational number and its mathematical parent
+field are required:
 
 ```jldoctest
 julia> a = QQ(1)/3;
@@ -25,170 +41,173 @@ julia> parent(a) == QQ
 true
 ```
 
-A **number field** is a finite extension of $\mathbb Q$. OSCAR presents it by
-an algebraic generator and a polynomial relation. For example, to use a square
-root of $2$ exactly, construct $K=\mathbb Q(s)$ with $s^2=2$. The supplied
-Ising constructor is used here only to show that a category retains this field;
-its categorical operations appear in [A first computation](@ref first-category).
+A number field is a finite extension of $\mathbb Q$. OSCAR presents it by
+generators and polynomial relations. The following constructs
+$K=\mathbb Q(s)$ with $s^2=2$:
 
-```@example fields
+```@example coefficient_fields
 using TensorCategories, Oscar
 K, s = quadratic_field(2)
 @assert s^2 == 2
-C = ising_category(K, s)
-@assert base_ring(C) == K
-base_ring(C)
+(K, minpoly(s))
 ```
 
-The element $s$ is an algebraic generator; inside the abstract field it is not
-the *positive* square root. That distinction requires an embedding into the
-complex numbers.
+The element $s$ is an exact algebraic element. The abstract field does not
+declare that it is the positive real square root of $2$. An embedding
+$\sigma\colon K\hookrightarrow\mathbb C$ specifies which complex root the
+generator represents. In this example there are two real embeddings,
+$\sigma_+(s)=\sqrt{2}$ and $\sigma_-(s)=-\sqrt{2}$, exchanged by the
+nontrivial element of $\operatorname{Gal}(K/\mathbb Q)$. Applying different
+embeddings to algebraic coefficients produces their Galois-conjugate
+realizations. When an ordered realization inside $\mathbb R$ is required,
+OSCAR records the chosen real embedding with `embedded_number_field`.
 
-Useful coefficient domains include `QQ`, number fields,
-`algebraic_closure(QQ)` for algebraic numbers, and `GF(p)` for a prime field.
-The field returned as the first component of `abelian_closure(QQ)` contains the
-abelian algebraic extensions, not all algebraic numbers. The second component
-constructs its distinguished roots of unity. Support for an operation can be
-narrower than this list.
+Computations are often more efficient over a small number field containing the
+required coefficients than over a large algebraic closure. Working over the
+smaller field also retains arithmetic information that disappears after
+choosing one complex realization. It can, however, prevent objects from
+decomposing into absolutely simple summands. The resulting questions of
+splitness and scalar extension are treated in
+[Scalar extension and splitting](@ref splitting-and-scalars).
 
-## Algebraic closure and fields of definition
-
-The usual characteristic-zero theory of
-[fusion categories](@ref tensor-conventions) works over an
-algebraically closed field $k$. In particular, the endomorphism algebra of every
-simple object is then $k$, so semisimple categories satisfy the
-[split condition defined below](@ref splitting-over-field).
-[EGNO; §4.16](@citet) use this setting for most of their treatment and discuss
-arbitrary fields separately.
-
-OSCAR can work exactly over the algebraic closure
-$\overline{\mathbb Q}$:
+The algebraic and abelian closures are exact fields rather than numerical
+approximations to $\mathbb C$:
 
 ```jldoctest
-julia> Qbar = algebraic_closure(QQ)
-Algebraic closure of rational field
+julia> Qab, z = abelian_closure(QQ);
+
+julia> Qbar = algebraic_closure(QQ);
+
+julia> F25 = GF(5, 2);
+
+julia> order(F25)
+25
+
+julia> Fbar = algebraic_closure(GF(5))
+Algebraic closure of prime field of characteristic 5
 ```
 
-This is an exact field of algebraic numbers, not a floating-point model of
-$\mathbb C$. For a [multifusion category](@ref tensor-conventions) over an
-algebraically closed field of characteristic zero, it is large enough in
-principle: the category descends to an algebraic number field
-[EGNO; Corollary 9.1.8](@cite).
+Here $\mathbb Q^{\mathrm{ab}}$ is the union of the cyclotomic fields, whereas
+$\overline{\mathbb Q}$ contains every algebraic number. Algebraically closed
+coefficient fields remove division-algebra phenomena for finite-dimensional
+endomorphism algebras of simple objects, but they are not automatically the
+best computational choice. The positive-characteristic constructor currently
+takes a prime field `GF(p)` and represents
+$\overline{\mathbb F}_p$ as the union of its finite extensions.
 
-For computations, however, it is usually preferable to retain a reasonably
-small number field containing the structural coefficients. This keeps the
-field of definition visible and generally gives smaller exact linear-algebra
-problems. It also exposes the different complex realizations of the same
-algebraic data. The algebraic closure remains useful when roots must be chosen
-or objects must be split, but not every package algorithm supports every exact
-field equally well.
+## [Numerical computations](@id numerical-computations)
 
-## Complex embeddings of number fields
+Arb is a library for arbitrary-precision ball arithmetic
+[johansson2017arb](@cite). A real or complex ball records a midpoint together
+with an error radius, and arithmetic propagates these enclosures. The user
+chooses the working precision; a computation continues at that precision
+unless an algorithm explicitly increases it.
 
-An abstract number field does not by itself choose a copy inside $\mathbb C$.
-A complex embedding
-$\iota\colon K\hookrightarrow\mathbb C$ chooses a complex root of the defining
-polynomial as the image of the generator. Thus $\mathbb Q(s)$ with $s^2=2$ has
-two complex embeddings, sending $s$ to $\sqrt2$ and $-\sqrt2$. OSCAR returns
-their values as certified [complex balls](@ref numerical-computations); the
-predicate `overlaps` tests whether two such enclosures intersect. It enumerates
-the embeddings with `complex_embeddings`:
+OSCAR exposes real and complex ball arithmetic through two pairs of
+constructors. The functions `real_field()` and `complex_field()` return
+`RealField` and `ComplexField` parents controlled by the global `Balls`
+precision. The names `RR` and `CC` are commonly assigned to these parents in
+examples. The constructors `ArbField(p)` and `AcbField(p)` instead store the
+working precision $p$ in the parent. TensorCategories.jl uses these
+explicit-precision parents for its main numerical workflows; in particular,
+`numeric(E,p)` produces a category over an `AcbField`.
 
-```@example fields
-embeddings = complex_embeddings(K)
-@assert length(embeddings) == 2
-@assert overlaps(embeddings[1](s), -embeddings[2](s))
-length(embeddings)
+These parents implement AbstractAlgebra's computational `Field` interface,
+but their elements are not exact symbolic scalars: a ball containing zero, for
+example, cannot be inverted. Accordingly,
+`is_exact_type(elem_type(K))` is `false` for all four ball-field types, whereas
+it is `true` for an exact field such as `QQ`.
+
+Unlike `Float64`, ball fields are not restricted to 53 binary digits and retain
+uncertainty as part of every scalar. They provide controlled numerical
+computation rather than point-valued floating-point arithmetic with untracked
+rounding error. In `ArbField(p)` and `AcbField(p)`, the precision belongs to the
+field and hence to a category over that field. For reproducible category
+computations, prefer these explicit-precision parents.
+
+Here is a scalar computation over a real ball field:
+
+```@example numerical_scalars
+using Oscar
+R = ArbField(128)
+x = sqrt(R(2))
+@assert contains_zero(x^2 - R(2))
+precision(R)
 ```
 
-The exact field element $s$ and its value $\iota(s)$ play different roles.
-TensorCategories.jl stores structural coefficients in the exact field. A
-complex embedding selects their numerical realization. This choice can
-determine which realization is
-unitary and which signs or phases appear in
-[$F$- and $R$-symbols](@ref f-conventions).
+These numerical coefficient parents can also be used directly by a supported
+category. For example, the usual coordinate model of vector spaces and its
+matrix operations work over a real ball field:
 
-`K(3)` constructs a scalar in `K`. Independently constructed isomorphic fields
-do not automatically identify their chosen roots. Specify the intended
-embedding when extending scalars.
+```@example numerical_vector_spaces
+using TensorCategories, Oscar
+R = ArbField(128)
+C = vector_spaces(R)
+X = VectorSpaceObject(C, 2)
+A = matrix(R, [sqrt(R(2)) 0; 0 R(1)/3])
+f = morphism(X, X, A)
+g = f ∘ f
+@assert base_ring(C) == R
+(int_dim(X), contains_zero(matrix(g)[1,1] - R(2)))
+```
 
-The schematic call `extension_of_scalars(C, L; embedding=iota)` uses a chosen
-map `iota` from the old field into `L` and applies it to every coefficient of
-the structural maps. The concrete construction of `L` and `iota` depends on the
-coefficient fields. An embedding, a change of basis, and a change of
-[pivotal structure](@ref pivotal-braided) are different operations.
+This returns `(2,true)`: the first diagonal entry of $g$ is a ball containing
+the exact value $2$.
 
-## Galois conjugation
+!!! warning "Current numerical limitations"
+    TensorCategories.jl and its OSCAR/Nemo backends do not yet provide every
+    algorithm required by the numerical side of the package. Basic category
+    models can often be constructed over a real or complex ball field, and
+    specified objects and morphisms can be manipulated using the available
+    matrix operations. This does not imply that every higher algorithm is
+    implemented for that field type.
 
-Let the structural coefficients lie in a number field $K$. Applying a field
-embedding to every coefficient preserves the polynomial pentagon and hexagon
-equations. The resulting solution is called a **Galois conjugate**. Its fusion
-multiplicities are unchanged, while its embedded $F$- and $R$-symbols, pivotal
-dimensions and twists when present, and unitarity properties can change.
-Different embeddings become restrictions of automorphisms after passing to a
-normal closure; the field $K$ itself need not be Galois. Thus Galois conjugation
-is more general than ordinary complex conjugation. Galois-conjugate data need
-not define equivalent complex fusion categories. This coefficientwise action
-is used in the proof of [EGNO; Proposition 9.6.5](@citet).
+    In particular, simple-object enumeration for group representations over
+    ball fields is not currently implemented. Direct computation and
+    skeletonization of Drinfeld centers over real ball fields also require
+    further support for scalar extraction, numerical decomposition and linear
+    dependence, and the recovery of fusion multiplicities. Extending these
+    interfaces and algorithms is ongoing work.
 
-The standard rank-two example is the pair of Fibonacci and Yang–Lee
-realizations: they have the same fusion rule
-$\tau\otimes\tau=\mathbb 1\oplus\tau$, but the two roots of the defining
-quadratic equation give a unitary realization and its nonunitary Galois
-conjugate [rowell2009classification; pp. 3--4](@cite). The
-[Fibonacci catalogue entry](../F-symbols/Fibonacci.md) shows how this choice
-appears in the package.
+Exact field types support algebraic equality and symbolic field operations.
+Inexact ball types support high-precision analytic and linear-algebra
+computations and retain an enclosure for every result. When exact source data
+are available, keep them and construct a numerical model for the required
+computation. The exact source records the algebraic object; the numerical
+model records one realization at one chosen working precision.
 
-These operations are distinct: choosing an embedding selects a conjugate
-realization of the coefficients, whereas enlarging the coefficient field can
-also create new direct-sum decompositions of objects.
+For a supported object `E`, `numeric(E,p)` requests a numerical realization at
+approximately $p$ bits. A conversion may use guard bits, so the precision of
+the resulting base field is authoritative. For coefficients in a number field,
+the conversion also requires a complex embedding. Increasing the precision
+cannot recover information already lost through decimal or low-precision
+input.
 
-## [Splitting over the chosen field](@id splitting-over-field)
+Structural equality `==` remains an equivalence relation. It is not replaced by
+ball overlap, because overlap is not transitive. Numerical algorithms instead
+use explicit tests such as `overlaps(x,y)` and `contains_zero(x)` where the
+mathematics asks whether two enclosures are compatible or whether a quantity
+may vanish.
 
-For a simple object $S$, Schur's lemma says that
-$D_S=\operatorname{End}_{\mathcal C}(S)$ is a division algebra. The
-Hom-finiteness assumption makes $D_S$ finite-dimensional over the base field
-$k$. In the finite semisimple setting, *split* means
-that the canonical map $k\to D_S$ is an isomorphism for every simple $S$. This
-is automatic over an algebraically closed field, but not over a number field.
-The familiar identification of simple endomorphisms with scalars therefore
-requires the split hypothesis [EGNO; §4.16, pp. 87--88](@cite).
+Suppose that a ball $B$ contains an exact quantity $b$.
 
-A category can be split over a number field even though that field is not
-algebraically closed. When it is not split, a simple object can decompose after
-a suitable scalar extension. The division algebras $D_S$ are the main source
-of the additional phenomena over non-algebraically closed fields
-[sanford2025fusion](@cite).
+- If $0\notin B$, then $b\ne0$.
+- Disjoint balls containing $b$ and $c$ prove $b\ne c$.
+- If $0\in B$, or if two balls overlap, this does not prove equality.
 
-The distinction is computationally important. The scalar
-[$F$-symbol model](@ref skeletal-fusion) assumes split simples and chosen bases of
-their fusion spaces. The general category interface can also represent
-non-split categories, but multiplicities,
-decomposition, scalar extension, and center computations must then retain the
-simple endomorphism algebras. Treating them as copies of the base field gives
-wrong multiplicities.
+Thus a numerical calculation can give an exact mathematical conclusion. For
+example, a determinant ball excluding zero certifies nonvanishing. This does
+not turn every ball-valued calculation into symbolic algebra: its scalars are
+still enclosures rather than exact algebraic expressions.
 
-The Ising category above is split, but its center need not split over the same
-field. This is a result about that field, not an incomplete center calculation.
-The [center tutorial](@ref ising-center) follows scalar extension and splitting.
-The terminology used by the package is summarized under
-[Fusion categories and splitting](@ref tensor-conventions). Its section on
-[scalar extension and algorithmic splitting](@ref algorithmic-splitting)
-explains how the package passes to a common splitting field and obtains the
-new simple objects from idempotents in the extended endomorphism algebras.
-The terminology follows
-[maurer2024computing; §2.1](@citet). The center algorithm and the subsequent
-splitting of central objects are developed in
-[maurer2024computing; §§4--5](@cite).
+Supported categorical predicates over a ball field use the corresponding
+numerical criterion at the field's working precision. They do not reject an
+input merely because it lacks an exact symbolic certificate. Unless a predicate
+explicitly documents a rigorous certificate, a successful result means that
+the defining equations hold to the chosen working precision. Ball arithmetic
+can nevertheless certify particular conclusions, such as nonvanishing or
+strict separation, when the computed enclosures imply them. The pages
+introducing each categorical structure state the equations tested by its
+predicate.
 
-TensorCategories.jl also supports coefficient fields of positive
-characteristic, such as `GF(p)`. This is an important feature: the
-characteristic is part of the mathematical input and can change semisimplicity,
-splitting, and the behavior of categorical constructions. In positive
-characteristic a category can fail to be semisimple, independently of whether
-its simple objects are split. Enlarging the coefficient field within the same
-characteristic does not repair such a failure of semisimplicity.
-The [characteristic example](@ref positive-characteristic-fusion) later in the
-manual shows both phenomena for representations of a cyclic group.
-
-Continue with [Numerical computations](@ref numerical-computations).
+Continue with [simple objects and finite-length categories](@ref simple-objects).
