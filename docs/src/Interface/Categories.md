@@ -92,6 +92,14 @@ support. Computing a kernel, for example, may require a substantial
 category-specific algorithm; TensorCategories.jl cannot derive one merely
 from the basic category interface.
 
+Category-level predicates such as `is_abelian(C)` and `is_finite(C)` are
+conservative capability queries. A `true` result means that the implementation
+declares or establishes the property, and generic fallbacks include its logical
+consequences. A `false` result can mean either that the property fails or that
+the implementation has not established it. Thus an algorithm may use a true
+result to select a method whose hypotheses apply, but it should not interpret
+every false result as a mathematical counterexample.
+
 ## [Example: Finite sets](@id finite-sets)
 
 We first implement the category of finite sets. Its objects are finite sets,

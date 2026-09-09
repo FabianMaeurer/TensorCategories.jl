@@ -2,8 +2,10 @@
     Generic checks for categories 
 ----------------------------------------------------------=#
 
-# Structural predicates report declared or category-specific knowledge. Generic
-# methods cannot prove axioms merely from the existence of other methods.
+# Structural predicates are conservative capability queries. A true result
+# records declared or category-specific knowledge and includes the logical
+# consequences below. A false result may also mean that a property has not been
+# declared; generic methods cannot prove axioms from the existence of methods.
 _declared_structure(C::Category, key::Symbol) =
     hasfield(typeof(C), :__attrs) && get_attribute(C, key, false) === true
 
@@ -25,14 +27,37 @@ is_ring(C::Category) = is_tensor(C) || _declared_structure(C, :ring)
 is_multiring(C::Category) = is_multitensor(C) || is_ring(C) ||
     _declared_structure(C, :multiring)
 
+"""
+    is_finite(C::Category)
+
+Return whether `C` is known to be a finite abelian category.
+"""
 is_finite(C::Category) = is_weak_multifusion(C) || _declared_structure(C, :finite)
+
+"""
+    is_locally_finite(C::Category)
+
+Return whether `C` is known to be a locally finite linear abelian category.
+"""
+is_locally_finite(C::Category) = is_finite(C) || is_multiring(C) ||
+    _declared_structure(C, :locally_finite)
+
 is_monoidal(C::Category) = is_multiring(C) || any(
     key -> _declared_structure(C, key), (:monoidal, :rigid, :spherical, :is_braided))
-is_abelian(C::Category) = is_multiring(C) || _declared_structure(C, :abelian)
-is_additive(C::Category) = is_abelian(C) || _declared_structure(C, :additive)
-is_linear(C::Category) = is_multiring(C) || _declared_structure(C, :linear)
 is_semisimple(C::Category) = is_weak_multifusion(C) ||
     _declared_structure(C, :semisimple)
+is_abelian(C::Category) = is_locally_finite(C) || is_semisimple(C) ||
+    _declared_structure(C, :abelian)
+"""
+    is_krull_schmidt(C::Category)
+
+Return whether `C` is known to be a Krull--Schmidt category.
+"""
+is_krull_schmidt(C::Category) = is_locally_finite(C) ||
+    _declared_structure(C, :krull_schmidt)
+is_additive(C::Category) = is_abelian(C) || is_krull_schmidt(C) ||
+    _declared_structure(C, :additive)
+is_linear(C::Category) = is_locally_finite(C) || _declared_structure(C, :linear)
 
 function is_modular(C::Category) 
     if hasfield(typeof(C), :__attrs) 
@@ -89,10 +114,6 @@ function is_rigid(C::Category)
 end
 
 is_braided(C::Category) = _declared_structure(C, :is_braided)
-
-function is_krull_schmidt(C::Category)
-    is_multiring(C) || _declared_structure(C, :krull_schmidt)
-end
 
 is_unitary(C::Category) = false
 #=----------------------------------------------------------

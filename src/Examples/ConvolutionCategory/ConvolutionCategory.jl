@@ -20,6 +20,8 @@ struct ConvolutionMorphism <: Morphism
     m::CohSheafMorphism
 end
 is_multitensor(::ConvolutionCategory) = true
+# The finite G-set yields finitely many stabilizer representation categories.
+is_finite(C::ConvolutionCategory) = is_finite(C.group)
 is_fusion(C::ConvolutionCategory) = mod(order(C.group),characteristic(base_ring(C))) != 0
 """
     convolution_category( K::Field, X::GSet)

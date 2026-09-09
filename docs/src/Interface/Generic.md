@@ -10,6 +10,8 @@ missing operations.
 | Linear category | `base_ring`, morphism addition and scalar multiplication, `zero_morphism`, a finite basis for `Hom` |
 | Additive category | `zero(C)`, binary `direct_sum` with inclusions and projections |
 | Abelian category | `kernel` with inclusion, `cokernel` with projection |
+| Locally finite category | the linear and abelian interfaces, finite-dimensional Hom spaces, and finite length for every object |
+| Finite category | the locally finite interface, enough projectives, and finitely many simple isomorphism classes |
 | Monoidal category | tensor product on objects **and** morphisms, `one(C)`, `associator` and its inverse |
 | Rigid category | chosen left duality through `dual`, `ev`, `coev`, and chosen right duality through `right_dual`, `right_ev`, `right_coev`; the generic right-duality methods require `pivotal` |
 | Semisimple category | effective `decompose` and simple representatives where enumeration is finite |

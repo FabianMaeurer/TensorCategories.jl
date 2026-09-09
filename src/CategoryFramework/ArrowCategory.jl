@@ -67,8 +67,10 @@ function is_simple(X::ArrowObject)
     return false
 end
 is_linear(C::ArrowCategory) = is_linear(category(C))
-# Finite-dimensional arrows over Vec are representations of the A2 quiver.
-is_krull_schmidt(C::ArrowCategory) = category(C) isa VectorSpaces
+is_locally_finite(C::ArrowCategory) = is_locally_finite(category(C))
+# If C is equivalent to A-mod, its arrow category is the module category of a
+# finite-dimensional triangular matrix algebra over A.
+is_finite(C::ArrowCategory) = is_finite(category(C))
 
 matrix(f::ArrowMorphism) = diagonal_matrix(matrix(f.left), matrix(f.right))
 

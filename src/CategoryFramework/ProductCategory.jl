@@ -150,7 +150,23 @@ one(C::ProductCategory) = ProductObject(C, one.(C.factors))
 zero_morphism(X::ProductObject, Y::ProductObject) = ProductMorphism(X,Y, Tuple(zero_morphism(x,y) for (x,y) ∈ zip(X.factors, Y.factors)))
 id(X::ProductObject) = ProductMorphism(X,X, Tuple(id(x) for x ∈ X.factors))
 
-is_multitensor(C::ProductCategory) = *(is_multitensor.(C.factors)...)
+is_additive(C::ProductCategory) = all(is_additive, C.factors)
+is_abelian(C::ProductCategory) = all(is_abelian, C.factors)
+is_krull_schmidt(C::ProductCategory) = all(is_krull_schmidt, C.factors)
+is_semisimple(C::ProductCategory) = all(is_semisimple, C.factors)
+
+function _has_common_base_ring(C::ProductCategory)
+    isempty(C.factors) && return false
+    K = base_ring(first(C.factors))
+    all(D -> base_ring(D) == K, C.factors)
+end
+
+is_linear(C::ProductCategory) = all(is_linear, C.factors) && _has_common_base_ring(C)
+is_locally_finite(C::ProductCategory) =
+    all(is_locally_finite, C.factors) && _has_common_base_ring(C)
+is_finite(C::ProductCategory) = all(is_finite, C.factors) && _has_common_base_ring(C)
+is_multitensor(C::ProductCategory) =
+    all(is_multitensor, C.factors) && _has_common_base_ring(C)
 
 function Hom(X::ProductObject{N}, Y::ProductObject{N}) where N
     basis = ProductMorphism[]

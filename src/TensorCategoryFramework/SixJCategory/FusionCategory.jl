@@ -659,6 +659,8 @@ end
 #   Functionality
 #-------------------------------------------------------------------------------
 is_semisimple(::SixJCategory) = true
+# Objects have finite multiplicity vectors over a fixed finite simple list.
+is_finite(::SixJCategory) = true
 is_multiring(::SixJCategory) = true
 is_braided(C::SixJCategory) = isdefined(C, :braiding)
 

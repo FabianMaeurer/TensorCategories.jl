@@ -33,9 +33,12 @@ especially visible in positive characteristic.
 
 ## The interface
 
-The predicate `is_finite(C)` records that an implementation declares
-$\mathcal C$ to be a finite abelian category. A `false` result may mean only
-that the property has not been declared.
+The predicates `is_locally_finite(C)` and `is_finite(C)` record these two
+properties. The generic implications reflect the definitions: a finite
+category is locally finite, and a locally finite category is linear, abelian,
+additive, and Krull--Schmidt. As for all structural predicates, a `false`
+result may mean only that the property has not been established by the
+implementation.
 
 Within a finite-length category, an implementation may provide the following
 computational functions. They are optional capabilities rather than part of
@@ -89,6 +92,7 @@ C = representation_category(F, G)
 J = matrix(F, [1 1; 0 1])
 X = Representation(C, gens(G), [J]; check=true)
 
+@assert is_finite(C) && is_locally_finite(C)
 @assert J^5 == identity_matrix(F, 2)
 @assert !is_simple(X)
 factors = composition_factors(X)
