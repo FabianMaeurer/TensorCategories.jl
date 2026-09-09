@@ -15,6 +15,8 @@ usual left-action convention after replacing $g$ by $g^{-1}$.
 `representation_category(K,G)` models finite-dimensional representations of a
 finite group over the specified field. Objects store a group homomorphism into
 a matrix group. Morphisms are intertwiners in the row-vector convention.
+The shorter forms `rep(K,G)` and `rep(G)` are aliases for
+`representation_category(K,G)` and `representation_category(G)`.
 Use either `Representation(C,generators,matrices; check=false)` for an existing
 category $C$, or `Representation(G,generators,matrices; check=false)` to infer
 the field and parent category from the matrices. The corresponding overloads
@@ -64,16 +66,114 @@ Finiteness of $G$ is a hypothesis of this model and is not checked by the
 constructor.
 
 The no-field constructor `representation_category(G)` uses OSCAR's abelian
-closure of `QQ`. Even if the category is mathematically finite, `simples(C)` is
-not supported over every coefficient field. The current backend enumerates over
-finite fields (and handles the trivial group directly); it does not enumerate
-characteristic-zero irreducibles with their Schur-index information.
-Constructing explicit representations and computing their Hom spaces still
-works.
+closure of `QQ`, which is a splitting field for every finite group. Ordinary
+irreducible representations can therefore be enumerated:
 
-For small finite fields, the representation backend can enumerate simples and
-decompose modules. In modular characteristic distinguish composition factors
-from direct-sum summands. See [Splitting](@ref tensor-conventions).
+```@example representations
+D = representation_category(symmetric_group(3))
+int_dim.(simples(D))
+```
+
+Over a nonsplitting characteristic-zero field, the absolutely irreducible
+matrices returned by GAP need not be defined over the requested field. The
+implementation checks their entries before constructing any objects and fails
+rather than silently changing the coefficient field. Explicit representations,
+Hom spaces, and exact tests such as `is_simple(X)` remain available in the
+cases described below.
+
+## Representation algorithms and backends
+
+The functions `simples`, `is_simple`, `composition_factors`,
+`simple_subobjects`, and `decompose` accept a `backend` keyword. The available
+values are:
+
+| Value | Behaviour |
+|:---|:---|
+| `:auto` | use the established default for the coefficient field and operation |
+| `:gap` | use GAP's ordinary representation routines or its finite-field MeatAxe |
+| `:hecke` | use Hecke's matrix-module MeatAxe routines |
+
+For finite fields, `:auto` uses GAP. It supports irreducibility tests, simple
+enumeration, composition factors, and indecomposable decomposition. GAP's
+ordinary routine supplies absolutely irreducible representations in
+characteristic zero. This works directly over the default abelian closure and
+over another field when GAP's chosen matrices can be converted to that field.
+It does not by itself construct the simple objects over an arbitrary
+nonsplitting field; Galois orbits and Schur indices enter that problem.
+
+The Hecke backend works directly with the stored generator matrices. It is
+available over finite fields and for one-generator modules over supported
+infinite exact fields. For several generators over an infinite field, the
+current Hecke algorithm does not provide a dependable backend and the package
+reports this limitation. In a semisimple category, the default implementation
+can compute composition multiplicities from Hom spaces once `simples(C)` is
+available. In modular characteristic, composition factors and indecomposable
+direct summands are distinct; `decompose(X; backend=:hecke)` is therefore not
+used there. GAP's relevant matrix-module operations are documented in
+[gapmanual2026; Chapters 69.5 and 69.7](@cite), and the Hecke matrix-module
+implementation is part of the Nemo/Hecke system described by
+[fieker2017nemo](@cite).
+
+The following rational example has one generator, so the Hecke backend can
+recover the two rational simple modules of $C_3$ from the regular
+representation:
+
+```@example representations
+Cq = representation_category(QQ, cyclic_group(3))
+int_dim.(simples(Cq; backend=:hecke))
+```
+
+## Splitting fields
+
+The predicate `is_split_semisimple(C)` tests both semisimplicity and whether
+the endomorphism algebra of every simple is the coefficient field. Over
+$\mathbb Q$, the implementation instead uses the equivalent ordinary-character
+criterion: all irreducible characters must be rational-valued and have Schur
+index one.
+
+If $m$ is the exponent of $G$, Brauer's splitting theorem states that a field
+containing a primitive $m$-th root of unity is a splitting field for $G$. In
+characteristic $p>0$, only the prime-to-$p$ part of $m$ contributes a
+nontrivial root of unity. The function `splitting_field(C)` constructs the
+splitting field of the corresponding polynomial $x^{m'}-1$ over the current
+exact coefficient field, where $m'=m$ in characteristic zero and $m'$ is the
+prime-to-$p$ part of $m$ in characteristic $p$; compare
+[webb2016representations; Theorem 9.2.7](@cite).
+
+!!! note
+    `splitting_field(C)` returns **a** splitting field for $G$ over the current
+    coefficient field. It does not claim to return a minimal splitting field.
+
+```@example representations
+C2 = representation_category(GF(2), cyclic_group(3))
+L = splitting_field(C2)
+@assert degree(L) == 2
+@assert !is_split_semisimple(C2)
+@assert is_split_semisimple(representation_category(L, cyclic_group(3)))
+L
+```
+
+## Indecomposable representations
+
+The predicate `is_finite_representation_type(C)` records whether there are
+only finitely many indecomposable isomorphism classes. In characteristic zero
+and in nonmodular characteristic this follows from Maschke's theorem. If the
+coefficient field has characteristic $p$ dividing $|G|$, Higman's theorem says
+that the representation type is finite exactly when a Sylow $p$-subgroup of
+$G$ is cyclic [higman1954indecomposable](@cite).
+
+When the category is semisimple, `indecomposables(C)` is the same list as
+`simples(C)`. The installed GAP and Hecke backends do not provide a general
+enumeration of every indecomposable module in the modular finite-type case, so
+the predicate is available there but enumeration is not.
+
+```@example representations
+@assert is_finite_representation_type(
+    representation_category(GF(5), cyclic_group(5)))
+@assert !is_finite_representation_type(
+    representation_category(GF(2), symmetric_group(4)))
+nothing # hide
+```
 
 Semisimplicity, splitting, and the distinction between simple and absolutely
 simple objects follow the conventions of [EGNO; §§4.2 and 4.16](@citet).

@@ -56,22 +56,18 @@ interface. Testing whether an object is simple, finding its composition
 factors or simple subobjects, and enumerating all simple objects are generally
 difficult problems that require algorithms specific to the category and its
 coefficient field. These capabilities are therefore implemented separately.
-For representations of finite groups over finite fields, established modular
-representation algorithms are available; TensorCategories.jl uses GAP's
-irreducible-representation routines and MeatAxe functionality, as illustrated
-below.
+For finite-group representations, these operations are available over many
+coefficient fields; their precise scope and backend selection are documented
+on the [representation-category inventory page](@ref representations).
 
 ## Example: Modular group representations
 
 For a finite group $G$ and a field $k$, finite-dimensional
 $k$-representations form a finite abelian category: they are the
 finite-dimensional modules over the finite-dimensional group algebra $kG$.
-In particular, every such representation has finite length. TensorCategories.jl
-converts the representation below to a GAP module and uses GAP's MeatAxe
-routines `MTX.IsIrreducible` and
-`MTX.CollectedFactors` to test simplicity and compute composition factors; see
-[gapmanual2026; §§69.5 and 69.7](@cite). These algorithms use the action
-matrices of the module, not merely its endomorphism algebra.
+In particular, every such representation has finite length. The example below
+tests simplicity and computes composition factors with the specialized
+finite-group representation implementation.
 
 Let $G=C_5$ and $k=\mathbb F_5$. The matrix
 
@@ -119,18 +115,6 @@ nothing # hide
 
 This example shows why composition factors and direct-sum decompositions need
 separate interfaces. We discuss direct summands next.
-
-!!! note "MeatAxe functionality in Hecke"
-    Hecke.jl provides the matrix-module type `ModAlgAss` together with
-    `meataxe`, `composition_series`, `composition_factors`, and
-    `composition_factors_with_multiplicity` [fieker2017nemo](@cite). These
-    algorithms take modules described by generator matrices; the current Hecke
-    test suite exercises them over finite fields, $\mathbb Q$, and a number
-    field. TensorCategories.jl does not currently use this interface for group
-    representations: its `composition_factors` method converts the
-    representation to a GAP module and calls `MTX.CollectedFactors` directly.
-    The Hecke implementation may therefore provide a broader future backend for
-    the categorical function.
 
 Continue with [idempotents and direct-sum decompositions](@ref
 karoubian-categories).

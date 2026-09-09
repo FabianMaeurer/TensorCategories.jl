@@ -268,7 +268,8 @@ export is_central
 export is_epimorphism
 export is_equivalent
 export is_equivariant
-export is_finite 
+export is_finite
+export is_finite_representation_type
 export is_fusion 
 export is_half_braiding
 export is_irreducible
@@ -406,6 +407,7 @@ export rand
 export randomized_pentagon_axiom
 export rational_lift 
 export regular_representation
+export rep
 export Representation 
 export RepresentationCategory 
 export representation_category
@@ -466,6 +468,7 @@ export solve_groebner
 export sort_simples_by_dimension! 
 export spherical 
 export split
+export splitting_field
 export split_cyclotomic
 export stalk 
 export stalks

@@ -12,7 +12,7 @@ table.
 | Finite sets and maps | `Sets`, `SetObject`, `SetMorphism`, `SetHomSet` | [Finite sets](../Interface/Categories.md#finite-sets) |
 | Finite-dimensional vector spaces | `vector_spaces`, `VectorSpaces`, `VectorSpaceObject`, `VectorSpaceMorphism`, `VSObject`, `VSHomSpace` | [Vector spaces and gradings](../ConcreteExamples/VectorSpaces.md) |
 | Group-graded vector spaces | `graded_vector_spaces`, `twisted_graded_vector_spaces`, `GradedVectorSpaces`, `GVSObject`, `GVSMorphism`, `GVSHomSpace`, `Cocycle`, `cyclic_group_3cocycle`, `unitary_cocycle` | [Vector spaces and gradings](../ConcreteExamples/VectorSpaces.md) |
-| Finite-group representations | `representation_category`, `GroupRepresentationCategory`, `GroupRepresentation`, `GroupRepresentationMorphism`, `GRHomSpace`, `Representation` | [Group representations](../ConcreteExamples/Representations.md) |
+| Finite-group representations | `representation_category`, `rep`, `GroupRepresentationCategory`, `GroupRepresentation`, `GroupRepresentationMorphism`, `GRHomSpace`, `Representation` | [Group representations](../ConcreteExamples/Representations.md) |
 | Equivariant coherent sheaves | `coherent_sheaves`, `convolution_category` | [Equivariant sheaves and convolution](../ConcreteExamples/CoherentSheaves.md) |
 | Generic quantum $\mathfrak{sl}_2$ model | `sl2_representations` | [$\mathfrak{sl}_2$, Verlinde, and dihedral models](../ConcreteExamples/UqSl2.md) |
 

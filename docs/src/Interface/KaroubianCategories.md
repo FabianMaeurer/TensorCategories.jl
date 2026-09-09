@@ -115,10 +115,9 @@ Over a finite field, the generic decomposition backend forms
 $A=\operatorname{End}_{\mathcal C}(X)$ and decomposes the regular right
 $A$-module. Projecting $1_A$ onto its indecomposable summands gives primitive
 idempotents in $A$, and their images give the indecomposable summands of $X$.
-The group-representation backend instead applies GAP's
-`MTX.Indecomposition` directly to the representation. Hecke.jl's `ModAlgAss`
-MeatAxe routines provide related irreducibility and composition-series
-algorithms, as discussed in the preceding section.
+Finite-group representations have a specialized implementation; see the
+[representation-category inventory page](@ref representations) for its scope
+and backend choices.
 
 Scalar extension can create new idempotents in endomorphism algebras and hence
 new decompositions of formerly indecomposable objects. This is one reason that
