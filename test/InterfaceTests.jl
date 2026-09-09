@@ -669,6 +669,7 @@ end
     X,inc = kernel(aug)
     @test int_dim(X) == 2 && is_simple(X) && int_dim(End(X)) == 1
     @test is_zero(aug ∘ inc) && int_dim(Hom(U,X)) == 0
+    @test is_split_semisimple(C) && is_fusion(C)
 
     # Character theory gives std tensor std = 1 + sign + std, so Schur's
     # lemma gives a three-dimensional endomorphism algebra.
@@ -682,9 +683,28 @@ end
     D = representation_category(QQ,H)
     Y = Representation(D,gens(H),[matrix(QQ,2,2,[0,1,-1,-1])])
     @test int_dim(End(Y)) == 2 && is_simple(Y)
+    @test !is_split_semisimple(D) && !is_fusion(D)
+    @test sort(int_dim.(simples(D;backend=:hecke))) == [1,2]
+    @test sort([(int_dim(S),m) for (S,m) in
+                composition_factors(regular_representation(D);backend=:hecke)]) ==
+          [(1,1),(2,1)]
+    L = splitting_field(D)
+    @test degree(L) == 2
     # Enumeration needs a rational/Schur-index-aware backend; importing GAP's
     # absolutely irreducible list over a different field would be incorrect.
     @test_throws ArgumentError simples(C)
+    @test_throws ArgumentError is_simple(X;backend=:gap)
+
+    # The no-field constructor uses the abelian closure, where GAP's ordinary
+    # irreducibles give all simples. This restores the established
+    # characteristic-zero path without relying on an undocumented rational
+    # irreducible-module interface.
+    A = representation_category(G)
+    @test int_dim.(simples(A)) == [1,1,2]
+    reg = regular_representation(A)
+    @test int_dim(reg) == 6
+    @test sort([(int_dim(S),m) for (S,m) in composition_factors(reg)]) ==
+          [(1,1),(1,1),(2,2)]
 end
 
 function audit_jordan_representation(C, n)
@@ -717,8 +737,12 @@ end
     @test is_simple(J1)
     # J2 is a nonsplit length-two extension with only one factor type.
     @test !is_simple(J2) && !is_simple(J1 ⊕ J1)
+    @test !is_simple(J2;backend=:hecke)
     cf = composition_factors(J2)
     @test length(cf) == 1 && cf[1][2] == 2 && int_dim(cf[1][1]) == 1
+    cfh = composition_factors(J2;backend=:hecke)
+    @test length(cfh) == 1 && cfh[1][2] == 2 && int_dim(cfh[1][1]) == 1
+    @test_throws ArgumentError decompose(J2;backend=:hecke)
     soc = simple_subobjects(J2)
     @test length(soc) == 1 && int_dim(only(soc)) == 1
 
@@ -738,6 +762,26 @@ end
     S = only(simple_subobjects(Y))
     # The sign socle embeds, while the trivial head is only a quotient.
     @test int_dim(Hom(S,Y)) == 1 && int_dim(Hom(Y,S)) == 0
+end
+
+@testset "Splitting fields and representation type" begin
+    H = cyclic_group(3)
+    C = representation_category(GF(2),H)
+    L = splitting_field(C)
+    @test degree(L) == 2
+    @test !is_split_semisimple(C)
+    @test is_split_semisimple(representation_category(L,H))
+    @test is_finite_representation_type(C)
+    @test sort(int_dim.(indecomposables(C))) == [1,2]
+
+    M = representation_category(GF(5),cyclic_group(5))
+    @test is_finite_representation_type(M)
+    @test splitting_field(M) == GF(5)
+    @test_throws ArgumentError indecomposables(M)
+
+    I = representation_category(GF(2),symmetric_group(4))
+    @test !is_finite_representation_type(I)
+    @test_throws ArgumentError indecomposables(I)
 end
 
 # Finite-dimensional vector spaces are simple exactly in integer dimension

@@ -36,10 +36,73 @@ is_weak_fusion(C::GroupRepresentationCategory) = is_semisimple(C)
 is_weak_multifusion(C::GroupRepresentationCategory) = is_weak_fusion(C)
 function is_fusion(C::GroupRepresentationCategory)
     get_attribute!(C, :fusion) do
-        is_weak_fusion(C) && all(X -> int_dim(End(X)) == 1, simples(C))
+        is_weak_fusion(C) && is_split_semisimple(C)
     end
 end
-is_split_semisimple(C::GroupRepresentationCategory) = is_fusion(C)
+
+"""
+    is_split_semisimple(C::GroupRepresentationCategory)
+
+Return whether `C` is semisimple and every simple representation is
+absolutely simple over its coefficient field.
+"""
+function is_split_semisimple(C::GroupRepresentationCategory)
+    get_attribute!(C, :split_semisimple) do
+        is_semisimple(C) || return false
+        F = base_ring(C)
+        G = base_group(C)
+        if F isa QQField
+            # Over QQ, split semisimplicity is equivalent to every ordinary
+            # irreducible character being rational-valued with Schur index one.
+            return all(χ -> Oscar.degree_of_character_field(χ) == 1 &&
+                            Oscar.schur_index(χ) == 1,
+                       collect(Oscar.character_table(G)))
+        elseif F isa Oscar.QQAbField || F isa QQBarField
+            return true
+        end
+        all(X -> int_dim(End(X)) == 1, simples(C))
+    end
+end
+
+"""
+    is_finite_representation_type(C::GroupRepresentationCategory)
+
+Return whether `C` has only finitely many isomorphism classes of
+indecomposable objects. In modular characteristic this uses Higman's
+criterion: a Sylow subgroup for the characteristic is cyclic.
+"""
+function is_finite_representation_type(C::GroupRepresentationCategory)
+    is_semisimple(C) && return true
+    p = Int(characteristic(base_ring(C)))
+    Oscar.is_cyclic(Oscar.sylow_subgroup(base_group(C), p)[1])
+end
+
+"""
+    splitting_field(C::GroupRepresentationCategory)
+
+Return a splitting field for the finite-group representations in `C`.
+The returned field contains a primitive root of unity whose order is the
+prime-to-characteristic part of the exponent of the group. By Brauer's
+splitting theorem this is sufficient, but it need not be a minimal splitting
+field.
+"""
+function splitting_field(C::GroupRepresentationCategory)
+    F = base_ring(C)
+    Oscar.is_exact_type(F) || throw(ArgumentError(
+        "splitting_field requires an exact coefficient field"))
+    F isa Oscar.QQAbField && return F
+    F isa QQBarField && return F
+    m = Int(exponent(base_group(C)))
+    p = Int(characteristic(F))
+    if p != 0
+        while m % p == 0
+            m = div(m, p)
+        end
+    end
+    m == 1 && return F
+    Fx, x = polynomial_ring(F, "x"; cached=false)
+    Oscar.splitting_field(x^m - one(Fx))
+end
 
 function Base.hash(C::GroupRepresentationCategory, h::UInt)
     hash((C.group, C.base_ring), h)
@@ -552,60 +615,105 @@ end
 #-------------------------------------------------------------------------
 
 """
-    simples(Rep::GroupRepresentationCategory)
+    simples(Rep::GroupRepresentationCategory; backend=:auto)
 
-Return representatives of simple objects. The current backend supports finite
-coefficient fields and the trivial group. Characteristic-zero enumeration for
-nontrivial groups requires a rational/Schur-index backend and throws an error;
-constructing specified representations and computing Hom spaces are separate
-supported operations.
+Return representatives of simple objects. `backend=:gap` uses GAP's ordinary
+or modular representation routines. `backend=:hecke` obtains the simple
+factors of the regular module with Hecke's matrix-module algorithms. The
+default `:auto` uses GAP and reports when a nonsplit characteristic-zero field
+requires a rational/Schur-index backend.
 """
-function simples(Rep::GroupRepresentationCategory)
-    
-    return get_attribute!(Rep, :simples) do
-        #@show Rep.group
-        grp = base_group(Rep)
-        F = base_ring(Rep)
+function simples(Rep::GroupRepresentationCategory; backend::Symbol=:auto)
+    backend in (:auto, :gap, :hecke) || throw(ArgumentError(
+        "backend must be :auto, :gap, or :hecke"))
+    key = backend === :auto ? :simples : Symbol(:simples_, backend)
+    get_attribute!(Rep, key) do
+        grp, F = base_group(Rep), base_ring(Rep)
+        order(grp) == 1 && return [one(Rep)]
+        backend === :hecke && return first.(_composition_factors_hecke(
+            regular_representation(Rep)))
 
-        if order(grp) == 1 return [one(Rep)] end
-
-        is_finite(F) || throw(ArgumentError(
-            "simple enumeration over this field needs a rational/Schur-index backend; constructing representations and Hom spaces is supported"))
-
-        #gap_field = GAP.Globals.FiniteField(Int(characteristic(F)), degree(F))
-        gap_field = codomain(iso_oscar_gap(F))
-        gap_reps = if is_finite(F) 
-            GAP.Globals.IrreducibleRepresentations(grp.X,gap_field)
-        else
+        gap_field = is_finite(F) ? codomain(iso_oscar_gap(F)) : nothing
+        gap_reps = is_finite(F) ?
+            GAP.Globals.IrreducibleRepresentations(grp.X, gap_field) :
             GAP.Globals.IrreducibleRepresentations(grp.X)
+        try
+            generators = gens(grp)
+            [Representation(Rep, generators,
+                [matrix(F, GAP.Globals.Image(m, g.X)) for g in generators];
+                check=false) for m in gap_reps]
+        catch
+            backend === :gap && rethrow()
+            throw(ArgumentError(
+                "GAP's absolutely irreducible representations are not realizable over this coefficient field; try backend=:hecke for a field-aware matrix-module computation"))
         end
-
-        int_dims = [GAP.Globals.DimensionOfMatrixGroup(GAP.Globals.Range(m)) for m ∈ gap_reps]
-    
-        oscar_reps = [GAPGroupHomomorphism(grp, GL(int_dims[i],F), gap_reps[i]) for i ∈ 1:length(gap_reps)]
-        reps = [GroupRepresentation(Rep,grp,m,F,d) for (m,d) ∈ zip(oscar_reps,int_dims)]
-
-        return reps
-
     end
+end
+
+function _hecke_module(σ::GroupRepresentation)
+    G = base_group(σ)
+    generators = order(G) == 1 ? elements(G) : gens(G)
+    if !is_finite(base_ring(σ)) && length(generators) > 1
+        throw(ArgumentError(
+            "Hecke's matrix-module algorithms are not currently reliable for multiple generators over an infinite field"))
+    end
+    Oscar.Hecke.Amodule([matrix(σ(g)) for g in generators])
+end
+
+function _representation_from_hecke(C::GroupRepresentationCategory, M)
+    Representation(C, gens(base_group(C)), Oscar.Hecke.action_of_gens(M);
+                   check=false)
+end
+
+function _composition_factors_hecke(σ::GroupRepresentation)
+    C = parent(σ)
+    [(_representation_from_hecke(C,M), Int(n)) for (M,n) in
+        Oscar.Hecke.composition_factors_with_multiplicity(_hecke_module(σ))]
+end
+
+"""
+    indecomposables(C::GroupRepresentationCategory; backend=:auto)
+
+Enumerate all indecomposable representations when supported. In a semisimple
+category these are the simple representations. The finite-representation-type
+predicate is available in modular characteristic, but the installed backends
+do not provide a general enumeration there.
+"""
+function indecomposables(C::GroupRepresentationCategory; backend::Symbol=:auto)
+    is_semisimple(C) && return simples(C; backend)
+    is_finite_representation_type(C) || throw(ArgumentError(
+        "the representation category has infinite representation type"))
+    throw(ArgumentError(
+        "enumeration of all indecomposable modular representations is not implemented"))
 end
 
 
 """
-    decompose(σ::GroupRepresentation)
+    decompose(σ::GroupRepresentation; backend=:auto)
 
 Decompose the representation into a direct sum of indecomposable objects.
 Return a list of tuples with indecomposable objects and multiplicities.
 """
-#=  =# function decompose(σ::GroupRepresentation)
+#=  =# function decompose(σ::GroupRepresentation; backend::Symbol=:auto)
+    backend in (:auto, :gap, :hecke) || throw(ArgumentError(
+        "backend must be :auto, :gap, or :hecke"))
     F = base_ring(σ)
     if int_dim(σ) == 0 return [] end
     G = σ.group
 
     if order(G) == 1 return [(one(parent(σ)),int_dim(σ))] end
 
-    is_finite(F) || throw(ArgumentError(
-        "Krull-Schmidt decomposition of these representations currently requires a finite base field"))
+    if backend === :hecke
+        is_semisimple(parent(σ)) || throw(ArgumentError(
+            "Hecke computes composition factors, not indecomposable summands in a nonsemisimple category"))
+        return _composition_factors_hecke(σ)
+    elseif !is_finite(F)
+        backend === :gap && throw(ArgumentError(
+            "GAP's MeatAxe backend requires a finite coefficient field"))
+        is_semisimple(parent(σ)) || throw(ArgumentError(
+            "Krull-Schmidt decomposition over this field is unsupported"))
+        return _semisimple_representation_factors(σ)
+    end
 
     M = to_gap_module(σ,F)
     ret = Object[]
@@ -624,17 +732,28 @@ end
 # end
 
 """
-    composition_factors(σ::GroupRepresentation)
+    composition_factors(σ::GroupRepresentation; backend=:auto)
 
 Return simple composition factors with their Jordan--Hölder multiplicities.
 These are subquotients, not necessarily subobjects or direct summands.
 """
-function composition_factors(σ::GroupRepresentation)
+function composition_factors(σ::GroupRepresentation; backend::Symbol=:auto)
+    backend in (:auto, :gap, :hecke) || throw(ArgumentError(
+        "backend must be :auto, :gap, or :hecke"))
     F = base_ring(σ)
     if int_dim(σ) == 0 return Tuple{GroupRepresentation,Int}[] end
     G = σ.group
 
     if order(G) == 1 return [(one(parent(σ)),int_dim(σ))] end
+
+    backend === :hecke && return _composition_factors_hecke(σ)
+    if !is_finite(F)
+        backend === :gap && throw(ArgumentError(
+            "GAP's MeatAxe backend requires a finite coefficient field"))
+        is_semisimple(parent(σ)) || throw(ArgumentError(
+            "composition factors over this field are unsupported"))
+        return _semisimple_representation_factors(σ)
+    end
 
     M = to_gap_module(σ,F)
     ret = Tuple{GroupRepresentation,Int}[]
@@ -647,19 +766,31 @@ function composition_factors(σ::GroupRepresentation)
     ret
 end
 
+function _semisimple_representation_factors(σ::GroupRepresentation)
+    [(S, div(int_dim(Hom(S,σ)), int_dim(End(S))))
+     for S in simples(parent(σ)) if int_dim(Hom(S,σ)) != 0]
+end
+
 """
     simple_subobjects(σ::GroupRepresentation)
 
 Return the simple isomorphism types in the socle, without multiplicities.
 """
-function simple_subobjects(σ::GroupRepresentation)
-    [S for (S,_) in composition_factors(σ) if int_dim(Hom(S,σ)) != 0]
+function simple_subobjects(σ::GroupRepresentation; backend::Symbol=:auto)
+    [S for (S,_) in composition_factors(σ; backend) if int_dim(Hom(S,σ)) != 0]
 end
 
-function is_simple(σ::GroupRepresentation)
+function is_simple(σ::GroupRepresentation; backend::Symbol=:auto)
+    backend in (:auto, :gap, :hecke) || throw(ArgumentError(
+        "backend must be :auto, :gap, or :hecke"))
     int_dim(σ) == 0 && return false
     int_dim(σ) == 1 && return true
     order(base_group(σ)) == 1 && return false
+    if backend === :hecke
+        return Oscar.Hecke.meataxe(_hecke_module(σ))[1]
+    end
+    backend === :gap && !is_finite(base_ring(σ)) && throw(ArgumentError(
+        "GAP's MeatAxe backend requires a finite coefficient field"))
     if !(base_ring(σ) isa FinField)
         characteristic(base_ring(σ)) == 0 || throw(ArgumentError(
             "irreducibility over this field is unsupported"))
@@ -820,7 +951,7 @@ function induction(ρ::GroupRepresentation, G::Group)
 
     hi = [[inv(g_ji[k][i])*g[k]*transversal[i] for i ∈ 1:length(transversal)] for k ∈ 1:length(g)]
 
-    images = []
+    images = MatElem[]
     d = int_dim(ρ)
     n = length(transversal)*d
     for i ∈ 1:length(g)
@@ -829,7 +960,7 @@ function induction(ρ::GroupRepresentation, G::Group)
         for j ∈ 1:length(transversal)
             m[ (ji[i][j]-1)*d+1:ji[i][j]*d, (j-1)*d+1:j*d] = matrix(ρ(hi[i][j]))
         end
-        images = [images; m]
+        push!(images, m)
     end
     return Representation(G, g, images, check = false)
 end
