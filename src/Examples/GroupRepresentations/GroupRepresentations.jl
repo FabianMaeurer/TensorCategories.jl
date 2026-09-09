@@ -119,7 +119,7 @@ int_dim(ρ::GroupRepresentation) = ρ.int_dim
 """
     representation_category(F::Field, G::Group)
 
-Category of finite dimensonal group representations of ``G``.
+Category of finite-dimensional group representations of ``G`` over ``F``.
 """
 function representation_category(F::Field, G::Group)
     return GroupRepresentationCategory(G,F)
@@ -128,6 +128,17 @@ end
 function representation_category(G::Group)
     return representation_category(abelian_closure(QQ)[1], G)
 end
+
+"""
+    rep(F::Field, G::Group)
+    rep(G::Group)
+
+Short aliases for `representation_category(F,G)` and
+`representation_category(G)`, respectively. The one-argument form uses the
+abelian closure of the rational field.
+"""
+rep(F::Field, G::Group) = representation_category(F,G)
+rep(G::Group) = representation_category(G)
 
 function extension_of_scalars(C::GroupRepresentationCategory,L::Field;
                               embedding=_scalar_extension_embedding(base_ring(C),L))

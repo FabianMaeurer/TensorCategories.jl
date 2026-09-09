@@ -15,6 +15,8 @@ usual left-action convention after replacing $g$ by $g^{-1}$.
 `representation_category(K,G)` models finite-dimensional representations of a
 finite group over the specified field. Objects store a group homomorphism into
 a matrix group. Morphisms are intertwiners in the row-vector convention.
+The shorter forms `rep(K,G)` and `rep(G)` are aliases for
+`representation_category(K,G)` and `representation_category(G)`.
 Use either `Representation(C,generators,matrices; check=false)` for an existing
 category $C$, or `Representation(G,generators,matrices; check=false)` to infer
 the field and parent category from the matrices. The corresponding overloads

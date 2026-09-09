@@ -407,6 +407,7 @@ export rand
 export randomized_pentagon_axiom
 export rational_lift 
 export regular_representation
+export rep
 export Representation 
 export RepresentationCategory 
 export representation_category

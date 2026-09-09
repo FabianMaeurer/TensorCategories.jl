@@ -700,6 +700,8 @@ end
     # characteristic-zero path without relying on an undocumented rational
     # irreducible-module interface.
     A = representation_category(G)
+    @test rep(G) == A
+    @test rep(QQ,G) == C
     @test int_dim.(simples(A)) == [1,1,2]
     reg = regular_representation(A)
     @test int_dim(reg) == 6
