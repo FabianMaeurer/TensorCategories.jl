@@ -7,9 +7,8 @@ unit.
 
 ## Tensor products and the unit
 
-The calls `tensor_product(X,Y)` and `X ⊗ Y` return $X\otimes Y$. Tensor
-product also acts on morphisms: if $f\colon X\to X'$ and
-$g\colon Y\to Y'$, then
+The tensor product acts on both objects and morphisms. If $f\colon X\to X'$
+and $g\colon Y\to Y'$, then
 
 ```math
 \label{eq:tensor-product-morphism}
@@ -24,11 +23,10 @@ The implementation must satisfy the interchange law
 =(f'\otimes g')\circ(f\otimes g).
 ```
 
-The call `one(C)` returns the tensor unit $\mathbb 1$. A general monoidal
-category has left and right unit constraints. TensorCategories.jl uses a
-unit-strict presentation: tensoring a represented object with $\mathbb 1$
-returns that object, and the unit constraints are identities rather than
-separate public morphisms. The associator need not be an identity.
+A general monoidal category has left and right unit constraints.
+TensorCategories.jl uses a unit-strict presentation: tensoring a represented
+object with $\mathbb 1$ returns that object, and the unit constraints are
+identities. The associator need not be an identity.
 
 ## The associator
 
@@ -40,21 +38,12 @@ a_{X,Y,Z}\colon (X\otimes Y)\otimes Z
 \longrightarrow X\otimes(Y\otimes Z).
 ```
 
-`associator(X,Y,Z)` returns the morphism in equation
-\eqref{eq:monoidal-associator}; `inv_associator(X,Y,Z)` returns its inverse.
 This direction agrees with [EGNO; Definition 2.2.8](@citet). Parentheses should
 be written explicitly even when the two bracketings happen to be equal as
 represented objects.
 
-The associator satisfies Mac Lane's pentagon equation. TensorCategories.jl
-does not deduce this coherence law from the presence of an `associator` method:
-the category implementation is responsible for it. The method
-`pentagon_axiom(C)` performs an exhaustive check on the listed simple objects
-for supported finite semisimple models. `randomized_pentagon_axiom(C,n)` checks
-$n$ sampled quadruples and is only a diagnostic.
-
-With the direction in equation \eqref{eq:monoidal-associator}, the equation
-checked by the package is
+The associator satisfies Mac Lane's pentagon equation. With the direction in
+equation \eqref{eq:monoidal-associator}, it is
 
 ```math
 \label{eq:monoidal-pentagon}
@@ -69,7 +58,25 @@ Both sides map $((X\otimes Y)\otimes Z)\otimes W$ to
 $X\otimes(Y\otimes(Z\otimes W))$. Writing the sources and targets is a
 useful check when translating associator formulas from another convention.
 
-## Vector spaces and representations
+## The interface
+
+| Operation | Meaning |
+|:---|:---|
+| `tensor_product(X,Y)`, `X ⊗ Y` | the tensor product $X\otimes Y$ |
+| `tensor_product(f,g)`, `f ⊗ g` | the tensor product of morphisms |
+| `one(C)` | the tensor unit $\mathbb 1$ |
+| `associator(X,Y,Z)` | the associator in equation \eqref{eq:monoidal-associator} |
+| `inv_associator(X,Y,Z)` | the inverse associator |
+| `pentagon_axiom(C)` | exhaustively check the pentagon on the listed simple objects when supported |
+| `randomized_pentagon_axiom(C,n)` | check the pentagon on $n$ sampled quadruples |
+
+An implementation must provide the tensor product on objects and morphisms,
+the tensor unit, and the associator, and it is responsible for the
+bifunctoriality and coherence axioms. Merely providing an `associator` method
+does not establish the pentagon. The randomized check is a diagnostic rather
+than an exhaustive verification.
+
+## Example: Vector spaces and representations
 
 For the implemented categories $\operatorname{Vec}_k$ and
 $\operatorname{Rep}_k(G)$, tensor-product bases are ordered so that the

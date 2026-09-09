@@ -19,19 +19,7 @@ i\circ p=e.
 
 An additive category is **Karoubian**, or **idempotent complete**, if every
 idempotent splits. In an abelian category this is automatic: one may take
-$Y=\operatorname{im}(e)$. For an arbitrary additive category, its Karoubi
-envelope formally adjoins objects $(X,e)$ for idempotents
-$e\in\operatorname{End}(X)$; a morphism $(X,e)\to(Y,d)$ is a morphism
-$f\colon X\to Y$ satisfying $f=d\circ f\circ e$.
-
-This formal definition is simple, but realizing the Karoubi envelope
-effectively can be difficult. One must compute idempotents in endomorphism
-algebras, find their primitive decompositions, construct their images as
-objects, and recognize isomorphic summands. All of these are
-category-dependent algorithmic problems. In an abelian category an image is
-known to exist, but an implementation must still provide a way to compute it.
-The function `karoubian_envelope(C)` is therefore a construction which a
-concrete category model may implement.
+$Y=\operatorname{im}(e)$.
 
 Idempotents encode direct-sum decompositions. If
 
@@ -68,6 +56,8 @@ semiperfect endomorphism rings is Krull–Schmidt
 $k$-linear additive category is Krull–Schmidt precisely when it is idempotent
 complete. Every locally finite abelian category is therefore Krull–Schmidt;
 compare [EGNO; Definition 1.8.1 and the paragraph following it](@cite).
+In particular, $\operatorname{Rep}_k(G)$ is Krull–Schmidt for every finite
+group $G$ and every field $k$.
 
 The number of indecomposable isomorphism classes is a separate finiteness
 question. A finite-dimensional $k$-algebra has **finite representation type**
@@ -76,24 +66,32 @@ indecomposable modules; the same terminology is used for its representation
 category. A finite abelian category has only finitely many simple isomorphism
 classes, but it may have infinitely many indecomposable ones.
 
-Every finite cyclic group $C_n$ has finite representation type over every
-field $k$. Indeed, $kC_n\cong k[x]/(x^n-1)$. Write
-$x^n-1=\prod_i f_i(x)^{e_i}$ with the $f_i$ distinct monic irreducible
-polynomials in $k[x]$. By the structure theorem for finitely generated modules
-over $k[x]$, the indecomposable $kC_n$-modules are precisely
-
-```math
-\label{eq:cyclic-indecomposable-modules}
-k[x]/\bigl(f_i(x)^a\bigr),
-\qquad 1\leq a\leq e_i.
-```
-
-Thus there are only finitely many even when $k$ is not algebraically closed.
+Every finite cyclic group has finite representation type over every field.
 More generally, if $k$ is algebraically closed of characteristic $p$, then
 $\operatorname{Rep}_k(G)$ has finite representation type precisely when the
 Sylow $p$-subgroups of $G$ are cyclic [higman1954indecomposable](@cite). The
 Klein four group in characteristic $2$ therefore has infinitely many
 indecomposable representations.
+
+For an arbitrary additive category $\mathcal C$, its **Karoubi envelope**
+formally adjoins objects $(X,e)$ for idempotents
+$e\in\operatorname{End}_{\mathcal C}(X)$; a morphism
+$(X,e)\to(Y,d)$ is a morphism $f\colon X\to Y$ satisfying
+$f=d\circ f\circ e$. The Karoubi envelope is Karoubian and contains
+$\mathcal C$ as a full subcategory.
+
+Constructing it effectively can nevertheless be difficult. One must compute
+idempotents in endomorphism algebras, find their primitive decompositions,
+construct their images as objects, and recognize isomorphic summands. These
+are category-dependent algorithmic problems.
+
+!!! info "Indecomposables as discrete data"
+    The Krull–Schmidt property provides a way to discretize many categorical
+    constructions and problems. One specifies the relevant data on
+    indecomposable objects and then extends it over finite direct sums,
+    additively on objects and linearly on morphisms in the $k$-linear setting.
+    When there are only finitely many indecomposable isomorphism classes, this
+    reduces many questions to finite algebraic data.
 
 ## The interface
 
@@ -106,6 +104,11 @@ implementation may provide:
 | `is_indecomposable(X)` | test whether $X$ is indecomposable |
 | `decompose(X)` | return pairs `(Y,m)` of indecomposable summands and their multiplicities |
 | `TensorCategories.is_krull_schmidt(C)` | record that the implementation treats $\mathcal C$ as Krull–Schmidt |
+| `karoubian_envelope(C)` | construct the Karoubi envelope when supported by the category model |
+
+The function `karoubian_envelope(C)` requires a category-specific
+construction; the abstract interface cannot manufacture the necessary
+idempotents and their images.
 
 Over a finite field, the generic decomposition backend forms
 $A=\operatorname{End}_{\mathcal C}(X)$ and decomposes the regular right

@@ -33,12 +33,6 @@ and
 =\operatorname{id}_{X^*}.
 ```
 
-The package methods `dual(X)` and `left_dual(X)` return $X^*$, while `ev(X)`
-and `coev(X)` return the two morphisms in equation
-\eqref{eq:left-duality-morphisms}. The dual object alone is insufficient:
-evaluation, coevaluation, and their normalizations are part of the implemented
-data.
-
 A chosen right dual ${}^*X$ has morphisms
 
 ```math
@@ -52,15 +46,29 @@ X\otimes{}^*X\longrightarrow\mathbb 1,
 
 This agrees with [EGNO; Definition 2.10.2](@citet).
 
-They are exposed as `right_dual(X)`, `right_ev(X)`, and `right_coev(X)`. A
-chosen left dual is not automatically a chosen right dual at the level of the
-interface. A model must implement the right-duality data or provide additional
-structure from which the generic methods can construct it.
+A monoidal category is **rigid** if every object has left and right duals.
 
-A monoidal category is **rigid** if every object has left and right duals. The
-predicate `TensorCategories.is_rigid(C)` reports this property. It is a
-structural declaration; it does not run the triangle identities for arbitrary
-objects.
+## The interface
+
+| Operation | Meaning |
+|:---|:---|
+| `dual(X)`, `left_dual(X)` | the chosen left dual $X^*$ |
+| `ev(X)` | the left evaluation $X^*\otimes X\to\mathbb 1$ |
+| `coev(X)` | the left coevaluation $\mathbb 1\to X\otimes X^*$ |
+| `right_dual(X)` | the chosen right dual ${}^*X$ |
+| `right_ev(X)` | the right evaluation $X\otimes{}^*X\to\mathbb 1$ |
+| `right_coev(X)` | the right coevaluation $\mathbb 1\to{}^*X\otimes X$ |
+| `TensorCategories.is_rigid(C)` | report that every object has left and right duals |
+
+The dual objects alone are insufficient: evaluation, coevaluation, and their
+normalizations are part of the implemented data. A chosen left dual is not
+automatically a chosen right dual at the level of the interface. A model must
+implement the right-duality data or provide additional structure from which
+the generic methods can construct it. The predicate `is_rigid(C)` is a
+structural declaration; it does not check the triangle identities for
+arbitrary objects.
+
+## Example: Vector spaces and representations
 
 For vector spaces and group representations, `dual(X)` uses the dual vector
 space. In row coordinates, the action on the dual representation is

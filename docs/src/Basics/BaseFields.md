@@ -4,20 +4,10 @@ DocTestSetup = :(using TensorCategories, Oscar)
 
 # [Coefficient fields and numeric computations](@id base-fields)
 
-For a linear category, the field $k$ is part of the mathematical input, and
-`base_ring(C)` returns the corresponding coefficient parent of a category
-`C`. For exact computations, this parent may in principle be any field
-provided by OSCAR. For numerical computations over $\mathbb R$ or $\mathbb C$,
-it may instead be a parent whose elements are rigorous ball enclosures. In
-either case, this does not imply that every theorem or algorithm applies: its
-hypotheses may restrict the characteristic, require an algebraically closed or
-splitting field, or depend on operations that have only been implemented for
-certain coefficient types.
-
-Most fields used in TensorCategories.jl are represented exactly. Their
-elements are symbolic algebraic objects, and arithmetic and equality are exact.
-Numerical computations are also possible using arbitrary-precision real or
-complex ball arithmetic, as described below.
+Working with linear categories requires a coefficient field $k$, together with
+arithmetic and linear algebra over $k$. TensorCategories.jl supports two
+approaches: exact symbolic computation and numerical computation. The function
+`base_ring(C)` returns the coefficient parent used by a category `C`.
 
 ## Exact symbolic computations
 
@@ -106,60 +96,28 @@ best computational choice. The positive-characteristic constructor currently
 takes a prime field `GF(p)` and represents
 $\overline{\mathbb F}_p$ as the union of its finite extensions.
 
-TensorCategories.jl supports positive-characteristic coefficient fields as a
-first-class use case. Field extension within one characteristic can split
-objects, but it cannot repair a failure of semisimplicity caused by modular
-representation theory.
-
-OSCAR can work exactly with a finite real number field $K\subset\mathbb R$ by
-choosing a real embedding with `embedded_number_field`, and every finite
-collection of real algebraic numbers is contained in such a field. OSCAR can
-also represent real algebraic numbers as elements of $\overline{\mathbb Q}$ and
-test whether an element is real. It does not, however, provide the real closed
-field $\mathbb R_{\mathrm{alg}}=\overline{\mathbb Q}\cap\mathbb R$ as a
-separate exact coefficient field. The parent of a real element represented in
-`algebraic_closure(QQ)` is still all of $\overline{\mathbb Q}$, so this does not
-model a category whose coefficient field is $\mathbb R_{\mathrm{alg}}$. Exact
-computations over a chosen embedded real number field are possible in
-principle, but a universal exact real closed coefficient field is not currently
-available in OSCAR. Investigating exact and numerical computations with fusion
-categories over real fields is ongoing work in TensorCategories.jl.
-
 ## [Numerical computations](@id numerical-computations)
 
-A numerical computation begins with an intended coefficient field
-$\mathbb R$ or $\mathbb C$ and a computational parent representing its scalars,
-just as an exact computation begins with an exact coefficient field.
-TensorCategories.jl uses arbitrary-precision ball arithmetic: the user chooses
-a working precision, and arithmetic propagates rigorous enclosures for the
-represented quantities.
+Arb is a library for arbitrary-precision ball arithmetic
+[johansson2017arb](@cite). A real or complex ball records a midpoint together
+with an error radius, and arithmetic propagates these enclosures. The user
+chooses the working precision; a computation continues at that precision
+unless an algorithm explicitly increases it.
 
-OSCAR provides two interfaces to Arb's real and complex ball arithmetic.
-The constructors `real_field()` and `complex_field()` return parents of types
-`RealField` and `ComplexField`; their precision is controlled through the
-global `Balls` precision. In OSCAR examples, `RR` and `CC` are conventional
-variable names assigned with `RR = real_field()` and `CC = complex_field()`.
-They are not exact symbolic models of $\mathbb R$ and $\mathbb C$.
+OSCAR exposes real and complex ball arithmetic through two pairs of
+constructors. The functions `real_field()` and `complex_field()` return
+`RealField` and `ComplexField` parents controlled by the global `Balls`
+precision. The names `RR` and `CC` are commonly assigned to these parents in
+examples. The constructors `ArbField(p)` and `AcbField(p)` instead store the
+working precision $p$ in the parent. TensorCategories.jl uses these
+explicit-precision parents for its main numerical workflows; in particular,
+`numeric(E,p)` produces a category over an `AcbField`.
 
-These parents belong to AbstractAlgebra's `Field` type hierarchy because they
-implement its computational field interface. This is not an assertion that
-the ball objects themselves form a field in the algebraic sense: a ball is an
-enclosure, and a ball containing zero cannot be inverted. Exactness is a
-separate part of the interface. For an exact field such as `QQ`,
-`is_exact_type(elem_type(QQ))` is `true`; for `RealField`, `ComplexField`,
-`ArbField`, and `AcbField` elements it is `false`. Thus a category with
-`base_ring(C) == real_field()` is a numerical model of a category over
-$\mathbb R$, computed using rigorous enclosures at the selected precision.
-
-The constructors `ArbField(p)` and `AcbField(p)` instead return real and
-complex ball fields whose working precision of $p$ bits is stored in the
-parent. TensorCategories.jl currently uses these explicit-precision parents
-for its principal numerical workflows, and `numeric(E,p)` produces a category
-over an `AcbField`. A ball records a midpoint and an error radius. The
-precision may be chosen as large as needed, but a particular field, category,
-and computation use one chosen precision. The implementation does not
-automatically increase it unless an algorithm explicitly says so. See
-[johansson2017arb](@citet) for the arithmetic model.
+These parents implement AbstractAlgebra's computational `Field` interface,
+but their elements are not exact symbolic scalars: a ball containing zero, for
+example, cannot be inverted. Accordingly,
+`is_exact_type(elem_type(K))` is `false` for all four ball-field types, whereas
+it is `true` for an exact field such as `QQ`.
 
 Unlike `Float64`, ball fields are not restricted to 53 binary digits and retain
 uncertainty as part of every scalar. They provide controlled numerical

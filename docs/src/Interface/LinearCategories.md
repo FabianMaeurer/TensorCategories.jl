@@ -32,7 +32,7 @@ category is preadditive.
     $k$-linear in the sense of EGNO is both linear and additive in the
     terminology used by the interface.
 
-### What an implementation must provide
+### The interface
 
 A finite-dimensional $k$-linear model should provide the following methods:
 
@@ -86,7 +86,7 @@ realization, the ordered bases, and the direction in which its matrices act.
 No compatibility with a monoidal structure is assumed here; that additional
 condition belongs to the later notion of a fiber functor.
 
-### Generic consequences
+#### Generic functions
 
 Several functions are then available from the generic interface:
 
@@ -112,7 +112,7 @@ $k$-linear category is already preadditive, so it becomes additive once finite
 biproducts are supplied. This is equivalent to the axioms in
 [EGNO; Definition 1.2.1](@citet).
 
-### What an implementation must provide
+### The interface
 
 An additive model should provide the following methods in addition to the
 preadditive Hom-group operations:
@@ -146,7 +146,7 @@ An implementation not already carrying a linear structure must also provide
 the preadditive Hom-group operations. Once the axioms are established, it
 reports the property with `is_additive(C)`.
 
-### Generic consequences
+#### Generic functions
 
 From binary direct sums and a zero object, the interface derives:
 
@@ -167,7 +167,7 @@ every morphism has the usual image--coimage factorization; equivalently, every
 monomorphism is a kernel and every epimorphism is a cokernel. We use the
 conventions of [EGNO; Definition 1.3.1](@citet).
 
-### What an implementation must provide
+### The interface
 
 For every $f:X\to Y$, an abelian model must implement:
 
@@ -182,7 +182,7 @@ responsible for the abelian normality conditions, which are not verified by
 dispatch. Once these conditions are known, it reports the property through
 `is_abelian(C)`.
 
-### Generic consequences
+#### Generic functions
 
 The generic interface then provides:
 

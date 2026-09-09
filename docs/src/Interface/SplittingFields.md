@@ -1,5 +1,13 @@
 # [Scalar extension and splitting](@id splitting-and-scalars)
 
+Computations take place over a fixed coefficient field, and for exact
+computations it is usually preferable to choose this field as small as
+possible. An object which is indecomposable or simple over the chosen field
+may decompose after extending the field. This non-split phenomenon is not
+merely a technical complication: it records arithmetic structure which is
+invisible over an algebraically closed field. Scalar extension and splitting
+make this structure accessible.
+
 ## Scalar extension
 
 Let $\mathcal C$ be a $k$-linear category and let
@@ -32,7 +40,8 @@ $L$-linear. However, when $\mathcal C$ is Karoubian, its Hom-space extension
 need not be Karoubian: an algebra
 $\operatorname{End}_{\mathcal C}(X)\otimes_kL$ may contain idempotents whose
 images are not represented by the old objects. We therefore define the
-**scalar extension** of an idempotent-complete additive category by
+**scalar extension** of an idempotent-complete additive category to be the
+Karoubian closure
 
 ```math
 \label{eq:completed-scalar-extension}
@@ -41,18 +50,8 @@ images are not represented by the old objects. We therefore define the
 \operatorname{Kar}\!\left(\mathcal C\otimes_k^{\mathrm{Hom}}L\right).
 ```
 
-An object of $\mathcal C_L$ is a pair $(X,e)$ with
-$e^2=e\in\operatorname{End}_{\mathcal C}(X)\otimes_kL$, and
-
-```math
-\label{eq:completed-scalar-extension-hom}
-\operatorname{Hom}_{\mathcal C_L}\bigl((X,e),(Y,d)\bigr)
-=
-d\bigl(\operatorname{Hom}_{\mathcal C}(X,Y)\otimes_kL\bigr)e.
-```
-
-The scalar-extension functor sends $X$ to
-$(X,\operatorname{id}_X)$. Some sources write
+The [Karoubian closure](@ref karoubian-categories) was described in the
+previous section. Some sources write
 $\mathcal C\otimes_kL$ for this completed category; others use that notation
 first for the Hom-space extension and mention the Karoubi envelope separately
 [morrison2012noncyclotomic; §2.1](@cite).
@@ -64,47 +63,10 @@ semisimple and $k$ is perfect, then $\mathcal C_L$ is again finite
 semisimple. Indeed, over a perfect field every finite-dimensional division
 algebra is separable over $k$, and a separable algebra remains semisimple after
 any field extension. More generally, it is enough that the endomorphism
-algebras of the simple objects are separable over $k$; this is the
-**absolutely semisimple** hypothesis in
-[etingof2012descent; §3.1, footnote 1](@citet).
+algebras of the simple objects are separable over $k$
+[etingof2012descent; §3.1, footnote 1](@cite).
 
-Perfectness cannot simply be omitted. Let $k$ have characteristic $p>0$, let
-$a\in k$ not be a $p$th power, and put
-$E=k[u]/(u^p-a)$. The category $\operatorname{Vec}_E$, regarded as a
-$k$-linear category, is finite semisimple. After extending from $k$ to $E$,
-the endomorphism algebra of its simple object becomes
-
-```math
-\label{eq:inseparable-scalar-extension-counterexample}
-E\otimes_kE
-\cong
-E[\varepsilon]/(\varepsilon^p),
-```
-
-which is not semisimple. Consequently the scalar-extended category is not
-semisimple.
-
-### Scalar-extension interface
-
-| Operation | Meaning |
-|:---|:---|
-| `extension_of_scalars(C,L; embedding=iota)` | construct a scalar-extended category along $\iota\colon k\to L$ |
-| `extension_of_scalars(X,L,D; embedding=iota)` | map an object into a chosen scalar-extended category $\mathcal D$ |
-| `extension_of_scalars(f,L,D; embedding=iota)` | map a morphism into $\mathcal D$ |
-
-A concrete category model must implement scalar extension for its categories,
-objects, and morphisms. The category-level method constructs a suitable target
-model rather than a universal category of formal pairs $(X,e)$. The
-object-level method returns the scalar extension of $X$ in that target; it may
-be decomposable. For `VectorSpaces` and `GroupRepresentationCategory`, the
-target is the full corresponding category over $L$, such as
-$\operatorname{Rep}_L(G)$.
-
-Independently constructed isomorphic fields do not necessarily identify their
-chosen generators. Pass `embedding=iota` whenever the required embedding is not
-the canonical one.
-
-## Splitting
+## Absolute indecomposability and splitting
 
 Let $\mathcal C$ now be Hom-finite and Krull–Schmidt. If $X$ is
 indecomposable, then $E_X=\operatorname{End}_{\mathcal C}(X)$ is local. Its
@@ -146,9 +108,9 @@ k\longrightarrow D_S
 
 is an isomorphism for every simple $S$. This is equivalent to every simple
 object being absolutely simple: after scalar extension,
-$\operatorname{End}(S_L)=D_S\otimes_kL$. No perfectness hypothesis is needed
-for this equivalence. A field $L$ is a **splitting field** for $\mathcal C$ if
-$\mathcal C_L$ is split; compare [EGNO; §4.16](@cite).
+$\operatorname{End}(S_L)=D_S\otimes_kL$. A field $L$ is a **splitting
+field** for $\mathcal C$ if $\mathcal C_L$ is split; compare
+[EGNO; §4.16](@cite).
 
 If $\mathcal C$ is split semisimple, then its Hom-space extension is already
 idempotent complete, so the Karoubi envelope introduces no new objects. When
@@ -157,10 +119,13 @@ finding primitive idempotents in $D_S\otimes_kL$ and taking their images.
 Every simple object of $\mathcal C_L$ arises in this way from a simple object
 of $\mathcal C$.
 
-### Splitting interface
+## The interface
 
 | Operation | Meaning |
 |:---|:---|
+| `extension_of_scalars(C,L; embedding=iota)` | construct a scalar-extended category along $\iota\colon k\to L$ |
+| `extension_of_scalars(X,L,D; embedding=iota)` | map an object into a chosen scalar-extended category $\mathcal D$ |
+| `extension_of_scalars(f,L,D; embedding=iota)` | map a morphism into $\mathcal D$ |
 | `split(X)` | choose an extension and split the indecomposable summands of $X$ |
 | `split(objects)` | split a finite family over one common extension |
 | `split(C)` | construct a split scalar extension when the category model supplies such an algorithm |
@@ -214,46 +179,5 @@ summands = only(result.decompositions)
 @assert all(m == 1 && int_dim(X) == 1 for (X, m) in summands)
 summands
 ```
-
-Extending the coefficient field cannot restore semisimplicity. For example,
-no extension of $\mathbb F_5$ makes
-$\operatorname{Rep}_{\mathbb F_5}(C_5)$ semisimple.
-
-## Field embeddings, Galois conjugacy, and forms
-
-Let $\iota_1,\iota_2\colon k\hookrightarrow L$. If
-$\iota_2=\tau\circ\iota_1$ for an automorphism $\tau$ of $L$, then
-
-```math
-\label{eq:semilinear-conjugate-scalar-extensions}
-f\otimes\lambda\longmapsto f\otimes\tau(\lambda)
-```
-
-defines a $\tau$-semilinear equivalence between the two scalar extensions.
-It is an equivalence of ordinary categories, but it is not generally
-$L$-linear, and an $L$-linear equivalence need not exist. This is the usual
-Galois twist [etingof2012descent; §2.2 and §3](@cite).
-
-Under this hypothesis, if both scalar extensions are split finite semisimple
-categories, their underlying $L$-linear categories are nevertheless
-noncanonically equivalent:
-each is equivalent to $\operatorname{Vec}_L^{\oplus r}$, where $r$ is the
-number of simple isomorphism classes.
-
-Conversely, let $\mathcal D$ be an $L$-linear category. A **$k$-form** of
-$\mathcal D$ is a $k$-linear category $\mathcal C$ together with an
-$L$-linear equivalence
-
-```math
-\label{eq:form-of-linear-category}
-\mathcal C_L\simeq\mathcal D.
-```
-
-Constructing a form is also called **descent**. Thus forms provide the reverse
-viewpoint on scalar extension [etingof2012descent; §2.1 and §3](@cite).
-
-Choosing an embedding and extending scalars are different operations. An
-embedding selects how the old coefficients map into the target field, whereas
-scalar extension can create new idempotents and new direct-sum decompositions.
 
 Continue with [functors and natural transformations](@ref linear-functors).

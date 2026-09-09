@@ -37,7 +37,17 @@ The adjective *weak* refers only to splitness over the chosen coefficient
 field. It does not weaken rigidity, semisimplicity, or the monoidal coherence
 axioms. Over an algebraically closed field the weak and split notions agree.
 
-The package predicates are:
+## Separability in positive characteristic
+
+Over an imperfect field, some authors include separability in the definition
+of a multifusion category. For a finite semisimple category this condition is
+automatic over a perfect field, including number fields and finite fields, but
+can be stronger over an imperfect field
+[sanford2025fusion; Definition 2.9 and pp. 3--4](@cite). The package predicates
+use the semisimple convention above and do not independently test this
+separability condition.
+
+## The interface
 
 | Predicate | Implemented meaning |
 |:---|:---|
@@ -52,7 +62,7 @@ methods. The predicates report properties of the category over its current
 field. Extending the field can change both the simple objects and which of the
 four predicates applies.
 
-## Representation categories
+## Example: Group representations
 
 Finite-group representations show separately the effects of semisimplicity and
 splitness. Let $G=C_3$. Over $\mathbb F_2$, Maschke's theorem gives a weak
@@ -72,15 +82,5 @@ C3 = representation_category(GF(3), G)
 ```
 
 This example uses concrete representations and intertwiners throughout.
-
-## Separability in positive characteristic
-
-Over an imperfect field, some authors include separability in the definition
-of a multifusion category. For a finite semisimple category this condition is
-automatic over a perfect field, including number fields and finite fields, but
-can be stronger over an imperfect field
-[sanford2025fusion; Definition 2.9 and pp. 3--4](@cite). The package predicates
-use the semisimple convention above and do not independently test this
-separability condition.
 
 Continue with [Grothendieck rings](@ref grothendieck-rings).

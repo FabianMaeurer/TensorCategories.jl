@@ -25,6 +25,8 @@ classes in a Grothendieck ring does not thereby acquire tensorators, and an
 objectwise identification $F(X\otimes Y)\cong F(X)\otimes F(Y)$ does not
 supply a coherent choice of them.
 
+## The interface
+
 The implemented solvers assume additive $k$-linear behavior, strict
 preservation of the represented unit, and normalized unit tensorators. The
 constructor checks the source and target and the image of the unit, but it does

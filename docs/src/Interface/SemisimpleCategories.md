@@ -4,17 +4,7 @@ An abelian category $\mathcal C$ is **semisimple** if every object is a direct
 sum of simple objects [EGNO; Definition 1.5.1](@cite). If $\mathcal C$ is
 locally finite, these direct sums are finite. It is then a Krull--Schmidt
 category, and its simple objects are precisely its indecomposable objects.
-Thus the direct-sum decomposition computed by `decompose(X)` is a
-decomposition into simple objects in the semisimple case.
-
-The package predicate `is_semisimple(C)` records that this property is known for
-the implemented category. When the backend can enumerate the simple objects,
-`simples(C)` returns chosen representatives of their isomorphism classes. The
-order of this list belongs to the implementation and must not be treated as a
-mathematical invariant.
-
-For an object $X$, `decompose(X)` returns pairs `(S,m)` describing an
-isomorphism
+Thus every object $X$ admits a decomposition
 
 ```math
 \label{eq:semisimple-decomposition}
@@ -30,16 +20,27 @@ precomposition and
 m_S=\dim_{D_S}\operatorname{Hom}_{\mathcal C}(S,X).
 ```
 
-The generic implementation of `decompose(X,S)` uses equation
-\eqref{eq:nonsplit-hom-multiplicity}; it does not silently replace the
-$D_S$-dimension by the dimension over $k$.
-
 Schur's lemma says that $D_S$ is a division algebra
 [EGNO; Lemma 1.5.2](@cite). Outside a semisimple category, the converse in
 Schur's lemma fails: an object with division endomorphism algebra need not be
-simple, and an indecomposable object need not be simple. The generic
-`is_simple(X)` therefore uses indecomposability only when the parent category
-is semisimple; otherwise a category-specific test is required.
+simple, and an indecomposable object need not be simple.
+
+## The interface
+
+The predicate `is_semisimple(C)` records that this property is known for the
+implemented category. When the backend can enumerate the simple objects,
+`simples(C)` returns chosen representatives of their isomorphism classes. The
+order of this list belongs to the implementation and must not be treated as a
+mathematical invariant.
+
+For an object $X$, `decompose(X)` returns pairs `(S,m)` representing the
+decomposition in equation \eqref{eq:semisimple-decomposition}. The generic
+implementation of `decompose(X,S)` computes the multiplicity using equation
+\eqref{eq:nonsplit-hom-multiplicity}; it does not replace the $D_S$-dimension
+by the dimension over $k$.
+
+The generic `is_simple(X)` uses indecomposability only when the parent category
+is semisimple. Otherwise a category-specific test is required.
 
 ## Example: Finite-group representations
 

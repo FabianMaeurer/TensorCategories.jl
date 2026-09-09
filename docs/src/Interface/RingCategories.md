@@ -23,20 +23,27 @@ A ring category is a category with specified linear and monoidal properties; it
 should not be confused with the Grothendieck ring constructed from such a
 category later in this chapter.
 
+Over a general coefficient field, TensorCategories.jl also supports the
+non-split convention of [maurer2024computing; §2.1](@citet), in which a simple
+tensor unit need not have endomorphism algebra $k$. Algorithms which require
+the split condition must impose it separately.
+
+## The interface
+
 The corresponding package predicates are `is_multiring`, `is_ring`,
 `is_multitensor`, and `is_tensor`. Stronger structural declarations imply the
 weaker ones through generic fallbacks. The predicates report what a backend has
 declared or established; they do not reconstruct the axioms from the available
 methods.
 
-Over a general coefficient field, TensorCategories.jl also supports the
-non-split convention used by [maurer2024computing; §2.1](@citet). In that
-setting a category with a simple but non-scalar tensor unit can be reported as
+In the non-split convention, a category with a simple but non-scalar tensor
+unit can be reported as
 `is_tensor(C) == true` and `is_ring(C) == true`, even though equation
 \eqref{eq:tensor-category-unit} fails. Algorithms that require the split EGNO
-condition must additionally test `is_split_semisimple(C)` or the appropriate
-split fusion predicate. This broader behavior is part of the current package
-interface.
+condition must additionally test `is_split_semisimple(C)`. This broader
+behavior is part of the current package interface.
+
+## Example: Group representations
 
 Both $\operatorname{Vec}_k$ and $\operatorname{Rep}_k(G)$ are tensor
 categories in the sense above, whether or not $\operatorname{Rep}_k(G)$ is

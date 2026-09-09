@@ -7,12 +7,11 @@ A braiding in TensorCategories.jl has direction
 c_{X,Y}\colon X\otimes Y\longrightarrow Y\otimes X.
 ```
 
-The call `braiding(X,Y)` returns the morphism in equation
-\eqref{eq:package-braiding}. This agrees with the convention of
-[EGNO; Definition 8.1.1](@cite). Naturality and the two hexagon equations use
-the associator direction fixed in equation \eqref{eq:monoidal-associator}.
+This agrees with the convention of [EGNO; Definition 8.1.1](@cite).
+Naturality and the two hexagon equations use the associator direction fixed in
+equation \eqref{eq:monoidal-associator}.
 
-Explicitly, the two equations checked by `hexagon_axiom` are
+Explicitly, the two hexagon equations are
 
 ```math
 \label{eq:package-positive-hexagon}
@@ -48,8 +47,39 @@ c_{Y,X}\circ c_{X,Y}=\operatorname{id}_{X\otimes Y}
 
 for all objects $X,Y$. The standard braiding on vector spaces is the flip,
 and the same flip is equivariant for the diagonal action on
-$\operatorname{Rep}_k(G)$ in every characteristic. These implemented
-representation categories are therefore symmetric.
+$\operatorname{Rep}_k(G)$ in every characteristic.
+
+Given a braiding and pivotal structure, the package uses the twist convention
+
+```math
+\label{eq:package-twist}
+\theta_X=u_X^{-1}\circ j_X,
+```
+
+where $u_X\colon X\to X^{**}$ is the Drinfeld isomorphism and
+$j_X\colon X\to X^{**}$ is the pivotal component. This is the convention of
+[EGNO; §8.10](@cite).
+
+## The interface
+
+| Operation | Meaning |
+|:---|:---|
+| `braiding(X,Y)` | the braiding $c_{X,Y}\colon X\otimes Y\to Y\otimes X$ |
+| `is_braided(C)` | report that $\mathcal C$ supplies a braiding |
+| `hexagon_axiom(C)` | check both hexagon equations on all listed simple triples |
+| `twist(X)` | the twist $\theta_X$ |
+| `twist_scalar(X)` | return the scalar of $\theta_X$ when it is a scalar endomorphism |
+
+Providing `braiding(X,Y)` does not establish naturality or the hexagon axioms.
+In supported finite semisimple models, `hexagon_axiom(C)` performs the
+exhaustive check on listed simple objects. A successful ball-valued check means
+that the equations hold at the chosen working precision. The function
+`twist_scalar(X)` requires the twist to be represented by a unique scalar
+multiple of the identity.
+
+## Example: Group representations
+
+The implemented categories $\operatorname{Rep}_k(G)$ are symmetric.
 
 ```@example representation_braiding
 using TensorCategories, Oscar
@@ -61,24 +91,5 @@ c = braiding(X,X)
 matrix(c)
 show(stdout, MIME"text/plain"(), matrix(c)); println() # hide
 ```
-
-The predicate `is_braided(C)` records that the category supplies a braiding.
-It does not establish naturality or the hexagon axioms from the existence of a
-method. In supported finite semisimple models, `hexagon_axiom(C)` checks all
-triples of listed simple objects. A successful ball-valued check means that the
-two sides agree at the chosen working precision.
-
-Given a braiding and pivotal structure, the package uses the twist convention
-
-```math
-\label{eq:package-twist}
-\theta_X=u_X^{-1}\circ j_X,
-```
-
-where $u_X\colon X\to X^{**}$ is the Drinfeld isomorphism and
-$j_X\colon X\to X^{**}$ is the pivotal component. This is the convention of
-[EGNO; §8.10](@cite). The call `twist(X)` returns the resulting endomorphism;
-`twist_scalar(X)` additionally requires it to be represented by a unique scalar
-multiple of the identity.
 
 Continue with [unitarity and modularity](@ref unitary-modular-categories).

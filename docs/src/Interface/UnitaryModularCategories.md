@@ -7,6 +7,8 @@ $f\colon X\to Y$ to $f^\dagger\colon Y\to X$, is conjugate-linear and
 involutive, reverses composition, and is compatible with tensor products. A
 unitary category has a compatible positive dagger structure.
 
+### The interface
+
 The method `dagger(f)` is category-specific. In concrete matrix models it is
 implemented by conjugate transpose when the chosen bases carry the intended
 Hermitian structures. The predicate `is_unitary(C)` concerns the structure in
@@ -32,6 +34,8 @@ The displayed endomorphism acts on $X_j\otimes X_i$. Cyclicity of the
 spherical trace identifies this with the usual trace of the double braiding on
 $X_i\otimes X_j$. A premodular category is **modular** when this matrix is
 invertible [EGNO; Definitions 8.13.1, 8.13.2, and 8.13.4](@cite).
+
+### The interface
 
 The public methods use the following conventions:
 

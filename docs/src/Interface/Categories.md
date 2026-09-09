@@ -5,7 +5,7 @@ values. The abstract types `Category`, `Object`, and `Morphism` provide the
 common language used by generic algorithms, while each concrete category model
 chooses its own stored data.
 
-## The basic category interface
+## [The interface](@id basic-category-interface)
 
 To implement a category, one must first represent its three kinds of data. A
 typical model defines
