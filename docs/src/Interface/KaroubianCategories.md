@@ -104,7 +104,7 @@ implementation may provide:
 |:---|:---|
 | `is_indecomposable(X)` | test whether $X$ is indecomposable |
 | `decompose(X)` | return pairs `(Y,m)` of indecomposable summands and their multiplicities |
-| `TensorCategories.is_krull_schmidt(C)` | record that the implementation treats $\mathcal C$ as Krull–Schmidt; locally finite categories satisfy this through a generic fallback |
+| `is_krull_schmidt(C)` | record that the implementation treats $\mathcal C$ as Krull–Schmidt; locally finite categories satisfy this through a generic fallback |
 | `karoubian_envelope(C)` | construct the Karoubi envelope when supported by the category model |
 
 The function `karoubian_envelope(C)` requires a category-specific

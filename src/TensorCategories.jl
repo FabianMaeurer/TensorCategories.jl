@@ -306,6 +306,7 @@ export isgraded
 export ising_category 
 export is_invertible
 export is_indecomposable
+export is_krull_schmidt
 export karoubian_envelope 
 export kernel 
 export left_action

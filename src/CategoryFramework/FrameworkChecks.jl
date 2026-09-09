@@ -48,6 +48,11 @@ is_semisimple(C::Category) = is_weak_multifusion(C) ||
     _declared_structure(C, :semisimple)
 is_abelian(C::Category) = is_locally_finite(C) || is_semisimple(C) ||
     _declared_structure(C, :abelian)
+"""
+    is_krull_schmidt(C::Category)
+
+Return whether `C` is known to be a Krull--Schmidt category.
+"""
 is_krull_schmidt(C::Category) = is_locally_finite(C) ||
     _declared_structure(C, :krull_schmidt)
 is_additive(C::Category) = is_abelian(C) || is_krull_schmidt(C) ||
