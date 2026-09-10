@@ -41,6 +41,16 @@
     Zskel = six_j_category(Zsplit)
     @test multiplication_table(Zskel) == multiplication_table(Zsplit)
     @test pentagon_axiom(Zskel)
+    @test is_pivotal(Zskel;check=true)
+    @test is_spherical(Zskel;check=true)
+
+    # A second associator for the same rank-three fusion ring must use the
+    # identical simple order for its fusion bases and pivotal coordinates.
+    C2 = anyonwiki(3,1,0,2,3,0,1)
+    Z2split, = split(center(C2))
+    Z2skel = six_j_category(Z2split)
+    @test is_pivotal(Z2skel;check=true)
+    @test is_spherical(Z2skel;check=true)
 end
 
 # Scalar conversion preserves the exact polynomial pentagon relations. QQBar

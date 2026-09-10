@@ -373,7 +373,7 @@ The order of $a$ and $b$ matters. The inverse of $B^{ab}_d$ represents the
 inverse map from $b\otimes a$ to $a\otimes b$; it is not generally
 $B^{ba}_d$.
 
-### Pivotal coefficients
+### [Pivotal coefficients](@id pivotal-coefficients)
 
 A pivotal structure is a monoidal natural isomorphism
 
@@ -420,6 +420,39 @@ additional equality of the left and right pivotal traces and can be checked
 with `is_spherical(C; check=true)`. Since a $P$-symbol dictionary has one
 scalar per simple object rather than matrix entries indexed by fusion paths,
 `P_symbols` has no `convention` keyword.
+
+When `skeletonize(C)` constructs a skeletal model from a concrete category,
+the ordered simple representatives and the bases of
+$\operatorname{Hom}(S_i\otimes S_j,S_k)$ determine the skeletal associator,
+braiding, and duality. The same choices must therefore be used when the
+pivotal structure is transported. Let $S_i$ be the source representative,
+let $\widehat S_i$ be the corresponding skeletal simple, and let
+$j^{(0)}_{\widehat S_i}=\operatorname{id}_{\widehat S_i}$ denote the reference
+double-dual identification before its pivotal coefficient is changed. The
+transported coefficient is
+
+```math
+\label{eq:skeletal-pivotal-transport}
+P_i=
+\frac{\operatorname{Tr}_{L}(j_{S_i})}
+     {\operatorname{Tr}_{L}(j^{(0)}_{\widehat S_i})}.
+```
+
+This trace ratio is the coordinate of the transported map in the
+one-dimensional split-simple double-dual Hom space. Its denominator is
+nonzero: in a semisimple tensor category the trace of an isomorphism from a
+simple object to its double dual is nonzero
+[EGNO; Proposition 4.8.4](@cite). This remains true in positive
+characteristic under the split semisimple hypotheses required by
+`skeletonize`. With ball-valued coefficients, an enclosure containing zero
+means that the chosen working precision does not resolve this nonzero trace;
+skeletonization then asks for higher precision instead of retaining default
+coefficients.
+
+The values $P_i$ are coordinates in the resulting skeletal gauge. Changing
+the multiplicity-space bases can change them, even though the transported
+pivotal category remains equivalent. In particular, an all-one pivotal vector
+is a statement about a chosen presentation, not an invariant of the category.
 
 ### [Unit normalization](@id unit-normalization)
 
